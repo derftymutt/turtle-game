@@ -40,12 +40,13 @@ height = 34.0
 [node name="Crocodile" type="RigidBody2D" groups=["enemies"]]
 collision_layer = 4
 script = ExtResource("1_36s23")
+is_invincible = true
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_d24gk")
 animation = &"swim"
 autoplay = "swim"
-frame_progress = 0.56026566
+frame_progress = 0.70393866
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 rotation = 1.5707964
