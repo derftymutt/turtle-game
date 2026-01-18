@@ -11,7 +11,7 @@ extends Camera2D
 @export var vertical_zoom_speed: float = 3.0
 
 # Horizontal (side-scrolling) settings
-@export var horizontal_follow_enabled: bool = false
+@export var horizontal_follow_enabled: bool = true
 @export var horizontal_offset: float = 100.0  # Turtle stays this far from center
 @export var horizontal_smoothing: float = 5.0
 @export var horizontal_deadzone: float = 50.0  # Turtle can move this much before camera follows

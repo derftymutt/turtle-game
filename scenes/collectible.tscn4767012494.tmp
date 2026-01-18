@@ -48,7 +48,6 @@ radius = 4.0
 [node name="Collectible" type="RigidBody2D"]
 collision_layer = 2
 script = ExtResource("1_1pg6c")
-sink_speed = 200.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_k2x07")

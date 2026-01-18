@@ -23,16 +23,17 @@ func spawn_collectible(pos: Vector2):
 	
 	var collectible = collectible_scene.instantiate()
 	add_child(collectible)
-	collectible.global_position = pos
+	collectible.global_position = pos  # This should work but let's verify
 	
+	print("Spawned collectible at intended pos: ", pos, " actual global_pos: ", collectible.global_position)
 
 # Spawn at random positions
 func spawn_random_stars(count: int):
 	for i in count:
-		var random_x = randf_range(50, 590)  # Within screen width
+		var random_x = randf_range(-280, 280)  # Within screen width
 		var random_y = randf_range(-100, -50)  # Start above water
 		spawn_collectible(Vector2(random_x, random_y))
 
 
 func spawn_star_wave():
-	spawn_random_stars(3)  
+	spawn_random_stars(2)  
