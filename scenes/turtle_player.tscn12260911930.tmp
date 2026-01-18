@@ -1,0 +1,118 @@
+[gd_scene load_steps=14 format=3 uid="uid://btbnsn74vk1b"]
+
+[ext_resource type="Script" uid="uid://cfadv316hum" path="res://scripts/turtle-player.gd" id="1_1620a"]
+[ext_resource type="Texture2D" uid="uid://dwr1o07fl02do" path="res://assets/turtle.png" id="2_occdr"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_7uinh"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ch07n"]
+atlas = ExtResource("2_occdr")
+region = Rect2(0, 0, 44, 44)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_n086i"]
+atlas = ExtResource("2_occdr")
+region = Rect2(44, 44, 44, 44)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kitud"]
+atlas = ExtResource("2_occdr")
+region = Rect2(88, 44, 44, 44)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_occdr"]
+atlas = ExtResource("2_occdr")
+region = Rect2(44, 132, 44, 44)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7uinh"]
+atlas = ExtResource("2_occdr")
+region = Rect2(88, 132, 44, 44)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3cugm"]
+atlas = ExtResource("2_occdr")
+region = Rect2(0, 88, 44, 44)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5cp3k"]
+atlas = ExtResource("2_occdr")
+region = Rect2(44, 88, 44, 44)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6u1a7"]
+atlas = ExtResource("2_occdr")
+region = Rect2(88, 88, 44, 44)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jd5x6"]
+atlas = ExtResource("2_occdr")
+region = Rect2(0, 132, 44, 44)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_6u1a7"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ch07n")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_n086i")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kitud")
+}],
+"loop": true,
+"name": &"kick_down",
+"speed": 3.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_occdr")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7uinh")
+}],
+"loop": true,
+"name": &"kick_left",
+"speed": 3.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3cugm")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5cp3k")
+}],
+"loop": true,
+"name": &"kick_right",
+"speed": 3.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6u1a7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jd5x6")
+}],
+"loop": true,
+"name": &"kick_up",
+"speed": 3.0
+}]
+
+[node name="TurtlePlayer" type="RigidBody2D"]
+freeze_mode = 1
+script = ExtResource("1_1620a")
+thrust_force = null
+max_velocity = null
+thrust_cooldown = null
+shoot_cooldown = null
+bullet_speed = null
+sink_force = null
+water_drag = null
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_7uinh")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+scale = Vector2(3, 3)
+sprite_frames = SubResource("SpriteFrames_6u1a7")
+animation = &"kick_left"
+autoplay = "idle"
+frame_progress = 0.4909973
