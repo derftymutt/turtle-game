@@ -13,6 +13,13 @@ func _ready():
 	lock_rotation = true
 	mass = 0.01
 	
+	# NOTE: Collision layers MUST be set in Inspector:
+	# - Collision Layer: 4 (bullets)
+	# - Collision Mask: 1 + 3 (world + enemies)
+	
+	# Connect collision signal
+	body_entered.connect(_on_body_entered)
+	
 	# Apply initial velocity
 	linear_velocity = velocity
 	
@@ -37,7 +44,7 @@ func _on_body_entered(body):
 	if body.is_in_group("player"):
 		return
 	
-	# Damage enemies
+	# Damage enemies (including invincible ones - they'll show feedback!)
 	if body.is_in_group("enemies") and body.has_method("take_damage"):
 		body.take_damage(damage)
 		queue_free()
