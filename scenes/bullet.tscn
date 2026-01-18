@@ -7,13 +7,17 @@
 radius = 2.0
 
 [node name="Bullet" type="RigidBody2D"]
-gravity_scale = 0.2
+collision_layer = 4
+collision_mask = 9
+gravity_scale = 0.0
+contact_monitor = true
+max_contacts_reported = 4
 script = ExtResource("1_y25gk")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-shape = SubResource("CircleShape2D_y25gk")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("2_y25gk")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_y25gk")
 
 [connection signal="body_entered" from="." to="." method="_on_body_entered"]

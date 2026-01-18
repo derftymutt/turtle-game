@@ -1,0 +1,67 @@
+[gd_scene load_steps=9 format=3 uid="uid://bu0sjqqm7uvm1"]
+
+[ext_resource type="Script" uid="uid://brvxny7a14gmo" path="res://scripts/crocodile.gd" id="1_36s23"]
+[ext_resource type="Texture2D" uid="uid://bgkqg17ivskt5" path="res://assets/crocodile1.png" id="1_rs0p7"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_36s23"]
+atlas = ExtResource("1_rs0p7")
+region = Rect2(0, 0, 32, 10)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ivdnp"]
+atlas = ExtResource("1_rs0p7")
+region = Rect2(0, 10, 32, 10)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_d24gk"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_36s23")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ivdnp")
+}],
+"loop": true,
+"name": &"swim",
+"speed": 4.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ivdnp"]
+radius = 5.0
+height = 32.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_36s23"]
+radius = 40.0
+height = 200.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_bumr2"]
+radius = 6.0
+height = 34.0
+
+[node name="Crocodile" type="RigidBody2D" groups=["enemies"]]
+collision_layer = 8
+collision_mask = 3
+script = ExtResource("1_36s23")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_d24gk")
+animation = &"swim"
+autoplay = "swim"
+frame_progress = 0.19298887
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_ivdnp")
+
+[node name="PatrolArea" type="Area2D" parent="."]
+collision_layer = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PatrolArea"]
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_36s23")
+
+[node name="DamageArea" type="Area2D" parent="."]
+collision_layer = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DamageArea"]
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_bumr2")

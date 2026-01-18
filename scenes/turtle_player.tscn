@@ -61,6 +61,7 @@ animations = [{
 radius = 7.0
 
 [node name="TurtlePlayer" type="RigidBody2D" groups=["player"]]
+collision_mask = 9
 freeze_mode = 1
 continuous_cd = 1
 script = ExtResource("1_n086i")
