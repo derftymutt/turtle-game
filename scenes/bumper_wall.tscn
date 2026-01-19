@@ -1,10 +1,22 @@
-[gd_scene load_steps=2 format=3 uid="uid://bgoopne83ygdj"]
+[gd_scene load_steps=4 format=3 uid="uid://bgoopne83ygdj"]
 
 [ext_resource type="Script" uid="uid://b86ctjqpdwmld" path="res://scripts/bumper_wall.gd" id="1_gdhvm"]
 
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_gdhvm"]
+friction = 0.1
+bounce = 1.2
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_le5p8"]
+size = Vector2(100, 20)
+
 [node name="BumperWall" type="StaticBody2D"]
+physics_material_override = SubResource("PhysicsMaterial_gdhvm")
 script = ExtResource("1_gdhvm")
+min_bounce_force = 400.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_le5p8")
 
 [node name="Polygon2D" type="Polygon2D" parent="."]
+color = Color(0.9, 0.3, 0.3, 1)
+polygon = PackedVector2Array(-50, -10, 50, -10, 47, -7, 47, 7, 50, 10, -50, 10, -47, 7, -47, -7)

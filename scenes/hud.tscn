@@ -1,0 +1,80 @@
+[gd_scene load_steps=2 format=3 uid="uid://bahema85c45s"]
+
+[ext_resource type="Script" uid="uid://c8gcxh4gmwsi3" path="res://scripts/hud.gd" id="1_ahhtf"]
+
+[node name="HUD" type="CanvasLayer" groups=["hud"]]
+script = ExtResource("1_ahhtf")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+offset_right = 40.0
+offset_bottom = 40.0
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+theme_override_constants/separation = 8
+
+[node name="ScoreLabel" type="Label" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Score: 0"
+
+[node name="Spacer1" type="Control" parent="MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+
+[node name="HealthContainer" type="VBoxContainer" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="HealthLabel" type="Label" parent="MarginContainer/HBoxContainer/HealthContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Health"
+
+[node name="HealthBar" type="ProgressBar" parent="MarginContainer/HBoxContainer/HealthContainer"]
+custom_minimum_size = Vector2(120, 20)
+layout_mode = 2
+value = 100.0
+show_percentage = false
+
+[node name="BreathContainer" type="VBoxContainer" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="BreathLabel" type="Label" parent="MarginContainer/HBoxContainer/BreathContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Breath"
+
+[node name="BreathBar" type="ProgressBar" parent="MarginContainer/HBoxContainer/BreathContainer"]
+custom_minimum_size = Vector2(120, 20)
+layout_mode = 2
+max_value = 30.0
+value = 30.0
+show_percentage = false
+
+[node name="ExhaustionContainer" type="VBoxContainer" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="ExhaustionLabel" type="Label" parent="MarginContainer/HBoxContainer/ExhaustionContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Stamina"
+
+[node name="ExhaustionBar" type="ProgressBar" parent="MarginContainer/HBoxContainer/ExhaustionContainer"]
+custom_minimum_size = Vector2(120, 20)
+layout_mode = 2
+value = 100.0
+show_percentage = false
+
+[node name="SuperSpeedIndicator" type="Label" parent="MarginContainer/HBoxContainer"]
+modulate = Color(1, 0.75686276, 0, 1)
+layout_mode = 2
+text = "** SUPER SPEED **"

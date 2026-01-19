@@ -110,6 +110,10 @@ func collect(collector):
 	collected = true
 	freeze = true
 	
+	# Award score through player
+	if collector.has_method("add_score"):
+		collector.add_score(point_value)
+	
 	# Tween to turtle with satisfying animation
 	var tween = create_tween()
 	tween.set_parallel(true)

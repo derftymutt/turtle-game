@@ -19,6 +19,15 @@ extends RigidBody2D
 @export var max_health: float = 100.0
 var current_health: float = 100.0
 
+# Super Speed System
+@export_group("Super Speed")
+@export var super_speed_threshold: float = 300.0  # Velocity needed to activate
+@export var super_speed_damage: float = 100.0  # Damage dealt to enemies
+@export var super_speed_color: Color = Color(1.0, 0.8, 0.0, 1.0)  # Yellow/gold tint
+var is_super_speed: bool = false
+var super_speed_trail_timer: float = 0.0
+var super_speed_trail_interval: float = 0.01  # Spawn trail every 0.01 seconds
+
 # Internal state
 var can_thrust: bool = true
 var can_shoot: bool = true
@@ -27,6 +36,15 @@ var shoot_timer: float = 0.0
 
 # Ocean reference
 var ocean: Ocean = null
+
+# HUD reference
+var hud: HUD = null
+
+# Wall contact tracking for exhaustion bonus
+var touching_walls: Array = []
+
+# Super speed damage detection
+var super_speed_area: Area2D = null
 
 func _ready():
 	# Physics setup
@@ -38,7 +56,7 @@ func _ready():
 	
 	# NOTE: Collision layers MUST be set in Inspector:
 	# - Collision Layer: 1 (player/world)
-	# - Collision Mask: 1 (only collide with world)
+	# - Collision Mask: 1 + 3 (world + enemies)
 	
 	# Find the ocean
 	ocean = get_tree().get_first_node_in_group("ocean")
@@ -46,7 +64,22 @@ func _ready():
 		push_warning("No Ocean found! Add Ocean scene to level and add it to 'ocean' group.")
 		gravity_scale = 0.1
 	
+	# Find the HUD
+	hud = get_tree().get_first_node_in_group("hud")
+	if not hud:
+		push_warning("No HUD found! Add HUD scene to level and add it to 'hud' group.")
+	else:
+		# Initialize HUD with current health
+		hud.update_health(current_health, max_health)
+	
 	add_to_group("player")
+	
+	# Create Area2D for super speed enemy detection (doesn't cause physics collision)
+	_setup_super_speed_area()
+	
+	# Connect collision signals for wall contact detection
+	body_entered.connect(_on_body_entered)
+	body_exited.connect(_on_body_exited)
 
 func _physics_process(delta):
 	# Update cooldown timers
@@ -60,11 +93,51 @@ func _physics_process(delta):
 		if shoot_timer <= 0:
 			can_shoot = true
 	
+	# Check super speed state
+	var current_speed = linear_velocity.length()
+	var was_super_speed = is_super_speed
+	is_super_speed = current_speed >= super_speed_threshold
+	
+	# Super speed visual feedback
+	if is_super_speed:
+		_apply_super_speed_visuals(delta)
+		
+		# State change - just entered super speed
+		if not was_super_speed:
+			if hud:
+				hud.set_super_speed_active(true)
+			_create_super_speed_burst()  # Big visual pop!
+	else:
+		_remove_super_speed_visuals()
+		
+		# State change - just exited super speed
+		if was_super_speed:
+			if hud:
+				hud.set_super_speed_active(false)
+	
 	# Apply ocean physics
 	if ocean:
 		apply_ocean_effects(delta)
 	else:
 		linear_velocity *= 0.98
+	
+	# Update HUD systems
+	if hud:
+		var depth = ocean.get_depth(global_position) if ocean else 0.0
+		var is_underwater = depth > 0
+		
+		# Breath system
+		if is_underwater:
+			var out_of_breath = hud.drain_breath(delta)
+			if out_of_breath:
+				# Take drowning damage
+				take_damage(10.0 * delta)
+		else:
+			hud.refill_breath(delta)
+		
+		# Exhaustion recovery (bonus if touching wall)
+		var is_touching_wall = touching_walls.size() > 0
+		hud.recover_exhaustion(delta, is_touching_wall)
 	
 	# Get input
 	var movement_input = Vector2(
@@ -77,8 +150,12 @@ func _physics_process(delta):
 		Input.get_axis("shoot_up", "shoot_down")
 	)
 	
-	# Handle movement
-	if movement_input.length() > 0.1 and can_thrust:
+	# Handle movement (check exhaustion)
+	var can_actually_thrust = can_thrust
+	if hud and movement_input.length() > 0.1:
+		can_actually_thrust = can_actually_thrust and hud.can_thrust()
+	
+	if movement_input.length() > 0.1 and can_actually_thrust:
 		apply_thrust(movement_input.normalized())
 	
 	# Handle shooting
@@ -119,6 +196,11 @@ func apply_thrust(direction: Vector2):
 	
 	# Cancel upward thrust in air
 	if ocean and ocean.get_depth(global_position) <= 0 and kick_direction.y < 0:
+		return
+	
+	# Consume exhaustion if HUD system is active
+	if hud and not hud.try_thrust():
+		# Too exhausted! Don't thrust
 		return
 	
 	var animated_sprite = $AnimatedSprite2D
@@ -168,18 +250,163 @@ func apply_flipper_force(direction: Vector2, force_multiplier: float = 5.0):
 	apply_central_impulse(direction * thrust_force * force_multiplier)
 
 func take_damage(amount: float):
+	# Invincible during super speed!
+	if is_super_speed:
+		return
+	
 	current_health -= amount
+	
+	# Update HUD
+	if hud:
+		hud.update_health(current_health, max_health)
 	
 	# Flash red
 	var sprite = $AnimatedSprite2D
 	if sprite:
 		sprite.modulate = Color.RED
 		await get_tree().create_timer(0.1).timeout
-		sprite.modulate = Color.WHITE
+		if sprite and is_instance_valid(sprite):
+			sprite.modulate = Color.WHITE
 	
 	if current_health <= 0:
 		die()
 
 func die():
-	print("Turtle died!")
-	# TODO: Death animation, respawn, etc.
+	# Get the HUD's current score
+	var final_score = 0
+	if hud:
+		final_score = hud.current_score
+	
+	# Find and show game over screen
+	var game_over_screen = get_tree().get_first_node_in_group("game_over_screen")
+	if game_over_screen and game_over_screen.has_method("show_game_over"):
+		game_over_screen.show_game_over(final_score)
+	else:
+		push_warning("No GameOverScreen found! Add it to your main scene.")
+		# Fallback: just reload the scene
+		await get_tree().create_timer(2.0).timeout
+		get_tree().reload_current_scene()
+
+func _on_body_entered(body: Node):
+	"""Track walls for exhaustion recovery bonus"""
+	if body.is_in_group("walls") or body is StaticBody2D:
+		if not body in touching_walls:
+			touching_walls.append(body)
+
+func _on_body_exited(body: Node):
+	"""Stop tracking walls when we leave them"""
+	if body in touching_walls:
+		touching_walls.erase(body)
+
+func add_score(points: int):
+	"""Called by collectibles when picked up"""
+	if hud:
+		hud.add_score(points)
+
+func _setup_super_speed_area():
+	"""Create an Area2D for detecting enemies during super speed without physics collision"""
+	super_speed_area = Area2D.new()
+	super_speed_area.name = "SuperSpeedArea"
+	
+	# Collision setup - detect enemies on layer 3
+	super_speed_area.collision_layer = 0  # Not on any layer
+	super_speed_area.collision_mask = 4  # Detect layer 3 (enemies)
+	
+	# Create collision shape matching turtle size
+	var collision_shape = CollisionShape2D.new()
+	var circle = CircleShape2D.new()
+	circle.radius = 12.0  # Slightly bigger than turtle for better detection
+	collision_shape.shape = circle
+	
+	super_speed_area.add_child(collision_shape)
+	add_child(super_speed_area)
+	
+	# Connect signal
+	super_speed_area.body_entered.connect(_on_super_speed_area_entered)
+
+func _on_super_speed_area_entered(body: Node2D):
+	"""Detect enemies entering super speed range"""
+	# Only damage during super speed
+	if not is_super_speed:
+		return
+	
+	# Check if it's an enemy
+	if body.is_in_group("enemies") and body.has_method("take_damage"):
+		body.take_damage(super_speed_damage)
+		
+		# Bounce effect
+		var bounce_direction = (global_position - body.global_position).normalized()
+		apply_central_impulse(bounce_direction * 100)
+
+func _apply_super_speed_visuals(delta: float):
+	"""Apply glowing effect and spawn motion trail"""
+	var sprite = $AnimatedSprite2D
+	if sprite:
+		# BRIGHT golden glow effect - much more saturated
+		sprite.modulate = Color(2.0, 1.5, 0.0, 1.0)  # Overbright yellow!
+		
+		# BIGGER pulse effect
+		var pulse = 1.0 + sin(Time.get_ticks_msec() * 0.015) * 0.4  # Bigger range
+		sprite.scale = Vector2.ONE * pulse
+	
+	# Spawn motion trail MORE FREQUENTLY
+	super_speed_trail_timer += delta
+	if super_speed_trail_timer >= super_speed_trail_interval:
+		super_speed_trail_timer = 0.0
+		_spawn_motion_trail()
+
+func _remove_super_speed_visuals():
+	"""Remove super speed visual effects"""
+	var sprite = $AnimatedSprite2D
+	if sprite and is_instance_valid(sprite):
+		sprite.modulate = Color.WHITE
+		sprite.scale = Vector2.ONE
+
+func _spawn_motion_trail():
+	"""Create a fading afterimage trail effect"""
+	var sprite = $AnimatedSprite2D
+	if not sprite:
+		return
+	
+	# Create a Sprite2D that matches our current appearance
+	var trail = Sprite2D.new()
+	trail.texture = sprite.sprite_frames.get_frame_texture(sprite.animation, sprite.frame)
+	trail.global_position = global_position
+	trail.global_rotation = sprite.global_rotation
+	trail.scale = sprite.scale * 1.2  # Slightly bigger!
+	trail.modulate = Color(2.0, 1.5, 0.0, 0.8)  # Brighter and more opaque
+	trail.z_index = 10  # High z_index to appear above ocean layer!
+	
+	# Add to scene
+	get_parent().add_child(trail)
+	
+	# Fade out slower so trails are more visible
+	var tween = create_tween()
+	tween.tween_property(trail, "modulate:a", 0.0, 0.5)  # Was 0.3, now 0.5
+	tween.tween_callback(trail.queue_free)
+
+func _create_super_speed_burst():
+	"""Create a big visual burst when entering super speed"""
+	# Create expanding ring effect
+	for i in range(8):
+		var burst_sprite = Sprite2D.new()
+		var sprite = $AnimatedSprite2D
+		if sprite:
+			burst_sprite.texture = sprite.sprite_frames.get_frame_texture(sprite.animation, sprite.frame)
+		
+		burst_sprite.global_position = global_position
+		burst_sprite.rotation = randf() * TAU
+		burst_sprite.modulate = Color(2.0, 1.5, 0.0, 0.9)
+		burst_sprite.z_index = 10  # High z_index to appear above ocean!
+		
+		get_parent().add_child(burst_sprite)
+		
+		# Animate outward and fade
+		var tween = create_tween()
+		tween.set_parallel(true)
+		
+		var direction = Vector2(cos(i * TAU / 8), sin(i * TAU / 8))
+		tween.tween_property(burst_sprite, "global_position", global_position + direction * 50, 0.4)
+		tween.tween_property(burst_sprite, "scale", Vector2.ONE * 2.0, 0.4)
+		tween.tween_property(burst_sprite, "modulate:a", 0.0, 0.4)
+		tween.tween_callback(burst_sprite.queue_free)
