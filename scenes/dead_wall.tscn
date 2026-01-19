@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=3 uid="uid://dtqni7qbnvils"]
+
+[ext_resource type="Script" uid="uid://bf0j3a6u1quen" path="res://scripts/dead_wall.gd" id="1_cm4ne"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_cm4ne"]
+friction = 0.8
+
+[node name="DeadWall" type="StaticBody2D"]
+rotation = -0.4904375
+physics_material_override = SubResource("PhysicsMaterial_cm4ne")
+script = ExtResource("1_cm4ne")
+wall_length = 200.0
+wall_thickness = 5.0
+wall_color = Color(0, 0, 0, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+
+[node name="Polygon2D" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(-100, -2.5, 100, -2.5, 100, 2.5, -100, 2.5)

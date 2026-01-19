@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://bgoopne83ygdj"]
+
+[ext_resource type="Script" uid="uid://b86ctjqpdwmld" path="res://scripts/bumper_wall.gd" id="1_gdhvm"]
+
+[node name="BumperWall" type="StaticBody2D"]
+script = ExtResource("1_gdhvm")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+
+[node name="Polygon2D" type="Polygon2D" parent="."]
