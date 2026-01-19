@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3 uid="uid://oi3nqoqhpdcw"]
+[gd_scene load_steps=26 format=3 uid="uid://oi3nqoqhpdcw"]
 
 [ext_resource type="PackedScene" uid="uid://qd5yfrw7588i" path="res://scenes/ocean.tscn" id="1_0wfyh"]
 [ext_resource type="PackedScene" uid="uid://btbnsn74vk1b" path="res://scenes/turtle_player.tscn" id="1_o5qli"]
@@ -46,6 +46,12 @@ bounce = 1.2
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_0ld40"]
 friction = 0.1
 bounce = 1.2
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_trceg"]
+size = Vector2(9.000052, 471.00015)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_a8y0u"]
+size = Vector2(9.999756, 465.00012)
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_tbgi4")
@@ -204,3 +210,39 @@ wall_thickness = 5.0
 script = ExtResource("13_trceg")
 dead_wall_scene = ExtResource("11_ya4ey")
 bumper_wall_scene = ExtResource("12_eb6dy")
+
+[node name="BoundaryLeft" type="StaticBody2D" parent="."]
+position = Vector2(-12.000001, -63.000004)
+rotation = -3.1415925
+scale = Vector2(0.99999994, 0.99999994)
+metadata/_edit_group_ = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BoundaryLeft"]
+position = Vector2(307.49997, -32.50003)
+scale = Vector2(0.9999995, 0.9999995)
+shape = SubResource("RectangleShape2D_trceg")
+
+[node name="ColorRect" type="ColorRect" parent="BoundaryLeft"]
+offset_left = 303.51578
+offset_top = -269.00006
+offset_right = 311.90527
+offset_bottom = 62.268463
+color = Color(0.1764706, 0.12156863, 0.023529412, 1)
+
+[node name="BoundaryRight" type="StaticBody2D" parent="."]
+position = Vector2(-6.9999995, -64)
+rotation = -3.1415925
+scale = Vector2(0.99999994, 0.99999994)
+metadata/_edit_group_ = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BoundaryRight"]
+position = Vector2(-327.9998, -36.49993)
+scale = Vector2(0.99999976, 0.99999976)
+shape = SubResource("RectangleShape2D_a8y0u")
+
+[node name="ColorRect" type="ColorRect" parent="BoundaryRight"]
+offset_left = -333.00003
+offset_top = -269.0
+offset_right = -323.4816
+offset_bottom = 62.268524
+color = Color(0.1764706, 0.12156863, 0.023529412, 1)
