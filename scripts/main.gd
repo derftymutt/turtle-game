@@ -24,8 +24,6 @@ func spawn_collectible(pos: Vector2):
 	var collectible = collectible_scene.instantiate()
 	add_child(collectible)
 	collectible.global_position = pos  # This should work but let's verify
-	
-	print("Spawned collectible at intended pos: ", pos, " actual global_pos: ", collectible.global_position)
 
 # Spawn at random positions
 func spawn_random_stars(count: int):

@@ -40,8 +40,6 @@ func _ready():
 	# - Collision Layer: 1 (player/world)
 	# - Collision Mask: 1 (only collide with world)
 	
-	print("Turtle collision: layer=", collision_layer, " mask=", collision_mask)
-	
 	# Find the ocean
 	ocean = get_tree().get_first_node_in_group("ocean")
 	if not ocean:

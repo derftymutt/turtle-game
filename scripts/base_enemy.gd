@@ -42,10 +42,6 @@ func _ready():
 	
 	# Call child class setup
 	_enemy_ready()
-	
-	# Debug output to verify collision layers set in Inspector
-	print(name, " collision: layer=", collision_layer, " mask=", collision_mask, 
-		" | pass_through_player=", pass_through_player, " | invincible=", is_invincible)
 
 ## Override in child classes for custom initialization
 func _enemy_ready():
