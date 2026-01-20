@@ -50,6 +50,18 @@ func _on_quit_pressed():
 	get_tree().quit()
 
 func _input(event):
-	# Allow restart with spacebar or enter when game over
-	if visible and event.is_action_pressed("ui_accept"):
-		_on_restart_pressed()
+	# Allow restart with spacebar/enter/any controller button when game over
+	if visible:
+		# Keyboard: spacebar or enter
+		if event.is_action_pressed("ui_accept"):
+			_on_restart_pressed()
+			return
+		
+		# Controller: any button press (joypad buttons)
+		if event is InputEventJoypadButton and event.pressed:
+			# Check which button is focused and activate it
+			if restart_button and restart_button.has_focus():
+				_on_restart_pressed()
+			elif quit_button and quit_button.has_focus():
+				_on_quit_pressed()
+			return
