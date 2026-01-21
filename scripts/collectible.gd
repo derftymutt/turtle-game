@@ -16,6 +16,7 @@ class_name Collectible
 
 # Despawn properties
 @export var floor_despawn_time: float = 10.0
+@export var disable_floor_despawn: bool = false  # Set true for seeded collectibles
 
 # Internal variables
 var ocean: Ocean = null
@@ -27,6 +28,7 @@ var visual_node: Node2D = null
 var on_floor: bool = false
 var floor_timer: float = 0.0
 var is_valuable: bool = false
+var animation_set: bool = false  # Prevent animation from being overridden
 
 func _ready():
 	# Physics setup for underwater object
@@ -74,13 +76,15 @@ func _physics_process(delta):
 			is_valuable = true
 			floor_timer = 0.0
 		
-		floor_timer += delta
-		
-		# Despawn after timeout
-		if floor_timer >= floor_despawn_time:
-			despawning = true
-			start_despawn()
-			return
+		# Only despawn if not disabled (seeded collectibles don't despawn)
+		if not disable_floor_despawn:
+			floor_timer += delta
+			
+			# Despawn after timeout
+			if floor_timer >= floor_despawn_time:
+				despawning = true
+				start_despawn()
+				return
 	else:
 		on_floor = false
 		floor_timer = 0.0
@@ -102,10 +106,12 @@ func _physics_process(delta):
 	if visual_node:
 		visual_node.position.y = sin(bob_offset) * bob_amount
 		
-	if is_valuable:
+	# Play valuable animation only once when becoming valuable
+	if is_valuable and not animation_set:
 		var animated_sprite = $AnimatedSprite2D
 		if animated_sprite and animated_sprite.animation != "valuable":
 			animated_sprite.play("valuable")
+			animation_set = true
 		point_value = point_value_valuable
 		
 
@@ -159,3 +165,31 @@ func start_despawn():
 	
 	# Delete when finished
 	tween.finished.connect(queue_free)
+
+## Make collectible immediately valuable (used by FloorSeeder)
+func make_valuable_immediately():
+	"""Set collectible as valuable without needing to settle"""
+	is_valuable = true
+	on_floor = true
+	point_value = point_value_valuable
+	
+	# IMPORTANT: Disable floor despawning for seeded collectibles
+	disable_floor_despawn = true
+	floor_timer = 0.0
+	
+	# IMPORTANT: High z_index to ensure visibility above ocean
+	z_index = 100
+	
+	# Play valuable animation
+	var animated_sprite = get_node_or_null("AnimatedSprite2D")
+	if animated_sprite and animated_sprite.sprite_frames and animated_sprite.sprite_frames.has_animation("valuable"):
+		animated_sprite.play("valuable")
+		animation_set = true  # Prevent _physics_process from overriding
+	
+	# Make mostly stationary
+	linear_velocity = Vector2.ZERO
+	angular_velocity = 0.0
+	linear_damp = 20.0  # High damping to keep it still
+	
+	# Don't apply sinking forces anymore
+	gravity_scale = 0.0

@@ -36,9 +36,9 @@ var breath_warning: bool = false
 @export_group("Exhaustion System")
 @export var exhaustion_enabled: bool = true
 @export var max_exhaustion: float = 100.0
-@export var exhaustion_per_thrust: float = 15.0  # Cost per thrust
+@export var exhaustion_per_thrust: float = 12.0  # Cost per thrust
 @export var exhaustion_recovery_rate: float = 20.0  # Recovery per second when idle
-@export var exhaustion_wall_bonus: float = 40.0  # Extra recovery per second touching wall
+@export var exhaustion_wall_bonus: float = 50.0  # Extra recovery per second touching wall
 @export var exhaustion_threshold: float = 15.0  # Can't thrust below this
 var current_exhaustion: float = 100.0
 var is_touching_wall: bool = false
@@ -160,6 +160,20 @@ func refill_breath(delta: float):
 	
 	current_breath = min(max_breath, current_breath + breath_refill_rate * delta)
 	update_breath(current_breath, max_breath)
+
+## Instantly restore breath (for air bubble collectibles)
+func refill_breath_instant(amount: float):
+	if not breath_enabled:
+		return
+	
+	current_breath = min(max_breath, current_breath + amount)
+	update_breath(current_breath, max_breath)
+	
+	# Clear warning state if breath restored above threshold
+	if current_breath > breath_warning_threshold and breath_warning:
+		breath_warning = false
+		if breath_bar:
+			breath_bar.modulate = Color.CYAN
 
 ## Update exhaustion display
 func update_exhaustion(exhaustion: float, max_ex: float):

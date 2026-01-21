@@ -1,37 +1,23 @@
 extends Node2D
 
-@export var collectible_scene: PackedScene
+## Main scene script
+## Spawning is now handled by dedicated spawner nodes:
+## - CollectibleSpawner for stars/coins
+## - AirBubbleSpawner for breath bubbles
+## - PiranhaSpawner (or EnemySpawner) for enemies
 
-
-# Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	var timer = Timer.new()
-	add_child(timer)
-	timer.timeout.connect(spawn_star_wave)
-	timer.wait_time = 5.0  # Every 5 seconds
-	timer.start()
+	await get_tree().create_timer(2.0).timeout
+	test_collectible_spawn()
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
+func test_collectible_spawn():
+	var test_collectible = $FloorSeeder.collectible_scene.instantiate()
+	add_child(test_collectible)
+	test_collectible.global_position = Vector2(0, 165)
+	test_collectible.z_index = 100
+	test_collectible.modulate = Color.RED  # Make it red for visibility
+	print("TEST: Spawned red collectible at (0, 165)")
+
+func _process(_delta: float) -> void:
+	# Main game loop logic
 	pass
-	
-# Spawn function
-func spawn_collectible(pos: Vector2):
-	if collectible_scene == null:
-		push_warning("No collectible scene assigned!")
-		return
-	
-	var collectible = collectible_scene.instantiate()
-	add_child(collectible)
-	collectible.global_position = pos  # This should work but let's verify
-
-# Spawn at random positions
-func spawn_random_stars(count: int):
-	for i in count:
-		var random_x = randf_range(-280, 280)  # Within screen width
-		var random_y = randf_range(-100, -50)  # Start above water
-		spawn_collectible(Vector2(random_x, random_y))
-
-
-func spawn_star_wave():
-	spawn_random_stars(2)  

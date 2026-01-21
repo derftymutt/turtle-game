@@ -1,4 +1,4 @@
-[gd_scene load_steps=33 format=3 uid="uid://oi3nqoqhpdcw"]
+[gd_scene load_steps=37 format=3 uid="uid://oi3nqoqhpdcw"]
 
 [ext_resource type="PackedScene" uid="uid://qd5yfrw7588i" path="res://scenes/ocean.tscn" id="1_0wfyh"]
 [ext_resource type="PackedScene" uid="uid://btbnsn74vk1b" path="res://scenes/turtle_player.tscn" id="1_o5qli"]
@@ -15,15 +15,13 @@
 [ext_resource type="Script" uid="uid://b78tuve6bekjn" path="res://scripts/wall_layout_helper.gd" id="13_trceg"]
 [ext_resource type="PackedScene" uid="uid://bahema85c45s" path="res://scenes/hud.tscn" id="14_a8y0u"]
 [ext_resource type="PackedScene" uid="uid://cn5v270vtn1pl" path="res://scenes/game_over_screen.tscn" id="15_jkv2x"]
+[ext_resource type="Script" uid="uid://3jp0yf3qb8pa" path="res://scripts/air_bubble_spawner.gd" id="16_jbj1t"]
+[ext_resource type="PackedScene" uid="uid://cdmr2papqk2ih" path="res://scenes/air_bubble.tscn" id="17_muem4"]
+[ext_resource type="PackedScene" uid="uid://cc3k1qa68v0mc" path="res://scenes/collectible_spawner.tscn" id="18_dp3eg"]
+[ext_resource type="PackedScene" uid="uid://bwyt5nkmne05h" path="res://scenes/floor_seeder.tscn" id="19_0ld40"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_tefeu"]
 size = Vector2(640, 40)
-
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_jkv2x"]
-friction = 0.8
-
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_jbj1t"]
-friction = 0.8
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_muem4"]
 friction = 0.8
@@ -44,12 +42,10 @@ friction = 0.8
 friction = 0.8
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_pm3ni"]
-friction = 0.1
-bounce = 1.2
+friction = 0.8
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_y6deb"]
-friction = 0.1
-bounce = 1.2
+friction = 0.8
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_og1vs"]
 friction = 0.1
@@ -67,6 +63,14 @@ bounce = 1.2
 friction = 0.1
 bounce = 1.2
 
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_yq6so"]
+friction = 0.1
+bounce = 1.2
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_fv21b"]
+friction = 0.1
+bounce = 1.2
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_trceg"]
 size = Vector2(9.000052, 471.00015)
 
@@ -75,7 +79,6 @@ size = Vector2(9.999756, 465.00012)
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_tbgi4")
-collectible_scene = ExtResource("4_jyhfs")
 
 [node name="Ocean" parent="." instance=ExtResource("1_0wfyh")]
 
@@ -179,59 +182,75 @@ piranha_scene = ExtResource("9_85g3d")
 [node name="DeadWall" parent="." instance=ExtResource("11_ya4ey")]
 position = Vector2(250, -57.999996)
 rotation = 0.7853982
-physics_material_override = SubResource("PhysicsMaterial_jkv2x")
+physics_material_override = SubResource("PhysicsMaterial_muem4")
 wall_length = 60.0
+slippery_mode = null
+slippery_acceleration = null
 
 [node name="DeadWall2" parent="." instance=ExtResource("11_ya4ey")]
 position = Vector2(-106.00001, -14.999996)
 rotation = -0.7853982
 scale = Vector2(0.99999994, 0.99999994)
-physics_material_override = SubResource("PhysicsMaterial_jbj1t")
+physics_material_override = SubResource("PhysicsMaterial_dp3eg")
 wall_length = 45.0
+slippery_mode = null
+slippery_acceleration = null
 
 [node name="DeadWall3" parent="." instance=ExtResource("11_ya4ey")]
-position = Vector2(-264, -59.000008)
+position = Vector2(-262, -58.000008)
 rotation = -0.7853982
 scale = Vector2(0.99999994, 0.99999994)
-physics_material_override = SubResource("PhysicsMaterial_muem4")
+physics_material_override = SubResource("PhysicsMaterial_0ld40")
 wall_length = 60.0
+slippery_mode = null
+slippery_acceleration = null
 
 [node name="DeadWall4" parent="." instance=ExtResource("11_ya4ey")]
 position = Vector2(89.00001, -14.000004)
 rotation = 0.7853982
-physics_material_override = SubResource("PhysicsMaterial_dp3eg")
+physics_material_override = SubResource("PhysicsMaterial_gqmmt")
 wall_length = 45.0
+slippery_mode = null
+slippery_acceleration = null
 
 [node name="DeadWall5" parent="." instance=ExtResource("11_ya4ey")]
-position = Vector2(-285, 85.999985)
+position = Vector2(-283.00003, 87.99999)
 rotation = -0.7853982
 scale = Vector2(0.99999994, 0.99999994)
-physics_material_override = SubResource("PhysicsMaterial_0ld40")
+physics_material_override = SubResource("PhysicsMaterial_yc10j")
 wall_length = 40.0
+slippery_mode = null
+slippery_acceleration = null
 
 [node name="DeadWall6" parent="." instance=ExtResource("11_ya4ey")]
-position = Vector2(97, 126)
+position = Vector2(95.00001, 128)
 rotation = 0.7853982
-physics_material_override = SubResource("PhysicsMaterial_gqmmt")
+physics_material_override = SubResource("PhysicsMaterial_jscy8")
 wall_length = 60.0
+slippery_mode = null
+slippery_acceleration = null
 
 [node name="DeadWall7" parent="." instance=ExtResource("11_ya4ey")]
 position = Vector2(-126, 120)
 rotation = -0.7853982
 scale = Vector2(0.99999994, 0.99999994)
-physics_material_override = SubResource("PhysicsMaterial_yc10j")
+physics_material_override = SubResource("PhysicsMaterial_pm3ni")
 wall_length = 45.0
+slippery_mode = null
+slippery_acceleration = null
 
 [node name="DeadWall8" parent="." instance=ExtResource("11_ya4ey")]
 position = Vector2(289, 91.000015)
 rotation = 0.7853982
-physics_material_override = SubResource("PhysicsMaterial_jscy8")
+physics_material_override = SubResource("PhysicsMaterial_y6deb")
 wall_length = 40.0
+slippery_mode = null
+slippery_acceleration = null
 
 [node name="BumperWall" parent="." instance=ExtResource("12_eb6dy")]
 position = Vector2(-175, -26)
 scale = Vector2(0.99999994, 0.99999994)
-physics_material_override = SubResource("PhysicsMaterial_pm3ni")
+physics_material_override = SubResource("PhysicsMaterial_og1vs")
 wall_length = 48.0
 wall_thickness = 5.0
 
@@ -239,35 +258,35 @@ wall_thickness = 5.0
 position = Vector2(-6.9999995, -64)
 rotation = -3.1415925
 scale = Vector2(0.99999994, 0.99999994)
-physics_material_override = SubResource("PhysicsMaterial_y6deb")
+physics_material_override = SubResource("PhysicsMaterial_2wyq8")
 wall_length = 35.0
 wall_thickness = 5.0
 
 [node name="BumperWall3" parent="." instance=ExtResource("12_eb6dy")]
 position = Vector2(177, 94.999985)
 scale = Vector2(0.99999994, 0.99999994)
-physics_material_override = SubResource("PhysicsMaterial_og1vs")
+physics_material_override = SubResource("PhysicsMaterial_vxglm")
 wall_length = 35.0
 wall_thickness = 5.0
 
 [node name="BumperWall4" parent="." instance=ExtResource("12_eb6dy")]
 position = Vector2(-12.999996, 59.999996)
 scale = Vector2(0.99999994, 0.99999994)
-physics_material_override = SubResource("PhysicsMaterial_2wyq8")
+physics_material_override = SubResource("PhysicsMaterial_2f3dj")
 wall_length = 40.0
 wall_thickness = 5.0
 
 [node name="BumperWall5" parent="." instance=ExtResource("12_eb6dy")]
 position = Vector2(166.00002, -26.000002)
 scale = Vector2(0.99999994, 0.99999994)
-physics_material_override = SubResource("PhysicsMaterial_vxglm")
+physics_material_override = SubResource("PhysicsMaterial_yq6so")
 wall_length = 48.0
 wall_thickness = 5.0
 
 [node name="BumperWall6" parent="." instance=ExtResource("12_eb6dy")]
 position = Vector2(-198.99997, 97)
 scale = Vector2(0.99999994, 0.99999994)
-physics_material_override = SubResource("PhysicsMaterial_2f3dj")
+physics_material_override = SubResource("PhysicsMaterial_fv21b")
 wall_length = 35.0
 wall_thickness = 5.0
 
@@ -316,3 +335,16 @@ color = Color(0.1764706, 0.12156863, 0.023529412, 1)
 follow_viewport_enabled = false
 
 [node name="GameOverScreen" parent="." instance=ExtResource("15_jkv2x")]
+
+[node name="AirBubbleSpawner" type="Node2D" parent="."]
+script = ExtResource("16_jbj1t")
+bubble_scene = ExtResource("17_muem4")
+spawn_interval = 10.0
+spawn_count_max = 2
+
+[node name="CollectibleSpawner" parent="." instance=ExtResource("18_dp3eg")]
+collectible_scene = ExtResource("4_jyhfs")
+
+[node name="FloorSeeder" parent="." instance=ExtResource("19_0ld40")]
+collectible_scene = ExtResource("4_jyhfs")
+seed_count_min = 5

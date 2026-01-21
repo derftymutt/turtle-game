@@ -16,8 +16,8 @@ class_name Ocean
 @export var shallow_buoyancy: float = 100.0  # Constant upward force in shallow zone
 @export var mid_buoyancy_base: float = 175.0  # Starting upward force in mid zone
 @export var mid_buoyancy_rate: float = 3.0  # Linear increase per pixel deeper (+0.5 force per pixel)
-@export var deep_buoyancy_base: float = 250.0  # Starting upward force in deep zone
-@export var deep_buoyancy_curve: float = 0.08   # Exponential multiplier (depthÂ² Ã— 0.002 added to base)
+@export var deep_buoyancy_base: float = 200.0  # Starting upward force in deep zone
+@export var deep_buoyancy_curve: float = 0.07   # Exponential multiplier (depthÂ² Ã— 0.002 added to base)
 
 # Visual effects
 @export_group("Visual Settings")

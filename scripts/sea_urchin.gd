@@ -22,6 +22,7 @@ func _enemy_ready():
 	# Sea urchins are invincible and pass-through!
 	is_invincible = true
 	pass_through_player = true  # This is just a flag for documentation/future use
+	contact_damage= 15
 	
 	# Physics setup - heavy and stationary
 	gravity_scale = 0.0

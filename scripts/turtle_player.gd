@@ -1,9 +1,9 @@
 extends RigidBody2D
 
 # Movement properties
-@export var thrust_force: float = 30000.0
+@export var thrust_force: float = 30.0
 @export var max_velocity: float = 2500.0
-@export var kick_animation_duration: float = 0.4
+@export var kick_animation_duration: float = 0.3
 
 # Shooting properties
 @export var shoot_cooldown: float = 0.3
@@ -11,9 +11,9 @@ extends RigidBody2D
 @export var bullet_scene: PackedScene
 
 # Thrust strengths
-@export var horizontal_thrust: float = 200.0
+@export var horizontal_thrust: float = 150.0
 @export var upward_thrust: float = 75.0
-@export var downward_thrust: float = 250.0
+@export var downward_thrust: float = 200.0
 
 # Health
 @export var max_health: float = 100.0
