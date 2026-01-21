@@ -3,6 +3,7 @@ class_name Collectible
 
 # Collectible properties
 @export var point_value: int = 10
+@export var point_value_valuable: int = 100
 @export var sink_speed: float = 100.0
 
 # Visual feedback
@@ -25,6 +26,7 @@ var sway_offset: float = 0.0
 var visual_node: Node2D = null
 var on_floor: bool = false
 var floor_timer: float = 0.0
+var is_valuable: bool = false
 
 func _ready():
 	# Physics setup for underwater object
@@ -69,6 +71,7 @@ func _physics_process(delta):
 	if is_near_floor and is_mostly_still:
 		if not on_floor:
 			on_floor = true
+			is_valuable = true
 			floor_timer = 0.0
 		
 		floor_timer += delta
@@ -98,6 +101,13 @@ func _physics_process(delta):
 	bob_offset += bob_speed * delta
 	if visual_node:
 		visual_node.position.y = sin(bob_offset) * bob_amount
+		
+	if is_valuable:
+		var animated_sprite = $AnimatedSprite2D
+		if animated_sprite and animated_sprite.animation != "valuable":
+			animated_sprite.play("valuable")
+		point_value = point_value_valuable
+		
 
 func _on_area_2d_body_entered(body: Node2D) -> void:
 	if body.is_in_group("player") and not collected:

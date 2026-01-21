@@ -3,11 +3,12 @@
 [ext_resource type="Script" uid="uid://c8gcxh4gmwsi3" path="res://scripts/hud.gd" id="1_ahhtf"]
 
 [node name="HUD" type="CanvasLayer" groups=["hud"]]
+follow_viewport_enabled = true
 script = ExtResource("1_ahhtf")
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
-offset_right = 40.0
-offset_bottom = 40.0
+offset_right = 712.0
+offset_bottom = 52.0
 theme_override_constants/margin_left = 5
 theme_override_constants/margin_top = 5
 theme_override_constants/margin_right = 5
