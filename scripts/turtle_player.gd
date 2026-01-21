@@ -183,7 +183,7 @@ func _physics_process(delta):
 	# Return to idle when slow
 	if can_thrust and linear_velocity.length() < 50:
 		var animated_sprite = $AnimatedSprite2D
-		if animated_sprite and animated_sprite.animation != "idle":
+		if animated_sprite and animated_sprite.animation != "idle" and animated_sprite.animation != "shoot":
 			animated_sprite.play("idle")
 
 func apply_ocean_effects(delta: float):
@@ -250,7 +250,8 @@ func shoot(direction: Vector2):
 	# Spawn bullet
 	var bullet = bullet_scene.instantiate()
 	get_parent().add_child(bullet)
-	bullet.global_position = global_position + direction * 30
+	# Spawn MUCH closer - just outside turtle's collision radius (12 pixels + bullet radius ~5 = 17)
+	bullet.global_position = global_position + direction * 15
 	
 	# Set bullet velocity
 	bullet.set_velocity(direction * bullet_speed)

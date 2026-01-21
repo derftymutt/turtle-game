@@ -16,6 +16,10 @@ func _ready():
 	mass = 0.01
 	continuous_cd = RigidBody2D.CCD_MODE_CAST_RAY
 	
+	# CRITICAL: Enable contact monitoring for body_entered signal
+	contact_monitor = true
+	max_contacts_reported = 4
+	
 	# NOTE: Collision layers MUST be set in Inspector:
 	# - Collision Layer: 4 (bullets)
 	# - Collision Mask: 1 + 3 (world + enemies)
@@ -62,7 +66,7 @@ func check_initial_overlaps():
 	
 	query.shape = expanded_shape
 	query.transform = global_transform
-	query.collision_mask = 4  # Check layer 3 (enemies)
+	query.collision_mask = 4  # Check layer 3 (enemies) - bit 2 = value 4
 	query.exclude = [self]
 	
 	var results = space_state.intersect_shape(query, 10)
