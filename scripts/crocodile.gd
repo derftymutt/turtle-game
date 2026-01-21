@@ -16,17 +16,23 @@ class_name Crocodile
 
 # Behavior settings
 @export var detection_range: float = 120.0
+@export var vertical_attack_threshold: float = 30.0  # If player is more than this far below, use vertical attack
 
 # Visual
 @export var bob_amount: float = 2.0
 @export var bob_speed: float = 1.5
 
+# Orientation recovery
+@export var orientation_recovery_speed: float = 3.0  # How fast to return to horizontal
+@export var target_rotation: float = 0.0  # Desired rotation when patrolling
+
 # Internal state
-enum State { PATROL_LEFT, PATROL_RIGHT, CHASE }
+enum State { PATROL_LEFT, PATROL_RIGHT, CHASE, VERTICAL_ATTACK }
 var current_state: State = State.PATROL_RIGHT
 var player: Node2D = null
 var ocean: Ocean = null
 var bob_offset: float = 0.0
+var vertical_attack_timer: float = 0.0  # Prevents instant state switching
 
 @onready var patrol_area = $PatrolArea
 
@@ -68,6 +74,17 @@ func _physics_process(delta):
 	if sprite:
 		sprite.position.y = sin(bob_offset) * bob_amount
 	
+	# Gradually recover orientation when not actively being hit
+	# This smoothly returns crocodile to horizontal after collisions
+	if current_state != State.VERTICAL_ATTACK:
+		var rotation_diff = angle_difference(rotation, target_rotation)
+		if abs(rotation_diff) > 0.01:  # Only correct if noticeably off
+			rotation = lerp_angle(rotation, target_rotation, orientation_recovery_speed * delta)
+	
+	# Update vertical attack timer
+	if vertical_attack_timer > 0:
+		vertical_attack_timer -= delta
+	
 	# State-based movement
 	match current_state:
 		State.PATROL_LEFT:
@@ -85,9 +102,13 @@ func _physics_process(delta):
 				chase_player()
 			else:
 				current_state = State.PATROL_RIGHT
+		
+		State.VERTICAL_ATTACK:
+			vertical_attack_behavior(delta)
 	
-	# Clamp rotation (keep mostly horizontal)
-	rotation = clamp(rotation, deg_to_rad(-15), deg_to_rad(15))
+	# Only clamp rotation when NOT in vertical attack mode
+	if current_state != State.VERTICAL_ATTACK:
+		rotation = clamp(rotation, deg_to_rad(-15), deg_to_rad(15))
 
 func apply_surface_locking():
 	"""Keep croc at the surface using forces"""
@@ -119,18 +140,66 @@ func chase_player():
 	if not player or not is_instance_valid(player):
 		return
 	
-	var to_player = player.global_position.x - global_position.x
-	var direction = sign(to_player)
+	var to_player = player.global_position - global_position
+	var horizontal_distance = abs(to_player.x)
+	var vertical_distance = to_player.y  # Positive = player is below
 	
+	# Check if player is significantly below us
+	if vertical_distance > vertical_attack_threshold and horizontal_distance < detection_range * 0.5:
+		# Player is below - switch to vertical attack if timer allows
+		if vertical_attack_timer <= 0:
+			current_state = State.VERTICAL_ATTACK
+			vertical_attack_timer = 1.0  # Minimum time in vertical attack
+			if sprite and sprite is AnimatedSprite2D:
+				sprite.play("vertical_attack")
+		return
+	
+	# Normal horizontal chase
+	var direction = sign(to_player.x)
 	patrol_movement(direction, chase_speed)
+
+func vertical_attack_behavior(delta: float):
+	"""Lunge downward at player below"""
+	if not player or not is_instance_valid(player):
+		current_state = State.CHASE
+		return
+	
+	var to_player = player.global_position - global_position
+	var vertical_distance = to_player.y  # Positive = player is below
+	var horizontal_distance = abs(to_player.x)
+	
+	# Stay mostly stationary horizontally, bob menacingly
+	linear_velocity.x *= 0.9
+	
+	# Point downward at player
+	var angle_to_player = to_player.angle() - deg_to_rad(90)  # Subtract 90 because sprite faces up by default
+	rotation = lerp_angle(rotation, angle_to_player, 2.0 * delta)
+	
+	# Only exit if player moved significantly away OR went above us
+	# Stay in vertical attack even when player is directly below (vertical_distance can be small)
+	if vertical_distance < 0 or horizontal_distance > detection_range:
+		# Player moved above us or too far horizontally - exit vertical attack
+		current_state = State.CHASE
+		vertical_attack_timer = 0.5  # Short cooldown before can vertical attack again
+		if sprite and sprite is AnimatedSprite2D:
+			sprite.play("swim")  # Return to normal animation
 
 func _on_player_detected(body: Node2D):
 	if body.is_in_group("player"):
 		player = body
-		current_state = State.CHASE
+		# Only switch to chase if not already in vertical attack
+		if current_state != State.VERTICAL_ATTACK:
+			current_state = State.CHASE
 
 func _on_player_lost(body: Node2D):
 	if body.is_in_group("player"):
+		# Exit vertical attack when player leaves range
+		if current_state == State.VERTICAL_ATTACK:
+			current_state = State.CHASE
+			if sprite and sprite is AnimatedSprite2D:
+				sprite.play("swim")
+		
+		# Return to patrol
 		if global_position.x < (patrol_min_x + patrol_max_x) / 2:
 			current_state = State.PATROL_RIGHT
 		else:
