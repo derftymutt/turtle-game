@@ -1,0 +1,71 @@
+[gd_scene load_steps=11 format=3 uid="uid://dtv45nw6ur1dc"]
+
+[ext_resource type="Script" uid="uid://snpitdc5g55a" path="res://entities/enemies/piranha/piranha.gd" id="1_2xr4y"]
+[ext_resource type="Texture2D" uid="uid://inv0j6qxl33j" path="res://entities/enemies/piranha/sprites/piranha2.png" id="2_2xr4y"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_clyk4"]
+atlas = ExtResource("2_2xr4y")
+region = Rect2(32, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_j63f2"]
+atlas = ExtResource("2_2xr4y")
+region = Rect2(0, 16, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tb8k7"]
+atlas = ExtResource("2_2xr4y")
+region = Rect2(16, 16, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5dtlv"]
+atlas = ExtResource("2_2xr4y")
+region = Rect2(32, 16, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8c083"]
+atlas = ExtResource("2_2xr4y")
+region = Rect2(0, 32, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_tb8k7"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_clyk4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_j63f2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tb8k7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5dtlv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8c083")
+}],
+"loop": true,
+"name": &"default",
+"speed": 9.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_qj0xi"]
+radius = 7.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_2xr4y"]
+radius = 8.0
+
+[node name="Piranha" type="RigidBody2D"]
+collision_layer = 4
+script = ExtResource("1_2xr4y")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_tb8k7")
+autoplay = "default"
+frame_progress = 0.7938951
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_qj0xi")
+
+[node name="DamageArea" type="Area2D" parent="."]
+collision_layer = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DamageArea"]
+shape = SubResource("CircleShape2D_2xr4y")

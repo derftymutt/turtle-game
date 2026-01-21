@@ -1,24 +1,24 @@
 [gd_scene load_steps=38 format=3 uid="uid://oi3nqoqhpdcw"]
 
-[ext_resource type="PackedScene" uid="uid://qd5yfrw7588i" path="res://scenes/ocean.tscn" id="1_0wfyh"]
-[ext_resource type="PackedScene" uid="uid://btbnsn74vk1b" path="res://scenes/turtle_player.tscn" id="1_o5qli"]
+[ext_resource type="PackedScene" uid="uid://qd5yfrw7588i" path="res://entities/environment/ocean/ocean.tscn" id="1_0wfyh"]
+[ext_resource type="PackedScene" uid="uid://btbnsn74vk1b" path="res://entities/player/turtle_player.tscn" id="1_o5qli"]
 [ext_resource type="Script" uid="uid://d0b7cokox6gc0" path="res://scripts/main.gd" id="1_tbgi4"]
-[ext_resource type="PackedScene" uid="uid://r0k3freedece" path="res://scenes/flipper.tscn" id="3_sugp2"]
-[ext_resource type="PackedScene" uid="uid://doh85qcfn8x2w" path="res://scenes/collectible.tscn" id="4_jyhfs"]
-[ext_resource type="Script" uid="uid://c3i3p77jm22vp" path="res://scripts/camera_2d.gd" id="4_tefeu"]
-[ext_resource type="PackedScene" uid="uid://bu0sjqqm7uvm1" path="res://scenes/crocodile.tscn" id="7_o6xl0"]
-[ext_resource type="PackedScene" uid="uid://d2kw7hdpyp6d0" path="res://scenes/sea_urchin.tscn" id="8_tipki"]
-[ext_resource type="PackedScene" uid="uid://dtv45nw6ur1dc" path="res://scenes/piranha.tscn" id="9_85g3d"]
-[ext_resource type="PackedScene" uid="uid://bgu8t3jworeir" path="res://scenes/piranha_spawner.tscn" id="10_choun"]
-[ext_resource type="PackedScene" uid="uid://dtqni7qbnvils" path="res://scenes/dead_wall.tscn" id="11_ya4ey"]
-[ext_resource type="PackedScene" uid="uid://bgoopne83ygdj" path="res://scenes/bumper_wall.tscn" id="12_eb6dy"]
-[ext_resource type="Script" uid="uid://b78tuve6bekjn" path="res://scripts/wall_layout_helper.gd" id="13_trceg"]
-[ext_resource type="PackedScene" uid="uid://bahema85c45s" path="res://scenes/hud.tscn" id="14_a8y0u"]
-[ext_resource type="PackedScene" uid="uid://cn5v270vtn1pl" path="res://scenes/game_over_screen.tscn" id="15_jkv2x"]
-[ext_resource type="Script" uid="uid://3jp0yf3qb8pa" path="res://scripts/air_bubble_spawner.gd" id="16_jbj1t"]
-[ext_resource type="PackedScene" uid="uid://cdmr2papqk2ih" path="res://scenes/air_bubble.tscn" id="17_muem4"]
-[ext_resource type="PackedScene" uid="uid://cc3k1qa68v0mc" path="res://scenes/collectible_spawner.tscn" id="18_dp3eg"]
-[ext_resource type="PackedScene" uid="uid://bwyt5nkmne05h" path="res://scenes/floor_seeder.tscn" id="19_0ld40"]
+[ext_resource type="PackedScene" uid="uid://r0k3freedece" path="res://entities/environment/flippers/flipper.tscn" id="3_sugp2"]
+[ext_resource type="PackedScene" uid="uid://doh85qcfn8x2w" path="res://entities/collectibles/star/collectible.tscn" id="4_jyhfs"]
+[ext_resource type="Script" uid="uid://c3i3p77jm22vp" path="res://systems/camera_2d.gd" id="4_tefeu"]
+[ext_resource type="PackedScene" uid="uid://bu0sjqqm7uvm1" path="res://entities/enemies/crocodile/crocodile.tscn" id="7_o6xl0"]
+[ext_resource type="PackedScene" uid="uid://d2kw7hdpyp6d0" path="res://entities/enemies/sea_urchin/sea_urchin.tscn" id="8_tipki"]
+[ext_resource type="PackedScene" uid="uid://dtv45nw6ur1dc" path="res://entities/enemies/piranha/piranha.tscn" id="9_85g3d"]
+[ext_resource type="PackedScene" uid="uid://bgu8t3jworeir" path="res://entities/enemies/piranha/piranha_spawner.tscn" id="10_choun"]
+[ext_resource type="PackedScene" uid="uid://dtqni7qbnvils" path="res://entities/environment/walls/dead_wall/dead_wall.tscn" id="11_ya4ey"]
+[ext_resource type="PackedScene" uid="uid://bgoopne83ygdj" path="res://entities/environment/walls/bumper_wall/bumper_wall.tscn" id="12_eb6dy"]
+[ext_resource type="Script" uid="uid://b78tuve6bekjn" path="res://systems/wall_layout_helper.gd" id="13_trceg"]
+[ext_resource type="PackedScene" uid="uid://bahema85c45s" path="res://ui/hud/hud.tscn" id="14_a8y0u"]
+[ext_resource type="PackedScene" uid="uid://cn5v270vtn1pl" path="res://ui/menus/game_over_screen.tscn" id="15_jkv2x"]
+[ext_resource type="Script" uid="uid://3jp0yf3qb8pa" path="res://entities/collectibles/air_bubble/air_bubble_spawner.gd" id="16_jbj1t"]
+[ext_resource type="PackedScene" uid="uid://cdmr2papqk2ih" path="res://entities/collectibles/air_bubble/air_bubble.tscn" id="17_muem4"]
+[ext_resource type="PackedScene" uid="uid://cc3k1qa68v0mc" path="res://entities/collectibles/star/collectible_spawner.tscn" id="18_dp3eg"]
+[ext_resource type="PackedScene" uid="uid://bwyt5nkmne05h" path="res://systems/floor_seeder.tscn" id="19_0ld40"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_tefeu"]
 size = Vector2(640, 40)
@@ -63,15 +63,15 @@ bounce = 1.2
 friction = 0.1
 bounce = 1.2
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_5q0nq"]
-friction = 0.1
-bounce = 1.2
-
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_tel4y"]
 friction = 0.1
 bounce = 1.2
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_qkpxi"]
+friction = 0.1
+bounce = 1.2
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_5q0nq"]
 friction = 0.1
 bounce = 1.2
 
@@ -267,21 +267,21 @@ wall_thickness = 5.0
 [node name="BumperWall7" parent="." instance=ExtResource("12_eb6dy")]
 position = Vector2(-13, 112)
 scale = Vector2(0.99999994, 0.99999994)
-physics_material_override = SubResource("PhysicsMaterial_5q0nq")
+physics_material_override = SubResource("PhysicsMaterial_tel4y")
 wall_length = 40.0
 wall_thickness = 5.0
 
 [node name="BumperWall5" parent="." instance=ExtResource("12_eb6dy")]
 position = Vector2(166.00002, -26.000002)
 scale = Vector2(0.99999994, 0.99999994)
-physics_material_override = SubResource("PhysicsMaterial_tel4y")
+physics_material_override = SubResource("PhysicsMaterial_qkpxi")
 wall_length = 48.0
 wall_thickness = 5.0
 
 [node name="BumperWall6" parent="." instance=ExtResource("12_eb6dy")]
 position = Vector2(-198.99997, 97)
 scale = Vector2(0.99999994, 0.99999994)
-physics_material_override = SubResource("PhysicsMaterial_qkpxi")
+physics_material_override = SubResource("PhysicsMaterial_5q0nq")
 wall_length = 35.0
 wall_thickness = 5.0
 

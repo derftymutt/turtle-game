@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://bgu8t3jworeir"]
+
+[ext_resource type="Script" uid="uid://tqrfqhbjojgk" path="res://entities/enemies/piranha/piranha_spawner.gd" id="1_fm62g"]
+
+[node name="PiranhaSpawner" type="Node2D"]
+script = ExtResource("1_fm62g")

@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=3 uid="uid://qd5yfrw7588i"]
+
+[ext_resource type="Script" uid="uid://270n74wx2x44" path="res://entities/environment/ocean/ocean.gd" id="1_tiovm"]
+
+[node name="Ocean" type="Node2D" groups=["ocean"]]
+script = ExtResource("1_tiovm")
+
+[node name="WaterSurface" type="Line2D" parent="."]
+position = Vector2(0, -126)
+points = PackedVector2Array(-700, 0, 700, 0)
+width = 2.0
+default_color = Color(0.21960784, 0.5058824, 0.8666667, 1)
+begin_cap_mode = 1
+end_cap_mode = 1
+
+[node name="DepthMarkers" type="Node2D" parent="."]
