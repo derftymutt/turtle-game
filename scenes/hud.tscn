@@ -74,8 +74,3 @@ custom_minimum_size = Vector2(120, 20)
 layout_mode = 2
 value = 100.0
 show_percentage = false
-
-[node name="SuperSpeedIndicator" type="Label" parent="MarginContainer/HBoxContainer"]
-modulate = Color(1, 0.75686276, 0, 1)
-layout_mode = 2
-text = "** SUPER SPEED **"

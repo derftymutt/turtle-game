@@ -11,7 +11,6 @@ var breath_container: Control
 var breath_bar: ProgressBar
 var exhaustion_container: Control
 var exhaustion_bar: ProgressBar
-var super_speed_indicator: Label  # New!
 
 # Game state
 var current_score: int = 0
@@ -58,7 +57,6 @@ func _ready():
 	breath_bar = find_child("BreathBar")
 	exhaustion_container = find_child("ExhaustionContainer")
 	exhaustion_bar = find_child("ExhaustionBar")
-	super_speed_indicator = find_child("SuperSpeedIndicator")
 	
 	# Debug: verify we found everything
 	if not score_label:
@@ -75,7 +73,6 @@ func _ready():
 	update_health(max_health, max_health)
 	update_breath(max_breath, max_breath)
 	update_exhaustion(max_exhaustion, max_exhaustion)
-	set_super_speed_active(false)
 	
 	# Hide experimental meters if disabled
 	if breath_container:
@@ -224,13 +221,3 @@ func can_thrust() -> bool:
 	if not exhaustion_enabled:
 		return true
 	return current_exhaustion >= exhaustion_threshold
-
-## Update super speed indicator
-func set_super_speed_active(active: bool):
-	if super_speed_indicator:
-		super_speed_indicator.visible = active
-		if active:
-			# Flash effect
-			var tween = create_tween().set_loops()
-			tween.tween_property(super_speed_indicator, "modulate:a", 0.3, 0.3)
-			tween.tween_property(super_speed_indicator, "modulate:a", 1.0, 0.3)

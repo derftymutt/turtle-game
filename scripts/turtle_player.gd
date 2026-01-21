@@ -116,19 +116,12 @@ func _physics_process(delta):
 		
 		# State change - just entered super speed
 		if not was_super_speed:
-			if hud:
-				hud.set_super_speed_active(true)
 			_create_super_speed_burst()  # Big visual pop!
 	elif is_super_speed_cooldown:
 		# During cooldown - keep visuals but with pulsing effect to show it's ending
 		_apply_cooldown_visuals(delta)
 	else:
 		_remove_super_speed_visuals()
-		
-		# State change - just exited super speed (not in cooldown)
-		if was_super_speed or was_in_cooldown:
-			if hud:
-				hud.set_super_speed_active(false)
 	
 	# Transition from active super speed to cooldown
 	if was_super_speed and not is_super_speed and not is_super_speed_cooldown:
