@@ -47,7 +47,7 @@ func _enemy_ready():
 	mass = 0.8
 	
 	# Set health (piranhas are fragile but fast)
-	max_health = 20.0
+	max_health = 10.0
 	current_health = max_health
 	contact_damage = 15.0
 	

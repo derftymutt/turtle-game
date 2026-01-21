@@ -313,8 +313,6 @@ offset_bottom = 62.268524
 color = Color(0.1764706, 0.12156863, 0.023529412, 1)
 
 [node name="HUD" parent="." instance=ExtResource("14_a8y0u")]
-visible = false
 follow_viewport_enabled = false
 
 [node name="GameOverScreen" parent="." instance=ExtResource("15_jkv2x")]
-visible = false
