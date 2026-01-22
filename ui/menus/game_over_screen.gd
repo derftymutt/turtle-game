@@ -1,14 +1,17 @@
 extends CanvasLayer
 class_name GameOverScreen
 
-## Game Over screen with restart and quit options
+## Game Over screen with restart, main menu, and quit options
 
-@onready var game_over_panel = $CenterContainer/PanelContainer
-@onready var final_score_label = $CenterContainer/PanelContainer/VBoxContainer/FinalScoreLabel
-@onready var restart_button = $CenterContainer/PanelContainer/VBoxContainer/RestartButton
-@onready var quit_button = $CenterContainer/PanelContainer/VBoxContainer/QuitButton
+@onready var game_over_panel = $Control/CenterContainer/PanelContainer
+@onready var final_score_label = $Control/CenterContainer/PanelContainer/VBoxContainer/FinalScoreLabel
+@onready var high_score_label = $Control/CenterContainer/PanelContainer/VBoxContainer/HighScoreLabel
+@onready var restart_button = $Control/CenterContainer/PanelContainer/VBoxContainer/RestartButton
+@onready var menu_button = $Control/CenterContainer/PanelContainer/VBoxContainer/MenuButton
+@onready var quit_button = $Control/CenterContainer/PanelContainer/VBoxContainer/QuitButton
 
 var final_score: int = 0
+var current_level: String = ""
 
 func _ready():
 	add_to_group("game_over_screen")
@@ -19,15 +22,28 @@ func _ready():
 	# Connect buttons
 	if restart_button:
 		restart_button.pressed.connect(_on_restart_pressed)
+	if menu_button:
+		menu_button.pressed.connect(_on_menu_pressed)
 	if quit_button:
 		quit_button.pressed.connect(_on_quit_pressed)
 
-func show_game_over(score: int):
-	"""Display the game over screen with final score"""
+func show_game_over(score: int, level_name: String = ""):
+	"""Display the game over screen with final score and high score"""
 	final_score = score
+	current_level = level_name
 	
 	if final_score_label:
 		final_score_label.text = "Final Score: %d" % final_score
+	
+	# Show high score
+	if high_score_label and not level_name.is_empty():
+		var high_score = GameManager.get_high_score(level_name)
+		if score > high_score:
+			high_score_label.text = "NEW HIGH SCORE!"
+			high_score_label.modulate = Color.GOLD
+		else:
+			high_score_label.text = "High Score: %d" % high_score
+			high_score_label.modulate = Color.WHITE
 	
 	visible = true
 	
@@ -42,26 +58,46 @@ func _on_restart_pressed():
 	# Unpause
 	get_tree().paused = false
 	
-	# Reload the current scene
-	get_tree().reload_current_scene()
+	# Restart through GameManager
+	if not current_level.is_empty():
+		GameManager.restart_current_level()
+	else:
+		# Fallback
+		get_tree().reload_current_scene()
+
+func _on_menu_pressed():
+	print("Menu button pressed!")
+	print("Current level: ", current_level)
+	print("GameManager exists: ", GameManager != null)
+	
+	# Unpause
+	get_tree().paused = false
+	
+	# Return to main menu
+	GameManager.load_main_menu()
 
 func _on_quit_pressed():
 	# Quit the game
 	get_tree().quit()
 
 func _input(event):
-	# Allow restart with spacebar/enter/any controller button when game over
-	if visible:
-		# Keyboard: spacebar or enter
-		if event.is_action_pressed("ui_accept"):
+	if not visible:
+		return
+	
+	# Any button press activates focused button
+	if event is InputEventKey and event.pressed and not event.echo:
+		if restart_button and restart_button.has_focus():
 			_on_restart_pressed()
-			return
-		
-		# Controller: any button press (joypad buttons)
-		if event is InputEventJoypadButton and event.pressed:
-			# Check which button is focused and activate it
-			if restart_button and restart_button.has_focus():
-				_on_restart_pressed()
-			elif quit_button and quit_button.has_focus():
-				_on_quit_pressed()
-			return
+		elif menu_button and menu_button.has_focus():
+			_on_menu_pressed()
+		elif quit_button and quit_button.has_focus():
+			_on_quit_pressed()
+	
+	# Controller buttons
+	if event is InputEventJoypadButton and event.pressed:
+		if restart_button and restart_button.has_focus():
+			_on_restart_pressed()
+		elif menu_button and menu_button.has_focus():
+			_on_menu_pressed()
+		elif quit_button and quit_button.has_focus():
+			_on_quit_pressed()

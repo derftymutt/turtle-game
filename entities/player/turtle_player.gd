@@ -292,15 +292,22 @@ func die():
 	if hud:
 		final_score = hud.current_score
 	
-	# Find and show game over screen
-	var game_over_screen = get_tree().get_first_node_in_group("game_over_screen")
-	if game_over_screen and game_over_screen.has_method("show_game_over"):
-		game_over_screen.show_game_over(final_score)
+	# Update GameManager score
+	GameManager.current_score = final_score
+	
+	# Find level base (parent scene) and notify it
+	var level = get_tree().get_first_node_in_group("level")
+	if level and level.has_method("on_player_died"):
+		level.on_player_died(final_score)
 	else:
-		push_warning("No GameOverScreen found! Add it to your main scene.")
-		# Fallback: just reload the scene
-		await get_tree().create_timer(2.0).timeout
-		get_tree().reload_current_scene()
+		# Fallback: show game over screen directly
+		var game_over_screen = get_tree().get_first_node_in_group("game_over_screen")
+		if game_over_screen and game_over_screen.has_method("show_game_over"):
+			game_over_screen.show_game_over(final_score, GameManager.current_level)
+		else:
+			push_warning("No GameOverScreen found!")
+			await get_tree().create_timer(2.0).timeout
+			get_tree().reload_current_scene()
 
 func _on_body_entered(body: Node):
 	"""Track walls for exhaustion recovery bonus"""

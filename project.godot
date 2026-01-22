@@ -11,9 +11,13 @@ config_version=5
 [application]
 
 config/name="Turtle 640 x 360"
-run/main_scene="uid://oi3nqoqhpdcw"
+run/main_scene="uid://u1q38ecdmws8"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
+
+[autoload]
+
+GameManager="*res://global/game_manager.gd"
 
 [display]
 

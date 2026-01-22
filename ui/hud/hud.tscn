@@ -3,12 +3,14 @@
 [ext_resource type="Script" uid="uid://c8gcxh4gmwsi3" path="res://ui/hud/hud.gd" id="1_ahhtf"]
 
 [node name="HUD" type="CanvasLayer" groups=["hud"]]
-follow_viewport_enabled = true
 script = ExtResource("1_ahhtf")
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
-offset_right = 712.0
-offset_bottom = 52.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_constants/margin_left = 5
 theme_override_constants/margin_top = 5
 theme_override_constants/margin_right = 5
