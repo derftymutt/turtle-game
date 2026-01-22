@@ -85,9 +85,16 @@ func _on_body_entered(body):
 	if body.is_in_group("player"):
 		return
 	
+	# Pop air bubbles (before enemies, so they take priority)
+	if body.is_in_group("air_bubbles") and body.has_method("pop_from_bullet"):
+		body.pop_from_bullet()
+		queue_free()
+		return
+	
 	# Damage enemies (including invincible ones - they'll show feedback!)
-	if body.is_in_group("enemies"):
-		_hit_enemy(body)
+	if body.is_in_group("enemies") and body.has_method("take_damage"):
+		body.take_damage(damage)
+		queue_free()
 		return
 	
 	# Hit wall/flipper - destroy bullet

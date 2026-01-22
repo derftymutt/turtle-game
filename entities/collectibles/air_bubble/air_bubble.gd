@@ -183,6 +183,30 @@ func pop_at_surface():
 		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	
 	tween.finished.connect(queue_free)
+	
+## Pop when hit by bullet
+func pop_from_bullet():
+	#"""Called when shot by a bullet - immediate pop without breath restore"""
+	if collected or despawning:
+		return
+	
+	collected = true
+	despawning = true
+	freeze = true
+	
+	# Same satisfying pop animation as surface pop
+	var tween = create_tween()
+	tween.set_parallel(true)
+	
+	# Expand dramatically
+	tween.tween_property(self, "scale", Vector2(2.0, 2.0), 0.2)\
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	
+	# Fade to transparent
+	tween.tween_property(self, "modulate:a", 0.0, 0.2)\
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	
+	tween.finished.connect(queue_free)
 
 func start_despawn():
 	"""Gentle fade for lifetime expiration"""

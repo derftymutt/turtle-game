@@ -47,7 +47,8 @@ func _build_pages():
 
 • Collect stars! Twinkling stars on the sea floor are worth the most
 • Avoid enemies! (shoot piranhas)
-• Don't run out of breath! Get air bubbles or surface when needed
+• Don't run out of breath! 
+	- Get air bubbles (but don't pop them!) or surface when needed
 • Turtles can't kick forever! Mind your Stamina!
 • Flipper/Bumper super speed = invincibility + damage
 • Can you get 500 points? 1000?"""
