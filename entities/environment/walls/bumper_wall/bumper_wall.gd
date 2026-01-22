@@ -69,13 +69,19 @@ func _ready():
 			rect.size = Vector2(wall_length, wall_thickness)
 			collision_shape.shape = rect
 	
+	# Also duplicate hit_area shapes if they exist
+	if hit_area:
+		for child in hit_area.get_children():
+			if child is CollisionShape2D and child.shape:
+				child.shape = child.shape.duplicate()
+	
 	_update_wall_shape()
 	
 	# Ensure collision is enabled
 	if collision_shape:
 		collision_shape.disabled = false
 	
-	# Create Area2D for detecting player hits (only in-game, not editor)
+	# Create Area2D for detecting player hits (only in-game, not editor, and if doesn't exist)
 	if not Engine.is_editor_hint() and not hit_area:
 		_setup_hit_area()
 

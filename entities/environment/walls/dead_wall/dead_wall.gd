@@ -10,7 +10,7 @@ class_name DeadWall
 		wall_length = value
 		_update_wall_shape()
 
-@export var wall_thickness: float = 20.0:
+@export var wall_thickness: float = 5.0:
 	set(value):
 		wall_thickness = value
 		_update_wall_shape()
@@ -48,6 +48,8 @@ func _ready():
 			polygon = child
 		elif child is CollisionShape2D:
 			collision_shape = child
+		elif child is Area2D and child.name == "SlipperyArea":
+			slippery_area = child
 	
 	# CRITICAL: Make shapes unique for each instance to avoid shared resource bug
 	if collision_shape:
@@ -60,14 +62,20 @@ func _ready():
 			rect.size = Vector2(wall_length, wall_thickness)
 			collision_shape.shape = rect
 	
+	# Also duplicate SlipperyArea shapes if they exist
+	if slippery_area:
+		for child in slippery_area.get_children():
+			if child is CollisionShape2D and child.shape:
+				child.shape = child.shape.duplicate()
+	
 	_update_wall_shape()
 	
 	# Ensure collision is enabled
 	if collision_shape:
 		collision_shape.disabled = false
 	
-	# Create Area2D for slippery effect detection
-	if slippery_mode:
+	# Create Area2D for slippery effect detection (only if it doesn't exist)
+	if slippery_mode and not slippery_area:
 		_setup_slippery_area()
 
 func _physics_process(_delta):
