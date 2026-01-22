@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://u1q38ecdmws8"]
+[gd_scene load_steps=3 format=3 uid="uid://u1q38ecdmws8"]
 
 [ext_resource type="Script" uid="uid://d33exekcsupic" path="res://ui/menus/main_menu.gd" id="1_5oih7"]
+[ext_resource type="PackedScene" uid="uid://cmdqgqfevkvly" path="res://ui/menus/guide_screen.tscn" id="2_qc8qn"]
 
 [node name="MainMenu" type="CanvasLayer"]
 script = ExtResource("1_5oih7")
@@ -37,3 +38,5 @@ text = "Turtle Plunge"
 layout_mode = 2
 theme_override_constants/separation = 10
 alignment = 1
+
+[node name="GuideScreen" parent="." instance=ExtResource("2_qc8qn")]
