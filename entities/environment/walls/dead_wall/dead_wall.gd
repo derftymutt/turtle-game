@@ -39,24 +39,26 @@ func _ready():
 	# Set up physics material for no bounce and ultra-slippery surface
 	var physics_mat = PhysicsMaterial.new()
 	physics_mat.bounce = 0.0
-	physics_mat.friction = 0.0  # Zero friction = ice skating!
+	physics_mat.friction = 0.0
 	physics_material_override = physics_mat
 	
-	# Create or find child nodes
-	if get_child_count() == 0:
-		_setup_visuals()
-	else:
-		for child in get_children():
-			if child is Polygon2D:
-				polygon = child
-			elif child is CollisionShape2D:
-				collision_shape = child
+	# Find child nodes
+	for child in get_children():
+		if child is Polygon2D:
+			polygon = child
+		elif child is CollisionShape2D:
+			collision_shape = child
 	
-	# Ensure collision shape has actual shape data
-	if collision_shape and collision_shape.shape == null:
-		var rect = RectangleShape2D.new()
-		rect.size = Vector2(wall_length, wall_thickness)
-		collision_shape.shape = rect
+	# CRITICAL: Make shapes unique for each instance to avoid shared resource bug
+	if collision_shape:
+		if collision_shape.shape:
+			# Duplicate the shape so each wall has its own
+			collision_shape.shape = collision_shape.shape.duplicate()
+		else:
+			# Create new shape if none exists
+			var rect = RectangleShape2D.new()
+			rect.size = Vector2(wall_length, wall_thickness)
+			collision_shape.shape = rect
 	
 	_update_wall_shape()
 	
@@ -105,8 +107,11 @@ func _update_wall_shape():
 	# Update slippery area shape to match
 	if slippery_area:
 		for child in slippery_area.get_children():
-			if child is CollisionShape2D and child.shape is RectangleShape2D:
-				child.shape.size = Vector2(wall_length, wall_thickness)
+			if child is CollisionShape2D:
+				# Create a brand new shape instead of modifying (avoids shared resource issues)
+				var new_rect = RectangleShape2D.new()
+				new_rect.size = Vector2(wall_length, wall_thickness)
+				child.shape = new_rect
 	
 	# Update visual polygon
 	if polygon:
@@ -137,10 +142,6 @@ func _setup_slippery_area():
 	
 	slippery_area.add_child(area_collision)
 	add_child(slippery_area)
-	
-	# Update area shape when wall shape changes
-	if collision_shape and collision_shape.shape:
-		area_collision.shape.size = collision_shape.shape.size
 
 func _apply_slippery_force(body: RigidBody2D):
 	"""Apply tangential force along wall surface - creates 'oil slick' effect"""

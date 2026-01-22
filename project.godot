@@ -19,6 +19,10 @@ config/icon="res://icon.svg"
 
 GameManager="*res://global/game_manager.gd"
 
+[debug]
+
+shapes/collision/shape_color=Color(0.9336619, 2.3969114e-05, 0.64580274, 0.41960785)
+
 [display]
 
 window/size/viewport_width=640

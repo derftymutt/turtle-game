@@ -5,7 +5,7 @@ extends Camera2D
 @export var ocean_floor_y: float = 180.0
 
 # Vertical (sky/ocean) settings
-@export var sky_zoom_threshold: float = 100.0  # Above surface
+@export var sky_zoom_threshold: float = 60.0  # Above surface
 @export var sky_zoom: Vector2 = Vector2(0.5, 0.5)  # Zoom out 2x
 @export var normal_zoom: Vector2 = Vector2(1.0, 1.0)
 @export var vertical_zoom_speed: float = 3.0

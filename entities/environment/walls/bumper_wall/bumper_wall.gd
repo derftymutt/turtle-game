@@ -33,6 +33,7 @@ class_name BumperWall
 var collision_shape: CollisionShape2D
 var polygon: Polygon2D
 var original_color: Color
+var hit_area: Area2D
 
 func _ready():
 	original_color = wall_color
@@ -48,21 +49,25 @@ func _ready():
 	physics_mat.friction = 0.1
 	physics_material_override = physics_mat
 	
-	# Create or find child nodes
-	if get_child_count() == 0:
-		_setup_visuals()
-	else:
-		for child in get_children():
-			if child is Polygon2D:
-				polygon = child
-			elif child is CollisionShape2D:
-				collision_shape = child
+	# Find child nodes
+	for child in get_children():
+		if child is Polygon2D:
+			polygon = child
+		elif child is CollisionShape2D:
+			collision_shape = child
+		elif child is Area2D:
+			hit_area = child
 	
-	# Ensure collision shape has actual shape data
-	if collision_shape and collision_shape.shape == null:
-		var rect = RectangleShape2D.new()
-		rect.size = Vector2(wall_length, wall_thickness)
-		collision_shape.shape = rect
+	# CRITICAL: Make shapes unique for each instance to avoid shared resource bug
+	if collision_shape:
+		if collision_shape.shape:
+			# Duplicate the shape so each wall has its own
+			collision_shape.shape = collision_shape.shape.duplicate()
+		else:
+			# Create new shape if none exists
+			var rect = RectangleShape2D.new()
+			rect.size = Vector2(wall_length, wall_thickness)
+			collision_shape.shape = rect
 	
 	_update_wall_shape()
 	
@@ -71,21 +76,8 @@ func _ready():
 		collision_shape.disabled = false
 	
 	# Create Area2D for detecting player hits (only in-game, not editor)
-	if not Engine.is_editor_hint():
-		var area = Area2D.new()
-		area.collision_layer = 0  # Don't be on any layer
-		area.collision_mask = 1   # Detect layer 1 (player)
-		add_child(area)
-		
-		# Create matching collision shape for area
-		var area_shape = CollisionShape2D.new()
-		var rect = RectangleShape2D.new()
-		rect.size = Vector2(wall_length, wall_thickness)
-		area_shape.shape = rect
-		area.add_child(area_shape)
-		
-		# Connect area signal
-		area.body_entered.connect(_on_body_hit)
+	if not Engine.is_editor_hint() and not hit_area:
+		_setup_hit_area()
 
 func _setup_visuals():
 	# Create visual polygon
@@ -103,6 +95,23 @@ func _setup_visuals():
 	if Engine.is_editor_hint():
 		collision_shape.owner = get_tree().edited_scene_root
 
+func _setup_hit_area():
+	"""Create Area2D for detecting player hits with its own unique shape"""
+	hit_area = Area2D.new()
+	hit_area.collision_layer = 0  # Don't be on any layer
+	hit_area.collision_mask = 1   # Detect layer 1 (player)
+	add_child(hit_area)
+	
+	# Create matching collision shape for area with unique shape
+	var area_shape = CollisionShape2D.new()
+	var rect = RectangleShape2D.new()
+	rect.size = Vector2(wall_length, wall_thickness)
+	area_shape.shape = rect
+	hit_area.add_child(area_shape)
+	
+	# Connect area signal
+	hit_area.body_entered.connect(_on_body_hit)
+
 func _update_wall_shape():
 	if not is_inside_tree():
 		return
@@ -110,6 +119,15 @@ func _update_wall_shape():
 	# Update collision rectangle
 	if collision_shape and collision_shape.shape:
 		collision_shape.shape.size = Vector2(wall_length, wall_thickness)
+	
+	# Update hit area shape to match
+	if hit_area:
+		for child in hit_area.get_children():
+			if child is CollisionShape2D:
+				# Create a brand new shape instead of modifying (avoids shared resource issues)
+				var new_rect = RectangleShape2D.new()
+				new_rect.size = Vector2(wall_length, wall_thickness)
+				child.shape = new_rect
 	
 	# Update visual polygon with slight bevel for 3D effect
 	if polygon:
