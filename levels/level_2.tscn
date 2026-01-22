@@ -1,4 +1,4 @@
-[gd_scene load_steps=33 format=3 uid="uid://b0w1c6q8i6u2w"]
+[gd_scene load_steps=35 format=3 uid="uid://b0w1c6q8i6u2w"]
 
 [ext_resource type="PackedScene" uid="uid://dgwg5saty0h76" path="res://levels/shared/level_base.tscn" id="1_mi4ay"]
 [ext_resource type="PackedScene" uid="uid://qd5yfrw7588i" path="res://entities/environment/ocean/ocean.tscn" id="3_0srwa"]
@@ -29,10 +29,16 @@ size = Vector2(640, 40)
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ep78u"]
 friction = 0.0
 
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_h351q"]
+friction = 0.0
+
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_dfjjl"]
 friction = 0.0
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_at1ld"]
+friction = 0.0
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_dpc8t"]
 friction = 0.0
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_sd18g"]
@@ -209,19 +215,31 @@ rotation = -1.0471976
 physics_material_override = SubResource("PhysicsMaterial_ep78u")
 wall_length = 45.0
 
-[node name="DeadWall2" parent="DeadWalls" index="1" instance=ExtResource("8_xrja0")]
+[node name="DeadWall5" parent="DeadWalls" index="1" instance=ExtResource("8_xrja0")]
+position = Vector2(-60.000015, 49)
+rotation = -1.0471976
+physics_material_override = SubResource("PhysicsMaterial_h351q")
+wall_length = 30.0
+
+[node name="DeadWall2" parent="DeadWalls" index="2" instance=ExtResource("8_xrja0")]
 position = Vector2(-253, 97.00002)
 rotation = -1.0471976
 physics_material_override = SubResource("PhysicsMaterial_dfjjl")
 wall_length = 45.0
 
-[node name="DeadWall3" parent="DeadWalls" index="2" instance=ExtResource("8_xrja0")]
+[node name="DeadWall3" parent="DeadWalls" index="3" instance=ExtResource("8_xrja0")]
 position = Vector2(234, 97.99999)
 rotation = 1.0471976
 physics_material_override = SubResource("PhysicsMaterial_at1ld")
 wall_length = 45.0
 
-[node name="DeadWall4" parent="DeadWalls" index="3" instance=ExtResource("8_xrja0")]
+[node name="DeadWall6" parent="DeadWalls" index="4" instance=ExtResource("8_xrja0")]
+position = Vector2(57.000004, 49.000015)
+rotation = 1.0471976
+physics_material_override = SubResource("PhysicsMaterial_dpc8t")
+wall_length = 30.0
+
+[node name="DeadWall4" parent="DeadWalls" index="5" instance=ExtResource("8_xrja0")]
 position = Vector2(238, -42.000008)
 rotation = 1.0471976
 physics_material_override = SubResource("PhysicsMaterial_sd18g")

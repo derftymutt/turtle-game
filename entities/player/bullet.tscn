@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://lxxb80yuhgk7"]
 
 [ext_resource type="Script" uid="uid://do6f7fs6rok27" path="res://entities/player/bullet.gd" id="1_2qgwa"]
-[ext_resource type="Texture2D" uid="uid://dhg31ty6xpitg" path="res://entities/player/sprites/turtle-bullet2.png" id="2_leoqw"]
+[ext_resource type="Texture2D" uid="uid://defibnutrph1s" path="res://entities/player/sprites/turtle_bullet3.png" id="2_2qgwa"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_y25gk"]
 radius = 2.0
@@ -15,7 +15,7 @@ max_contacts_reported = 4
 script = ExtResource("1_2qgwa")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-texture = ExtResource("2_leoqw")
+texture = ExtResource("2_2qgwa")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_y25gk")
