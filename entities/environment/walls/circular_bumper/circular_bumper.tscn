@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://bp6g8v1jmnruo"]
+
+[ext_resource type="Script" uid="uid://cfjwjd8atp8tn" path="res://entities/environment/walls/circular_bumper/circular_bumper.gd" id="1_ir1ke"]
+
+[node name="CircularBumper" type="StaticBody2D"]
+script = ExtResource("1_ir1ke")
+
+[node name="Polygon2D" type="Polygon2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
