@@ -1,6 +1,11 @@
-[gd_scene load_steps=2 format=3 uid="uid://bgu8t3jworeir"]
+[gd_scene load_steps=4 format=3 uid="uid://bgu8t3jworeir"]
 
 [ext_resource type="Script" uid="uid://tqrfqhbjojgk" path="res://entities/enemies/piranha/piranha_spawner.gd" id="1_fm62g"]
+[ext_resource type="PackedScene" uid="uid://dtv45nw6ur1dc" path="res://entities/enemies/piranha/piranha.tscn" id="2_wydyh"]
+[ext_resource type="PackedScene" uid="uid://ikqnal6kalcc" path="res://entities/enemies/piranha/super_piranha.tscn" id="3_og4cs"]
 
 [node name="PiranhaSpawner" type="Node2D"]
 script = ExtResource("1_fm62g")
+piranha_scene = ExtResource("2_wydyh")
+super_piranha_scene = ExtResource("3_og4cs")
+super_piranha_warning_color = Color(0.60784316, 0, 0.627451, 1)

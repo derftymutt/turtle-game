@@ -1,0 +1,88 @@
+[gd_scene load_steps=13 format=3 uid="uid://ikqnal6kalcc"]
+
+[ext_resource type="Script" uid="uid://b1n37gdnklwmu" path="res://entities/enemies/piranha/super_piranha.gd" id="1_rtrrk"]
+[ext_resource type="Texture2D" uid="uid://ci7vocey1j8md" path="res://entities/enemies/piranha/sprites/super_piranha.png" id="2_rtrrk"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kavyd"]
+atlas = ExtResource("2_rtrrk")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pwofs"]
+atlas = ExtResource("2_rtrrk")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gvrga"]
+atlas = ExtResource("2_rtrrk")
+region = Rect2(32, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5eoxq"]
+atlas = ExtResource("2_rtrrk")
+region = Rect2(0, 16, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rj33i"]
+atlas = ExtResource("2_rtrrk")
+region = Rect2(16, 16, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6epuu"]
+atlas = ExtResource("2_rtrrk")
+region = Rect2(32, 16, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0hjmn"]
+atlas = ExtResource("2_rtrrk")
+region = Rect2(0, 32, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_tb8k7"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kavyd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_pwofs")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gvrga")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5eoxq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rj33i")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6epuu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0hjmn")
+}],
+"loop": true,
+"name": &"default",
+"speed": 15.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_qj0xi"]
+radius = 7.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_2xr4y"]
+radius = 8.0
+
+[node name="SuperPiranha" type="RigidBody2D"]
+collision_layer = 4
+script = ExtResource("1_rtrrk")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_tb8k7")
+autoplay = "default"
+frame_progress = 0.86868274
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+visible = false
+shape = SubResource("CircleShape2D_qj0xi")
+
+[node name="DamageArea" type="Area2D" parent="."]
+visible = false
+collision_layer = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DamageArea"]
+visible = false
+shape = SubResource("CircleShape2D_2xr4y")
