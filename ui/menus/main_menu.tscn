@@ -6,6 +6,14 @@
 [node name="MainMenu" type="CanvasLayer"]
 script = ExtResource("1_5oih7")
 
+[node name="ColorRect" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.05490196, 1, 1, 1)
+
 [node name="Control" type="Control" parent="."]
 layout_mode = 3
 anchors_preset = 15
@@ -31,6 +39,7 @@ layout_mode = 2
 
 [node name="TitleLabel" type="Label" parent="Control/CenterContainer/VBoxContainer"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.46710145, 0.93201816, 0.2886762, 1)
 theme_override_font_sizes/font_size = 48
 text = "Turtle Plunge"
 

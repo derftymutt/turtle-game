@@ -21,10 +21,10 @@ class_name Ocean
 
 # Visual effects
 @export_group("Visual Settings")
-@export var surface_color: Color = Color(0.4, 0.7, 0.9, 1.0)  # Light blue at surface
-@export var shallow_color: Color = Color(0.3, 0.6, 0.85, 1.0)  # Medium blue
-@export var mid_color: Color = Color(0.2, 0.4, 0.7, 1.0)  # Darker blue
-@export var deep_color: Color = Color(0.1, 0.2, 0.4, 1.0)  # Very dark blue
+@export var surface_color: Color = Color(0.055, 1.0, 1.0, 1.0)  # Bright cyan turquoise (#0effff)
+@export var shallow_color: Color = Color(0.0, 0.85, 0.95, 1.0)  # Vibrant cyan-blue
+@export var mid_color: Color = Color(0.0, 0.6, 1.0, 1.0)  # Bright sky blue
+@export var deep_color: Color = Color(0.0, 0.3, 1.0, 1.0)  # True vibrant blue
 @export var show_gradient: bool = true  # Toggle ocean gradient rendering
 
 func _ready():
