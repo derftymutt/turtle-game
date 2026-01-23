@@ -97,15 +97,15 @@ bounce = 1.2
 friction = 0.1
 bounce = 1.2
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_c3ijv"]
-friction = 0.1
-bounce = 1.2
-
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_dvo5v"]
 friction = 0.1
 bounce = 1.2
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_16jej"]
+friction = 0.1
+bounce = 1.2
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_c3ijv"]
 friction = 0.1
 bounce = 1.2
 
@@ -394,12 +394,12 @@ physics_material_override = SubResource("PhysicsMaterial_h3b7p")
 
 [node name="CircularBumper8" parent="." index="21" instance=ExtResource("17_svivd")]
 position = Vector2(187, -37)
-physics_material_override = SubResource("PhysicsMaterial_c3ijv")
+physics_material_override = SubResource("PhysicsMaterial_dvo5v")
 
 [node name="CircularBumper6" parent="." index="22" instance=ExtResource("17_svivd")]
 position = Vector2(-3, 76)
-physics_material_override = SubResource("PhysicsMaterial_dvo5v")
+physics_material_override = SubResource("PhysicsMaterial_16jej")
 
 [node name="CircularBumper7" parent="." index="23" instance=ExtResource("17_svivd")]
 position = Vector2(-277, 112)
-physics_material_override = SubResource("PhysicsMaterial_16jej")
+physics_material_override = SubResource("PhysicsMaterial_c3ijv")
