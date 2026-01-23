@@ -3,7 +3,7 @@ extends RigidBody2D
 # Movement properties
 @export var thrust_force: float = 30.0
 @export var max_velocity: float = 2500.0
-@export var kick_animation_duration: float = 0.3
+@export var kick_animation_duration: float = 0.25
 
 # Shooting properties
 @export var shoot_cooldown: float = 0.3
@@ -11,7 +11,7 @@ extends RigidBody2D
 @export var bullet_scene: PackedScene
 
 # Thrust strengths
-@export var horizontal_thrust: float = 150.0
+@export var horizontal_thrust: float = 175.0
 @export var upward_thrust: float = 75.0
 @export var downward_thrust: float = 200.0
 
@@ -52,7 +52,8 @@ var super_speed_area: Area2D = null
 func _ready():
 	# Physics setup
 	gravity_scale = 0.0
-	linear_damp = 2.0
+	linear_damp = 1.5
+	
 	angular_damp = 3.0
 	mass = 1.0
 	continuous_cd = RigidBody2D.CCD_MODE_CAST_RAY
@@ -185,7 +186,7 @@ func _physics_process(delta):
 		var animated_sprite = $AnimatedSprite2D
 		if animated_sprite and animated_sprite.animation != "idle" and animated_sprite.animation != "shoot":
 			animated_sprite.play("idle")
-
+		
 func apply_ocean_effects(delta: float):
 	"""Apply depth-based buoyancy and water drag"""
 	var depth = ocean.get_depth(global_position)
@@ -195,9 +196,17 @@ func apply_ocean_effects(delta: float):
 	if depth > 0:
 		# Underwater - apply water drag
 		linear_velocity *= ocean.water_drag
+		
+		# DEPTH-BASED LINEAR DAMP: Less drag near surface = faster rise
+		# Deep water (100+): full drag (2.0) - maintains flipper momentum
+		# Shallow water (0-50): reduced drag (1.0) - snappy surface movement
+		var depth_factor = clamp(depth / 100.0, 0.0, 1.0)
+		var dynamic_damp = lerp(1.0, 2.0, depth_factor)
+		linear_damp = dynamic_damp
 	else:
 		# In air - apply air drag
 		linear_velocity *= ocean.air_drag
+		linear_damp = 1.2  # Light drag in air
 
 func return_to_idle_after_delay():
 	await get_tree().create_timer(kick_animation_duration).timeout
