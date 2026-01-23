@@ -151,8 +151,28 @@ func _setup_slippery_area():
 	slippery_area.add_child(area_collision)
 	add_child(slippery_area)
 
+func _calculate_net_physics_force(body: RigidBody2D) -> Vector2:
+	"""Calculate the net physics force acting on a body (gravity + buoyancy)"""
+	var net_force = Vector2.ZERO
+	
+	# Gravity component
+	var gravity = Vector2(0, body.mass * body.gravity_scale * 980.0)  # 980 = default gravity
+	net_force += gravity
+	
+	# Buoyancy component (if body is in water)
+	var ocean = get_tree().get_first_node_in_group("ocean")
+	if ocean and ocean.has_method("get_depth") and ocean.has_method("calculate_buoyancy_force"):
+		var depth = ocean.get_depth(body.global_position)
+		if depth > 0:  # Underwater
+			var buoyancy_force = ocean.calculate_buoyancy_force(depth, body.mass)
+			net_force += Vector2(0, -buoyancy_force)  # Buoyancy points up
+	
+	return net_force
+
 func _apply_slippery_force(body: RigidBody2D):
 	"""Apply tangential force along wall surface - creates 'oil slick' effect"""
+	# ONLY slippery in the direction of net physics forces (gravity + buoyancy)
+	
 	# Get the wall's tangent direction (perpendicular to its normal)
 	var wall_angle = global_rotation
 	var wall_tangent = Vector2(cos(wall_angle), sin(wall_angle))
@@ -162,7 +182,18 @@ func _apply_slippery_force(body: RigidBody2D):
 	
 	# Only accelerate if already moving along wall (not perpendicular collisions)
 	if abs(velocity_along_wall) > 10:  # Minimum sliding speed threshold
-		# Apply force in the direction of motion along the wall
-		var direction = sign(velocity_along_wall)
-		var force = wall_tangent * direction * slippery_acceleration
-		body.apply_central_force(force)
+		# Calculate net physics force on the body
+		var net_physics_force = _calculate_net_physics_force(body)
+		
+		# Project physics force onto wall tangent to see "downhill" direction
+		var physics_along_wall = net_physics_force.dot(wall_tangent)
+		
+		# Only apply slippery force if moving in same direction as physics forces
+		var velocity_direction = sign(velocity_along_wall)
+		var physics_direction = sign(physics_along_wall)
+		
+		# CRITICAL: Only accelerate if moving WITH the natural physics flow
+		if velocity_direction == physics_direction:
+			var force = wall_tangent * velocity_direction * slippery_acceleration
+			body.apply_central_force(force)
+		# Otherwise, turtle is fighting against natural forces - no slippery boost!
