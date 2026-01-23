@@ -79,6 +79,19 @@ bounce = 1.2
 [node name="LevelBase" instance=ExtResource("1_vkd0v")]
 level_name = "level_3"
 
+[node name="HUD" parent="." index="0"]
+breath_enabled = null
+max_breath = null
+breath_drain_rate = null
+breath_refill_rate = null
+breath_warning_threshold = null
+exhaustion_enabled = null
+max_exhaustion = null
+exhaustion_per_thrust = null
+exhaustion_recovery_rate = null
+exhaustion_wall_bonus = null
+exhaustion_threshold = null
+
 [node name="GameOverScreen" parent="." index="1"]
 visible = false
 
