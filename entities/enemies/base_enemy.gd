@@ -83,7 +83,7 @@ func _play_invincible_feedback():
 
 ## Handle player collision in damage area
 func _on_damage_area_entered(body: Node2D):
-	if body.is_in_group("player") and body.has_method("take_damage"):
+	if body.is_in_group("player") and body.has_method("take_damage") and current_health > 0:
 		_deal_damage_to_player(body)
 
 ## Deal damage and knockback to player
