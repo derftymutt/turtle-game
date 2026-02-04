@@ -1,6 +1,5 @@
 extends CanvasLayer
 class_name GuideScreen
-
 ## Simple two-page guide: How to Play + Controls
 
 @onready var content_label = $Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ContentLabel
@@ -14,6 +13,7 @@ var pages: Array[String] = []
 
 func _ready():
 	visible = false
+	add_to_group("guide_screen")
 	_build_pages()
 	
 	# Connect button signals
@@ -32,9 +32,12 @@ func show_guide():
 	current_page = 0
 	_update_page()
 	
-	# Focus first button for controller navigation
-	if prev_button:
-		prev_button.grab_focus()
+	# Focus first available button for controller navigation
+	# Start with next button if prev is disabled
+	if next_button and not next_button.disabled:
+		next_button.grab_focus()
+	elif back_button:
+		back_button.grab_focus()
 
 func hide_guide():
 	"""Hide the guide screen"""
@@ -44,19 +47,17 @@ func _build_pages():
 	var page1 = """
 	
   ***HOW TO PLAY***
-
-• Collect stars! Twinkling stars on the sea floor are worth the most
-• Avoid enemies! (shoot piranhas)
-• Don't run out of breath! 
+- Collect stars! Twinkling stars on the sea floor are worth the most
+- Avoid enemies! (shoot piranhas)
+- Don't run out of breath! 
 	- Get air bubbles (but don't pop them!) or surface when needed
-• Turtles can't kick forever! Mind your Stamina!
-• Flipper/Bumper super speed = invincibility + damage
-• Can you get 500 points? 1000?"""
+- Turtles can't kick forever! Mind your Stamina!
+- Flipper/Bumper super speed = invincibility + damage
+- Can you get 500 points? 1000?"""
 	
 	var page2 = """
 	
 ***CONTROLS***
-
 THRUST: Left Stick / WASD
 SHOOT: Right Stick / IJKL
 FLIPPER LEFT: L Trigger / L Shift
@@ -105,16 +106,3 @@ func _on_back_pressed():
 	var main_menu = get_parent()
 	if main_menu and main_menu.has_method("show_menu"):
 		main_menu.show_menu()
-		# Prevent input from leaking to main menu
-		get_viewport().set_input_as_handled()
-
-func _input(event):
-	"""Handle controller input for guide navigation"""
-	if not visible:
-		return
-	
-	# Controller button activates focused button (like main menu)
-	if event is InputEventJoypadButton and event.pressed:
-		var focused = get_viewport().gui_get_focus_owner()
-		if focused is Button and not focused.disabled:
-			focused.pressed.emit()

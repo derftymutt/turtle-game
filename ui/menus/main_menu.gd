@@ -13,16 +13,16 @@ func _ready():
 	# Create level and menu buttons
 	_create_level_buttons()
 
-func _input(event):
-	# Don't handle input if guide screen is visible
-	if guide_screen and guide_screen.visible:
-		return
-	
-	# Controller button activates focused button
-	if event is InputEventJoypadButton and event.pressed:
-		var focused = get_viewport().gui_get_focus_owner()
-		if focused is Button:
-			focused.pressed.emit()
+#func _input(event):
+	## Don't handle input if guide screen is visible
+	#if guide_screen and guide_screen.visible:
+		#return
+	#
+	#if event.is_action_pressed("ui_accept"):
+		#var focused = get_viewport().gui_get_focus_owner()
+		#if focused is Button:
+			#focused.pressed.emit()
+			#get_viewport().set_input_as_handled()
 
 func _create_level_buttons():
 	"""Create a button for each registered level"""
