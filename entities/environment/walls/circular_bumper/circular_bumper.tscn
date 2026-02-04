@@ -1,10 +1,22 @@
-[gd_scene load_steps=2 format=3 uid="uid://bp6g8v1jmnruo"]
+[gd_scene load_steps=4 format=3 uid="uid://bp6g8v1jmnruo"]
 
 [ext_resource type="Script" uid="uid://cfjwjd8atp8tn" path="res://entities/environment/walls/circular_bumper/circular_bumper.gd" id="1_ir1ke"]
 
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ir1ke"]
+friction = 0.1
+bounce = 1.2
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_qkehw"]
+radius = 12.0
+
 [node name="CircularBumper" type="StaticBody2D"]
+physics_material_override = SubResource("PhysicsMaterial_ir1ke")
 script = ExtResource("1_ir1ke")
+bumper_color = Color(0.7882353, 0.3019608, 0.3019608, 1)
 
 [node name="Polygon2D" type="Polygon2D" parent="."]
+color = Color(0.7882353, 0.3019608, 0.3019608, 1)
+polygon = PackedVector2Array(12, 0, 11.7694235, 2.3410838, 11.086555, 4.592201, 9.977635, 6.666843, 8.485281, 8.485281, 6.666843, 9.977635, 4.592201, 11.086555, 2.3410838, 11.7694235, 7.347638e-16, 12, -2.3410838, 11.7694235, -4.592201, 11.086555, -6.666843, 9.977635, -8.485281, 8.485281, -9.977635, 6.666843, -11.086555, 4.592201, -11.7694235, 2.3410838, -12, 1.4695276e-15, -11.7694235, -2.3410838, -11.086555, -4.592201, -9.977635, -6.666843, -8.485281, -8.485281, -6.666843, -9.977635, -4.592201, -11.086555, -2.3410838, -11.7694235, -2.2042914e-15, -12, 2.3410838, -11.7694235, 4.592201, -11.086555, 6.666843, -9.977635, 8.485281, -8.485281, 9.977635, -6.666843, 11.086555, -4.592201, 11.7694235, -2.3410838)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_qkehw")
