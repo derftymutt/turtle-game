@@ -52,8 +52,10 @@ func hide_guide():
 
 func _build_pages():
 	var page1 = """
-	
+
+
   ***HOW TO PLAY***
+
 - Collect stars! Twinkling stars on the sea floor are worth the most
 - Avoid enemies! (shoot piranhas)
 - Don't run out of breath! 
@@ -65,8 +67,10 @@ func _build_pages():
 	# Page 2 is now just the basic controls text
 	# The checkbox will be shown separately below it
 	var page2 = """
-	
+
+
 ***CONTROLS***
+
 THRUST: Left Stick / WASD
 SHOOT: Right Stick / IJKL
 FLIPPER LEFT: L Trigger / L Shift

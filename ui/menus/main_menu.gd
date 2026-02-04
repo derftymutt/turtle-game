@@ -13,17 +13,6 @@ func _ready():
 	# Create level and menu buttons
 	_create_level_buttons()
 
-#func _input(event):
-	## Don't handle input if guide screen is visible
-	#if guide_screen and guide_screen.visible:
-		#return
-	#
-	#if event.is_action_pressed("ui_accept"):
-		#var focused = get_viewport().gui_get_focus_owner()
-		#if focused is Button:
-			#focused.pressed.emit()
-			#get_viewport().set_input_as_handled()
-
 func _create_level_buttons():
 	"""Create a button for each registered level"""
 	# Create level buttons
@@ -34,7 +23,10 @@ func _create_level_buttons():
 		var display_name = level_id.replace("_", " ").capitalize()
 		var high_score = GameManager.get_high_score(level_id)
 		button.text = "%s\nHigh Score: %d" % [display_name, high_score]
-		button.custom_minimum_size = Vector2(200, 60)
+		button.custom_minimum_size = Vector2(100, 30)  # Changed from 200x60
+		
+		# Optional: Make the font smaller
+		button.add_theme_font_size_override("font_size", 12)  # Adjust size as needed
 		
 		# Connect button to load level
 		button.pressed.connect(func(): _on_level_selected(level_id))
@@ -45,7 +37,8 @@ func _create_level_buttons():
 	# Add guide button
 	var guide_button = Button.new()
 	guide_button.text = "Guide"
-	guide_button.custom_minimum_size = Vector2(200, 40)
+	guide_button.custom_minimum_size = Vector2(100, 20)  # Changed from 200x40
+	guide_button.add_theme_font_size_override("font_size", 12)
 	guide_button.pressed.connect(_on_guide_pressed)
 	
 	if level_container:
@@ -54,7 +47,8 @@ func _create_level_buttons():
 	# Add quit button
 	var quit_button = Button.new()
 	quit_button.text = "Quit"
-	quit_button.custom_minimum_size = Vector2(200, 40)
+	quit_button.custom_minimum_size = Vector2(100, 20)  # Changed from 200x40
+	quit_button.add_theme_font_size_override("font_size", 12)
 	quit_button.pressed.connect(_on_quit_pressed)
 	
 	if level_container:
