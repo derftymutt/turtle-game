@@ -215,7 +215,7 @@ func return_to_idle_after_delay():
 		animated_sprite.play("idle")
 
 func apply_thrust(direction: Vector2):
-	var kick_direction = -direction
+	var kick_direction =  -direction if GameSettings.thrust_inverted else direction
 	
 	# Cancel upward thrust in air
 	if ocean and ocean.get_depth(global_position) <= 0 and kick_direction.y < 0:
@@ -228,7 +228,7 @@ func apply_thrust(direction: Vector2):
 	
 	var animated_sprite = $AnimatedSprite2D
 	if animated_sprite:
-		animated_sprite.global_rotation = direction.angle() + deg_to_rad(-90)
+		animated_sprite.global_rotation = direction.angle() + deg_to_rad(-90 if GameSettings.thrust_inverted else 90)
 		animated_sprite.play("kick")
 	
 	# Determine thrust strength based on direction

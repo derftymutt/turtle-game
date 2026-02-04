@@ -1,12 +1,16 @@
 extends CanvasLayer
 class_name GuideScreen
-## Simple two-page guide: How to Play + Controls
 
 @onready var content_label = $Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ContentLabel
 @onready var page_indicator = $Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/PageIndicator
 @onready var prev_button = $Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonContainer/PrevButton
 @onready var next_button = $Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonContainer/NextButton
 @onready var back_button = $Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonContainer/BackButton
+
+# NEW: Container for controls page with checkbox
+@onready var controls_container = $Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ControlsContainer
+@onready var controls_text = $Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ControlsContainer/ControlsText
+@onready var invert_thrust_checkbox = $Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ControlsContainer/InvertThrustCheckbox
 
 var current_page: int = 0
 var pages: Array[String] = []
@@ -24,6 +28,11 @@ func _ready():
 	if back_button:
 		back_button.pressed.connect(_on_back_pressed)
 	
+	# Connect checkbox signal
+	if invert_thrust_checkbox:
+		invert_thrust_checkbox.toggled.connect(_on_invert_thrust_toggled)
+		invert_thrust_checkbox.button_pressed = GameSettings.thrust_inverted
+	
 	_update_page()
 
 func show_guide():
@@ -32,8 +41,6 @@ func show_guide():
 	current_page = 0
 	_update_page()
 	
-	# Focus first available button for controller navigation
-	# Start with next button if prev is disabled
 	if next_button and not next_button.disabled:
 		next_button.grab_focus()
 	elif back_button:
@@ -55,13 +62,17 @@ func _build_pages():
 - Flipper/Bumper super speed = invincibility + damage
 - Can you get 500 points? 1000?"""
 	
+	# Page 2 is now just the basic controls text
+	# The checkbox will be shown separately below it
 	var page2 = """
 	
 ***CONTROLS***
 THRUST: Left Stick / WASD
 SHOOT: Right Stick / IJKL
 FLIPPER LEFT: L Trigger / L Shift
-FLIPPER RIGHT: R Trigger / R Shift"""
+FLIPPER RIGHT: R Trigger / R Shift
+
+CONTROL OPTIONS:"""
 	
 	pages = [page1, page2]
 
@@ -72,37 +83,49 @@ func _update_page():
 	if current_page >= pages.size():
 		current_page = pages.size() - 1
 	
-	# Update content
-	if content_label:
-		content_label.text = pages[current_page]
+	# Show either regular content or controls container
+	if current_page == 1:  # Controls page
+		# Hide regular label, show controls container
+		if content_label:
+			content_label.visible = false
+		if controls_container:
+			controls_container.visible = true
+		if controls_text:
+			controls_text.text = pages[current_page]
+	else:  # Other pages
+		# Show regular label, hide controls container
+		if content_label:
+			content_label.visible = true
+			content_label.text = pages[current_page]
+		if controls_container:
+			controls_container.visible = false
 	
 	# Update page indicator
 	if page_indicator:
 		page_indicator.text = "Page %d / %d" % [current_page + 1, pages.size()]
 	
-	# Update button states (disable when can't navigate further)
+	# Update button states
 	if prev_button:
 		prev_button.disabled = (current_page == 0)
 	if next_button:
 		next_button.disabled = (current_page == pages.size() - 1)
 
 func _on_prev_pressed():
-	"""Navigate to previous page"""
 	if current_page > 0:
 		current_page -= 1
 		_update_page()
 
 func _on_next_pressed():
-	"""Navigate to next page"""
 	if current_page < pages.size() - 1:
 		current_page += 1
 		_update_page()
 
 func _on_back_pressed():
-	"""Return to main menu"""
 	hide_guide()
-	
-	# Find and show main menu
 	var main_menu = get_parent()
 	if main_menu and main_menu.has_method("show_menu"):
 		main_menu.show_menu()
+
+func _on_invert_thrust_toggled(pressed: bool):
+	GameSettings.set_thrust_inverted(pressed)
+	print("Thrust inverted: ", pressed)
