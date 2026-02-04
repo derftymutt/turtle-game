@@ -16,8 +16,8 @@ class_name BaseEnemy
 @export var knockback_force: float = 300.0
 
 # Visual feedback
-@export var damage_flash_duration: float = 0.1
-@export var damage_flash_color: Color = Color.RED
+@export var damage_flash_duration: float = 0.3
+@export var damage_flash_color: Color = Color.CHARTREUSE
 
 # Internal state
 var current_health: float
@@ -75,11 +75,21 @@ func _play_invincible_feedback():
 	if not sprite:
 		return
 	
-	# Quick yellow flash to show "can't hurt me"
-	sprite.modulate = Color.YELLOW
-	await get_tree().create_timer(0.05).timeout
+	# Shake effect when hit
+	var original_pos = sprite.position
+	var shake_amount = 3.0
+	
+	# Quick shake sequence
+	for i in range(4):
+		if sprite and is_instance_valid(sprite):
+			sprite.position = original_pos + Vector2(
+				randf_range(-shake_amount, shake_amount),
+				randf_range(-shake_amount, shake_amount)
+			)
+			await get_tree().create_timer(0.03).timeout
+			
 	if sprite and is_instance_valid(sprite):
-		sprite.modulate = Color.WHITE
+		sprite.position.x = original_pos.x
 
 ## Handle player collision in damage area
 func _on_damage_area_entered(body: Node2D):

@@ -80,30 +80,3 @@ func apply_position_locking():
 	
 	# Dampen movement
 	linear_velocity *= 0.8
-
-## Override to provide special invincible feedback
-func _play_invincible_feedback():
-	if not sprite:
-		return
-	
-	# Shake effect when hit
-	var original_pos = sprite.position
-	var shake_amount = 3.0
-	
-	# Quick shake sequence
-	for i in range(4):
-		if sprite and is_instance_valid(sprite):
-			sprite.position = original_pos + Vector2(
-				randf_range(-shake_amount, shake_amount),
-				randf_range(-shake_amount, shake_amount)
-			)
-			await get_tree().create_timer(0.03).timeout
-	
-	# Return to normal (with bobbing offset)
-	if sprite and is_instance_valid(sprite):
-		sprite.position.x = original_pos.x
-		# Keep the Y bobbing animation
-
-## Sea urchins never die!
-func die():
-	pass  # Override to do nothing
