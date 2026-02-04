@@ -49,11 +49,13 @@ var touching_walls: Array = []
 # Super speed damage detection
 var super_speed_area: Area2D = null
 
+# Rotation control
+var is_player_controlling_rotation: bool = false
+
 func _ready():
 	# Physics setup
 	gravity_scale = 0.0
 	linear_damp = 1.5
-	
 	angular_damp = 3.0
 	mass = 1.0
 	continuous_cd = RigidBody2D.CCD_MODE_CAST_RAY
@@ -91,11 +93,13 @@ func _physics_process(delta):
 		thrust_timer -= delta
 		if thrust_timer <= 0:
 			can_thrust = true
+			is_player_controlling_rotation = false
 	
 	if not can_shoot:
 		shoot_timer -= delta
 		if shoot_timer <= 0:
 			can_shoot = true
+			is_player_controlling_rotation = false
 	
 	# Check super speed state
 	var current_speed = linear_velocity.length()
@@ -135,6 +139,10 @@ func _physics_process(delta):
 		apply_ocean_effects(delta)
 	else:
 		linear_velocity *= 0.98
+	
+	# Only snap sprite when player is NOT actively controlling it
+	if not is_player_controlling_rotation:
+		_snap_sprite_to_cardinal()
 	
 	# Update HUD systems
 	if hud:
@@ -186,7 +194,7 @@ func _physics_process(delta):
 		var animated_sprite = $AnimatedSprite2D
 		if animated_sprite and animated_sprite.animation != "idle" and animated_sprite.animation != "shoot":
 			animated_sprite.play("idle")
-		
+
 func apply_ocean_effects(delta: float):
 	"""Apply depth-based buoyancy and water drag"""
 	var depth = ocean.get_depth(global_position)
@@ -215,7 +223,7 @@ func return_to_idle_after_delay():
 		animated_sprite.play("idle")
 
 func apply_thrust(direction: Vector2):
-	var kick_direction =  -direction if GameSettings.thrust_inverted else direction
+	var kick_direction = -direction if GameSettings.thrust_inverted else direction
 	
 	# Cancel upward thrust in air
 	if ocean and ocean.get_depth(global_position) <= 0 and kick_direction.y < 0:
@@ -226,9 +234,17 @@ func apply_thrust(direction: Vector2):
 		# Too exhausted! Don't thrust
 		return
 	
+	# Set flag to prevent cardinal snapping from overwriting
+	is_player_controlling_rotation = true
+	
 	var animated_sprite = $AnimatedSprite2D
 	if animated_sprite:
-		animated_sprite.global_rotation = direction.angle() + deg_to_rad(-90 if GameSettings.thrust_inverted else 90)
+		var angle = direction.angle() + deg_to_rad(-90 if GameSettings.thrust_inverted else 90)
+		# Snap to nearest 45° increment for pixel-perfect rotation
+		var angle_deg = rad_to_deg(angle)
+		var snapped_deg = round(angle_deg / 45.0) * 45.0
+		
+		animated_sprite.global_rotation = deg_to_rad(snapped_deg)
 		animated_sprite.play("kick")
 	
 	# Determine thrust strength based on direction
@@ -250,9 +266,18 @@ func shoot(direction: Vector2):
 		push_warning("No bullet scene assigned!")
 		return
 	
+	# Set flag to prevent cardinal snapping from overwriting
+	is_player_controlling_rotation = true
+	
 	var animated_sprite = $AnimatedSprite2D
 	if animated_sprite:
-		animated_sprite.global_rotation = direction.angle() + deg_to_rad(90)
+		var angle = direction.angle() + deg_to_rad(90)
+		
+		# Snap to nearest 45° increment for pixel-perfect rotation
+		var angle_deg = rad_to_deg(angle)
+		var snapped_deg = round(angle_deg / 45.0) * 45.0
+		
+		animated_sprite.global_rotation = deg_to_rad(snapped_deg)
 		animated_sprite.play("shoot")
 		return_to_idle_after_delay()
 	
@@ -471,3 +496,19 @@ func _create_super_speed_burst():
 		tween.tween_property(burst_sprite, "scale", Vector2.ONE * 2.0, 0.4)
 		tween.tween_property(burst_sprite, "modulate:a", 0.0, 0.4)
 		tween.tween_callback(burst_sprite.queue_free)
+
+func _snap_sprite_to_cardinal():
+	"""Snap sprite rotation to nearest 45° while body rotates freely"""
+	var animated_sprite = $AnimatedSprite2D
+	if not animated_sprite:
+		return
+	
+	# Get the body's current physics rotation
+	var body_rotation_deg = rad_to_deg(rotation)
+	
+	# Snap to nearest 45°
+	var snapped_deg = round(body_rotation_deg / 45.0) * 45.0
+	var snapped_rotation_rad = deg_to_rad(snapped_deg)
+	
+	# Set sprite's LOCAL rotation to compensate for body's rotation
+	animated_sprite.rotation = snapped_rotation_rad - rotation

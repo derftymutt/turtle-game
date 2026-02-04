@@ -120,7 +120,6 @@ horizontal_follow_enabled = false
 
 [node name="TurtlePlayer" parent="." index="2" instance=ExtResource("4_jkxa6")]
 position = Vector2(-13, 16)
-thrust_invert = true
 
 [node name="Flippers" type="Node2D" parent="." index="3"]
 
