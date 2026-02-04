@@ -56,8 +56,8 @@ height = 200.0
 radius = 6.0
 height = 34.0
 
-[node name="Crocodile" type="RigidBody2D" groups=["enemies"]]
-collision_layer = 4
+[node name="Crocodile" type="AnimatableBody2D" groups=["enemies"]]
+collision_layer = 5
 script = ExtResource("1_36s23")
 is_invincible = true
 
