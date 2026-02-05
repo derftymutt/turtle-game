@@ -13,11 +13,11 @@ class_name Ocean
 @export_group("Buoyancy Zones")
 @export var shallow_depth: float = 100.0  # Shallow zone depth in pixels (0 to 100 below surface)
 @export var mid_depth: float = 200.0  # Mid zone depth in pixels (100 to 200 below surface)
-@export var shallow_buoyancy: float = 100.0  # Constant upward force in shallow zone
-@export var mid_buoyancy_base: float = 175.0  # Starting upward force in mid zone
-@export var mid_buoyancy_rate: float = 3.0  # Linear increase per pixel deeper (+0.5 force per pixel)
-@export var deep_buoyancy_base: float = 200.0  # Starting upward force in deep zone
-@export var deep_buoyancy_curve: float = 0.07   # Exponential multiplier (depthÂ² Ã— 0.002 added to base)
+@export var shallow_buoyancy: float = 150.0  # INCREASED: Was 100.0 - faster rise in shallow
+@export var mid_buoyancy_base: float = 225.0  # INCREASED: Was 175.0 - faster rise in mid
+@export var mid_buoyancy_rate: float = 4.0  # INCREASED: Was 3.0 - stronger gradient
+@export var deep_buoyancy_base: float = 275.0  # INCREASED: Was 200.0 - stronger deep push
+@export var deep_buoyancy_curve: float = 0.10   # INCREASED: Was 0.07 - more exponential growth
 
 # Visual effects
 @export_group("Visual Settings")

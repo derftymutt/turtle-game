@@ -13,7 +13,7 @@ extends RigidBody2D
 # Thrust strengths
 @export var horizontal_thrust: float = 175.0
 @export var upward_thrust: float = 75.0
-@export var downward_thrust: float = 200.0
+@export var downward_thrust: float = 225.0
 
 # Health
 @export var max_health: float = 100.0
