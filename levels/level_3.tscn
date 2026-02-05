@@ -348,7 +348,6 @@ position = Vector2(291, -106)
 position = Vector2(128, 121)
 
 [node name="Crocodile" parent="." index="10" instance=ExtResource("9_svivd")]
-visible = false
 position = Vector2(0, -128)
 
 [node name="PiranhaSpawner" parent="." index="11" instance=ExtResource("10_yafm2")]
