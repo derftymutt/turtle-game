@@ -40,12 +40,14 @@ theme_override_constants/separation = 15
 
 [node name="ContentLabel" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 12
 
 [node name="ControlsContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 
 [node name="ControlsText" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ControlsContainer"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 12
 
 [node name="InvertThrustCheckbox" type="CheckBox" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ControlsContainer"]
 layout_mode = 2

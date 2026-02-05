@@ -6,7 +6,7 @@
 friction = 0.0
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_uxycr"]
-size = Vector2(60, 5)
+size = Vector2(200, 5)
 
 [node name="DeadWall" type="StaticBody2D"]
 position = Vector2(-1, 0)

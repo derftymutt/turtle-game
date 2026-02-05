@@ -56,13 +56,13 @@ func _build_pages():
 
   ***HOW TO PLAY***
 
-- Collect stars! Twinkling stars on the sea floor are worth the most
-- Avoid enemies! (shoot piranhas)
-- Don't run out of breath! 
-	- Get air bubbles (but don't pop them!) or surface when needed
-- Turtles can't kick forever! Mind your Stamina!
-- Flipper/Bumper super speed = invincibility + damage
-- Can you get 500 points? 1000?"""
+- Collect stars for points. Twinkling stars on the sea floor are worth *ALOT* more
+- Avoid enemies! Shoot piranhas. Invincible enemies shake when shot.
+- Don't run out of breath! You will quickly lose health if you do. 
+	- Gain breath from air bubbles (but don't pop them!) or surfacing
+- Turtles can't kick forever! Mind your Stamina! (speed up recovery touching walls/flippers)
+- Super Speed (from bumpers, flippers, swimming in shallow water) = invincibility + damage
+- Stay alive and go for a high score! Can you get 500 points? 1000? More??"""
 	
 	# Page 2 is now just the basic controls text
 	# The checkbox will be shown separately below it

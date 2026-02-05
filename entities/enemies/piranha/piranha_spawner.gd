@@ -51,10 +51,8 @@ func spawn_with_animation():
 	
 	if is_super and super_piranha_scene:
 		scene_to_spawn = super_piranha_scene
-		print("Spawning SUPER piranha")  # Debug
 	elif piranha_scene:
 		scene_to_spawn = piranha_scene
-		print("Spawning regular piranha")  # Debug
 	else:
 		push_error("No piranha scene available to spawn!")
 		return

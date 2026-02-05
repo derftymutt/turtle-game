@@ -111,7 +111,7 @@ func _physics_process(delta):  # Changed to _physics_process
 			
 			# Only consider it cradling if body is RESTING, not actively moving
 			was_cradling = (is_currently_settled and settled_time >= cradle_threshold and has_body_touching and body_is_resting)
-			print("RELEASE: settled=%s, time=%.2f, touching=%s, resting=%s, was_cradling=%s" % [is_currently_settled, settled_time, has_body_touching, body_is_resting, was_cradling])
+			#print("RELEASE: settled=%s, time=%.2f, touching=%s, resting=%s, was_cradling=%s" % [is_currently_settled, settled_time, has_body_touching, body_is_resting, was_cradling])
 			deactivate_flip()
 	
 	# Update active movement timer
@@ -163,7 +163,7 @@ func _physics_process(delta):  # Changed to _physics_process
 				var body_id = body.get_instance_id()
 				if not body_id in hit_bodies:
 					# DEBUG
-					print("HIT! press=%s, cradling=%s, ang_vel=%.2f" % [last_input_was_press, was_cradling, angular_velocity])
+					#print("HIT! press=%s, cradling=%s, ang_vel=%.2f" % [last_input_was_press, was_cradling, angular_velocity])
 					hit_body(body, last_input_was_press, was_cradling)
 					hit_bodies[body_id] = 0.1
 
@@ -212,7 +212,7 @@ func hit_body(body, is_press_action: bool, was_cradle_release: bool):
 	# CRADLE DETECTION:
 	# If this is a RELEASE and flipper was cradling, don't apply force
 	if not is_press_action and was_cradle_release:
-		print("  -> BLOCKED: Cradle release detected")
+		#print("  -> BLOCKED: Cradle release detected")
 		return  # This is a cradle release - don't fling
 	
 	# Apply impulse based on surface velocity (realistic pinball physics)
@@ -221,9 +221,9 @@ func hit_body(body, is_press_action: bool, was_cradle_release: bool):
 	# BOOST release strokes for upward shots (they need extra power!)
 	if not is_press_action:
 		impulse_strength *= 2.0  # Double the force for release strokes
-		print("  -> RELEASE BOOST: 2x force")
+		#print("  -> RELEASE BOOST: 2x force")
 	
 	impulse_strength = clamp(impulse_strength, flip_force * 0.5, flip_force * 3.0)
 	
-	print("  -> Applying force: %.2f in direction %s" % [impulse_strength, tangent])
+	#print("  -> Applying force: %.2f in direction %s" % [impulse_strength, tangent])
 	body.linear_velocity += tangent * impulse_strength

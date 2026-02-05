@@ -11,7 +11,7 @@ var breath_container: Control
 var breath_bar: ProgressBar
 var exhaustion_container: Control
 var exhaustion_bar: ProgressBar
-var super_speed_indicator: Label  # New!
+var super_speed_indicator: Label
 var hud_container: Control  # Container for flash effect
 
 # Game state
@@ -26,10 +26,10 @@ func get_current_score() -> int:
 # Breath system (experimental - toggleable)
 @export_group("Breath System")
 @export var breath_enabled: bool = true
-@export var max_breath: float = 30.0  # 30 seconds underwater
-@export var breath_drain_rate: float = 1.0  # 1 breath per second
-@export var breath_refill_rate: float = 30.0  # 30 breaths per second at surface
-@export var breath_warning_threshold: float = 10.0  # Flash red below this
+@export var max_breath: float = 30.0
+@export var breath_drain_rate: float = 1.0
+@export var breath_refill_rate: float = 30.0
+@export var breath_warning_threshold: float = 10.0
 var current_breath: float = 30.0
 var breath_warning: bool = false
 
@@ -37,24 +37,25 @@ var breath_warning: bool = false
 @export_group("Exhaustion System")
 @export var exhaustion_enabled: bool = true
 @export var max_exhaustion: float = 100.0
-@export var exhaustion_per_thrust: float = 12.0  # Cost per thrust
-@export var exhaustion_recovery_rate: float = 20.0  # Recovery per second when idle
-@export var exhaustion_wall_bonus: float = 45.0  # Extra recovery per second touching wall
-@export var exhaustion_threshold: float = 15.0  # Can't thrust below this
+@export var exhaustion_per_thrust: float = 12.0
+@export var exhaustion_recovery_rate: float = 15.0
+@export var exhaustion_wall_bonus: float = 40.0
+@export var exhaustion_threshold: float = 15.0
 var current_exhaustion: float = 100.0
 var is_touching_wall: bool = false
+var wall_recovery_active: bool = false  # NEW: Track if we're actively recovering from wall
 
 # Visual feedback
 var breath_flash_timer: float = 0.0
 var breath_flash_interval: float = 0.5
-var hud_layer_flash_speed: float = 5.0  # How fast the HUD pulses (higher = faster)
+var hud_layer_flash_speed: float = 5.0
+var exhaustion_pulse_timer: float = 0.0  # NEW: For wall recovery pulse
+var exhaustion_pulse_speed: float = 8.0  # NEW: How fast the pulse is
 
 func _ready():
-	# Add to group for easy lookup
 	add_to_group("hud")
 	
-	# Find the main container (usually a VBoxContainer or HBoxContainer at the root)
-	# This will be what we modulate for the flash effect
+	# Find the main container
 	for child in get_children():
 		if child is Control:
 			hud_container = child
@@ -63,7 +64,7 @@ func _ready():
 	if not hud_container:
 		push_warning("HUD: Could not find container Control node! Flash effect won't work.")
 	
-	# Find UI nodes dynamically (works with VBox or HBox)
+	# Find UI nodes dynamically
 	score_label = find_child("ScoreLabel")
 	health_bar = find_child("HealthBar")
 	breath_container = find_child("BreathContainer")
@@ -101,22 +102,39 @@ func _process(delta):
 	# Handle breath warning flash - entire HUD layer pulses red
 	if breath_warning and breath_enabled and hud_container:
 		breath_flash_timer += delta * hud_layer_flash_speed
-		
-		# Sine wave for smooth pulsing (0.0 to 1.0)
 		var pulse = (sin(breath_flash_timer) + 1.0) / 2.0
-		
-		# Interpolate between normal white and red
 		var warning_color = Color.WHITE.lerp(Color(1.0, 0.3, 0.3, 1.0), pulse)
 		hud_container.modulate = warning_color
 		
-		# Keep breath bar cyan during flash for contrast
 		if breath_bar:
 			breath_bar.modulate = Color.CYAN
 	else:
-		# Reset to normal when not warning
 		if hud_container:
 			hud_container.modulate = Color.WHITE
 		breath_flash_timer = 0.0
+	
+	# NEW: Handle wall recovery visual feedback
+	if wall_recovery_active and exhaustion_bar:
+		exhaustion_pulse_timer += delta * exhaustion_pulse_speed
+		
+		# Pulse between current color and bright cyan
+		var pulse = (sin(exhaustion_pulse_timer) + 1.0) / 2.0
+		
+		# Get the base color (green/yellow/red based on exhaustion level)
+		var base_color = Color.GREEN
+		var exhaustion_ratio = current_exhaustion / max_exhaustion
+		if exhaustion_ratio <= 0.2:
+			base_color = Color.RED
+		elif exhaustion_ratio <= 0.5:
+			base_color = Color.YELLOW
+		
+		# Pulse to bright cyan to indicate wall recovery
+		var recovery_color = base_color.lerp(Color.CYAN, pulse * 0.7)
+		exhaustion_bar.modulate = recovery_color
+	else:
+		exhaustion_pulse_timer = 0.0
+		# Reset to normal color coding when not recovering from wall
+		update_exhaustion(current_exhaustion, max_exhaustion)
 
 ## Update score display
 func update_score(new_score: int):
@@ -196,30 +214,37 @@ func update_exhaustion(exhaustion: float, max_ex: float):
 		exhaustion_bar.max_value = max_ex
 		exhaustion_bar.value = exhaustion
 		
-		# Color code exhaustion bar
-		if exhaustion / max_ex > 0.5:
-			exhaustion_bar.modulate = Color.GREEN
-		elif exhaustion / max_ex > 0.2:
-			exhaustion_bar.modulate = Color.YELLOW
-		else:
-			exhaustion_bar.modulate = Color.RED
+		# Only update color if NOT actively recovering from wall
+		# (wall recovery has its own pulsing color in _process)
+		if not wall_recovery_active:
+			# Color code exhaustion bar
+			if exhaustion / max_ex > 0.5:
+				exhaustion_bar.modulate = Color.GREEN
+			elif exhaustion / max_ex > 0.2:
+				exhaustion_bar.modulate = Color.YELLOW
+			else:
+				exhaustion_bar.modulate = Color.RED
 
 ## Try to use exhaustion for a thrust
 func try_thrust() -> bool:
 	if not exhaustion_enabled:
-		return true  # Always allow if system disabled
+		return true
 	
 	if current_exhaustion >= exhaustion_threshold:
 		current_exhaustion -= exhaustion_per_thrust
 		update_exhaustion(current_exhaustion, max_exhaustion)
 		return true
 	else:
-		return false  # Too exhausted!
+		return false
 
 ## Recover exhaustion over time
 func recover_exhaustion(delta: float, touching_wall: bool = false):
 	if not exhaustion_enabled:
 		return
+	
+	# Track if we're getting wall bonus
+	var was_wall_recovery = wall_recovery_active
+	wall_recovery_active = touching_wall
 	
 	var recovery = exhaustion_recovery_rate * delta
 	if touching_wall:
@@ -239,7 +264,6 @@ func set_super_speed_active(active: bool):
 	if super_speed_indicator:
 		super_speed_indicator.visible = active
 		if active:
-			# Flash effect
 			var tween = create_tween().set_loops()
 			tween.tween_property(super_speed_indicator, "modulate:a", 0.3, 0.3)
 			tween.tween_property(super_speed_indicator, "modulate:a", 1.0, 0.3)

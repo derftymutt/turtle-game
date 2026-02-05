@@ -4,7 +4,7 @@ extends Node
 ## This autoload stores player preferences like control schemes
 
 # Control settings
-var thrust_inverted: bool = false
+var thrust_inverted: bool = true
 
 # Add this to Project Settings > Autoload as "GameSettings"
 

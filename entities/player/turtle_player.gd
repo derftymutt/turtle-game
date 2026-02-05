@@ -60,6 +60,11 @@ func _ready():
 	mass = 1.0
 	continuous_cd = RigidBody2D.CCD_MODE_CAST_RAY
 	
+	# CRITICAL: Enable contact monitoring for body_entered/exited signals!
+	# Without this, collision signals won't fire even though physics collisions work
+	contact_monitor = true
+	max_contacts_reported = 4  # Track up to 4 simultaneous contacts
+	
 	# NOTE: Collision layers MUST be set in Inspector:
 	# - Collision Layer: 1 (player/world)
 	# - Collision Mask: 1 + 3 (world + enemies)
@@ -159,8 +164,7 @@ func _physics_process(delta):
 			hud.refill_breath(delta)
 		
 		# Exhaustion recovery (bonus if touching wall)
-		var is_touching_wall = touching_walls.size() > 0
-		hud.recover_exhaustion(delta, is_touching_wall)
+		hud.recover_exhaustion(delta, touching_walls.size() > 0)
 	
 	# Get input
 	var movement_input = Vector2(
