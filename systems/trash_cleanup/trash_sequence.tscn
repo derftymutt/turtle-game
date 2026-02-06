@@ -1,0 +1,10 @@
+[gd_scene load_steps=4 format=3 uid="uid://vmbjxah4bjtc"]
+
+[ext_resource type="Script" uid="uid://lxqx3pmx4i8h" path="res://systems/trash_cleanup/trash_sequence.gd" id="1_akyjw"]
+[ext_resource type="PackedScene" uid="uid://b2kfhcx6aqa5j" path="res://systems/trash_cleanup/trash_item.tscn" id="2_6ox17"]
+[ext_resource type="PackedScene" uid="uid://dq7r6j7ritsv7" path="res://entities/collectibles/powerup/powerup.tscn" id="3_o5oca"]
+
+[node name="TrashSequence" type="Node2D"]
+script = ExtResource("1_akyjw")
+trash_item_scene = ExtResource("2_6ox17")
+powerup_scene = ExtResource("3_o5oca")

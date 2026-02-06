@@ -49,6 +49,17 @@ var touching_walls: Array = []
 # Super speed damage detection
 var super_speed_area: Area2D = null
 
+# Powerup states
+var shield_active: bool = false
+var shield_duration: float = 8.0
+var shield_timer: float = 0.0
+
+var air_reserve_bonus: float = 20.0
+
+var stamina_freeze_active: bool = false
+var stamina_freeze_duration: float = 20.0
+var stamina_freeze_timer: float = 0.0
+
 # Rotation control
 var is_player_controlling_rotation: bool = false
 
@@ -138,6 +149,17 @@ func _physics_process(delta):
 		# Just dropped below threshold - start cooldown
 		is_super_speed_cooldown = true
 		super_speed_cooldown_timer = super_speed_cooldown_duration
+		
+	# Update powerup timers
+	if shield_active:
+		shield_timer -= delta
+		if shield_timer <= 0:
+			deactivate_shield()
+	
+	if stamina_freeze_active:
+		stamina_freeze_timer -= delta
+		if stamina_freeze_timer <= 0:
+			deactivate_stamina_freeze()
 	
 	# Apply ocean physics
 	if ocean:
@@ -177,9 +199,9 @@ func _physics_process(delta):
 		Input.get_axis("shoot_up", "shoot_down")
 	)
 	
-	# Handle movement (check exhaustion)
+	# Handle movement (check exhaustion unless stamina freeze active)
 	var can_actually_thrust = can_thrust
-	if hud and movement_input.length() > 0.1:
+	if hud and movement_input.length() > 0.1 and not stamina_freeze_active:
 		can_actually_thrust = can_actually_thrust and hud.can_thrust()
 	
 	if movement_input.length() > 0.1 and can_actually_thrust:
@@ -234,7 +256,7 @@ func apply_thrust(direction: Vector2):
 		return
 	
 	# Consume exhaustion if HUD system is active
-	if hud and not hud.try_thrust():
+	if hud and not stamina_freeze_active and not hud.try_thrust():
 		# Too exhausted! Don't thrust
 		return
 	
@@ -303,8 +325,8 @@ func apply_flipper_force(direction: Vector2, force_multiplier: float = 5.0):
 	apply_central_impulse(direction * thrust_force * force_multiplier)
 
 func take_damage(amount: float):
-	# Invincible during super speed AND during cooldown!
-	if is_super_speed or is_super_speed_cooldown:
+	# Invincible during super speed, cooldown, OR shield!
+	if is_super_speed or is_super_speed_cooldown or shield_active:
 		return
 	
 	current_health -= amount
@@ -387,7 +409,7 @@ func _setup_super_speed_area():
 func _on_super_speed_area_entered(body: Node2D):
 	"""Detect enemies entering super speed range"""
 	# Damage enemies during active super speed (not cooldown)
-	if not is_super_speed:
+	if not is_super_speed and not shield_active:
 		return
 	
 	# Check if it's an enemy
@@ -500,6 +522,84 @@ func _create_super_speed_burst():
 		tween.tween_property(burst_sprite, "scale", Vector2.ONE * 2.0, 0.4)
 		tween.tween_property(burst_sprite, "modulate:a", 0.0, 0.4)
 		tween.tween_callback(burst_sprite.queue_free)
+		
+## Apply collected powerup effects
+func apply_powerup(powerup_type: int):
+	print("💥 APPLYING POWERUP TYPE: ", powerup_type, " 💥")
+	
+	match powerup_type:
+		0:  # SHIELD
+			activate_shield()
+		1:  # AIR_RESERVE
+			activate_air_reserve()
+		2:  # STAMINA_FREEZE
+			activate_stamina_freeze()
+		_:
+			push_error("Unknown powerup type: ", powerup_type)
+
+func activate_shield():
+	"""Temporary invincibility"""
+	shield_active = true
+	shield_timer = shield_duration
+	
+	print("🛡️🛡️🛡️ SHIELD ACTIVATED! Invincible for ", shield_duration, " seconds! 🛡️🛡️🛡️")
+	
+	# Visual effect - bright blue glow
+	var sprite = $AnimatedSprite2D
+	if sprite:
+		var tween = create_tween().set_loops()
+		tween.tween_property(sprite, "modulate", Color(0.3, 0.6, 1.0, 1.0), 0.3)
+		tween.tween_property(sprite, "modulate", Color(0.6, 0.9, 1.0, 1.0), 0.3)
+
+func deactivate_shield():
+	"""Shield expires"""
+	shield_active = false
+	
+	print("🛡️ Shield expired")
+	
+	# Return to normal color
+	var sprite = $AnimatedSprite2D
+	if sprite:
+		# Kill any active tween
+		sprite.modulate = Color.WHITE
+
+func activate_air_reserve():
+	"""Extra breath capacity (permanent boost)"""
+	if hud:
+		hud.max_breath += air_reserve_bonus
+		hud.current_breath = hud.max_breath  # Full refill!
+		hud.update_breath(hud.current_breath, hud.max_breath)
+		
+		print("💨💨💨 AIR RESERVE! +", air_reserve_bonus, " max breath! (new max: ", hud.max_breath, ") 💨💨💨")
+	else:
+		push_error("No HUD found! Can't apply air reserve.")
+
+func activate_stamina_freeze():
+	"""Pause stamina drain temporarily"""
+	stamina_freeze_active = true
+	stamina_freeze_timer = stamina_freeze_duration
+	
+	print("⚡⚡⚡ STAMINA FREEZE! No exhaustion for ", stamina_freeze_duration, " seconds! ⚡⚡⚡")
+	
+	# Visual effect - yellow glow (if not already super speed)
+	if not is_super_speed:
+		var sprite = $AnimatedSprite2D
+		if sprite:
+			var tween = create_tween().set_loops()
+			tween.tween_property(sprite, "modulate", Color(1.0, 1.0, 0.4, 1.0), 0.25)
+			tween.tween_property(sprite, "modulate", Color(1.0, 1.0, 0.7, 1.0), 0.25)
+
+func deactivate_stamina_freeze():
+	"""Stamina freeze expires"""
+	stamina_freeze_active = false
+	
+	print("⚡ Stamina freeze expired")
+	
+	# Return to normal color (if not in other powerup state)
+	if not shield_active and not is_super_speed:
+		var sprite = $AnimatedSprite2D
+		if sprite:
+			sprite.modulate = Color.WHITE
 
 func _snap_sprite_to_cardinal():
 	"""Snap sprite rotation to nearest 45° while body rotates freely"""

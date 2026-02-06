@@ -1,0 +1,88 @@
+[gd_scene load_steps=12 format=3 uid="uid://dq7r6j7ritsv7"]
+
+[ext_resource type="Script" uid="uid://dcd6f5ppbpoi3" path="res://entities/collectibles/powerup/powerup.gd" id="1_ieaf5"]
+[ext_resource type="Texture2D" uid="uid://bru3igffhmcii" path="res://entities/collectibles/powerup/sprites/powerups2.png" id="2_obmse"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3f2u0"]
+atlas = ExtResource("2_obmse")
+region = Rect2(32, 16, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_obmse"]
+atlas = ExtResource("2_obmse")
+region = Rect2(0, 32, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qk7c3"]
+atlas = ExtResource("2_obmse")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ghui4"]
+atlas = ExtResource("2_obmse")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_u25je"]
+atlas = ExtResource("2_obmse")
+region = Rect2(0, 16, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_crei3"]
+atlas = ExtResource("2_obmse")
+region = Rect2(16, 16, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_ghui4"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3f2u0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_obmse")
+}],
+"loop": true,
+"name": &"air",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qk7c3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ghui4")
+}],
+"loop": true,
+"name": &"shield",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_u25je")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_crei3")
+}],
+"loop": true,
+"name": &"stamina",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_u25je"]
+size = Vector2(14, 14)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_3f2u0"]
+size = Vector2(14, 14)
+
+[node name="Powerup" type="RigidBody2D"]
+collision_layer = 2
+script = ExtResource("1_ieaf5")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_ghui4")
+animation = &"stamina"
+autoplay = "shield"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_u25je")
+
+[node name="Area2D" type="Area2D" parent="."]
+collision_layer = 0
+
+[node name="CollisionPolygon2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("RectangleShape2D_3f2u0")

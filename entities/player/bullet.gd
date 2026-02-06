@@ -20,11 +20,13 @@ func _ready():
 	contact_monitor = true
 	max_contacts_reported = 4
 	
+	add_to_group("bullets")
+
 	# NOTE: Collision layers MUST be set in Inspector:
 	# - Collision Layer: 4 (bullets)
 	# - Collision Mask: 1 + 3 (world + enemies)
 	
-	# Connect collision signal
+	# Connect collision signals
 	body_entered.connect(_on_body_entered)
 	
 	# Apply initial velocity
@@ -83,6 +85,12 @@ func check_initial_overlaps():
 func _on_body_entered(body):
 	# Ignore player
 	if body.is_in_group("player"):
+		return
+		
+	# Hit trash items! (NEW)
+	if body.is_in_group("trash_items"):
+		# Trash handles destruction itself via Area2D
+		queue_free()
 		return
 	
 	# Pop air bubbles (before enemies, so they take priority)

@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3 uid="uid://c55cfm3aeb65a"]
+
+[ext_resource type="Script" uid="uid://qma5qik6lwv8" path="res://systems/trash_cleanup/trash_sequence_spawner.gd" id="1_38fwe"]
+[ext_resource type="PackedScene" uid="uid://vmbjxah4bjtc" path="res://systems/trash_cleanup/trash_sequence.tscn" id="2_5m8wq"]
+
+[node name="TrashSequenceSpawner" type="Node2D"]
+script = ExtResource("1_38fwe")
+trash_sequence_scene = ExtResource("2_5m8wq")
