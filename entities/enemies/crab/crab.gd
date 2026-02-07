@@ -4,6 +4,9 @@ class_name Crab
 ## Floor-dwelling enemy that throws projectiles at player
 ## Relocates to a new position when damaged (unless killed)
 
+# Signals
+signal ready_to_reproduce(crab: Crab)
+
 # Projectile settings
 @export var projectile_scene: PackedScene
 @export var throw_cooldown: float = 1.0  # Time between throws
@@ -26,7 +29,8 @@ class_name Crab
 @export var idle_bob_amount: float = 1.0
 @export var idle_bob_speed: float = 0.8
 
-@export var reproduceThreshold: int = 40 # seconds til reproduce when not hit
+# Reproduction
+@export var reproduce_threshold: float = 40.0  # Seconds til reproduce when not hit
 
 # Internal state
 enum State { IDLE, THROWING, RELOCATING }
@@ -38,9 +42,9 @@ var bob_offset: float = 0.0
 var player: Node2D = null
 var ocean: Ocean = null
 
-var reproduceTimer = reproduceThreshold
-var markForReproduction = false
-var hasReproduced: bool = false
+# Reproduction tracking (private - use signals to access)
+var _reproduce_timer: float = 0.0
+var _has_reproduced: bool = false
 
 func _enemy_ready():
 	# Physics setup - stays put on floor
@@ -65,6 +69,12 @@ func _enemy_ready():
 	# Random starting offsets for variety
 	bob_offset = randf() * TAU
 	throw_timer = randf() * throw_cooldown  # Stagger initial throws
+	
+	# Initialize reproduction timer
+	_reproduce_timer = reproduce_threshold
+	
+	# Add to crabs group for easy lookup
+	add_to_group("crabs")
 	
 	# Create collision shape if not present
 	_setup_collision_shape()
@@ -113,12 +123,15 @@ func _idle_behavior(delta: float):
 		if distance <= detection_range:
 			current_state = State.THROWING
 			throw_timer = throw_cooldown
-			
-	"""Reproduce after time threshold"""
-	reproduceTimer -= delta
 	
-	if reproduceTimer <= 0:
-		markForReproduction = true
+	# Reproduction timer (only in IDLE state, only if not already reproduced)
+	if not _has_reproduced:
+		_reproduce_timer -= delta
+		
+		if _reproduce_timer <= 0:
+			_has_reproduced = true
+			ready_to_reproduce.emit(self)
+			print("🦀 Crab ready to reproduce!")
 
 func _throwing_behavior(_delta: float):
 	"""Execute throw animation and spawn projectile"""
@@ -126,25 +139,26 @@ func _throwing_behavior(_delta: float):
 	current_state = State.IDLE
 
 func _relocating_behavior(delta: float):
-	var sprite = $AnimatedSprite2D
 	"""Scuttle to new location"""
 	var to_target = relocation_target - global_position
 	var distance = to_target.length()
 	
-	print('ID:', get_instance_id())
-	print('distance', distance)
 	if distance < 20.0:
 		# Reached target
-		if sprite:
-			sprite.play('default')
+		var animated_sprite = get_node_or_null("AnimatedSprite2D")
+		if animated_sprite and animated_sprite.sprite_frames and animated_sprite.sprite_frames.has_animation("default"):
+			animated_sprite.play('default')
+		
 		starting_position = global_position
 		current_state = State.IDLE
 		throw_timer = throw_cooldown * 0.5  # Shorter cooldown after relocation
 		return
 	
 	# Move toward target
-	if sprite:
-		sprite.play('move')
+	var animated_sprite = get_node_or_null("AnimatedSprite2D")
+	if animated_sprite and animated_sprite.sprite_frames and animated_sprite.sprite_frames.has_animation("move"):
+		animated_sprite.play('move')
+	
 	var direction = to_target.normalized()
 	apply_central_force(direction * relocation_speed * 10)
 	
@@ -202,8 +216,6 @@ func throw_projectile():
 	# Face throw direction
 	if sprite:
 		sprite.flip_h = horizontal_direction.x < 0
-	
-	print("Crab threw projectile at player!")
 
 func choose_relocation_target():
 	"""Pick a new floor position away from current spot"""
@@ -232,7 +244,18 @@ func choose_relocation_target():
 	
 	return best_target
 
-## Override take_damage to trigger relocation
+## PUBLIC METHOD: Called by CrabSpawner to make baby crab relocate
+func relocate_from_parent():
+	"""Force this crab to relocate (used for reproduction)"""
+	# Choose a relocation target
+	relocation_target = choose_relocation_target()
+	
+	# Enter relocating state
+	current_state = State.RELOCATING
+	
+	print("Baby crab relocating to: ", relocation_target)
+
+## Override take_damage to trigger relocation and reset reproduction timer
 func take_damage(amount: float):
 	if is_invincible or current_state == State.RELOCATING:
 		_play_invincible_feedback()
@@ -241,7 +264,9 @@ func take_damage(amount: float):
 	var was_alive = current_health > 0
 	current_health -= amount
 	_play_damage_feedback()
-	reproduceTimer = reproduceThreshold
+	
+	# Reset reproduction timer on damage
+	_reproduce_timer = reproduce_threshold
 	
 	if current_health <= 0:
 		die()

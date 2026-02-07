@@ -1,44 +1,64 @@
 extends Node
+class_name CrabSpawner
 
 @export var crab_scene: PackedScene
-@export var spawn_area_min: Vector2 = Vector2(-280, 160)
-@export var spawn_area_max: Vector2 = Vector2(280, 160)
 
+@export_group("Spawn Area")
+@export var floor_y: float = 165.0
+@export var spawn_area_min_x: float = -280.0
+@export var spawn_area_max_x: float = 280.0
 
-# Called when the node enters the scene tree for the first time.
+@export_group("Initial Population")
+@export var initial_crab_count: int = 1
+
 func _ready() -> void:
 	# Validation check
 	if not crab_scene:
 		push_error("CrabSpawner: crab_scene not assigned!")
-
+		return
+	
+	# Wait for scene to initialize
 	await get_tree().create_timer(0.1).timeout
+	
+	# Spawn initial crabs
+	for i in initial_crab_count:
+		spawn_crab()
 
-	_spawn_crab()
+func spawn_crab(at_position: Vector2 = Vector2.ZERO) -> Crab:
+	"""Spawn a new crab at the specified position, or random if Vector2.ZERO"""
+	var crab = crab_scene.instantiate() as Crab
+	
+	if not crab:
+		push_error("CrabSpawner: Failed to instantiate crab scene!")
+		return null
+	
+	get_parent().add_child(crab)
+	
+	# Set position
+	if at_position == Vector2.ZERO:
+		# Random position
+		crab.global_position = Vector2(
+			randf_range(spawn_area_min_x, spawn_area_max_x),
+			floor_y
+		)
+	else:
+		# Specific position (for reproduction)
+		crab.global_position = at_position
+	
+	# Connect to reproduction signal
+	crab.ready_to_reproduce.connect(_on_crab_ready_to_reproduce)
+	
+	return crab
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	var crabs = get_tree().get_nodes_in_group("crabs")
+func _on_crab_ready_to_reproduce(parent_crab: Crab):
+	"""Handle crab reproduction via signal"""
+	if not parent_crab or not is_instance_valid(parent_crab):
+		return
 	
-	for crab in crabs:
-		if crab.markForReproduction == true and crab.hasReproduced == false:
-			_reproduce_crab(crab)
-			crab.markForReproduction = false
-			crab.hasReproduced = true
+	# Spawn baby crab at parent's location
+	var baby_crab = spawn_crab(parent_crab.global_position)
 	
-	
-func _spawn_crab():
-	var pos = Vector2(
-		randf_range(spawn_area_min.x, spawn_area_max.x),
-		randf_range(spawn_area_min.y, spawn_area_max.y)
-	)
-	
-	var crab = crab_scene.instantiate()
-	get_parent().add_child(crab)
-	crab.global_position = pos
-	
-func _reproduce_crab(crabParent: Crab):
-	var crab = crab_scene.instantiate()
-	get_parent().add_child(crab)
-	crab.global_position = crabParent.global_position
-	# TODO: make this work (I think!)
-	#crab.current_state = Crab.State.RELOCATING
+	if baby_crab:
+		# Tell baby to relocate away from parent
+		baby_crab.relocate_from_parent()
+		print("🦀 Crab reproduced! Baby crab relocating...")
