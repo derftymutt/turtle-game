@@ -9,7 +9,7 @@ func _enemy_ready():
 	super._enemy_ready()
 	
 	# Override health for super variant
-	max_health = 30.0
+	max_health = 20.0
 	current_health = max_health
 	
 	# Optional: Slightly increased damage for tougher enemy

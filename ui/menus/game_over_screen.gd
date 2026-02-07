@@ -66,9 +66,9 @@ func _on_restart_pressed():
 		get_tree().reload_current_scene()
 
 func _on_menu_pressed():
-	print("Menu button pressed!")
-	print("Current level: ", current_level)
-	print("GameManager exists: ", GameManager != null)
+	#print("Menu button pressed!")
+	#print("Current level: ", current_level)
+	#print("GameManager exists: ", GameManager != null)
 	
 	# Unpause
 	get_tree().paused = false

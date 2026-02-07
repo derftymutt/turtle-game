@@ -15,22 +15,6 @@ func _ready():
 	
 	# Ensure game is unpaused
 	get_tree().paused = false
-	
-	# DEBUG: Print CanvasLayer info
-	if hud:
-		print("HUD Layer: ", hud.layer)
-		print("HUD Offset: ", hud.offset)
-		print("HUD Follow Viewport: ", hud.follow_viewport_enabled)
-		print("HUD Transform: ", hud.transform)
-	
-	if game_over_screen:
-		print("GameOver Layer: ", game_over_screen.layer)
-		print("GameOver Offset: ", game_over_screen.offset)
-		print("GameOver Follow Viewport: ", game_over_screen.follow_viewport_enabled)
-		print("GameOver Transform: ", game_over_screen.transform)
-	
-	print("Level loaded: ", level_name)
-	
 
 ## Called by turtle when player dies
 func on_player_died(final_score: int):

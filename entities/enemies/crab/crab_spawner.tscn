@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3 uid="uid://v7oylhrf7btq"]
+
+[ext_resource type="Script" uid="uid://kx2clx5i3cac" path="res://entities/enemies/crab/crab_spawner.gd" id="1_7gmof"]
+[ext_resource type="PackedScene" uid="uid://voj6ijlgscb1" path="res://entities/enemies/crab/crab.tscn" id="2_11v6g"]
+
+[node name="CrabSpawner" type="Node2D"]
+script = ExtResource("1_7gmof")
+crab_scene = ExtResource("2_11v6g")

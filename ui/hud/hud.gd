@@ -96,7 +96,7 @@ func _ready():
 	if exhaustion_container:
 		exhaustion_container.visible = exhaustion_enabled
 	
-	print("HUD initialized successfully!")
+	#print("HUD initialized successfully!")
 
 func _process(delta):
 	# Handle breath warning flash - entire HUD layer pulses red

@@ -1,0 +1,67 @@
+[gd_scene load_steps=10 format=3 uid="uid://voj6ijlgscb1"]
+
+[ext_resource type="Script" uid="uid://ct2up3l0wukxm" path="res://entities/enemies/crab/crab.gd" id="1_0rr64"]
+[ext_resource type="Texture2D" uid="uid://brfwkrnd6w0uw" path="res://entities/enemies/crab/sprites/crab1.png" id="1_x24by"]
+[ext_resource type="PackedScene" uid="uid://rde7srp2l038" path="res://entities/enemies/crab/crab_projectile.tscn" id="2_52iet"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0rr64"]
+atlas = ExtResource("1_x24by")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_52iet"]
+atlas = ExtResource("1_x24by")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wahec"]
+atlas = ExtResource("1_x24by")
+region = Rect2(0, 16, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_gq6gn"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0rr64")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_52iet")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wahec")
+}],
+"loop": true,
+"name": &"move",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_uuv3t"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_epmtx"]
+
+[node name="Crab" type="RigidBody2D" groups=["crabs"]]
+collision_layer = 4
+mass = 3.0
+gravity_scale = 0.0
+linear_damp = 15.0
+angular_damp = 5.0
+script = ExtResource("1_0rr64")
+projectile_scene = ExtResource("2_52iet")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_gq6gn")
+animation = &"move"
+autoplay = "default"
+frame_progress = 0.25639135
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_uuv3t")
+
+[node name="DamageArea" type="Area2D" parent="."]
+collision_layer = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DamageArea"]
+shape = SubResource("CircleShape2D_epmtx")
