@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://btbnsn74vk1b"]
+[gd_scene format=3 uid="uid://btbnsn74vk1b"]
 
 [ext_resource type="Script" uid="uid://cge0huw8algp1" path="res://entities/player/turtle_player.gd" id="1_n086i"]
 [ext_resource type="PackedScene" uid="uid://lxxb80yuhgk7" path="res://entities/player/bullet.tscn" id="2_7uinh"]
@@ -60,17 +60,17 @@ animations = [{
 [sub_resource type="CircleShape2D" id="CircleShape2D_7uinh"]
 radius = 7.0
 
-[node name="TurtlePlayer" type="RigidBody2D" groups=["player"]]
+[node name="TurtlePlayer" type="RigidBody2D" unique_id=1971009088 groups=["player"]]
 freeze_mode = 1
 continuous_cd = 1
 script = ExtResource("1_n086i")
 bullet_scene = ExtResource("2_7uinh")
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1828949440]
 sprite_frames = SubResource("SpriteFrames_6u1a7")
 animation = &"shoot"
 autoplay = "idle"
 frame_progress = 0.7637489
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=133129894]
 shape = SubResource("CircleShape2D_7uinh")

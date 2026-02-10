@@ -1,0 +1,61 @@
+[gd_scene format=3 uid="uid://bx3l4rf0ajwy1"]
+
+[ext_resource type="Script" uid="uid://bdl5mblpii608" path="res://entities/enemies/electric_eel/electric_eel.gd" id="1_rf52h"]
+[ext_resource type="Texture2D" uid="uid://ba3n5g6v6pfg8" path="res://entities/enemies/electric_eel/sprites/electric_eel.png" id="2_fsk80"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_05rkc"]
+atlas = ExtResource("2_fsk80")
+region = Rect2(0, 0, 24, 12)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vs171"]
+atlas = ExtResource("2_fsk80")
+region = Rect2(24, 0, 24, 12)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qwcig"]
+atlas = ExtResource("2_fsk80")
+region = Rect2(48, 0, 24, 12)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_uccnl"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_05rkc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vs171")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qwcig")
+}],
+"loop": true,
+"name": &"default",
+"speed": 4.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_qgh8x"]
+radius = 6.0
+height = 24.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ywjiv"]
+radius = 6.0
+height = 24.0
+
+[node name="ElectricEel" type="RigidBody2D" unique_id=286190206]
+collision_layer = 4
+script = ExtResource("1_rf52h")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=950464802]
+sprite_frames = SubResource("SpriteFrames_uccnl")
+autoplay = "default"
+frame_progress = 0.21433742
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1207589692]
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_qgh8x")
+
+[node name="DamageArea" type="Area2D" parent="." unique_id=117864233]
+collision_layer = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DamageArea" unique_id=266112622]
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_ywjiv")

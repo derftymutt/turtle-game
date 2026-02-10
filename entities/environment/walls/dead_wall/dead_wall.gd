@@ -33,8 +33,8 @@ func _ready():
 	add_to_group("walls")
 	
 	# Set collision layers
-	collision_layer = 1
-	collision_mask = 1
+	#collision_layer = 1
+	#collision_mask = 1
 	
 	# Set up physics material for no bounce and ultra-slippery surface
 	var physics_mat = PhysicsMaterial.new()

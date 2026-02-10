@@ -63,6 +63,9 @@ var stamina_freeze_timer: float = 0.0
 # Rotation control
 var is_player_controlling_rotation: bool = false
 
+var control_suspended: bool = false
+var control_suspend_timer: float = 0.0
+
 func _ready():
 	# Physics setup
 	gravity_scale = 0.0
@@ -187,6 +190,30 @@ func _physics_process(delta):
 		
 		# Exhaustion recovery (bonus if touching wall)
 		hud.recover_exhaustion(delta, touching_walls.size() > 0)
+	
+	#if control_suspended:
+		control_suspend_timer -= delta
+		if control_suspend_timer <= 0:
+			control_suspended = false
+			# Restore color when suspension ends
+			# Apply cyan tint and RESET SCALE
+			var sprite = $AnimatedSprite2D
+			if sprite:
+				sprite.modulate = Color(0.816, 0.043, 0.576, 1.0)
+				sprite.scale = Vector2.ONE  # Reset any scaling!
+			
+			if control_suspend_timer <= 0:
+				control_suspended = false
+				print("Player: Control restored!")
+				if sprite:
+					sprite.modulate = Color.WHITE
+					sprite.scale = Vector2.ONE  # Ensure scale is normal
+			
+	# BEFORE getting input, add this check (around line 175):
+	# Get input (BLOCKED if control suspended!)
+	if control_suspended:
+		# No input allowed during shock
+		return
 	
 	# Get input
 	var movement_input = Vector2(
@@ -616,3 +643,10 @@ func _snap_sprite_to_cardinal():
 	
 	# Set sprite's LOCAL rotation to compensate for body's rotation
 	animated_sprite.rotation = snapped_rotation_rad - rotation
+	
+func suspend_control(duration: float):
+	"""Temporarily disable player input (called by electric shock)"""
+	control_suspended = true
+	control_suspend_timer = duration
+	
+	print("Player: Control suspended for ", duration, "s!")
