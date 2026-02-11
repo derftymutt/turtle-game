@@ -74,3 +74,6 @@ frame_progress = 0.7637489
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=133129894]
 shape = SubResource("CircleShape2D_7uinh")
+
+[node name="CarryPoint" type="Marker2D" parent="." unique_id=91295509]
+position = Vector2(-9, 6)

@@ -37,8 +37,8 @@ func _ready():
 	angular_damp = 3.0
 	
 	# Collision setup - physics with world only
-	collision_layer = 2
-	collision_mask = 1
+	#collision_layer = 2
+	#collision_mask = 1
 	
 	# Find ocean system
 	ocean = get_tree().get_first_node_in_group("ocean")
@@ -57,8 +57,8 @@ func _ready():
 	# Connect Area2D for player detection
 	if has_node("Area2D"):
 		$Area2D.body_entered.connect(_on_area_2d_body_entered)
-		$Area2D.collision_layer = 0
-		$Area2D.collision_mask = 1
+		#$Area2D.collision_layer = 0
+		#$Area2D.collision_mask = 1
 	else:
 		push_warning("Collectible has no Area2D child!")
 
@@ -116,6 +116,8 @@ func _physics_process(delta):
 		
 
 func _on_area_2d_body_entered(body: Node2D) -> void:
+	
+	print('body entered')
 	if body.is_in_group("player") and not collected:
 		collect(body)
 

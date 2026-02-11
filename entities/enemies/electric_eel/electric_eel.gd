@@ -389,14 +389,14 @@ func _setup_damage_area():
 
 func _on_damage_area_entered(body: Node2D):
 	"""Override from BaseEnemy - always deals damage when touched"""
-	print("Eel: DamageArea body_entered signal fired!")
-	print("  Body: ", body.name, " | Is player: ", body.is_in_group("player"))
+	#print("Eel: DamageArea body_entered signal fired!")
+	#print("  Body: ", body.name, " | Is player: ", body.is_in_group("player"))
 	
 	if body.is_in_group("player") and body.has_method("take_damage"):
 		print("  ⚡ EEL SHOCKING PLAYER ON CONTACT! ⚡")
 		_deal_damage_to_player(body)
-	else:
-		print("  Body is not player or doesn't have take_damage method")
+	#else:
+		#print("  Body is not player or doesn't have take_damage method")
 
 ## Override die() for eel-specific death
 func die():
@@ -488,7 +488,7 @@ class ShockedWall extends Node:
 		if bodies.size() > 0:
 			print("  !!! FOUND BODIES ALREADY TOUCHING WALL !!!")
 			for body in bodies:
-				print("    - Body: ", body.name, " | In player group: ", body.is_in_group("player"))
+				#print("    - Body: ", body.name, " | In player group: ", body.is_in_group("player"))
 				if body.is_in_group("player") and not body in shocked_players:
 					print("    - ⚡⚡⚡ PLAYER WAS CAMPING! SHOCKING IMMEDIATELY! ⚡⚡⚡")
 					_shock_player(body)
@@ -539,10 +539,10 @@ class ShockedWall extends Node:
 				last_body_count = bodies.size()
 				if bodies.size() > 0:
 					print("ShockedWall: NOW detecting ", bodies.size(), " bodies")
-					for body in bodies:
-						print("  - Body: ", body.name, " | Type: ", body.get_class(), " | In 'player' group: ", body.is_in_group("player"))
-						print("  - Body position: ", body.global_position)
-						print("  - Detection area position: ", detection_area.global_position)
+					#for body in bodies:
+						#print("  - Body: ", body.name, " | Type: ", body.get_class(), " | In 'player' group: ", body.is_in_group("player"))
+						#print("  - Body position: ", body.global_position)
+						#print("  - Detection area position: ", detection_area.global_position)
 				else:
 					print("ShockedWall: Bodies left detection area")
 			

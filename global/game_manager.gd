@@ -21,6 +21,10 @@ var high_scores: Dictionary = {
 	"level_3": 0,
 }
 
+var carried_piece: Node = null
+var is_carrying_piece: bool = false
+
+
 func _ready():
 	print("GameManager initialized")
 

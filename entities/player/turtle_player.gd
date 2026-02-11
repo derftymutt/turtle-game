@@ -4,6 +4,7 @@ extends RigidBody2D
 @export var thrust_force: float = 30.0
 @export var max_velocity: float = 2500.0
 @export var kick_animation_duration: float = 0.25
+@export var kick_animation_duration_with_ufo_piece: float = 0.5
 
 # Shooting properties
 @export var shoot_cooldown: float = 0.3
@@ -36,6 +37,7 @@ var can_thrust: bool = true
 var can_shoot: bool = true
 var thrust_timer: float = 0.0
 var shoot_timer: float = 0.0
+var current_kick_animation_duration: float = kick_animation_duration
 
 # Ocean reference
 var ocean: Ocean = null
@@ -204,7 +206,7 @@ func _physics_process(delta):
 			
 			if control_suspend_timer <= 0:
 				control_suspended = false
-				print("Player: Control restored!")
+				#print("Player: Control restored!")
 				if sprite:
 					sprite.modulate = Color.WHITE
 					sprite.scale = Vector2.ONE  # Ensure scale is normal
@@ -270,7 +272,7 @@ func apply_ocean_effects(delta: float):
 		linear_damp = 1.2  # Light drag in air
 
 func return_to_idle_after_delay():
-	await get_tree().create_timer(kick_animation_duration).timeout
+	await get_tree().create_timer(current_kick_animation_duration).timeout
 	var animated_sprite = $AnimatedSprite2D
 	if animated_sprite and is_instance_valid(animated_sprite):
 		animated_sprite.play("idle")
@@ -306,13 +308,19 @@ func apply_thrust(direction: Vector2):
 		thrust_strength = upward_thrust
 	elif kick_direction.y > 0:
 		thrust_strength = downward_thrust
-	
+		
+	if GameManager.is_carrying_piece and GameManager.carried_piece:
+		#thrust_strength = thrust_strength / 2
+		current_kick_animation_duration = kick_animation_duration_with_ufo_piece
+	else:
+		current_kick_animation_duration = kick_animation_duration
+		
 	# Apply thrust
 	linear_velocity += kick_direction * thrust_strength
 	
 	# Start cooldown
 	can_thrust = false
-	thrust_timer = kick_animation_duration
+	thrust_timer = current_kick_animation_duration
 
 func shoot(direction: Vector2):
 	if bullet_scene == null:
@@ -369,6 +377,12 @@ func take_damage(amount: float):
 		await get_tree().create_timer(0.1).timeout
 		if sprite and is_instance_valid(sprite):
 			sprite.modulate = Color.WHITE
+			
+	if GameManager.is_carrying_piece and GameManager.carried_piece:
+		GameManager.carried_piece.dropPiece()
+		#GameManager.carried_piece = null
+		#GameManager.is_carrying_piece = false
+		
 	
 	if current_health <= 0:
 		die()

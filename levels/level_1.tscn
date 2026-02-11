@@ -122,6 +122,19 @@ horizontal_follow_enabled = false
 
 [node name="TurtlePlayer" parent="." index="2" unique_id=1163425295 instance=ExtResource("4_jkxa6")]
 position = Vector2(-13, 16)
+thrust_force = null
+max_velocity = null
+kick_animation_duration = null
+shoot_cooldown = null
+bullet_speed = null
+horizontal_thrust = null
+upward_thrust = null
+downward_thrust = null
+max_health = null
+super_speed_threshold = null
+super_speed_damage = null
+super_speed_color = null
+super_speed_cooldown_duration = null
 
 [node name="Flippers" type="Node2D" parent="." index="3" unique_id=1565940212]
 
@@ -378,7 +391,6 @@ spawn_count_max = 2
 collectible_scene = ExtResource("16_ohjdc")
 
 [node name="FloorSeeder" parent="." index="14" unique_id=1962003509 instance=ExtResource("17_e5brb")]
-collectible_scene = ExtResource("16_ohjdc")
 seed_count_min = 5
 
 [node name="CircularBumpers" type="Node2D" parent="." index="17" unique_id=1450458218]

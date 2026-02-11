@@ -1,0 +1,58 @@
+[gd_scene format=3 uid="uid://rkinsjd2v3bk"]
+
+[ext_resource type="Script" uid="uid://bgdc5r8l8uqll" path="res://entities/collectibles/ufo_piece/ufo_piece.gd" id="1_j8jpc"]
+[ext_resource type="Texture2D" uid="uid://c0hg3n7ovwlbb" path="res://entities/collectibles/ufo_piece/sprites/ufo_piece_12.png" id="2_kb87b"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dr38e"]
+atlas = ExtResource("2_kb87b")
+region = Rect2(0, 0, 12, 12)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kllp6"]
+atlas = ExtResource("2_kb87b")
+region = Rect2(12, 0, 12, 12)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_a3r56"]
+atlas = ExtResource("2_kb87b")
+region = Rect2(24, 0, 12, 12)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_a3r56"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dr38e")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kllp6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_a3r56")
+}],
+"loop": true,
+"name": &"default",
+"speed": 4.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_b50cn"]
+radius = 7.071068
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_r20ta"]
+radius = 7.0
+
+[node name="UfoPiece" type="RigidBody2D" unique_id=664197637]
+collision_layer = 2
+script = ExtResource("1_j8jpc")
+disable_floor_despawn = true
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1688053301]
+sprite_frames = SubResource("SpriteFrames_a3r56")
+autoplay = "default"
+frame_progress = 0.44313344
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1001940683]
+shape = SubResource("CircleShape2D_b50cn")
+
+[node name="Area2D" type="Area2D" parent="." unique_id=1193774342]
+collision_layer = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=459025843]
+shape = SubResource("CircleShape2D_r20ta")
