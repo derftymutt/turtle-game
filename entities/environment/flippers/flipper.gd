@@ -7,6 +7,7 @@ extends StaticBody2D
 @export var flip_input: String = "flipper_left"
 @export var flip_sprite_h: bool = false 
 @export var is_right_flipper: bool = false
+@export var is_skyward_flipper: bool = false
 
 var is_flipping: bool = false
 var target_rotation: float = 0.0
@@ -170,9 +171,9 @@ func _physics_process(delta):  # Changed to _physics_process
 func activate_flip():
 	is_flipping = true
 	if is_right_flipper:
-		target_rotation = deg_to_rad(rest_angle - flip_angle)  # Subtract for counter-clockwise
+		target_rotation = deg_to_rad((rest_angle + flip_angle) if is_skyward_flipper else (rest_angle - flip_angle))  # Subtract for counter-clockwise
 	else:
-		target_rotation = deg_to_rad(rest_angle + flip_angle)  # Add for clockwise
+		target_rotation = deg_to_rad((rest_angle - flip_angle) if is_skyward_flipper else (rest_angle + flip_angle))  # Add for clockwise
 	hit_bodies.clear()
 	
 	# Start active movement window

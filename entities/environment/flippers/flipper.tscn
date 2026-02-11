@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://r0k3freedece"]
+[gd_scene format=3 uid="uid://r0k3freedece"]
 
 [ext_resource type="Script" uid="uid://bk61l1txoabke" path="res://entities/environment/flippers/flipper.gd" id="1_otgx2"]
 [ext_resource type="Texture2D" uid="uid://cw8dltwno7f4l" path="res://entities/environment/flippers/sprites/flipper3.png" id="2_j537t"]
@@ -11,22 +11,22 @@ height = 31.332941
 radius = 5.0
 height = 32.0
 
-[node name="Flipper" type="StaticBody2D"]
+[node name="Flipper" type="StaticBody2D" unique_id=1447591536]
 script = ExtResource("1_otgx2")
 rest_angle = -50.0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=944965431]
 position = Vector2(12.0023775, 0.7499838)
 rotation = -1.5655603
 shape = SubResource("CapsuleShape2D_j537t")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=628480430]
 position = Vector2(12, 1)
 texture = ExtResource("2_j537t")
 
-[node name="Area2D" type="Area2D" parent="."]
+[node name="Area2D" type="Area2D" parent="." unique_id=906731839]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=635072278]
 position = Vector2(12, 1)
 rotation = -1.5707964
 shape = SubResource("CapsuleShape2D_vewl4")
