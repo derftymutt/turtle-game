@@ -405,7 +405,7 @@ func take_damage(amount: float):
 			sprite.modulate = Color.WHITE
 			
 	if GameManager.is_carrying_piece and GameManager.carried_piece:
-		GameManager.carried_piece.dropPiece()
+		GameManager.carried_piece.drop_piece()
 		#GameManager.carried_piece = null
 		#GameManager.is_carrying_piece = false
 		

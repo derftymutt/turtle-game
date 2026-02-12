@@ -1,8 +1,0 @@
-[gd_scene format=3 uid="uid://bwyt5nkmne05h"]
-
-[ext_resource type="Script" uid="uid://bjqlpjieqo68j" path="res://systems/floor_seeder.gd" id="1_r0ch2"]
-[ext_resource type="PackedScene" uid="uid://rkinsjd2v3bk" path="res://entities/collectibles/ufo_piece/ufo_piece.tscn" id="2_vrl5i"]
-
-[node name="FloorSeeder" type="Node2D" unique_id=1662612070]
-script = ExtResource("1_r0ch2")
-collectible_scene = ExtResource("2_vrl5i")

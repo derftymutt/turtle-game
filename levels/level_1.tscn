@@ -14,9 +14,9 @@
 [ext_resource type="Script" uid="uid://b78tuve6bekjn" path="res://systems/wall_layout_helper.gd" id="12_voubc"]
 [ext_resource type="Script" uid="uid://3jp0yf3qb8pa" path="res://entities/collectibles/air_bubble/air_bubble_spawner.gd" id="13_0x1rk"]
 [ext_resource type="PackedScene" uid="uid://cdmr2papqk2ih" path="res://entities/collectibles/air_bubble/air_bubble.tscn" id="14_pnpm1"]
-[ext_resource type="PackedScene" uid="uid://cc3k1qa68v0mc" path="res://entities/collectibles/star/collectible_spawner.tscn" id="15_06ecp"]
-[ext_resource type="PackedScene" uid="uid://doh85qcfn8x2w" path="res://entities/collectibles/star/collectible.tscn" id="16_ohjdc"]
-[ext_resource type="PackedScene" uid="uid://bwyt5nkmne05h" path="res://systems/floor_seeder.tscn" id="17_e5brb"]
+[ext_resource type="PackedScene" uid="uid://cc3k1qa68v0mc" path="res://entities/collectibles/star/star_collectible_spawner.tscn" id="15_06ecp"]
+[ext_resource type="PackedScene" uid="uid://doh85qcfn8x2w" path="res://entities/collectibles/star/star_collectible.tscn" id="16_ohjdc"]
+[ext_resource type="PackedScene" uid="uid://bwyt5nkmne05h" path="res://entities/collectibles/ufo_piece/ufo_piece_seeder.tscn" id="17_e5brb"]
 [ext_resource type="PackedScene" uid="uid://bp6g8v1jmnruo" path="res://entities/environment/walls/circular_bumper/circular_bumper.tscn" id="18_oqlok"]
 [ext_resource type="PackedScene" uid="uid://c55cfm3aeb65a" path="res://systems/trash_cleanup/trash_sequence_spawner.tscn" id="19_7nvrk"]
 [ext_resource type="PackedScene" uid="uid://cxt44kcegt0ah" path="res://entities/environment/ufo_workshop/ufo_workshop.tscn" id="21_w75he"]
@@ -123,19 +123,6 @@ horizontal_follow_enabled = false
 
 [node name="TurtlePlayer" parent="." index="2" unique_id=1163425295 instance=ExtResource("4_jkxa6")]
 position = Vector2(-13, 16)
-thrust_force = null
-max_velocity = null
-kick_animation_duration = null
-shoot_cooldown = null
-bullet_speed = null
-horizontal_thrust = null
-upward_thrust = null
-downward_thrust = null
-max_health = null
-super_speed_threshold = null
-super_speed_damage = null
-super_speed_color = null
-super_speed_cooldown_duration = null
 
 [node name="Flippers" type="Node2D" parent="." index="3" unique_id=1565940212]
 
@@ -392,7 +379,8 @@ spawn_count_max = 2
 [node name="CollectibleSpawner" parent="." index="13" unique_id=77619061 instance=ExtResource("15_06ecp")]
 collectible_scene = ExtResource("16_ohjdc")
 
-[node name="FloorSeeder" parent="." index="14" unique_id=1962003509 instance=ExtResource("17_e5brb")]
+[node name="UfoPieceSeeder" parent="." index="14" unique_id=1962003509 instance=ExtResource("17_e5brb")]
+use_level_manager_count = false
 seed_count_min = 5
 
 [node name="CircularBumpers" type="Node2D" parent="." index="17" unique_id=1450458218]

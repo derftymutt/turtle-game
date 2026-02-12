@@ -88,11 +88,14 @@ func deliver_piece(piece: UFOPiece):
 	"""Accept the UFO piece and remove it from world"""
 	print("🛠️ Workshop received UFO piece!")
 	
-	# Play satisfying delivery animation
-	_play_delivery_animation(piece)
+	# 🆕 AWARD POINTS HERE (not on pickup!)
+	piece.award_delivery_points()
 	
 	# Notify LevelManager
 	LevelManager.deliver_piece()
+	
+	# Play satisfying delivery animation
+	_play_delivery_animation(piece)
 	
 	# Clear carrier state
 	GameManager.is_carrying_piece = false
@@ -102,7 +105,8 @@ func deliver_piece(piece: UFOPiece):
 	piece.is_carried = false
 	piece.carrier = null
 	
-
+	# Notify LevelManager
+	#LevelManager.deliver_piece()
 	
 	# Remove piece from world after animation
 	await get_tree().create_timer(0.5).timeout

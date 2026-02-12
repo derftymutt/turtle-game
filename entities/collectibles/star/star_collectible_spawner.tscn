@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://cc3k1qa68v0mc"]
+
+[ext_resource type="Script" uid="uid://cb66c814tckln" path="res://entities/collectibles/star/star_collectible_spawner.gd" id="1_63qh1"]
+
+[node name="StarCollectibleSpawner" type="Node2D" unique_id=1070458982]
+script = ExtResource("1_63qh1")

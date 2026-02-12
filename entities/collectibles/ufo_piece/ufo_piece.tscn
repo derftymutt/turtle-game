@@ -41,7 +41,7 @@ radius = 7.0
 [node name="UfoPiece" type="RigidBody2D" unique_id=664197637]
 collision_layer = 2
 script = ExtResource("1_j8jpc")
-disable_floor_despawn = true
+point_value = 100
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1688053301]
 sprite_frames = SubResource("SpriteFrames_a3r56")

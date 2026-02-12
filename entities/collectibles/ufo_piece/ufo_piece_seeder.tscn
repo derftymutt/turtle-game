@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://bwyt5nkmne05h"]
+
+[ext_resource type="Script" uid="uid://bjqlpjieqo68j" path="res://entities/collectibles/ufo_piece/ufo_piece_seeder.gd" id="1_r0ch2"]
+[ext_resource type="PackedScene" uid="uid://rkinsjd2v3bk" path="res://entities/collectibles/ufo_piece/ufo_piece.tscn" id="2_a5s7l"]
+
+[node name="UfoPieceSeeder" type="Node2D" unique_id=1662612070]
+script = ExtResource("1_r0ch2")
+ufo_piece_scene = ExtResource("2_a5s7l")

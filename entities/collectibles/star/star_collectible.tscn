@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://doh85qcfn8x2w"]
 
-[ext_resource type="Script" uid="uid://f0lk4m2dnt7" path="res://entities/collectibles/star/collectible.gd" id="1_1pg6c"]
+[ext_resource type="Script" uid="uid://fmkgcpurdy5u" path="res://entities/collectibles/star/star_collectible.gd" id="1_pvkdq"]
 [ext_resource type="Texture2D" uid="uid://cdxjp3suyrrts" path="res://entities/collectibles/star/sprites/star2.png" id="2_1pg6c"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_61c27"]
@@ -99,10 +99,9 @@ radius = 4.0
 [sub_resource type="CircleShape2D" id="CircleShape2D_1pg6c"]
 radius = 4.0
 
-[node name="Collectible" type="RigidBody2D" unique_id=873473159]
+[node name="StarCollectible" type="RigidBody2D" unique_id=873473159]
 collision_layer = 2
-script = ExtResource("1_1pg6c")
-sink_speed = 20.0
+script = ExtResource("1_pvkdq")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1500911044]
 sprite_frames = SubResource("SpriteFrames_k2x07")
