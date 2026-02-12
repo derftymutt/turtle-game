@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://bgrcf873d7ity"]
+
+[ext_resource type="Script" uid="uid://dms22fj6psh0n" path="res://entities/collectibles/health_plant/health_plant_spawner.gd" id="1_ogl40"]
+[ext_resource type="PackedScene" uid="uid://37b5t5axujbw" path="res://entities/collectibles/health_plant/health_plant.tscn" id="2_jorq7"]
+
+[node name="HealthPlantSpawner" type="Node" unique_id=1172793188]
+script = ExtResource("1_ogl40")
+health_plant_scene = ExtResource("2_jorq7")

@@ -21,6 +21,7 @@
 [ext_resource type="PackedScene" uid="uid://v7oylhrf7btq" path="res://entities/enemies/crab/crab_spawner.tscn" id="19_ndgrd"]
 [ext_resource type="PackedScene" uid="uid://bx3l4rf0ajwy1" path="res://entities/enemies/electric_eel/electric_eel.tscn" id="21_dpc8t"]
 [ext_resource type="PackedScene" uid="uid://cxt44kcegt0ah" path="res://entities/environment/ufo_workshop/ufo_workshop.tscn" id="21_ngvhw"]
+[ext_resource type="PackedScene" uid="uid://bgrcf873d7ity" path="res://entities/collectibles/health_plant/health_plant_spawner.tscn" id="22_ngvhw"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_4s8mp"]
 size = Vector2(9.000052, 471.00015)
@@ -251,40 +252,40 @@ is_right_flipper = true
 [node name="DeadWalls" type="Node2D" parent="." index="7" unique_id=1432046294]
 
 [node name="DeadWall" parent="DeadWalls" index="0" unique_id=1594092339 instance=ExtResource("8_xrja0")]
-position = Vector2(-254, -42)
+position = Vector2(-260.00003, -38)
 rotation = -1.0471976
 physics_material_override = SubResource("PhysicsMaterial_dpc8t")
-wall_length = 45.0
+wall_length = 60.0
 
 [node name="DeadWall5" parent="DeadWalls" index="1" unique_id=656297433 instance=ExtResource("8_xrja0")]
-position = Vector2(-60.000015, 49)
+position = Vector2(-64.000015, 53)
 rotation = -1.0471976
 physics_material_override = SubResource("PhysicsMaterial_ngvhw")
-wall_length = 30.0
+wall_length = 45.0
 
 [node name="DeadWall2" parent="DeadWalls" index="2" unique_id=48569631 instance=ExtResource("8_xrja0")]
-position = Vector2(-253, 97.00002)
+position = Vector2(-259.00003, 102.00002)
 rotation = -1.0471976
 physics_material_override = SubResource("PhysicsMaterial_itbe0")
-wall_length = 45.0
+wall_length = 60.0
 
 [node name="DeadWall3" parent="DeadWalls" index="3" unique_id=1758797883 instance=ExtResource("8_xrja0")]
-position = Vector2(234, 97.99999)
+position = Vector2(240.00002, 103.99999)
 rotation = 1.0471976
 physics_material_override = SubResource("PhysicsMaterial_xrja0")
-wall_length = 45.0
+wall_length = 60.0
 
 [node name="DeadWall6" parent="DeadWalls" index="4" unique_id=337734916 instance=ExtResource("8_xrja0")]
-position = Vector2(57.000004, 49.000015)
+position = Vector2(61.00001, 55.00002)
 rotation = 1.0471976
 physics_material_override = SubResource("PhysicsMaterial_he6wg")
-wall_length = 30.0
+wall_length = 45.0
 
 [node name="DeadWall4" parent="DeadWalls" index="5" unique_id=1243812581 instance=ExtResource("8_xrja0")]
-position = Vector2(238, -42.000008)
+position = Vector2(243, -36.000008)
 rotation = 1.0471976
 physics_material_override = SubResource("PhysicsMaterial_jqt73")
-wall_length = 45.0
+wall_length = 60.0
 
 [node name="BumperWalls" type="Node2D" parent="." index="8" unique_id=1285814152]
 
@@ -364,29 +365,24 @@ collectible_scene = ExtResource("16_4xp61")
 [node name="FloorSeeder" parent="." index="13" unique_id=20977107 instance=ExtResource("17_4yoxl")]
 use_level_manager_count = false
 seed_count_min = 4
+seed_count_max = 6
 
 [node name="SeaUrchins" type="Node2D" parent="." index="14" unique_id=356347317]
 
 [node name="SeaUrchin" parent="SeaUrchins" index="0" unique_id=982797359 instance=ExtResource("7_itbe0")]
 position = Vector2(-277, -106)
 
-[node name="SeaUrchin5" parent="SeaUrchins" index="1" unique_id=1658208011 instance=ExtResource("7_itbe0")]
-position = Vector2(-285, 40)
-
-[node name="SeaUrchin2" parent="SeaUrchins" index="2" unique_id=140662319 instance=ExtResource("7_itbe0")]
+[node name="SeaUrchin2" parent="SeaUrchins" index="1" unique_id=140662319 instance=ExtResource("7_itbe0")]
 position = Vector2(-151, -93)
 
-[node name="SeaUrchin3" parent="SeaUrchins" index="3" unique_id=1824629733 instance=ExtResource("7_itbe0")]
+[node name="SeaUrchin3" parent="SeaUrchins" index="2" unique_id=1824629733 instance=ExtResource("7_itbe0")]
 position = Vector2(144, -93)
 
-[node name="SeaUrchin7" parent="SeaUrchins" index="4" unique_id=1683837988 instance=ExtResource("7_itbe0")]
+[node name="SeaUrchin7" parent="SeaUrchins" index="3" unique_id=1683837988 instance=ExtResource("7_itbe0")]
 position = Vector2(1, -106)
 
-[node name="SeaUrchin4" parent="SeaUrchins" index="5" unique_id=1710715458 instance=ExtResource("7_itbe0")]
+[node name="SeaUrchin4" parent="SeaUrchins" index="4" unique_id=1710715458 instance=ExtResource("7_itbe0")]
 position = Vector2(283, -106)
-
-[node name="SeaUrchin6" parent="SeaUrchins" index="6" unique_id=553962874 instance=ExtResource("7_itbe0")]
-position = Vector2(275, 39)
 
 [node name="Piranha" parent="." index="15" unique_id=2112069533 instance=ExtResource("10_jqt73")]
 position = Vector2(196, 94)
@@ -456,3 +452,5 @@ position = Vector2(-200, 104)
 
 [node name="ElectricEel4" parent="." index="23" unique_id=1893263053 instance=ExtResource("21_dpc8t")]
 position = Vector2(158, 90)
+
+[node name="HealthPlantSpawner" parent="." index="24" unique_id=1172793188 instance=ExtResource("22_ngvhw")]

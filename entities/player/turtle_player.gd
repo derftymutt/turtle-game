@@ -412,6 +412,24 @@ func take_damage(amount: float):
 	
 	if current_health <= 0:
 		die()
+		
+func restore_health(amount: float):
+	"""Restore health (e.g., from health plants)"""
+	current_health = min(max_health, current_health + amount)
+	
+	# Update HUD
+	if hud:
+		hud.update_health(current_health, max_health)
+	
+	# Flash green for positive feedback
+	var sprite = $AnimatedSprite2D
+	if sprite:
+		sprite.modulate = Color.GREEN
+		await get_tree().create_timer(0.2).timeout
+		if sprite and is_instance_valid(sprite):
+			sprite.modulate = Color.WHITE
+	
+	print("💚 Health restored! Current: ", current_health, "/", max_health)
 
 func die():
 	# Get the HUD's current score

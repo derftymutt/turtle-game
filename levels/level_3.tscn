@@ -22,6 +22,7 @@
 [ext_resource type="PackedScene" uid="uid://bx3l4rf0ajwy1" path="res://entities/enemies/electric_eel/electric_eel.tscn" id="20_t5hu4"]
 [ext_resource type="PackedScene" uid="uid://cxt44kcegt0ah" path="res://entities/environment/ufo_workshop/ufo_workshop.tscn" id="22_8swdu"]
 [ext_resource type="PackedScene" uid="uid://bqiv3f0mqyire" path="res://entities/enemies/electric_eel/electric_eel_spawner.tscn" id="22_67vg4"]
+[ext_resource type="PackedScene" uid="uid://bgrcf873d7ity" path="res://entities/collectibles/health_plant/health_plant_spawner.tscn" id="23_mqvtj"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_lfnxh"]
 size = Vector2(9.000052, 471.00015)
@@ -419,3 +420,5 @@ is_invincible = true
 position = Vector2(226, -132)
 
 [node name="ElectricEelSpawner" parent="." index="28" unique_id=1752833975 instance=ExtResource("22_67vg4")]
+
+[node name="HealthPlantSpawner" parent="." index="29" unique_id=1172793188 instance=ExtResource("23_mqvtj")]

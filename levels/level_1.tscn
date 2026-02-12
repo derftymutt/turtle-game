@@ -20,6 +20,7 @@
 [ext_resource type="PackedScene" uid="uid://bp6g8v1jmnruo" path="res://entities/environment/walls/circular_bumper/circular_bumper.tscn" id="18_oqlok"]
 [ext_resource type="PackedScene" uid="uid://c55cfm3aeb65a" path="res://systems/trash_cleanup/trash_sequence_spawner.tscn" id="19_7nvrk"]
 [ext_resource type="PackedScene" uid="uid://cxt44kcegt0ah" path="res://entities/environment/ufo_workshop/ufo_workshop.tscn" id="21_w75he"]
+[ext_resource type="PackedScene" uid="uid://bgrcf873d7ity" path="res://entities/collectibles/health_plant/health_plant_spawner.tscn" id="22_i6od7"]
 [ext_resource type="PackedScene" uid="uid://bx3l4rf0ajwy1" path="res://entities/enemies/electric_eel/electric_eel.tscn" id="22_udfhf"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_w75he"]
@@ -425,3 +426,5 @@ position = Vector2(-221, 24)
 
 [node name="ElectricEel2" parent="." index="21" unique_id=663847127 instance=ExtResource("22_udfhf")]
 position = Vector2(245, 5)
+
+[node name="HealthPlantSpawner" parent="." index="22" unique_id=1172793188 instance=ExtResource("22_i6od7")]

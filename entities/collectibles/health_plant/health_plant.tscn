@@ -1,0 +1,59 @@
+[gd_scene format=3 uid="uid://37b5t5axujbw"]
+
+[ext_resource type="Script" uid="uid://vpyabw1d03vm" path="res://entities/collectibles/health_plant/health_plant.gd" id="1_ov0bq"]
+[ext_resource type="Texture2D" uid="uid://bos5qly4cs7i4" path="res://entities/collectibles/health_plant/sprites/healh_plant.png" id="2_ewy55"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bkami"]
+atlas = ExtResource("2_ewy55")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ke81p"]
+atlas = ExtResource("2_ewy55")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qkkbb"]
+atlas = ExtResource("2_ewy55")
+region = Rect2(32, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dkack"]
+atlas = ExtResource("2_ewy55")
+region = Rect2(48, 0, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_67a2p"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bkami")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ke81p")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qkkbb")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dkack")
+}],
+"loop": true,
+"name": &"default",
+"speed": 4.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_5e7ww"]
+radius = 11.0
+
+[node name="HealthPlant" type="Node2D" unique_id=435949565]
+script = ExtResource("1_ov0bq")
+lifetime = 25.0
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1913558519]
+sprite_frames = SubResource("SpriteFrames_67a2p")
+autoplay = "default"
+frame = 1
+frame_progress = 0.5759694
+
+[node name="Area2D" type="Area2D" parent="." unique_id=1256210444]
+collision_layer = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=614366174]
+shape = SubResource("CircleShape2D_5e7ww")
