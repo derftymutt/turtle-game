@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://bqiv3f0mqyire"]
+
+[ext_resource type="Script" uid="uid://b6alh2alsvuph" path="res://entities/enemies/electric_eel/electric_eel_spawner.gd" id="1_avg8m"]
+[ext_resource type="PackedScene" uid="uid://bx3l4rf0ajwy1" path="res://entities/enemies/electric_eel/electric_eel.tscn" id="2_kiu61"]
+
+[node name="ElectricEelSpawner" type="Node2D" unique_id=1752833975]
+script = ExtResource("1_avg8m")
+eel_scene = ExtResource("2_kiu61")

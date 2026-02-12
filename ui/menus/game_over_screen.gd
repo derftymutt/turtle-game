@@ -1,3 +1,4 @@
+# game_over_screen.gd
 extends CanvasLayer
 class_name GameOverScreen
 
@@ -11,7 +12,6 @@ class_name GameOverScreen
 @onready var quit_button = $Control/CenterContainer/PanelContainer/VBoxContainer/QuitButton
 
 var final_score: int = 0
-var current_level: String = ""
 
 func _ready():
 	add_to_group("game_over_screen")
@@ -27,17 +27,20 @@ func _ready():
 	if quit_button:
 		quit_button.pressed.connect(_on_quit_pressed)
 
-func show_game_over(score: int, level_name: String = ""):
+func show_game_over(score: int):
 	"""Display the game over screen with final score and high score"""
 	final_score = score
-	current_level = level_name
 	
+	# Get current level info from LevelManager
+	var level_name = LevelManager.get_current_level_name()
+	var high_score = GameManager.get_high_score(level_name)
+	
+	# Show final score
 	if final_score_label:
 		final_score_label.text = "Final Score: %d" % final_score
 	
-	# Show high score
-	if high_score_label and not level_name.is_empty():
-		var high_score = GameManager.get_high_score(level_name)
+	# Show high score with "NEW HIGH SCORE!" if applicable
+	if high_score_label:
 		if score > high_score:
 			high_score_label.text = "NEW HIGH SCORE!"
 			high_score_label.modulate = Color.GOLD
@@ -58,18 +61,10 @@ func _on_restart_pressed():
 	# Unpause
 	get_tree().paused = false
 	
-	# Restart through GameManager
-	if not current_level.is_empty():
-		GameManager.restart_current_level()
-	else:
-		# Fallback
-		get_tree().reload_current_scene()
+	# Restart current level via LevelManager
+	LevelManager.restart_current_level()
 
 func _on_menu_pressed():
-	#print("Menu button pressed!")
-	#print("Current level: ", current_level)
-	#print("GameManager exists: ", GameManager != null)
-	
 	# Unpause
 	get_tree().paused = false
 	
@@ -84,7 +79,7 @@ func _input(event):
 	if not visible:
 		return
 	
-	# Any button press activates focused button
+	# Keyboard input
 	if event is InputEventKey and event.pressed and not event.echo:
 		if restart_button and restart_button.has_focus():
 			_on_restart_pressed()

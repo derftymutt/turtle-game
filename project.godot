@@ -23,6 +23,7 @@ config/icon="res://icon.svg"
 
 GameManager="*res://global/game_manager.gd"
 GameSettings="*res://global/game_settings.gd"
+LevelManager="*uid://de6da58bko7nu"
 
 [debug]
 

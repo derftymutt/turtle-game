@@ -14,8 +14,6 @@ func _process(_delta):
 	var carry_point := carrier.get_node("CarryPoint")
 	global_position = carry_point.global_position
 
-
-
 func collect(collector):
 	if GameManager.is_carrying_piece:
 		return

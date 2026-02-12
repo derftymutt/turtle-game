@@ -16,6 +16,10 @@ extends RigidBody2D
 @export var upward_thrust: float = 75.0
 @export var downward_thrust: float = 225.0
 
+@export var horizontal_thrust_with_piece: float = 75.0
+@export var upward_thrust_with_piece: float = 25.0
+@export var downward_thrust_with_piece: float = 125.0
+
 # Health
 @export var max_health: float = 100.0
 var current_health: float = 100.0
@@ -38,6 +42,10 @@ var can_shoot: bool = true
 var thrust_timer: float = 0.0
 var shoot_timer: float = 0.0
 var current_kick_animation_duration: float = kick_animation_duration
+
+#var current_horizontal_thrust = horizontal_thrust
+#var current_upward_thrust = upward_thrust
+#var current_downward_thrust = downward_thrust
 
 # Ocean reference
 var ocean: Ocean = null
@@ -301,19 +309,37 @@ func apply_thrust(direction: Vector2):
 		
 		animated_sprite.global_rotation = deg_to_rad(snapped_deg)
 		animated_sprite.play("kick")
-	
-	# Determine thrust strength based on direction
-	var thrust_strength = horizontal_thrust
-	if kick_direction.y < 0:
-		thrust_strength = upward_thrust
-	elif kick_direction.y > 0:
-		thrust_strength = downward_thrust
 		
+		
+	# OPTION 1: thrust strength carrying
+	var thrust_strength = horizontal_thrust
 	if GameManager.is_carrying_piece and GameManager.carried_piece:
-		#thrust_strength = thrust_strength / 2
-		current_kick_animation_duration = kick_animation_duration_with_ufo_piece
+		thrust_strength = horizontal_thrust_with_piece
+		if kick_direction.y < 0:
+			thrust_strength = upward_thrust_with_piece
+		elif kick_direction.y > 0:
+			thrust_strength = downward_thrust_with_piece
 	else:
-		current_kick_animation_duration = kick_animation_duration
+		thrust_strength = horizontal_thrust
+		if kick_direction.y < 0:
+			thrust_strength = upward_thrust
+		elif kick_direction.y > 0:
+			thrust_strength = downward_thrust
+		
+	
+	# OPTION 2: kick speed carrying (less control i think)
+	# Determine thrust strength based on direction
+	#var thrust_strength = horizontal_thrust
+	#if kick_direction.y < 0:
+		#thrust_strength = upward_thrust
+	#elif kick_direction.y > 0:
+		#thrust_strength = downward_thrust
+		
+	#if GameManager.is_carrying_piece and GameManager.carried_piece:
+		##thrust_strength = thrust_strength / 2
+		#current_kick_animation_duration = kick_animation_duration_with_ufo_piece
+	#else:
+		#current_kick_animation_duration = kick_animation_duration
 		
 	# Apply thrust
 	linear_velocity += kick_direction * thrust_strength

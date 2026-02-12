@@ -1,0 +1,92 @@
+[gd_scene format=3 uid="uid://cxt44kcegt0ah"]
+
+[ext_resource type="Script" uid="uid://cm0yegvu4eggc" path="res://entities/environment/ufo_workshop/ufo_workshop.gd" id="1_cgi04"]
+[ext_resource type="Texture2D" uid="uid://bp23k3jvq6u41" path="res://entities/environment/ufo_workshop/sprites/ufo_workshop.png" id="2_h1xus"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0xdhl"]
+atlas = ExtResource("2_h1xus")
+region = Rect2(0, 0, 24, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_b4vg7"]
+atlas = ExtResource("2_h1xus")
+region = Rect2(24, 0, 24, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fspjq"]
+atlas = ExtResource("2_h1xus")
+region = Rect2(48, 0, 24, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_v2olg"]
+atlas = ExtResource("2_h1xus")
+region = Rect2(72, 0, 24, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5pxo4"]
+atlas = ExtResource("2_h1xus")
+region = Rect2(96, 0, 24, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yhv7p"]
+atlas = ExtResource("2_h1xus")
+region = Rect2(120, 0, 24, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dxykf"]
+atlas = ExtResource("2_h1xus")
+region = Rect2(144, 0, 24, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_j4lmk"]
+atlas = ExtResource("2_h1xus")
+region = Rect2(168, 0, 24, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_xgr3u"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0xdhl")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_b4vg7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fspjq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_v2olg")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5pxo4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yhv7p")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dxykf")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_j4lmk")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_h1xus"]
+size = Vector2(24, 16)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_0xdhl"]
+radius = 15.0
+
+[node name="UfoWorkshop" type="StaticBody2D" unique_id=625327535]
+collision_mask = 0
+script = ExtResource("1_cgi04")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1178835738]
+sprite_frames = SubResource("SpriteFrames_xgr3u")
+autoplay = "default"
+frame_progress = 0.94773996
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=444846887]
+shape = SubResource("RectangleShape2D_h1xus")
+
+[node name="DeliveryArea" type="Area2D" parent="." unique_id=1773108134]
+collision_layer = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DeliveryArea" unique_id=1054093236]
+shape = SubResource("CircleShape2D_0xdhl")
