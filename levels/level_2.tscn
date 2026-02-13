@@ -190,9 +190,6 @@ offset_right = 320.0
 offset_bottom = 205.0
 color = Color(0.17755811, 0.12329503, 0.02367841, 1)
 
-[node name="GameOverScreen" parent="." index="5" unique_id=301166293]
-visible = false
-
 [node name="Flippers" type="Node2D" parent="." index="6" unique_id=930570642]
 
 [node name="Flipper" parent="Flippers" index="0" unique_id=1435666400 instance=ExtResource("5_dpc8t")]
@@ -296,7 +293,7 @@ wall_length = 30.0
 wall_thickness = 5.0
 
 [node name="BumperWall8" parent="BumperWalls" index="1" unique_id=1896924589 instance=ExtResource("9_he6wg")]
-position = Vector2(-230, 134)
+position = Vector2(-221, 126)
 rotation = -0.7853982
 physics_material_override = SubResource("PhysicsMaterial_cp3aq")
 wall_length = 30.0
@@ -309,14 +306,14 @@ wall_length = 30.0
 wall_thickness = 5.0
 
 [node name="BumperWall9" parent="BumperWalls" index="3" unique_id=396793053 instance=ExtResource("9_he6wg")]
-position = Vector2(211, 137)
+position = Vector2(201, 130)
 rotation = 0.7853982
 physics_material_override = SubResource("PhysicsMaterial_m4706")
 wall_length = 30.0
 wall_thickness = 5.0
 
 [node name="BumperWall3" parent="BumperWalls" index="4" unique_id=1182394853 instance=ExtResource("9_he6wg")]
-position = Vector2(1, -45)
+position = Vector2(1, -53)
 physics_material_override = SubResource("PhysicsMaterial_4xp61")
 wall_length = 40.0
 wall_thickness = 5.0
@@ -395,7 +392,7 @@ physics_material_override = SubResource("PhysicsMaterial_pjs8f")
 radius = 10.0
 
 [node name="CircularBumper2" parent="CircularBumpers" index="1" unique_id=285227436 instance=ExtResource("17_uo0vl")]
-position = Vector2(-230, 134)
+position = Vector2(-221, 126)
 physics_material_override = SubResource("PhysicsMaterial_bf7t1")
 radius = 10.0
 
@@ -415,7 +412,7 @@ physics_material_override = SubResource("PhysicsMaterial_6oa44")
 radius = 10.0
 
 [node name="CircularBumper6" parent="CircularBumpers" index="5" unique_id=1105303705 instance=ExtResource("17_uo0vl")]
-position = Vector2(211, 137)
+position = Vector2(201, 130)
 physics_material_override = SubResource("PhysicsMaterial_3582p")
 radius = 10.0
 
@@ -425,7 +422,7 @@ physics_material_override = SubResource("PhysicsMaterial_nomkf")
 radius = 15.0
 
 [node name="CircularBumper8" parent="CircularBumpers" index="7" unique_id=836163088 instance=ExtResource("17_uo0vl")]
-position = Vector2(1, -45)
+position = Vector2(1, -53)
 physics_material_override = SubResource("PhysicsMaterial_rddwe")
 radius = 15.0
 

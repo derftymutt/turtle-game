@@ -22,21 +22,21 @@ size_flags_horizontal = 0
 size_flags_vertical = 0
 theme_override_constants/separation = 8
 
-[node name="ScoreLabel" type="Label" parent="MarginContainer/HBoxContainer" unique_id=1757691156]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/HBoxContainer" unique_id=962764975]
+layout_mode = 2
+theme_override_constants/separation = -5
+
+[node name="ScoreLabel" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer" unique_id=1757691156]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Score: 0"
 
-[node name="Spacer1" type="Control" parent="MarginContainer/HBoxContainer" unique_id=1495008719]
-custom_minimum_size = Vector2(10, 0)
-layout_mode = 2
-
-[node name="UFOPiecesLabel" type="Label" parent="MarginContainer/HBoxContainer" unique_id=448331090]
+[node name="UFOPiecesLabel" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer" unique_id=448331090]
 layout_mode = 2
 text = "UFO Pieces: 0/0"
 
-[node name="Spacer2" type="Control" parent="MarginContainer/HBoxContainer" unique_id=607744181]
-custom_minimum_size = Vector2(10, 0)
+[node name="Spacer1" type="Control" parent="MarginContainer/HBoxContainer" unique_id=1495008719]
+custom_minimum_size = Vector2(70, 0)
 layout_mode = 2
 
 [node name="HealthContainer" type="VBoxContainer" parent="MarginContainer/HBoxContainer" unique_id=1510988890]

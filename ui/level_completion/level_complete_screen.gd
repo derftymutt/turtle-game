@@ -44,6 +44,9 @@ func show_completion(level_number: int, final_score: int, pieces_collected: int,
 	
 	if pieces_label:
 		pieces_label.text = "All %d UFO Pieces Collected!" % pieces_needed
+		
+		
+	print('final_score', final_score)
 	
 	if score_label:
 		score_label.text = "Score: %d" % final_score

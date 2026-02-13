@@ -148,6 +148,7 @@ func _process(delta):
 ## Update score display
 func update_score(new_score: int):
 	current_score = new_score
+	GameManager.current_score = new_score 
 	if score_label:
 		score_label.text = "Score: %d" % current_score
 

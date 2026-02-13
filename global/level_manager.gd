@@ -86,6 +86,8 @@ func _show_level_complete_screen():
 	var level_complete_screen = get_tree().get_first_node_in_group("level_complete_screen")
 	
 	if level_complete_screen and level_complete_screen.has_method("show_completion"):
+		
+		print('gamemanager score:', GameManager.current_score)
 		# Update existing screen
 		level_complete_screen.show_completion(
 			current_level_number,
