@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://cc1pfhtxq4cat" path="res://levels/shared/level_base.gd" id="1_hk6b7"]
 [ext_resource type="PackedScene" uid="uid://bahema85c45s" path="res://ui/hud/hud.tscn" id="2_vmt1o"]
 [ext_resource type="PackedScene" uid="uid://cn5v270vtn1pl" path="res://ui/menus/game_over_screen.tscn" id="3_da5si"]
+[ext_resource type="PackedScene" uid="uid://dohn0oo35f7m5" path="res://ui/level_completion/level_complete_screen.tscn" id="4_se1mh"]
 
 [node name="LevelBase" type="Node2D" unique_id=1013451131 groups=["level"]]
 script = ExtResource("1_hk6b7")
@@ -10,3 +11,5 @@ script = ExtResource("1_hk6b7")
 [node name="HUD" parent="." unique_id=1369229575 instance=ExtResource("2_vmt1o")]
 
 [node name="GameOverScreen" parent="." unique_id=301166293 instance=ExtResource("3_da5si")]
+
+[node name="LevelCompleteScreen" parent="." unique_id=1103608067 instance=ExtResource("4_se1mh")]

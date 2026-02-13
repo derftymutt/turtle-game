@@ -23,8 +23,8 @@ var level_scenes: Dictionary = {
 # Piece requirements per level
 var pieces_needed_by_level: Dictionary = {
 	1: 3,
-	2: 4,
-	3: 5,
+	2: 3,
+	3: 4,
 	# etc...
 }
 
@@ -45,6 +45,9 @@ func start_level(level_number: int):
 	
 	level_started.emit(level_number)
 	print("🌊 Level %d started! Collect %d UFO pieces" % [level_number, pieces_needed])
+	
+	# Emit initial piece count to update HUD (0/x)
+	piece_delivered.emit(0, pieces_needed)
 
 func deliver_piece():
 	"""Called by UFOWorkshop when a piece is delivered"""
@@ -70,10 +73,29 @@ func complete_level():
 	var level_name = "level_%d" % current_level_number
 	GameManager.update_high_score(level_name, GameManager.current_score)
 	
-	# TODO: Spawn assembled UFO, play animation
-	# For now, transition to next level after delay
-	await get_tree().create_timer(2.0).timeout
+	# Show level complete screen
+	_show_level_complete_screen()
+	
+	# Wait a bit longer to let player enjoy the moment
+	await get_tree().create_timer(3.0).timeout
 	load_next_level()
+
+func _show_level_complete_screen():
+	"""Create and show the level complete screen"""
+	# Look for existing level complete screen in the scene tree
+	var level_complete_screen = get_tree().get_first_node_in_group("level_complete_screen")
+	
+	if level_complete_screen and level_complete_screen.has_method("show_completion"):
+		# Update existing screen
+		level_complete_screen.show_completion(
+			current_level_number,
+			GameManager.current_score,
+			pieces_collected,
+			pieces_needed
+		)
+	else:
+		# No screen found - this is okay, just log it
+		print("⚠️ No LevelCompleteScreen found in scene. Add one to levels for visual feedback!")
 
 func load_next_level():
 	"""Load the next level scene"""

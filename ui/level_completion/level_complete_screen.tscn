@@ -1,0 +1,52 @@
+[gd_scene format=3 uid="uid://dohn0oo35f7m5"]
+
+[ext_resource type="Script" uid="uid://c2kxo8gmu2l2d" path="res://ui/level_completion/level_complete_screen.gd" id="1_ba1n4"]
+
+[node name="LevelCompleteScreen" type="CanvasLayer" unique_id=1103608067 groups=["level_complete_screen"]]
+script = ExtResource("1_ba1n4")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=401096989]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.7)
+
+[node name="CenterContainer" type="CenterContainer" parent="." unique_id=1384805189]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer" unique_id=2018101306]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="TitleLabel" type="Label" parent="CenterContainer/VBoxContainer" unique_id=355901358]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.84313726, 0, 1)
+theme_override_font_sizes/font_size = 48
+text = "Level Complete!"
+
+[node name="StatsContainer" type="VBoxContainer" parent="CenterContainer/VBoxContainer" unique_id=1130477405]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="PiecesLabel" type="Label" parent="CenterContainer/VBoxContainer/StatsContainer" unique_id=156626093]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "All UFO Pieces Collected!"
+horizontal_alignment = 1
+
+[node name="ScoreLabel" type="Label" parent="CenterContainer/VBoxContainer/StatsContainer" unique_id=1566740752]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Score: 0"
+horizontal_alignment = 1
+
+[node name="ContinueLabel" type="Label" parent="CenterContainer/VBoxContainer" unique_id=1156341924]
+layout_mode = 2
+text = "Assembling UFO..."
+horizontal_alignment = 1

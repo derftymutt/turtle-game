@@ -1,11 +1,11 @@
-[gd_scene load_steps=2 format=3 uid="uid://bahema85c45s"]
+[gd_scene format=3 uid="uid://bahema85c45s"]
 
 [ext_resource type="Script" uid="uid://c8gcxh4gmwsi3" path="res://ui/hud/hud.gd" id="1_ahhtf"]
 
-[node name="HUD" type="CanvasLayer" groups=["hud"]]
+[node name="HUD" type="CanvasLayer" unique_id=113944192 groups=["hud"]]
 script = ExtResource("1_ahhtf")
 
-[node name="MarginContainer" type="MarginContainer" parent="."]
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=844841658]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -16,62 +16,70 @@ theme_override_constants/margin_top = 5
 theme_override_constants/margin_right = 5
 theme_override_constants/margin_bottom = 5
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer" unique_id=1428579372]
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 0
 theme_override_constants/separation = 8
 
-[node name="ScoreLabel" type="Label" parent="MarginContainer/HBoxContainer"]
+[node name="ScoreLabel" type="Label" parent="MarginContainer/HBoxContainer" unique_id=1757691156]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Score: 0"
 
-[node name="Spacer1" type="Control" parent="MarginContainer/HBoxContainer"]
-custom_minimum_size = Vector2(80, 0)
+[node name="Spacer1" type="Control" parent="MarginContainer/HBoxContainer" unique_id=1495008719]
+custom_minimum_size = Vector2(10, 0)
 layout_mode = 2
 
-[node name="HealthContainer" type="VBoxContainer" parent="MarginContainer/HBoxContainer"]
+[node name="UFOPiecesLabel" type="Label" parent="MarginContainer/HBoxContainer" unique_id=448331090]
+layout_mode = 2
+text = "UFO Pieces: 0/0"
+
+[node name="Spacer2" type="Control" parent="MarginContainer/HBoxContainer" unique_id=607744181]
+custom_minimum_size = Vector2(10, 0)
+layout_mode = 2
+
+[node name="HealthContainer" type="VBoxContainer" parent="MarginContainer/HBoxContainer" unique_id=1510988890]
 layout_mode = 2
 theme_override_constants/separation = 2
 
-[node name="HealthLabel" type="Label" parent="MarginContainer/HBoxContainer/HealthContainer"]
+[node name="HealthLabel" type="Label" parent="MarginContainer/HBoxContainer/HealthContainer" unique_id=727431917]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 text = "Health"
 
-[node name="HealthBar" type="ProgressBar" parent="MarginContainer/HBoxContainer/HealthContainer"]
+[node name="HealthBar" type="ProgressBar" parent="MarginContainer/HBoxContainer/HealthContainer" unique_id=144372041]
 custom_minimum_size = Vector2(120, 20)
 layout_mode = 2
 value = 100.0
 show_percentage = false
 
-[node name="BreathContainer" type="VBoxContainer" parent="MarginContainer/HBoxContainer"]
+[node name="BreathContainer" type="VBoxContainer" parent="MarginContainer/HBoxContainer" unique_id=1472468396]
 layout_mode = 2
 theme_override_constants/separation = 2
 
-[node name="BreathLabel" type="Label" parent="MarginContainer/HBoxContainer/BreathContainer"]
+[node name="BreathLabel" type="Label" parent="MarginContainer/HBoxContainer/BreathContainer" unique_id=1351889758]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 text = "Breath"
 
-[node name="BreathBar" type="ProgressBar" parent="MarginContainer/HBoxContainer/BreathContainer"]
+[node name="BreathBar" type="ProgressBar" parent="MarginContainer/HBoxContainer/BreathContainer" unique_id=117113140]
 custom_minimum_size = Vector2(120, 20)
 layout_mode = 2
 max_value = 30.0
 value = 30.0
 show_percentage = false
 
-[node name="ExhaustionContainer" type="VBoxContainer" parent="MarginContainer/HBoxContainer"]
+[node name="ExhaustionContainer" type="VBoxContainer" parent="MarginContainer/HBoxContainer" unique_id=698796016]
 layout_mode = 2
 theme_override_constants/separation = 2
 
-[node name="ExhaustionLabel" type="Label" parent="MarginContainer/HBoxContainer/ExhaustionContainer"]
+[node name="ExhaustionLabel" type="Label" parent="MarginContainer/HBoxContainer/ExhaustionContainer" unique_id=1123686249]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 text = "Stamina"
 
-[node name="ExhaustionBar" type="ProgressBar" parent="MarginContainer/HBoxContainer/ExhaustionContainer"]
+[node name="ExhaustionBar" type="ProgressBar" parent="MarginContainer/HBoxContainer/ExhaustionContainer" unique_id=1827549335]
 custom_minimum_size = Vector2(120, 20)
 layout_mode = 2
 value = 100.0

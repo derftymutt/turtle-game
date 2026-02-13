@@ -6,6 +6,7 @@ class_name HUD
 
 # References (will be found dynamically)
 var score_label: Label
+var ufo_pieces_label: Label
 var health_bar: ProgressBar
 var breath_container: Control
 var breath_bar: ProgressBar
@@ -18,6 +19,8 @@ var hud_container: Control  # Container for flash effect
 var current_score: int = 0
 var current_health: float = 100.0
 var max_health: float = 100.0
+var pieces_collected: int = 0
+var pieces_needed: int = 0
 
 ## Get current score (used by game over screen)
 func get_current_score() -> int:
@@ -66,6 +69,7 @@ func _ready():
 	
 	# Find UI nodes dynamically
 	score_label = find_child("ScoreLabel")
+	ufo_pieces_label = find_child("UFOPiecesLabel")
 	health_bar = find_child("HealthBar")
 	breath_container = find_child("BreathContainer")
 	breath_bar = find_child("BreathBar")
@@ -76,6 +80,8 @@ func _ready():
 	# Debug: verify we found everything
 	if not score_label:
 		push_warning("HUD: Could not find ScoreLabel!")
+	if not ufo_pieces_label:
+		push_warning("HUD: Could not find UFOPiecesLabel!")
 	if not health_bar:
 		push_warning("HUD: Could not find HealthBar!")
 	if not breath_bar:
@@ -85,6 +91,7 @@ func _ready():
 	
 	# Initialize displays
 	update_score(0)
+	update_ufo_pieces(0, 0)
 	update_health(max_health, max_health)
 	update_breath(max_breath, max_breath)
 	update_exhaustion(max_exhaustion, max_exhaustion)
@@ -96,7 +103,9 @@ func _ready():
 	if exhaustion_container:
 		exhaustion_container.visible = exhaustion_enabled
 	
-	#print("HUD initialized successfully!")
+	if LevelManager:
+		LevelManager.piece_delivered.connect(_on_piece_delivered)
+		LevelManager.level_started.connect(_on_level_started)
 
 func _process(delta):
 	# Handle breath warning flash - entire HUD layer pulses red
@@ -267,3 +276,28 @@ func set_super_speed_active(active: bool):
 			var tween = create_tween().set_loops()
 			tween.tween_property(super_speed_indicator, "modulate:a", 0.3, 0.3)
 			tween.tween_property(super_speed_indicator, "modulate:a", 1.0, 0.3)
+			
+## Update UFO pieces display
+func update_ufo_pieces(collected: int, needed: int):
+	pieces_collected = collected
+	pieces_needed = needed
+	
+	if ufo_pieces_label:
+		ufo_pieces_label.text = "UFO Pieces: %d/%d" % [collected, needed]
+		
+		# Color code: green when complete, white otherwise
+		if collected >= needed and needed > 0:
+			ufo_pieces_label.modulate = Color.GREEN
+		else:
+			ufo_pieces_label.modulate = Color.WHITE
+
+## Signal handlers for LevelManager
+func _on_piece_delivered(collected: int, needed: int):
+	"""Called when a piece is delivered to the workshop"""
+	update_ufo_pieces(collected, needed)
+
+func _on_level_started(level_number: int):
+	"""Called when a new level starts - reset piece counter"""
+	# LevelManager will emit piece_delivered signal with initial 0/x values
+	# so we don't need to do anything here
+	pass
