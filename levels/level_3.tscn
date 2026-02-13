@@ -414,7 +414,6 @@ physics_material_override = SubResource("PhysicsMaterial_ro52v")
 
 [node name="ElectricEel" parent="." index="26" unique_id=286190206 instance=ExtResource("20_t5hu4")]
 position = Vector2(95, 17)
-is_invincible = true
 
 [node name="UfoWorkshop" parent="." index="27" unique_id=625327535 instance=ExtResource("22_8swdu")]
 position = Vector2(226, -132)

@@ -9,6 +9,14 @@ class_name ElectricEel
 @export var wall_detection_range: float = 300.0
 @export var player_influence_range: float = 250.0
 
+# Wall navigation and stuck prevention
+@export_group("Anti-Stuck Behavior")
+@export var stuck_detection_time: float = 2.0  # Time stationary = stuck
+@export var stuck_velocity_threshold: float = 15.0  # Velocity below this = stuck
+@export var wall_avoidance_force: float = 250.0
+@export var exploration_duration: float = 3.0  # How long to explore when stuck
+@export var exploration_speed_multiplier: float = 0.7
+
 # Shocking behavior
 @export var shock_telegraph_duration: float = 0.3
 @export var shock_duration: float = 2.5
@@ -30,7 +38,7 @@ class_name ElectricEel
 @export var depth_correction_force: float = 40.0
 
 # Internal state
-enum State { SEEKING_WALL, APPROACHING_WALL, TELEGRAPHING, SHOCKING, COOLDOWN }
+enum State { SEEKING_WALL, APPROACHING_WALL, TELEGRAPHING, SHOCKING, COOLDOWN, EXPLORING }
 var current_state: State = State.SEEKING_WALL
 var player: Node2D = null
 var ocean: Ocean = null
@@ -43,6 +51,11 @@ var shocked_walls: Array[Node2D] = []
 # Timers
 var state_timer: float = 0.0
 var wiggle_offset: float = 0.0
+
+# Stuck detection
+var last_position: Vector2 = Vector2.ZERO
+var stuck_timer: float = 0.0
+var exploration_target: Vector2 = Vector2.ZERO
 
 # Visual effects
 var telegraph_particles: Array = []
@@ -66,6 +79,9 @@ func _enemy_ready():
 	# Random starting wiggle
 	wiggle_offset = randf() * TAU
 	
+	# Initialize stuck detection
+	last_position = global_position
+	
 	# Setup damage area
 	if not damage_area:
 		_setup_damage_area()
@@ -84,6 +100,10 @@ func _physics_process(delta):
 	if not player or not is_instance_valid(player):
 		return
 	
+	# Detect if stuck (except during shocking phase)
+	if current_state != State.SHOCKING and current_state != State.TELEGRAPHING:
+		_detect_stuck(delta)
+	
 	# Maintain preferred depth
 	_maintain_depth()
 	
@@ -99,12 +119,17 @@ func _physics_process(delta):
 			_shock_behavior(delta)
 		State.COOLDOWN:
 			_cooldown_behavior(delta)
+		State.EXPLORING:
+			_exploration_behavior(delta)
 	
 	# Visual effects
 	_animate_swimming(delta)
 	
 	# Update state timer
 	state_timer -= delta
+	
+	# Update last position for stuck detection
+	last_position = global_position
 
 func _seek_wall_behavior(_delta: float):
 	"""Find a nearby wall to target, prioritizing walls near player"""
@@ -177,6 +202,65 @@ func _cooldown_behavior(_delta: float):
 	var to_player = player.global_position - global_position
 	if to_player.length() < player_influence_range:
 		apply_central_force(to_player.normalized() * swim_speed * 0.3)
+
+func _detect_stuck(delta: float):
+	"""Detect if eel is stuck against a wall and trigger exploration"""
+	var velocity = linear_velocity.length()
+	var movement = global_position.distance_to(last_position)
+	
+	# Check if we're barely moving
+	if velocity < stuck_velocity_threshold or movement < 2.0:
+		stuck_timer += delta
+		
+		if stuck_timer >= stuck_detection_time:
+			# We're stuck! Enter exploration mode
+			current_state = State.EXPLORING
+			state_timer = exploration_duration
+			stuck_timer = 0.0
+			_choose_exploration_target()
+	else:
+		# We're moving fine, reset stuck timer
+		stuck_timer = 0.0
+
+func _choose_exploration_target():
+	"""Pick a random direction to explore when stuck"""
+	# Choose a position away from our current location
+	var random_angle = randf() * TAU
+	var random_distance = randf_range(150.0, 300.0)
+	
+	exploration_target = global_position + Vector2(
+		cos(random_angle) * random_distance,
+		sin(random_angle) * random_distance
+	)
+	
+	# Keep it within reasonable depth bounds
+	if ocean:
+		var target_depth = ocean.get_depth(exploration_target)
+		if target_depth < preferred_depth_min:
+			exploration_target.y += 50
+		elif target_depth > preferred_depth_max:
+			exploration_target.y -= 50
+
+func _exploration_behavior(_delta: float):
+	"""Swim to exploration target to escape stuck position"""
+	if state_timer <= 0:
+		# Exploration done, go back to seeking walls
+		current_state = State.SEEKING_WALL
+		target_wall = null
+		nearby_walls.clear()
+		return
+	
+	# Swim toward exploration target
+	var to_target = exploration_target - global_position
+	var distance = to_target.length()
+	
+	if distance > 20.0:  # Still need to reach target
+		var direction = to_target.normalized()
+		apply_central_force(direction * swim_speed * exploration_speed_multiplier)
+		_face_direction(direction)
+	else:
+		# Reached target, pick a new one to keep moving
+		_choose_exploration_target()
 
 func _scan_for_walls():
 	"""Find all nearby walls and flippers"""
@@ -322,7 +406,10 @@ func _remove_shock_from_wall():
 	"""Clean up shock from wall"""
 	if target_wall and is_instance_valid(target_wall):
 		var shock_component = target_wall.get_node_or_null("ShockComponent")
-		if shock_component:
+		if shock_component and shock_component.has_method("cleanup"):
+			# Use cleanup method to ensure visual is removed immediately
+			shock_component.cleanup()
+		elif shock_component:
 			shock_component.queue_free()
 	
 	# Clear shocked walls list after cooldown
@@ -516,6 +603,11 @@ class ShockedWall extends Node:
 	
 	func _expire():
 		"""Remove shock effect when timer expires"""
+		cleanup()
+	
+	func cleanup():
+		"""Immediately clean up visual overlay and free component"""
 		if shock_overlay and is_instance_valid(shock_overlay):
 			shock_overlay.queue_free()
+			shock_overlay = null
 		queue_free()
