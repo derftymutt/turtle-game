@@ -1,0 +1,32 @@
+[gd_scene format=3 uid="uid://b4mldyvm61s6e"]
+
+[ext_resource type="Script" uid="uid://bhtcbn1hf2oep" path="res://entities/environment/flippers/flipper_left_down.gd" id="1_ugrn3"]
+[ext_resource type="Texture2D" uid="uid://bprmvs1p24lio" path="res://entities/environment/flippers/sprites/flipper_left_down.png" id="2_ugrn3"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_j537t"]
+radius = 6.0
+height = 32.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_vewl4"]
+radius = 6.0
+height = 32.0
+
+[node name="FlipperLeftDown" type="StaticBody2D" unique_id=1447591536]
+script = ExtResource("1_ugrn3")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=628480430]
+position = Vector2(12, 0)
+texture = ExtResource("2_ugrn3")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=944965431]
+position = Vector2(12, 0)
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_j537t")
+
+[node name="Area2D" type="Area2D" parent="." unique_id=906731839]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=635072278]
+visible = false
+position = Vector2(12, 0)
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_vewl4")
