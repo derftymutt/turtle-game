@@ -1,0 +1,32 @@
+[gd_resource type="SpriteFrames" format=3 uid="uid://cyx0alh6jyom"]
+
+[ext_resource type="Texture2D" uid="uid://f4ce2abkejw8" path="res://entities/environment/flippers/sprites/flipper-left-down-sheet.png" id="1_3f2wa"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bqvpr"]
+atlas = ExtResource("1_3f2wa")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2fk7l"]
+atlas = ExtResource("1_3f2wa")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3dske"]
+atlas = ExtResource("1_3f2wa")
+region = Rect2(64, 0, 32, 32)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bqvpr")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2fk7l")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3dske")
+}],
+"loop": true,
+"name": &"default",
+"speed": 0.0
+}]

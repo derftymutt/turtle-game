@@ -27,7 +27,7 @@ LevelManager="*uid://de6da58bko7nu"
 
 [debug]
 
-shapes/collision/shape_color=Color(0.9336619, 2.3969114e-05, 0.64580274, 0.41960785)
+shapes/collision/shape_color=Color(0.91918194, 0.17991984, 0.55100334, 0.41960785)
 
 [display]
 
