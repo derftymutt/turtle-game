@@ -1,4 +1,4 @@
-extends FlipperBase
+extends FlipperBasePixelPerfect
 class_name FlipperLeftDown
 
 ## Left-side flipper that rotates clockwise (downward into ocean)
@@ -7,7 +7,7 @@ class_name FlipperLeftDown
 ## Flip position: Rotates clockwise to push ball deeper
 
 @export var rest_angle_degrees: float = -30.0  # Resting position (up-left angle)
-@export var flip_angle_degrees: float = 65.0  # How many degrees to rotate when flipping
+@export var flip_angle_degrees: float = 60.0  # How many degrees to rotate when flipping
 
 
 func get_rest_angle() -> float:

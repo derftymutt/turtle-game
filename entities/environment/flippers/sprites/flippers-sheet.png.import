@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dxns6igxp5pcb"
-path="res://.godot/imported/flipper-left-down-Sheet.png-a0a893b153b666c29cf60c6c5b08af0e.ctex"
+uid="uid://bkqexc0wkxc0m"
+path="res://.godot/imported/flippers-sheet.png-16b06e20d96e61949d06ddae0df13b30.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://entities/environment/flippers/sprites/flipper-left-down-Sheet.png"
-dest_files=["res://.godot/imported/flipper-left-down-Sheet.png-a0a893b153b666c29cf60c6c5b08af0e.ctex"]
+source_file="res://entities/environment/flippers/sprites/flippers-sheet.png"
+dest_files=["res://.godot/imported/flippers-sheet.png-16b06e20d96e61949d06ddae0df13b30.ctex"]
 
 [params]
 

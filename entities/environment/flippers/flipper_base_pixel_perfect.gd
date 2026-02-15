@@ -10,7 +10,7 @@ class_name FlipperBasePixelPerfect
 @export var flip_force: float = 300.0
 @export var flip_speed: float = 40.0
 @export var flip_input: String = "flipper_left"
-@export var collision_rotation_scale: float = 0.73  # Scale collision rotation (e.g., 0.9 = 10% less rotation)
+@export var collision_rotation_scale: float = 0.79  # Scale collision rotation (e.g., 0.9 = 10% less rotation)
 
 var is_flipping: bool = false
 var current_rotation: float = 0.0  # Physics rotation
@@ -164,9 +164,11 @@ func update_sprite_frame():
 	var dist_to_flip = abs(angle_difference(current_rotation, flip_rot))
 	
 	if dist_to_rest < dist_to_flip:
-		animated_sprite.frame = 0
+		#animated_sprite.frame = 0
+		animated_sprite.play('up')
 	else:
-		animated_sprite.frame = 2
+		#animated_sprite.frame = 2
+		animated_sprite.play('down')
 
 
 func activate_flip():
