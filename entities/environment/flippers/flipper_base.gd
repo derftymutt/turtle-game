@@ -1,58 +1,69 @@
 extends StaticBody2D
 class_name FlipperBase
 
-## Base class for all flipper types
-## Contains shared physics, cradle detection, and force application
-## Subclasses define rotation direction and rest/flip angles
+## PIXEL-PERFECT FLIPPER - Correct approach:
+## - DON'T rotate StaticBody2D (sprite stays in place)
+## - Rotate ONLY collision shapes (for physics)
+## - Swap sprite frames (pixel-perfect visuals)
+## - Collision setup IDENTICAL to original flipper
 
-## Exported variables - configure in Inspector
-@export var flip_force: float = 300.0  # Base force applied to bodies
-@export var flip_speed: float = 40.0  # How fast flipper rotates (lerp speed)
-@export var flip_input: String = "flipper_left"  # Input action to trigger flip
+@export var flip_force: float = 300.0
+@export var flip_speed: float = 40.0
+@export var flip_input: String = "flipper_left"
+@export var collision_rotation_scale: float = 0.85  # Scale collision rotation (e.g., 0.9 = 10% less rotation)
 
-## Physics tracking
 var is_flipping: bool = false
+var current_rotation: float = 0.0  # Physics rotation
 var target_rotation: float = 0.0
 var previous_rotation: float = 0.0
 var angular_velocity: float = 0.0
-var hit_bodies: Dictionary = {}  # Tracks bodies we've recently hit (prevents double-hits)
+var hit_bodies: Dictionary = {}
+var is_actively_moving: bool = false
+var active_movement_timer: float = 0.0
+var active_movement_duration: float = 0.3
+var last_input_was_press: bool = false
+var settled_time: float = 0.0
+var cradle_threshold: float = 0.2
+var was_cradling: bool = false
 
-## Active movement tracking (for bidirectional hits)
-var is_actively_moving: bool = false  # True when flipper is responding to input change
-var active_movement_timer: float = 0.0  # Countdown for active hit window
-var active_movement_duration: float = 0.3  # How long after input change we apply force
-var last_input_was_press: bool = false  # Tracks press vs release for force direction
+var base_collision_rotation: float = 0.0  # Store initial collision rotation from scene
+var base_collision_position: Vector2 = Vector2.ZERO  # Store initial collision position from scene
+var base_area_collision_position: Vector2 = Vector2.ZERO
 
-## Cradle detection (prevents accidental flings when holding ball)
-var settled_time: float = 0.0  # How long flipper has been at target
-var cradle_threshold: float = 0.2  # Time needed to be considered "cradling"
-var was_cradling: bool = false  # True if ball was being cradled before release
-
-## Node references
-@onready var area = $Area2D
-
+@onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
+@onready var collision_shape: CollisionShape2D = $CollisionShape2D
+@onready var area: Area2D = $Area2D
+@onready var area_collision_shape: CollisionShape2D = $Area2D/CollisionShape2D
 
 func _ready():
-	# Set initial rotation to rest position
 	target_rotation = get_rest_angle()
-	rotation = target_rotation
-	previous_rotation = rotation
-
+	current_rotation = target_rotation
+	
+	# Store the base collision rotation and position from the scene
+	if collision_shape:
+		base_collision_rotation = collision_shape.rotation
+		base_collision_position = collision_shape.position
+	
+	if area_collision_shape:
+		base_area_collision_position = area_collision_shape.position
+	
+	# Start at frame 0
+	if animated_sprite:
+		animated_sprite.frame = 0
+		animated_sprite.stop()
+	
+	# Set initial collision rotation
+	update_collision_rotation()
 
 func _physics_process(delta):
-	# Handle input - subclasses determine rotation targets via abstract methods
+	# Input handling
 	if Input.is_action_pressed(flip_input):
 		if not is_flipping:
 			activate_flip()
 	else:
 		if is_flipping:
-			# CRADLE DETECTION before deactivating
-			# Must have ALL of:
-			# 1. Flipper settled at target position
-			# 2. Been settled for minimum threshold time
-			# 3. Body touching flipper
-			# 4. Body is mostly stationary (resting, not bouncing)
-			var rotation_distance = abs(angle_difference(rotation, target_rotation))
+			# Cradle detection
+			var rotation_distance = abs(angle_difference(current_rotation, target_rotation))
 			var is_currently_settled = (rotation_distance < deg_to_rad(5) and abs(angular_velocity) < 1.0)
 			var has_body_touching = false
 			var body_is_resting = false
@@ -61,48 +72,48 @@ func _physics_process(delta):
 				var touching_bodies = area.get_overlapping_bodies()
 				has_body_touching = touching_bodies.size() > 0
 				
-				# Check if any touching body is "resting" (low velocity = being cradled)
 				if has_body_touching:
 					for body in touching_bodies:
 						if body is RigidBody2D:
 							var body_velocity = body.linear_velocity.length()
-							# Resting threshold: slower than 50 pixels/sec
 							if body_velocity < 50:
 								body_is_resting = true
 								break
 			
-			# Only flag as cradling if body is RESTING, not actively moving
 			was_cradling = (is_currently_settled and settled_time >= cradle_threshold 
 							and has_body_touching and body_is_resting)
 			
 			deactivate_flip()
 	
-	# Update active movement timer (for hit detection window)
+	# Active movement timer
 	if active_movement_timer > 0:
 		active_movement_timer -= delta
 		if active_movement_timer <= 0:
 			is_actively_moving = false
 	
-	# Smoothly rotate toward target
-	previous_rotation = rotation
-	rotation = lerp_angle(rotation, target_rotation, flip_speed * delta)
-	angular_velocity = (rotation - previous_rotation) / delta  # Preserves sign for direction
+	# ROTATE PHYSICS ANGLE (not StaticBody2D, just track the angle)
+	previous_rotation = current_rotation
+	current_rotation = lerp_angle(current_rotation, target_rotation, flip_speed * delta)
+	angular_velocity = (current_rotation - previous_rotation) / delta
 	
-	# Track how long flipper has been settled (for cradle detection)
-	var rotation_distance = abs(angle_difference(rotation, target_rotation))
-	var is_near_target = rotation_distance < deg_to_rad(5)  # Within 5 degrees
+	# Update collision and sprite
+	update_collision_rotation()
+	update_sprite_frame()
+	
+	# Settled time tracking
+	var rotation_distance = abs(angle_difference(current_rotation, target_rotation))
+	var is_near_target = rotation_distance < deg_to_rad(5)
 	
 	if is_near_target and abs(angular_velocity) < 1.0:
 		settled_time += delta
 	else:
 		settled_time = 0.0
 	
-	# End active window early if flipper has settled
 	if is_actively_moving and is_near_target and abs(angular_velocity) < 1.0:
 		is_actively_moving = false
 		active_movement_timer = 0
 	
-	# Clean up old hit tracking (prevents hitting same body multiple times)
+	# Hit tracking cleanup
 	var to_remove = []
 	for body_id in hit_bodies.keys():
 		hit_bodies[body_id] -= delta
@@ -111,12 +122,7 @@ func _physics_process(delta):
 	for body_id in to_remove:
 		hit_bodies.erase(body_id)
 	
-	# BIDIRECTIONAL FORCE APPLICATION
-	# Only apply force during active movement window to prevent:
-	# - Hitting bodies that just come to rest on flipper
-	# - Flinging cradled balls when releasing
-	#
-	# Lower velocity threshold for releases (upward shots need this)
+	# Force application
 	var velocity_threshold = 0.5 if not last_input_was_press else 2.0
 	
 	if is_actively_moving and abs(angular_velocity) > velocity_threshold and not is_near_target and area:
@@ -125,16 +131,51 @@ func _physics_process(delta):
 				var body_id = body.get_instance_id()
 				if not body_id in hit_bodies:
 					hit_body(body, last_input_was_press, was_cradling)
-					hit_bodies[body_id] = 0.1  # Cooldown before can hit again
+					hit_bodies[body_id] = 0.1
+
+
+func update_collision_rotation():
+	"""Rotate collision shapes by physics angle + base rotation
+	ALSO rotate the position vector so it orbits around the origin (pivot point)"""
+	# Scale the rotation amount for collision (to match sprite angle range)
+	var scaled_rotation = current_rotation * collision_rotation_scale
+	
+	if collision_shape:
+		# Rotate the shape itself
+		collision_shape.rotation = base_collision_rotation + scaled_rotation
+		
+		# Rotate the position vector around origin (0,0)
+		collision_shape.position = base_collision_position.rotated(scaled_rotation)
+	
+	if area_collision_shape:
+		area_collision_shape.rotation = base_collision_rotation + scaled_rotation
+		area_collision_shape.position = base_area_collision_position.rotated(scaled_rotation)
+
+
+func update_sprite_frame():
+	"""Show frame 0 at rest, frame 1 when flipped"""
+	if not animated_sprite:
+		return
+	
+	var rest_rot = get_rest_angle()
+	var flip_rot = get_flip_angle()
+	
+	var dist_to_rest = abs(angle_difference(current_rotation, rest_rot))
+	var dist_to_flip = abs(angle_difference(current_rotation, flip_rot))
+	
+	if dist_to_rest < dist_to_flip:
+		#animated_sprite.frame = 0
+		animated_sprite.play('rest')
+	else:
+		#animated_sprite.frame = 2
+		animated_sprite.play('extend')
 
 
 func activate_flip():
-	"""Called when flip input is pressed - rotates to active position"""
 	is_flipping = true
 	target_rotation = get_flip_angle()
 	hit_bodies.clear()
 	
-	# Start active movement window
 	is_actively_moving = true
 	active_movement_timer = active_movement_duration
 	last_input_was_press = true
@@ -143,64 +184,45 @@ func activate_flip():
 
 
 func deactivate_flip():
-	"""Called when flip input is released - returns to rest position"""
 	is_flipping = false
 	target_rotation = get_rest_angle()
 	hit_bodies.clear()
 	
-	# Start active movement window for RELEASE stroke (enables bidirectional hits)
 	is_actively_moving = true
 	active_movement_timer = active_movement_duration
 	last_input_was_press = false
 
 
 func hit_body(body: RigidBody2D, is_press_action: bool, was_cradle_release: bool):
-	"""
-	Apply force to a body based on flipper's surface velocity
-	Uses realistic pinball physics: force = contact_distance × angular_velocity
-	"""
-	# CRADLE PROTECTION: Don't fling balls that were being held
+	"""Exact same physics as original flipper"""
 	if not is_press_action and was_cradle_release:
-		return  # Ball was cradled - don't apply force on release
+		return
 	
-	# Calculate contact point and distance from pivot
 	var to_body = body.global_position - global_position
 	var contact_distance = to_body.length()
-	
-	# Surface velocity at contact point (v = r × ω)
-	# This is the actual speed the flipper surface is moving at impact point
 	var surface_velocity = contact_distance * angular_velocity
 	
-	# Get tangent direction (perpendicular to radius - direction of surface movement)
 	var tangent = Vector2(-to_body.y, to_body.x).normalized()
 	
-	# Correct tangent based on rotation direction
 	if angular_velocity < 0:
 		tangent = -tangent
 	
-	# Calculate impulse based on surface velocity (realistic pinball physics)
 	var impulse_strength = flip_force * abs(surface_velocity) * 0.1
 	
-	# BOOST release strokes for upward shots (they need extra power to overcome gravity)
 	if not is_press_action:
 		impulse_strength *= 2.0
 	
-	# Clamp to reasonable range
 	impulse_strength = clamp(impulse_strength, flip_force * 0.5, flip_force * 3.0)
 	
-	# Apply the impulse
 	body.linear_velocity += tangent * impulse_strength
 
 
-## ABSTRACT METHODS - Subclasses must implement these
+## ABSTRACT METHODS
 
 func get_rest_angle() -> float:
-	"""Return the rest angle in radians - override in subclass"""
 	push_error("get_rest_angle() must be implemented in subclass")
 	return 0.0
 
-
 func get_flip_angle() -> float:
-	"""Return the active flip angle in radians - override in subclass"""
 	push_error("get_flip_angle() must be implemented in subclass")
 	return 0.0

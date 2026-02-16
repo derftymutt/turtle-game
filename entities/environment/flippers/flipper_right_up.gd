@@ -7,7 +7,7 @@ class_name FlipperRightUp
 ## Flip position: Rotates counter-clockwise to launch ball up/left
 
 @export var rest_angle_degrees: float = -30.0  # Resting position (down-right angle)
-@export var flip_angle_degrees: float = 65.0  # How many degrees to rotate when flipping
+@export var flip_angle_degrees: float = 60.0  # How many degrees to rotate when flipping
 
 
 func get_rest_angle() -> float:

@@ -1,9 +1,10 @@
-[gd_scene format=3 uid="uid://ckonw8pq3soib"]
+[gd_scene format=3 uid="uid://dcjepsmxmmqkl"]
 
 [ext_resource type="PackedScene" uid="uid://dgwg5saty0h76" path="res://levels/shared/level_base.tscn" id="1_lrvbd"]
 [ext_resource type="PackedScene" uid="uid://qd5yfrw7588i" path="res://entities/environment/ocean/ocean.tscn" id="2_oqlok"]
 [ext_resource type="Script" uid="uid://c3i3p77jm22vp" path="res://systems/camera_2d.gd" id="3_7nvrk"]
 [ext_resource type="PackedScene" uid="uid://btbnsn74vk1b" path="res://entities/player/turtle_player.tscn" id="4_jkxa6"]
+[ext_resource type="PackedScene" uid="uid://r0k3freedece" path="res://entities/environment/flippers/flipper-legacy/flipper.tscn" id="5_w75he"]
 [ext_resource type="PackedScene" uid="uid://bu0sjqqm7uvm1" path="res://entities/enemies/crocodile/crocodile.tscn" id="6_udfhf"]
 [ext_resource type="PackedScene" uid="uid://d2kw7hdpyp6d0" path="res://entities/enemies/sea_urchin/sea_urchin.tscn" id="7_i6od7"]
 [ext_resource type="PackedScene" uid="uid://dtqni7qbnvils" path="res://entities/environment/walls/dead_wall/dead_wall.tscn" id="8_ryfpa"]
@@ -20,59 +21,57 @@
 [ext_resource type="PackedScene" uid="uid://c55cfm3aeb65a" path="res://systems/trash_cleanup/trash_sequence_spawner.tscn" id="19_7nvrk"]
 [ext_resource type="PackedScene" uid="uid://cxt44kcegt0ah" path="res://entities/environment/ufo_workshop/ufo_workshop.tscn" id="21_w75he"]
 [ext_resource type="PackedScene" uid="uid://bgrcf873d7ity" path="res://entities/collectibles/health_plant/health_plant_spawner.tscn" id="22_i6od7"]
-[ext_resource type="PackedScene" uid="uid://4het8fdlmvgj" path="res://entities/environment/flippers/flipper_left_down.tscn" id="22_ryfpa"]
 [ext_resource type="PackedScene" uid="uid://bx3l4rf0ajwy1" path="res://entities/enemies/electric_eel/electric_eel.tscn" id="22_udfhf"]
-[ext_resource type="PackedScene" uid="uid://b5olvcks1vnwn" path="res://entities/environment/flippers/flipper_right_down.tscn" id="23_ntdhj"]
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_fqf46"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_udfhf"]
 friction = 0.0
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_asgae"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_i6od7"]
 friction = 0.0
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_07wad"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ryfpa"]
 friction = 0.0
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_017ew"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ntdhj"]
 friction = 0.0
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_j3jie"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_0fu15"]
 friction = 0.0
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_3di1g"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_4knja"]
 friction = 0.0
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_tfwdd"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_voubc"]
 friction = 0.0
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_4vbag"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_0x1rk"]
 friction = 0.0
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_sblu5"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_pnpm1"]
 friction = 0.1
 bounce = 1.2
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_cd3ty"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_06ecp"]
 friction = 0.1
 bounce = 1.2
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ow8nx"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ohjdc"]
 friction = 0.1
 bounce = 1.2
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_cnjkq"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_e5brb"]
 friction = 0.1
 bounce = 1.2
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_uslkj"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_rf48r"]
 friction = 0.1
 bounce = 1.2
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_66dtd"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_toluw"]
 friction = 0.1
 bounce = 1.2
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_s45bq"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_dp1ib"]
 friction = 0.1
 bounce = 1.2
 
@@ -85,52 +84,100 @@ size = Vector2(9.999756, 465.00012)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_dp1ib"]
 size = Vector2(640, 40)
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_4jylu"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_5t0se"]
 friction = 0.1
 bounce = 1.2
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_m52kh"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_tqj1w"]
 friction = 0.1
 bounce = 1.2
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_tsi1h"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_gtrna"]
 friction = 0.1
 bounce = 1.2
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_3lwj0"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_xapae"]
 friction = 0.1
 bounce = 1.2
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ql43f"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_r0nt2"]
 friction = 0.1
 bounce = 1.2
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_x1mqi"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_xv8d5"]
 friction = 0.1
 bounce = 1.2
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_cvkwf"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_0wxk8"]
 friction = 0.1
 bounce = 1.2
 
 [node name="LevelBase" unique_id=519430445 instance=ExtResource("1_lrvbd")]
 
-[node name="Ocean" parent="." index="3" unique_id=2062759388 instance=ExtResource("2_oqlok")]
+[node name="Ocean" parent="." index="0" unique_id=2062759388 instance=ExtResource("2_oqlok")]
 
-[node name="Camera2D" type="Camera2D" parent="." index="4" unique_id=380561311 node_paths=PackedStringArray("follow_target")]
+[node name="Camera2D" type="Camera2D" parent="." index="1" unique_id=380561311 node_paths=PackedStringArray("follow_target")]
 script = ExtResource("3_7nvrk")
 follow_target = NodePath("../TurtlePlayer")
 vertical_zoom_speed = 4.0
 horizontal_follow_enabled = false
 
-[node name="TurtlePlayer" parent="." index="5" unique_id=1163425295 instance=ExtResource("4_jkxa6")]
+[node name="TurtlePlayer" parent="." index="2" unique_id=1163425295 instance=ExtResource("4_jkxa6")]
 position = Vector2(-13, 16)
 
-[node name="Crocodile" parent="." index="6" unique_id=781536171 instance=ExtResource("6_udfhf")]
+[node name="Flippers" type="Node2D" parent="." index="3" unique_id=1565940212]
+
+[node name="Flipper Left" parent="Flippers" index="0" unique_id=1992760177 instance=ExtResource("5_w75he")]
+position = Vector2(-233.99997, -88)
+
+[node name="Flipper Left2" parent="Flippers" index="1" unique_id=1792572197 instance=ExtResource("5_w75he")]
+position = Vector2(-85, -40)
+
+[node name="Flipper Left3" parent="Flippers" index="2" unique_id=1767765847 instance=ExtResource("5_w75he")]
+position = Vector2(-175, -195)
+
+[node name="Flipper Left4" parent="Flippers" index="3" unique_id=1385220634 instance=ExtResource("5_w75he")]
+position = Vector2(-63, -195)
+
+[node name="Flipper Right" parent="Flippers" index="4" unique_id=1936786536 instance=ExtResource("5_w75he")]
+position = Vector2(224, -88)
+rest_angle = 50.0
+flip_input = "flipper_right"
+flip_sprite_h = true
+is_right_flipper = true
+
+[node name="Flipper Right2" parent="Flippers" index="5" unique_id=2036556566 instance=ExtResource("5_w75he")]
+position = Vector2(67, -40)
+rest_angle = 50.0
+flip_input = "flipper_right"
+flip_sprite_h = true
+is_right_flipper = true
+
+[node name="Flipper Right3" parent="Flippers" index="6" unique_id=1679220718 instance=ExtResource("5_w75he")]
+position = Vector2(74, 95)
+rest_angle = 50.0
+flip_input = "flipper_right"
+flip_sprite_h = true
+is_right_flipper = true
+
+[node name="Flipper Right4" parent="Flippers" index="7" unique_id=1970866778 instance=ExtResource("5_w75he")]
+position = Vector2(269, 66)
+rest_angle = 50.0
+flip_input = "flipper_right"
+flip_sprite_h = true
+is_right_flipper = true
+
+[node name="Flipper Left5" parent="Flippers" index="8" unique_id=986236811 instance=ExtResource("5_w75he")]
+position = Vector2(-267, 62)
+
+[node name="Flipper Left6" parent="Flippers" index="9" unique_id=1474039361 instance=ExtResource("5_w75he")]
+position = Vector2(-110.99999, 95)
+
+[node name="Crocodile" parent="." index="4" unique_id=781536171 instance=ExtResource("6_udfhf")]
 position = Vector2(-264, -124)
 patrol_speed = 60.0
 
-[node name="SeaUrchins" type="Node2D" parent="." index="7" unique_id=673576481]
+[node name="SeaUrchins" type="Node2D" parent="." index="5" unique_id=673576481]
 
 [node name="SeaUrchin" parent="SeaUrchins" index="0" unique_id=37824323 instance=ExtResource("7_i6od7")]
 position = Vector2(221, 138)
@@ -150,69 +197,69 @@ position = Vector2(-142, -80)
 [node name="SeaUrchin6" parent="SeaUrchins" index="5" unique_id=876129622 instance=ExtResource("7_i6od7")]
 position = Vector2(62, -103)
 
-[node name="DeadWalls" type="Node2D" parent="." index="8" unique_id=984029997]
+[node name="DeadWalls" type="Node2D" parent="." index="6" unique_id=984029997]
 
 [node name="DeadWall" parent="DeadWalls" index="0" unique_id=2124518800 instance=ExtResource("8_ryfpa")]
 position = Vector2(245, -58)
 rotation = 0.7853982
 scale = Vector2(0.99999994, 0.99999994)
-physics_material_override = SubResource("PhysicsMaterial_fqf46")
+physics_material_override = SubResource("PhysicsMaterial_udfhf")
 wall_length = 60.0
 
 [node name="DeadWall2" parent="DeadWalls" index="1" unique_id=1107499780 instance=ExtResource("8_ryfpa")]
 position = Vector2(-106, -8.999996)
 rotation = -0.7853982
 scale = Vector2(0.9999999, 0.9999999)
-physics_material_override = SubResource("PhysicsMaterial_asgae")
+physics_material_override = SubResource("PhysicsMaterial_i6od7")
 wall_length = 60.0
 
 [node name="DeadWall3" parent="DeadWalls" index="2" unique_id=1348094076 instance=ExtResource("8_ryfpa")]
 position = Vector2(-257, -58)
 rotation = -0.7853982
-physics_material_override = SubResource("PhysicsMaterial_07wad")
+physics_material_override = SubResource("PhysicsMaterial_ryfpa")
 wall_length = 60.0
 
 [node name="DeadWall4" parent="DeadWalls" index="3" unique_id=880768741 instance=ExtResource("8_ryfpa")]
 position = Vector2(87, -10.000004)
 rotation = 0.7853982
 scale = Vector2(0.99999994, 0.99999994)
-physics_material_override = SubResource("PhysicsMaterial_017ew")
+physics_material_override = SubResource("PhysicsMaterial_ntdhj")
 wall_length = 60.0
 
 [node name="DeadWall5" parent="DeadWalls" index="4" unique_id=1688922808 instance=ExtResource("8_ryfpa")]
 position = Vector2(-283.00003, 87.99999)
 rotation = -0.7853982
 scale = Vector2(0.9999999, 0.9999999)
-physics_material_override = SubResource("PhysicsMaterial_j3jie")
+physics_material_override = SubResource("PhysicsMaterial_0fu15")
 wall_length = 40.0
 
 [node name="DeadWall6" parent="DeadWalls" index="5" unique_id=1951804786 instance=ExtResource("8_ryfpa")]
 position = Vector2(89.000015, 121.000015)
 rotation = 0.7853982
 scale = Vector2(0.99999994, 0.99999994)
-physics_material_override = SubResource("PhysicsMaterial_3di1g")
+physics_material_override = SubResource("PhysicsMaterial_4knja")
 wall_length = 45.0
 
 [node name="DeadWall7" parent="DeadWalls" index="6" unique_id=684897873 instance=ExtResource("8_ryfpa")]
 position = Vector2(-126, 120)
 rotation = -0.7853982
 scale = Vector2(0.9999999, 0.9999999)
-physics_material_override = SubResource("PhysicsMaterial_tfwdd")
+physics_material_override = SubResource("PhysicsMaterial_voubc")
 wall_length = 45.0
 
 [node name="DeadWall8" parent="DeadWalls" index="7" unique_id=1667846455 instance=ExtResource("8_ryfpa")]
 position = Vector2(285, 91.000015)
 rotation = 0.7853982
 scale = Vector2(0.99999994, 0.99999994)
-physics_material_override = SubResource("PhysicsMaterial_4vbag")
+physics_material_override = SubResource("PhysicsMaterial_0x1rk")
 wall_length = 40.0
 
-[node name="BumperWalls" type="Node2D" parent="." index="9" unique_id=1803017627]
+[node name="BumperWalls" type="Node2D" parent="." index="7" unique_id=1803017627]
 
 [node name="BumperWall" parent="BumperWalls" index="0" unique_id=794959371 instance=ExtResource("9_ntdhj")]
 position = Vector2(-175, -26)
 scale = Vector2(0.99999994, 0.99999994)
-physics_material_override = SubResource("PhysicsMaterial_sblu5")
+physics_material_override = SubResource("PhysicsMaterial_pnpm1")
 wall_length = 48.0
 wall_thickness = 5.0
 
@@ -220,46 +267,46 @@ wall_thickness = 5.0
 position = Vector2(-6.9999995, -64)
 rotation = -3.1415925
 scale = Vector2(0.99999994, 0.99999994)
-physics_material_override = SubResource("PhysicsMaterial_cd3ty")
+physics_material_override = SubResource("PhysicsMaterial_06ecp")
 wall_length = 35.0
 wall_thickness = 5.0
 
 [node name="BumperWall3" parent="BumperWalls" index="2" unique_id=297096102 instance=ExtResource("9_ntdhj")]
 position = Vector2(177, 94.999985)
 scale = Vector2(0.99999994, 0.99999994)
-physics_material_override = SubResource("PhysicsMaterial_ow8nx")
+physics_material_override = SubResource("PhysicsMaterial_ohjdc")
 wall_length = 35.0
 wall_thickness = 5.0
 
 [node name="BumperWall4" parent="BumperWalls" index="3" unique_id=653196056 instance=ExtResource("9_ntdhj")]
 position = Vector2(-12.999996, 59.999996)
 scale = Vector2(0.99999994, 0.99999994)
-physics_material_override = SubResource("PhysicsMaterial_cnjkq")
+physics_material_override = SubResource("PhysicsMaterial_e5brb")
 wall_length = 40.0
 wall_thickness = 5.0
 
 [node name="BumperWall7" parent="BumperWalls" index="4" unique_id=1807518273 instance=ExtResource("9_ntdhj")]
 position = Vector2(-13, 112)
 scale = Vector2(0.99999994, 0.99999994)
-physics_material_override = SubResource("PhysicsMaterial_uslkj")
+physics_material_override = SubResource("PhysicsMaterial_rf48r")
 wall_length = 40.0
 wall_thickness = 5.0
 
 [node name="BumperWall5" parent="BumperWalls" index="5" unique_id=1224459938 instance=ExtResource("9_ntdhj")]
 position = Vector2(166.00002, -26.000002)
 scale = Vector2(0.99999994, 0.99999994)
-physics_material_override = SubResource("PhysicsMaterial_66dtd")
+physics_material_override = SubResource("PhysicsMaterial_toluw")
 wall_length = 48.0
 wall_thickness = 5.0
 
 [node name="BumperWall6" parent="BumperWalls" index="6" unique_id=1276922697 instance=ExtResource("9_ntdhj")]
 position = Vector2(-198.99997, 97)
 scale = Vector2(0.99999994, 0.99999994)
-physics_material_override = SubResource("PhysicsMaterial_s45bq")
+physics_material_override = SubResource("PhysicsMaterial_dp1ib")
 wall_length = 35.0
 wall_thickness = 5.0
 
-[node name="WorldBoundaries" type="Node2D" parent="." index="10" unique_id=953225133]
+[node name="WorldBoundaries" type="Node2D" parent="." index="8" unique_id=953225133]
 
 [node name="BoundaryLeft" type="StaticBody2D" parent="WorldBoundaries" index="0" unique_id=1983000424]
 position = Vector2(-12.000001, -63.000004)
@@ -313,27 +360,27 @@ offset_right = 320.0
 offset_bottom = 205.0
 color = Color(0.17755811, 0.12329503, 0.02367841, 1)
 
-[node name="Piranha" parent="." index="11" unique_id=923197771 instance=ExtResource("10_0fu15")]
+[node name="Piranha" parent="." index="9" unique_id=923197771 instance=ExtResource("10_0fu15")]
 position = Vector2(-142, 103)
 
-[node name="PiranhaSpawner" parent="." index="12" unique_id=664138342 instance=ExtResource("11_4knja")]
+[node name="PiranhaSpawner" parent="." index="10" unique_id=664138342 instance=ExtResource("11_4knja")]
 position = Vector2(-175, 40)
 
-[node name="WallLayoutHelper" type="Node2D" parent="." index="13" unique_id=215277583]
+[node name="WallLayoutHelper" type="Node2D" parent="." index="11" unique_id=215277583]
 script = ExtResource("12_voubc")
 dead_wall_scene = ExtResource("8_ryfpa")
 bumper_wall_scene = ExtResource("9_ntdhj")
 
-[node name="AirBubbleSpawner" type="Node2D" parent="." index="14" unique_id=799194845]
+[node name="AirBubbleSpawner" type="Node2D" parent="." index="12" unique_id=799194845]
 script = ExtResource("13_0x1rk")
 bubble_scene = ExtResource("14_pnpm1")
 spawn_interval = 10.0
 spawn_count_max = 2
 
-[node name="CollectibleSpawner" parent="." index="15" unique_id=77619061 instance=ExtResource("15_06ecp")]
+[node name="CollectibleSpawner" parent="." index="13" unique_id=77619061 instance=ExtResource("15_06ecp")]
 collectible_scene = ExtResource("16_ohjdc")
 
-[node name="UfoPieceSeeder" parent="." index="16" unique_id=1962003509 instance=ExtResource("17_e5brb")]
+[node name="UfoPieceSeeder" parent="." index="14" unique_id=1962003509 instance=ExtResource("17_e5brb")]
 use_level_manager_count = false
 seed_count_min = 5
 
@@ -341,33 +388,33 @@ seed_count_min = 5
 
 [node name="CircularBumper" parent="CircularBumpers" index="0" unique_id=110944296 instance=ExtResource("18_oqlok")]
 position = Vector2(-175, -26)
-physics_material_override = SubResource("PhysicsMaterial_4jylu")
+physics_material_override = SubResource("PhysicsMaterial_5t0se")
 radius = 15.0
 
 [node name="CircularBumper2" parent="CircularBumpers" index="1" unique_id=699960614 instance=ExtResource("18_oqlok")]
 position = Vector2(-199, 97)
-physics_material_override = SubResource("PhysicsMaterial_m52kh")
+physics_material_override = SubResource("PhysicsMaterial_tqj1w")
 
 [node name="CircularBumper3" parent="CircularBumpers" index="2" unique_id=1564020895 instance=ExtResource("18_oqlok")]
 position = Vector2(-13, 60)
-physics_material_override = SubResource("PhysicsMaterial_tsi1h")
+physics_material_override = SubResource("PhysicsMaterial_gtrna")
 
 [node name="CircularBumper4" parent="CircularBumpers" index="3" unique_id=1506783036 instance=ExtResource("18_oqlok")]
 position = Vector2(-13, 112)
-physics_material_override = SubResource("PhysicsMaterial_3lwj0")
+physics_material_override = SubResource("PhysicsMaterial_xapae")
 
 [node name="CircularBumper5" parent="CircularBumpers" index="4" unique_id=1937263089 instance=ExtResource("18_oqlok")]
 position = Vector2(-7, -64)
-physics_material_override = SubResource("PhysicsMaterial_ql43f")
+physics_material_override = SubResource("PhysicsMaterial_r0nt2")
 
 [node name="CircularBumper6" parent="CircularBumpers" index="5" unique_id=1003900960 instance=ExtResource("18_oqlok")]
 position = Vector2(166, -26)
-physics_material_override = SubResource("PhysicsMaterial_x1mqi")
+physics_material_override = SubResource("PhysicsMaterial_xv8d5")
 radius = 15.0
 
 [node name="CircularBumper7" parent="CircularBumpers" index="6" unique_id=365714998 instance=ExtResource("18_oqlok")]
 position = Vector2(177, 95)
-physics_material_override = SubResource("PhysicsMaterial_cvkwf")
+physics_material_override = SubResource("PhysicsMaterial_0wxk8")
 
 [node name="TrashSequenceSpawner" parent="." index="18" unique_id=435128493 instance=ExtResource("19_7nvrk")]
 
@@ -381,27 +428,3 @@ position = Vector2(-221, 24)
 position = Vector2(245, 5)
 
 [node name="HealthPlantSpawner" parent="." index="22" unique_id=1172793188 instance=ExtResource("22_i6od7")]
-
-[node name="FlipperLeftDownPixelPerfect" parent="." index="23" unique_id=94480237 instance=ExtResource("22_ryfpa")]
-position = Vector2(-80, -40)
-
-[node name="FlipperRightDownPixelPerfect" parent="." index="24" unique_id=366067672 instance=ExtResource("23_ntdhj")]
-position = Vector2(63, -42)
-
-[node name="FlipperLeftDown" parent="." index="25" unique_id=1447591536 instance=ExtResource("22_ryfpa")]
-position = Vector2(-231, -90)
-
-[node name="FlipperLeftDown2" parent="." index="26" unique_id=661980428 instance=ExtResource("22_ryfpa")]
-position = Vector2(-263, 64)
-
-[node name="FlipperLeftDown3" parent="." index="27" unique_id=431302676 instance=ExtResource("22_ryfpa")]
-position = Vector2(-105, 94)
-
-[node name="FlipperRightDownPixelPerfect2" parent="." index="28" unique_id=1894723362 instance=ExtResource("23_ntdhj")]
-position = Vector2(68, 95)
-
-[node name="FlipperRightDownPixelPerfect3" parent="." index="29" unique_id=62498836 instance=ExtResource("23_ntdhj")]
-position = Vector2(219, -91)
-
-[node name="FlipperRightDownPixelPerfect4" parent="." index="30" unique_id=1458908778 instance=ExtResource("23_ntdhj")]
-position = Vector2(266, 65)

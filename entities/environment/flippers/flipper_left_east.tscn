@@ -1,0 +1,85 @@
+[gd_scene format=3 uid="uid://d3ui83o5ln2lj"]
+
+[ext_resource type="Script" uid="uid://dfbewcnx7rs6p" path="res://entities/environment/flippers/flipper_left_down.gd" id="1_tleyg"]
+[ext_resource type="Texture2D" uid="uid://j733syysa3v3" path="res://entities/environment/flippers/sprites/flipper-sheet2.png" id="1_yeka4"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tleyg"]
+atlas = ExtResource("1_yeka4")
+region = Rect2(64, 192, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_h1o0e"]
+atlas = ExtResource("1_yeka4")
+region = Rect2(96, 192, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kfaxi"]
+atlas = ExtResource("1_yeka4")
+region = Rect2(128, 192, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wulga"]
+atlas = ExtResource("1_yeka4")
+region = Rect2(128, 160, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f1t70"]
+atlas = ExtResource("1_yeka4")
+region = Rect2(0, 192, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_addtx"]
+atlas = ExtResource("1_yeka4")
+region = Rect2(32, 192, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_rqogn"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tleyg")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_h1o0e")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kfaxi")
+}],
+"loop": true,
+"name": &"extend",
+"speed": 2.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wulga")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f1t70")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_addtx")
+}],
+"loop": true,
+"name": &"rest",
+"speed": 2.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_j537t"]
+radius = 6.0
+height = 33.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_vewl4"]
+radius = 6.0
+height = 33.0
+
+[node name="FlipperLeftEast" type="StaticBody2D" unique_id=1447591536]
+script = ExtResource("1_tleyg")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1085307217]
+position = Vector2(0, -12)
+sprite_frames = SubResource("SpriteFrames_rqogn")
+animation = &"extend"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=944965431]
+position = Vector2(0, -12)
+shape = SubResource("CapsuleShape2D_j537t")
+
+[node name="Area2D" type="Area2D" parent="." unique_id=906731839]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=635072278]
+position = Vector2(0, -12)
+shape = SubResource("CapsuleShape2D_vewl4")

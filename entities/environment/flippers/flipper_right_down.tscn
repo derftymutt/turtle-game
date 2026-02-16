@@ -1,32 +1,92 @@
-[gd_scene format=3 uid="uid://dom6aaxyhgakl"]
+[gd_scene format=3 uid="uid://b5olvcks1vnwn"]
 
-[ext_resource type="Script" uid="uid://bhd1fo6og6n68" path="res://entities/environment/flippers/flipper_right_down.gd" id="1_oy44e"]
-[ext_resource type="Texture2D" uid="uid://bpl0mf1a2r5rt" path="res://entities/environment/flippers/sprites/flipper_right_down.png" id="2_oy44e"]
+[ext_resource type="Script" uid="uid://bhd1fo6og6n68" path="res://entities/environment/flippers/flipper_right_down.gd" id="1_63b54"]
+[ext_resource type="Texture2D" uid="uid://bkqexc0wkxc0m" path="res://entities/environment/flippers/sprites/flippers-sheet.png" id="2_63b54"]
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_j537t"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_5p5ak"]
+atlas = ExtResource("2_63b54")
+region = Rect2(0, 128, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_g6e2s"]
+atlas = ExtResource("2_63b54")
+region = Rect2(32, 128, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6oeyb"]
+atlas = ExtResource("2_63b54")
+region = Rect2(64, 128, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6s32v"]
+atlas = ExtResource("2_63b54")
+region = Rect2(32, 96, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gupcf"]
+atlas = ExtResource("2_63b54")
+region = Rect2(64, 96, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dfkyv"]
+atlas = ExtResource("2_63b54")
+region = Rect2(96, 96, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_8i1ca"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5p5ak")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_g6e2s")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6oeyb")
+}],
+"loop": true,
+"name": &"extend",
+"speed": 2.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6s32v")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gupcf")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dfkyv")
+}],
+"loop": true,
+"name": &"rest",
+"speed": 2.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ouauj"]
 radius = 6.0
-height = 32.0
+height = 33.0
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_vewl4"]
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_i0b76"]
 radius = 6.0
-height = 32.0
+height = 33.0
 
-[node name="FlipperRightDown" type="StaticBody2D" unique_id=1447591536]
-script = ExtResource("1_oy44e")
+[node name="FlipperRightDownPixelPerfect" type="StaticBody2D" unique_id=94480237]
+script = ExtResource("1_63b54")
 flip_input = "flipper_right"
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=628480430]
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=2128002274]
 position = Vector2(-12, 0)
-texture = ExtResource("2_oy44e")
+sprite_frames = SubResource("SpriteFrames_8i1ca")
+animation = &"rest"
+autoplay = "rest"
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=944965431]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=586107701]
 position = Vector2(-12, 0)
 rotation = 1.5707964
-shape = SubResource("CapsuleShape2D_j537t")
+shape = SubResource("CapsuleShape2D_ouauj")
+debug_color = Color(0.9336619, 2.3969114e-05, 0.64580274, 0.41960785)
 
-[node name="Area2D" type="Area2D" parent="." unique_id=906731839]
+[node name="Area2D" type="Area2D" parent="." unique_id=1008583152]
+collision_layer = 0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=635072278]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=1968413971]
 position = Vector2(-12, 0)
-rotation = -1.5707964
-shape = SubResource("CapsuleShape2D_vewl4")
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_i0b76")
+debug_color = Color(0.9336619, 2.3969114e-05, 0.64580274, 0.41960785)

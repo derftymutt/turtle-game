@@ -1,4 +1,4 @@
-extends FlipperBasePixelPerfect
+extends FlipperBase
 class_name FlipperLeftDown
 
 ## Left-side flipper that rotates clockwise (downward into ocean)

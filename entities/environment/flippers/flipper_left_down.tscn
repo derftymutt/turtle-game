@@ -1,22 +1,106 @@
-[gd_scene format=3 uid="uid://b4mldyvm61s6e"]
+[gd_scene format=3 uid="uid://4het8fdlmvgj"]
 
-[ext_resource type="Script" uid="uid://bhtcbn1hf2oep" path="res://entities/environment/flippers/flipper_left_down.gd" id="1_ugrn3"]
-[ext_resource type="Texture2D" uid="uid://bprmvs1p24lio" path="res://entities/environment/flippers/sprites/flipper_left_down.png" id="2_ugrn3"]
+[ext_resource type="Texture2D" uid="uid://bkqexc0wkxc0m" path="res://entities/environment/flippers/sprites/flippers-sheet.png" id="1_7je5b"]
+
+[sub_resource type="GDScript" id="GDScript_7je5b"]
+script/source = "extends FlipperBase
+#class_name FlipperLeftDown
+
+## Left-side flipper that rotates clockwise (downward into ocean)
+## Typical use: Left side of play field, pushing ball down/right
+## Rest position: Angled up-left
+## Flip position: Rotates clockwise to push ball deeper
+
+@export var rest_angle_degrees: float = -30.0  # Resting position (up-left angle)
+@export var flip_angle_degrees: float = 60.0  # How many degrees to rotate when flipping
+
+
+func get_rest_angle() -> float:
+	\"\"\"Return rest position in radians\"\"\"
+	return deg_to_rad(rest_angle_degrees)
+
+
+func get_flip_angle() -> float:
+	\"\"\"Return active flip position in radians - rotates CLOCKWISE (adds to rest angle)\"\"\"
+	return deg_to_rad(rest_angle_degrees + flip_angle_degrees)
+"
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ugrn3"]
+atlas = ExtResource("1_7je5b")
+region = Rect2(32, 64, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ex104"]
+atlas = ExtResource("1_7je5b")
+region = Rect2(64, 64, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_t22oo"]
+atlas = ExtResource("1_7je5b")
+region = Rect2(96, 64, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sfbj6"]
+atlas = ExtResource("1_7je5b")
+region = Rect2(64, 32, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_81vyk"]
+atlas = ExtResource("1_7je5b")
+region = Rect2(96, 32, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hql6r"]
+atlas = ExtResource("1_7je5b")
+region = Rect2(0, 64, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_rqogn"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ugrn3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ex104")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_t22oo")
+}],
+"loop": true,
+"name": &"extend",
+"speed": 2.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sfbj6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_81vyk")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hql6r")
+}],
+"loop": true,
+"name": &"rest",
+"speed": 2.0
+}]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_j537t"]
-radius = 7.0
-height = 32.0
+radius = 6.0
+height = 33.0
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_vewl4"]
-radius = 7.0
+radius = 6.0
 height = 33.0
 
 [node name="FlipperLeftDown" type="StaticBody2D" unique_id=1447591536]
-script = ExtResource("1_ugrn3")
+script = SubResource("GDScript_7je5b")
+rest_angle_degrees = null
+flip_angle_degrees = null
+flip_force = null
+flip_speed = null
+flip_input = null
+collision_rotation_scale = null
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=628480430]
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1085307217]
 position = Vector2(12, 0)
-texture = ExtResource("2_ugrn3")
+sprite_frames = SubResource("SpriteFrames_rqogn")
+animation = &"rest"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=944965431]
 position = Vector2(12, 0)

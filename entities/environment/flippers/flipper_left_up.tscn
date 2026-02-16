@@ -1,22 +1,79 @@
 [gd_scene format=3 uid="uid://ntfpaqi03yfr"]
 
 [ext_resource type="Script" uid="uid://bl60a3lcs3e3d" path="res://entities/environment/flippers/flipper_left_up.gd" id="1_4tcyp"]
-[ext_resource type="Texture2D" uid="uid://dqusvs4iopdx8" path="res://entities/environment/flippers/sprites/flipper_left_up.png" id="2_4tcyp"]
+[ext_resource type="Texture2D" uid="uid://bkqexc0wkxc0m" path="res://entities/environment/flippers/sprites/flippers-sheet.png" id="2_4tcyp"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vditb"]
+atlas = ExtResource("2_4tcyp")
+region = Rect2(96, 160, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7dxpq"]
+atlas = ExtResource("2_4tcyp")
+region = Rect2(0, 192, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_43xd8"]
+atlas = ExtResource("2_4tcyp")
+region = Rect2(32, 192, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xtha8"]
+atlas = ExtResource("2_4tcyp")
+region = Rect2(0, 160, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_r830o"]
+atlas = ExtResource("2_4tcyp")
+region = Rect2(32, 160, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hjbim"]
+atlas = ExtResource("2_4tcyp")
+region = Rect2(64, 160, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_6ad38"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vditb")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7dxpq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_43xd8")
+}],
+"loop": true,
+"name": &"extend",
+"speed": 2.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xtha8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_r830o")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hjbim")
+}],
+"loop": true,
+"name": &"rest",
+"speed": 2.0
+}]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_j537t"]
 radius = 6.0
-height = 32.0
+height = 33.0
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_vewl4"]
 radius = 6.0
-height = 32.0
+height = 33.0
 
 [node name="FlipperLeftUp" type="StaticBody2D" unique_id=1447591536]
 script = ExtResource("1_4tcyp")
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=628480430]
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=896963701]
 position = Vector2(12.000001, -5.9604645e-08)
-texture = ExtResource("2_4tcyp")
+sprite_frames = SubResource("SpriteFrames_6ad38")
+animation = &"extend"
+autoplay = "rest"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=944965431]
 position = Vector2(12, 0)

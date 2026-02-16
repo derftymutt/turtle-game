@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://r0k3freedece"]
 
-[ext_resource type="Script" uid="uid://bk61l1txoabke" path="res://entities/environment/flippers/flipper.gd" id="1_otgx2"]
+[ext_resource type="Script" uid="uid://bk61l1txoabke" path="res://entities/environment/flippers/flipper-legacy/flipper.gd" id="1_otgx2"]
 [ext_resource type="Texture2D" uid="uid://cw8dltwno7f4l" path="res://entities/environment/flippers/sprites/flipper3.png" id="2_j537t"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_j537t"]

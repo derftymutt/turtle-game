@@ -1,6 +1,6 @@
 [gd_resource type="SpriteFrames" format=3 uid="uid://cyx0alh6jyom"]
 
-[ext_resource type="Texture2D" uid="uid://dxns6igxp5pcb" path="res://entities/environment/flippers/sprites/flipper-left-down-sheet.png" id="1_3f2wa"]
+[ext_resource type="Texture2D" uid="uid://dxns6igxp5pcb" path="res://entities/environment/flippers/sprites/flipper-left-down-Sheet.png" id="1_3f2wa"]
 [ext_resource type="Texture2D" uid="uid://bkqexc0wkxc0m" path="res://entities/environment/flippers/sprites/flippers-sheet.png" id="2_bqvpr"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_bqvpr"]
