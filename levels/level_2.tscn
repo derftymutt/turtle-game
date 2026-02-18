@@ -25,6 +25,7 @@
 [ext_resource type="PackedScene" uid="uid://bwdbbu1jhxn2n" path="res://entities/environment/walls/bumper_wall/bumper_wall_2.tscn" id="25_amxoe"]
 [ext_resource type="PackedScene" uid="uid://4het8fdlmvgj" path="res://entities/environment/flippers/flipper_left_down.tscn" id="25_he6wg"]
 [ext_resource type="PackedScene" uid="uid://b5olvcks1vnwn" path="res://entities/environment/flippers/flipper_right_down.tscn" id="25_jqt73"]
+[ext_resource type="PackedScene" uid="uid://ko8xdpxfr5ej" path="res://entities/environment/ocean_current/ocean_current.tscn" id="26_jqt73"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_4s8mp"]
 size = Vector2(9.000052, 471.00015)
@@ -34,10 +35,6 @@ size = Vector2(9.999756, 465.00012)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_nfgrx"]
 size = Vector2(640, 40)
-
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_he6wg"]
-friction = 0.1
-bounce = 1.2
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_jqt73"]
 friction = 0.1
@@ -71,8 +68,24 @@ bounce = 1.2
 friction = 0.1
 bounce = 1.2
 
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_6dcgf"]
+friction = 0.1
+bounce = 1.2
+
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_qthv2"]
 friction = 0.0
+
+[sub_resource type="Curve2D" id="Curve2D_00pa0"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, -1, 7, 0, 0, 0, 0, -15, 49, 0, 0, 0, 0, -42, 83, 0, 0, 0, 0, -52, 111, 0, 0, 0, 0, -62, 147, 0, 0, 0, 0, -63, 192)
+}
+point_count = 6
+
+[sub_resource type="Curve2D" id="Curve2D_jqt73"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 6, 32, 0, 0, 0, 0, 24, 59, 0, 0, 0, 0, 33, 89, 0, 0, 0, 0, 38, 119, 0, 0, 0, 0, 43, 146, 0, 0, 0, 0, 50, 187)
+}
+point_count = 7
 
 [node name="LevelBase" unique_id=202497572 instance=ExtResource("1_mi4ay")]
 level_number = 2
@@ -87,7 +100,6 @@ horizontal_follow_enabled = false
 
 [node name="TurtlePlayer" parent="." index="5" unique_id=1487317846 instance=ExtResource("4_h351q")]
 position = Vector2(0, 16)
-bullet_scene = null
 
 [node name="WorldBoundaries" type="Node2D" parent="." index="6" unique_id=1924603415]
 
@@ -193,47 +205,47 @@ position = Vector2(196, 94)
 
 [node name="CircularBumper" parent="CircularBumpers" index="0" unique_id=1014141023 instance=ExtResource("17_uo0vl")]
 position = Vector2(-143, 54)
-physics_material_override = SubResource("PhysicsMaterial_he6wg")
-radius = 10.0
-
-[node name="CircularBumper2" parent="CircularBumpers" index="1" unique_id=285227436 instance=ExtResource("17_uo0vl")]
-position = Vector2(-221, 126)
 physics_material_override = SubResource("PhysicsMaterial_jqt73")
 radius = 10.0
 
-[node name="CircularBumper3" parent="CircularBumpers" index="2" unique_id=1032191174 instance=ExtResource("17_uo0vl")]
-position = Vector2(-49, 117)
+[node name="CircularBumper2" parent="CircularBumpers" index="1" unique_id=285227436 instance=ExtResource("17_uo0vl")]
+position = Vector2(-216, 126)
 physics_material_override = SubResource("PhysicsMaterial_00pa0")
 radius = 10.0
 
-[node name="CircularBumper4" parent="CircularBumpers" index="3" unique_id=2026297353 instance=ExtResource("17_uo0vl")]
-position = Vector2(55, 117)
+[node name="CircularBumper3" parent="CircularBumpers" index="2" unique_id=1032191174 instance=ExtResource("17_uo0vl")]
+position = Vector2(-43, 117)
 physics_material_override = SubResource("PhysicsMaterial_amxoe")
+radius = 10.0
+
+[node name="CircularBumper4" parent="CircularBumpers" index="3" unique_id=2026297353 instance=ExtResource("17_uo0vl")]
+position = Vector2(49, 117)
+physics_material_override = SubResource("PhysicsMaterial_cp3aq")
 radius = 10.0
 
 [node name="CircularBumper5" parent="CircularBumpers" index="4" unique_id=154585098 instance=ExtResource("17_uo0vl")]
 position = Vector2(113, 54)
-physics_material_override = SubResource("PhysicsMaterial_cp3aq")
+physics_material_override = SubResource("PhysicsMaterial_wgvos")
 radius = 10.0
 
 [node name="CircularBumper6" parent="CircularBumpers" index="5" unique_id=1105303705 instance=ExtResource("17_uo0vl")]
-position = Vector2(201, 130)
-physics_material_override = SubResource("PhysicsMaterial_wgvos")
+position = Vector2(196, 130)
+physics_material_override = SubResource("PhysicsMaterial_m4706")
 radius = 10.0
 
 [node name="CircularBumper7" parent="CircularBumpers" index="6" unique_id=1561823359 instance=ExtResource("17_uo0vl")]
 position = Vector2(92, -76)
-physics_material_override = SubResource("PhysicsMaterial_m4706")
+physics_material_override = SubResource("PhysicsMaterial_4xp61")
 radius = 15.0
 
 [node name="CircularBumper8" parent="CircularBumpers" index="7" unique_id=836163088 instance=ExtResource("17_uo0vl")]
 position = Vector2(1, -53)
-physics_material_override = SubResource("PhysicsMaterial_4xp61")
+physics_material_override = SubResource("PhysicsMaterial_4yoxl")
 radius = 15.0
 
 [node name="CircularBumper9" parent="CircularBumpers" index="8" unique_id=1051804719 instance=ExtResource("17_uo0vl")]
 position = Vector2(-91, -76)
-physics_material_override = SubResource("PhysicsMaterial_4yoxl")
+physics_material_override = SubResource("PhysicsMaterial_6dcgf")
 radius = 15.0
 
 [node name="TrashSequenceSpawner" parent="." index="18" unique_id=1946022152 instance=ExtResource("18_k2aru")]
@@ -321,7 +333,7 @@ physics_material_override = SubResource("PhysicsMaterial_qthv2")
 angle_preset = 1
 
 [node name="BumperWall2" parent="." index="42" unique_id=1997660828 instance=ExtResource("25_amxoe")]
-position = Vector2(-221, 126)
+position = Vector2(-216, 126)
 angle_preset = 1
 mirrored = true
 
@@ -335,5 +347,31 @@ position = Vector2(113, 54)
 angle_preset = 1
 
 [node name="BumperWall5" parent="." index="45" unique_id=1903210993 instance=ExtResource("25_amxoe")]
-position = Vector2(201, 130)
+position = Vector2(196, 130)
 angle_preset = 1
+
+[node name="OceanCurrent" parent="." index="46" unique_id=1683655070 instance=ExtResource("26_jqt73")]
+position = Vector2(-44, -84)
+cycle_active = true
+active_duration = 7.0
+inactive_duration = 6.0
+start_delay = 3.0
+fade_duration = 1.0
+show_debug_arrows = false
+
+[node name="Path2D" parent="OceanCurrent" index="0" unique_id=1461068862]
+curve = SubResource("Curve2D_00pa0")
+
+[node name="OceanCurrent2" parent="." index="47" unique_id=1506362636 instance=ExtResource("26_jqt73")]
+position = Vector2(49, -81)
+cycle_active = true
+active_duration = 7.0
+inactive_duration = 7.0
+start_delay = 10.0
+fade_duration = 1.0
+
+[node name="Path2D" parent="OceanCurrent2" index="0" unique_id=1461068862]
+curve = SubResource("Curve2D_jqt73")
+
+[editable path="OceanCurrent"]
+[editable path="OceanCurrent2"]

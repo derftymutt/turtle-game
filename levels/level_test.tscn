@@ -121,7 +121,6 @@ horizontal_follow_enabled = false
 
 [node name="TurtlePlayer" parent="." unique_id=1971009088 instance=ExtResource("4_d4l3b")]
 position = Vector2(-13, 16)
-bullet_scene = null
 
 [node name="HUD" parent="." unique_id=404964298 instance=ExtResource("5_41qk1")]
 

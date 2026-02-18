@@ -4,6 +4,7 @@
 
 [node name="OceanCurrent" type="Node2D" unique_id=1683655070]
 script = ExtResource("1_oaihg")
+exit_impulse = 300.0
 
 [node name="Path2D" type="Path2D" parent="." unique_id=1461068862]
 

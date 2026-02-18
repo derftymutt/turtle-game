@@ -20,12 +20,12 @@ class_name OceanCurrent
 ## How strongly the current pushes the turtle along the path
 @export var propulsion_force: float = 800.0
 ## How strongly the current corrects the turtle back toward the path centre
-@export var centering_force: float = 400.0
+@export var centering_force: float = 10.0
 ## Width of the current tunnel in pixels (also controls collision & particle spread)
 @export var current_width: float = 48.0
 ## Dampen the turtle's velocity perpendicular to the current direction
 ## (1.0 = full kill, 0.0 = no damping). Keeps turtle from drifting sideways.
-@export_range(0.0, 1.0) var lateral_damping: float = 0.85
+@export_range(0.0, 1.0) var lateral_damping: float = 0.1
 ## How far from the path end (in pixels) before we stop pushing and eject the turtle.
 @export var exit_zone_length: float = 24.0
 ## Impulse applied outward when the turtle exits the current end.
@@ -47,7 +47,7 @@ class_name OceanCurrent
 # ── Visual / Particles ────────────────────────────────────────────────────────
 @export_group("Visual")
 ## Primary color of the current (bubbles, glow, arrows)
-@export var current_color: Color = Color(0.0, 0.8, 1.0, 0.7)
+@export var current_color: Color = Color(0.87, 0.95, 0.99, 0.7)
 ## Fade-out color for particles at end of life (default = transparent)
 @export var current_color_fade: Color = Color(0.4, 1.0, 1.0, 0.0)
 ## How many GPUParticles2D emitters to place along the path.
@@ -344,7 +344,6 @@ func _disable_collision() -> void:
 
 
 func _set_emitters_emitting(enabled: bool) -> void:
-	print("OceanCurrent: setting %d emitters emitting=%s" % [_emitters.size(), enabled])
 	for emitter in _emitters:
 		if is_instance_valid(emitter):
 			emitter.emitting = enabled
