@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://ko8xdpxfr5ej"]
+
+[ext_resource type="Script" uid="uid://yelwa3uutnxw" path="res://entities/environment/ocean_current/ocean_current.gd" id="1_oaihg"]
+
+[node name="OceanCurrent" type="Node2D" unique_id=1683655070]
+script = ExtResource("1_oaihg")
+
+[node name="Path2D" type="Path2D" parent="." unique_id=1461068862]
+
+[node name="Area2D" type="Area2D" parent="Path2D" unique_id=719841149]
+collision_layer = 0
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Path2D/Area2D" unique_id=1995390763]
+
+[node name="Visuals" type="Node2D" parent="." unique_id=2005124627]
