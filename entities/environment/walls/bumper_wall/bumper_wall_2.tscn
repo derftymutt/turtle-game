@@ -1,0 +1,29 @@
+[gd_scene format=3 uid="uid://bwdbbu1jhxn2n"]
+
+[ext_resource type="Script" uid="uid://cfnqsj3x1ytcd" path="res://entities/environment/walls/bumper_wall/bumper_wall_2.gd" id="1_wtod3"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_wtod3"]
+friction = 0.1
+bounce = 1.2
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_v6wjl"]
+size = Vector2(8, 64)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wtod3"]
+size = Vector2(8, 64)
+
+[node name="BumperWall2" type="StaticBody2D" unique_id=1997660828]
+physics_material_override = SubResource("PhysicsMaterial_wtod3")
+script = ExtResource("1_wtod3")
+angle_preset = 3
+length_units = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1343515061]
+shape = SubResource("RectangleShape2D_v6wjl")
+
+[node name="Polygon2D" type="Polygon2D" parent="." unique_id=205440260]
+
+[node name="HitArea" type="Area2D" parent="." unique_id=854879236]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitArea" unique_id=33980710]
+shape = SubResource("RectangleShape2D_wtod3")

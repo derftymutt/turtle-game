@@ -6,8 +6,6 @@
 [ext_resource type="PackedScene" uid="uid://btbnsn74vk1b" path="res://entities/player/turtle_player.tscn" id="4_h351q"]
 [ext_resource type="PackedScene" uid="uid://bu0sjqqm7uvm1" path="res://entities/enemies/crocodile/crocodile.tscn" id="6_ngvhw"]
 [ext_resource type="PackedScene" uid="uid://d2kw7hdpyp6d0" path="res://entities/enemies/sea_urchin/sea_urchin.tscn" id="7_itbe0"]
-[ext_resource type="PackedScene" uid="uid://dtqni7qbnvils" path="res://entities/environment/walls/dead_wall/dead_wall.tscn" id="8_xrja0"]
-[ext_resource type="PackedScene" uid="uid://bgoopne83ygdj" path="res://entities/environment/walls/bumper_wall/bumper_wall.tscn" id="9_he6wg"]
 [ext_resource type="PackedScene" uid="uid://dtv45nw6ur1dc" path="res://entities/enemies/piranha/piranha.tscn" id="10_jqt73"]
 [ext_resource type="PackedScene" uid="uid://bgu8t3jworeir" path="res://entities/enemies/piranha/piranha_spawner.tscn" id="11_00pa0"]
 [ext_resource type="Script" uid="uid://3jp0yf3qb8pa" path="res://entities/collectibles/air_bubble/air_bubble_spawner.gd" id="13_cp3aq"]
@@ -23,6 +21,8 @@
 [ext_resource type="PackedScene" uid="uid://bgrcf873d7ity" path="res://entities/collectibles/health_plant/health_plant_spawner.tscn" id="22_ngvhw"]
 [ext_resource type="PackedScene" uid="uid://d3ui83o5ln2lj" path="res://entities/environment/flippers/flipper_left_east.tscn" id="23_itbe0"]
 [ext_resource type="PackedScene" uid="uid://brjd5ho5mmmy4" path="res://entities/environment/flippers/flipper_right_west.tscn" id="24_xrja0"]
+[ext_resource type="PackedScene" uid="uid://8edo3etakc1a" path="res://entities/environment/walls/dead_wall/dead_wall_2.tscn" id="25_00pa0"]
+[ext_resource type="PackedScene" uid="uid://bwdbbu1jhxn2n" path="res://entities/environment/walls/bumper_wall/bumper_wall_2.tscn" id="25_amxoe"]
 [ext_resource type="PackedScene" uid="uid://4het8fdlmvgj" path="res://entities/environment/flippers/flipper_left_down.tscn" id="25_he6wg"]
 [ext_resource type="PackedScene" uid="uid://b5olvcks1vnwn" path="res://entities/environment/flippers/flipper_right_down.tscn" id="25_jqt73"]
 
@@ -34,44 +34,6 @@ size = Vector2(9.999756, 465.00012)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_nfgrx"]
 size = Vector2(640, 40)
-
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_jqt73"]
-friction = 0.0
-
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_00pa0"]
-friction = 0.0
-
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_amxoe"]
-friction = 0.0
-
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_cp3aq"]
-friction = 0.0
-
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_wgvos"]
-friction = 0.0
-
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_m4706"]
-friction = 0.0
-
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_4xp61"]
-friction = 0.1
-bounce = 1.2
-
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_4yoxl"]
-friction = 0.1
-bounce = 1.2
-
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_6dcgf"]
-friction = 0.1
-bounce = 1.2
-
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ubuva"]
-friction = 0.1
-bounce = 1.2
-
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_0nm7o"]
-friction = 0.1
-bounce = 1.2
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_pjs8f"]
 friction = 0.1
@@ -110,20 +72,7 @@ friction = 0.1
 bounce = 1.2
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_qthv2"]
-friction = 0.1
-bounce = 1.2
-
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_wnekv"]
-friction = 0.1
-bounce = 1.2
-
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_jyp08"]
-friction = 0.1
-bounce = 1.2
-
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_wvv8u"]
-friction = 0.1
-bounce = 1.2
+friction = 0.0
 
 [node name="LevelBase" unique_id=202497572 instance=ExtResource("1_mi4ay")]
 level_number = 2
@@ -197,101 +146,7 @@ color = Color(0.17755811, 0.12329503, 0.02367841, 1)
 
 [node name="DeadWalls" type="Node2D" parent="." index="8" unique_id=1432046294]
 
-[node name="DeadWall" parent="DeadWalls" index="0" unique_id=1594092339 instance=ExtResource("8_xrja0")]
-position = Vector2(-260.00003, -38)
-rotation = -1.0471976
-physics_material_override = SubResource("PhysicsMaterial_jqt73")
-wall_length = 60.0
-
-[node name="DeadWall5" parent="DeadWalls" index="1" unique_id=656297433 instance=ExtResource("8_xrja0")]
-position = Vector2(-64.000015, 53)
-rotation = -1.0471976
-physics_material_override = SubResource("PhysicsMaterial_00pa0")
-wall_length = 45.0
-
-[node name="DeadWall2" parent="DeadWalls" index="2" unique_id=48569631 instance=ExtResource("8_xrja0")]
-position = Vector2(-259.00003, 102.00002)
-rotation = -1.0471976
-physics_material_override = SubResource("PhysicsMaterial_amxoe")
-wall_length = 60.0
-
-[node name="DeadWall3" parent="DeadWalls" index="3" unique_id=1758797883 instance=ExtResource("8_xrja0")]
-position = Vector2(240.00002, 103.99999)
-rotation = 1.0471976
-physics_material_override = SubResource("PhysicsMaterial_cp3aq")
-wall_length = 60.0
-
-[node name="DeadWall6" parent="DeadWalls" index="4" unique_id=337734916 instance=ExtResource("8_xrja0")]
-position = Vector2(61.00001, 55.00002)
-rotation = 1.0471976
-physics_material_override = SubResource("PhysicsMaterial_wgvos")
-wall_length = 45.0
-
-[node name="DeadWall4" parent="DeadWalls" index="5" unique_id=1243812581 instance=ExtResource("8_xrja0")]
-position = Vector2(243, -36.000008)
-rotation = 1.0471976
-physics_material_override = SubResource("PhysicsMaterial_m4706")
-wall_length = 60.0
-
 [node name="BumperWalls" type="Node2D" parent="." index="9" unique_id=1285814152]
-
-[node name="BumperWall" parent="BumperWalls" index="0" unique_id=113462208 instance=ExtResource("9_he6wg")]
-position = Vector2(-49, 117)
-physics_material_override = SubResource("PhysicsMaterial_4xp61")
-wall_length = 30.0
-wall_thickness = 5.0
-
-[node name="BumperWall8" parent="BumperWalls" index="1" unique_id=1896924589 instance=ExtResource("9_he6wg")]
-position = Vector2(-221, 126)
-rotation = -0.7853982
-physics_material_override = SubResource("PhysicsMaterial_4yoxl")
-wall_length = 30.0
-wall_thickness = 5.0
-
-[node name="BumperWall2" parent="BumperWalls" index="2" unique_id=991966896 instance=ExtResource("9_he6wg")]
-position = Vector2(55, 117)
-physics_material_override = SubResource("PhysicsMaterial_6dcgf")
-wall_length = 30.0
-wall_thickness = 5.0
-
-[node name="BumperWall9" parent="BumperWalls" index="3" unique_id=396793053 instance=ExtResource("9_he6wg")]
-position = Vector2(201, 130)
-rotation = 0.7853982
-physics_material_override = SubResource("PhysicsMaterial_ubuva")
-wall_length = 30.0
-wall_thickness = 5.0
-
-[node name="BumperWall3" parent="BumperWalls" index="4" unique_id=1182394853 instance=ExtResource("9_he6wg")]
-position = Vector2(1, -53)
-physics_material_override = SubResource("PhysicsMaterial_0nm7o")
-wall_length = 40.0
-wall_thickness = 5.0
-
-[node name="BumperWall6" parent="BumperWalls" index="5" unique_id=801943006 instance=ExtResource("9_he6wg")]
-position = Vector2(-91, -76)
-physics_material_override = SubResource("PhysicsMaterial_pjs8f")
-wall_length = 40.0
-wall_thickness = 5.0
-
-[node name="BumperWall7" parent="BumperWalls" index="6" unique_id=1015145666 instance=ExtResource("9_he6wg")]
-position = Vector2(92, -76)
-physics_material_override = SubResource("PhysicsMaterial_bf7t1")
-wall_length = 40.0
-wall_thickness = 5.0
-
-[node name="BumperWall4" parent="BumperWalls" index="7" unique_id=263194310 instance=ExtResource("9_he6wg")]
-position = Vector2(-143, 54)
-rotation = -1.0471976
-physics_material_override = SubResource("PhysicsMaterial_ghfw4")
-wall_length = 30.0
-wall_thickness = 5.0
-
-[node name="BumperWall5" parent="BumperWalls" index="8" unique_id=204178482 instance=ExtResource("9_he6wg")]
-position = Vector2(113.00001, 54.000004)
-rotation = 1.0471976
-physics_material_override = SubResource("PhysicsMaterial_s67ts")
-wall_length = 30.0
-wall_thickness = 5.0
 
 [node name="Crocodile" parent="." index="10" unique_id=239984108 instance=ExtResource("6_ngvhw")]
 position = Vector2(212, -124)
@@ -337,47 +192,47 @@ position = Vector2(196, 94)
 
 [node name="CircularBumper" parent="CircularBumpers" index="0" unique_id=1014141023 instance=ExtResource("17_uo0vl")]
 position = Vector2(-143, 54)
-physics_material_override = SubResource("PhysicsMaterial_6oa44")
+physics_material_override = SubResource("PhysicsMaterial_pjs8f")
 radius = 10.0
 
 [node name="CircularBumper2" parent="CircularBumpers" index="1" unique_id=285227436 instance=ExtResource("17_uo0vl")]
 position = Vector2(-221, 126)
-physics_material_override = SubResource("PhysicsMaterial_3582p")
+physics_material_override = SubResource("PhysicsMaterial_bf7t1")
 radius = 10.0
 
 [node name="CircularBumper3" parent="CircularBumpers" index="2" unique_id=1032191174 instance=ExtResource("17_uo0vl")]
 position = Vector2(-49, 117)
-physics_material_override = SubResource("PhysicsMaterial_nomkf")
+physics_material_override = SubResource("PhysicsMaterial_ghfw4")
 radius = 10.0
 
 [node name="CircularBumper4" parent="CircularBumpers" index="3" unique_id=2026297353 instance=ExtResource("17_uo0vl")]
 position = Vector2(55, 117)
-physics_material_override = SubResource("PhysicsMaterial_rddwe")
+physics_material_override = SubResource("PhysicsMaterial_s67ts")
 radius = 10.0
 
 [node name="CircularBumper5" parent="CircularBumpers" index="4" unique_id=154585098 instance=ExtResource("17_uo0vl")]
 position = Vector2(113, 54)
-physics_material_override = SubResource("PhysicsMaterial_6bdx5")
+physics_material_override = SubResource("PhysicsMaterial_6oa44")
 radius = 10.0
 
 [node name="CircularBumper6" parent="CircularBumpers" index="5" unique_id=1105303705 instance=ExtResource("17_uo0vl")]
 position = Vector2(201, 130)
-physics_material_override = SubResource("PhysicsMaterial_qthv2")
+physics_material_override = SubResource("PhysicsMaterial_3582p")
 radius = 10.0
 
 [node name="CircularBumper7" parent="CircularBumpers" index="6" unique_id=1561823359 instance=ExtResource("17_uo0vl")]
 position = Vector2(92, -76)
-physics_material_override = SubResource("PhysicsMaterial_wnekv")
+physics_material_override = SubResource("PhysicsMaterial_nomkf")
 radius = 15.0
 
 [node name="CircularBumper8" parent="CircularBumpers" index="7" unique_id=836163088 instance=ExtResource("17_uo0vl")]
 position = Vector2(1, -53)
-physics_material_override = SubResource("PhysicsMaterial_jyp08")
+physics_material_override = SubResource("PhysicsMaterial_rddwe")
 radius = 15.0
 
 [node name="CircularBumper9" parent="CircularBumpers" index="8" unique_id=1051804719 instance=ExtResource("17_uo0vl")]
 position = Vector2(-91, -76)
-physics_material_override = SubResource("PhysicsMaterial_wvv8u")
+physics_material_override = SubResource("PhysicsMaterial_6bdx5")
 radius = 15.0
 
 [node name="TrashSequenceSpawner" parent="." index="18" unique_id=1946022152 instance=ExtResource("18_k2aru")]
@@ -430,3 +285,54 @@ position = Vector2(-48, 26)
 
 [node name="FlipperRightDownPixelPerfect" parent="." index="35" unique_id=94480237 instance=ExtResource("25_jqt73")]
 position = Vector2(48, 26)
+
+[node name="DeadWall2" parent="." index="36" unique_id=797132162 instance=ExtResource("25_00pa0")]
+position = Vector2(-260, -38)
+physics_material_override = SubResource("PhysicsMaterial_qthv2")
+angle_preset = 1
+mirrored = true
+
+[node name="DeadWall3" parent="." index="37" unique_id=686630903 instance=ExtResource("25_00pa0")]
+position = Vector2(-259, 102)
+physics_material_override = SubResource("PhysicsMaterial_qthv2")
+angle_preset = 1
+mirrored = true
+
+[node name="DeadWall4" parent="." index="38" unique_id=734019924 instance=ExtResource("25_00pa0")]
+position = Vector2(-68, 62)
+physics_material_override = SubResource("PhysicsMaterial_qthv2")
+angle_preset = 1
+mirrored = true
+
+[node name="DeadWall5" parent="." index="39" unique_id=524509204 instance=ExtResource("25_00pa0")]
+position = Vector2(65, 62)
+physics_material_override = SubResource("PhysicsMaterial_qthv2")
+angle_preset = 1
+
+[node name="DeadWall6" parent="." index="40" unique_id=842702931 instance=ExtResource("25_00pa0")]
+position = Vector2(242, -34)
+physics_material_override = SubResource("PhysicsMaterial_qthv2")
+angle_preset = 1
+
+[node name="DeadWall7" parent="." index="41" unique_id=544276415 instance=ExtResource("25_00pa0")]
+position = Vector2(243, 106)
+physics_material_override = SubResource("PhysicsMaterial_qthv2")
+angle_preset = 1
+
+[node name="BumperWall2" parent="." index="42" unique_id=1997660828 instance=ExtResource("25_amxoe")]
+position = Vector2(-221, 126)
+angle_preset = 1
+mirrored = true
+
+[node name="BumperWall3" parent="." index="43" unique_id=2081537971 instance=ExtResource("25_amxoe")]
+position = Vector2(-143, 54)
+angle_preset = 1
+mirrored = true
+
+[node name="BumperWall4" parent="." index="44" unique_id=328288568 instance=ExtResource("25_amxoe")]
+position = Vector2(113, 54)
+angle_preset = 1
+
+[node name="BumperWall5" parent="." index="45" unique_id=1903210993 instance=ExtResource("25_amxoe")]
+position = Vector2(201, 130)
+angle_preset = 1
