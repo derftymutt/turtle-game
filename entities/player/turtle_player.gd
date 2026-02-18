@@ -187,7 +187,7 @@ func _physics_process(delta):
 	# Update HUD systems
 	if hud:
 		var depth = ocean.get_depth(global_position) if ocean else 0.0
-		var is_underwater = depth > 0
+		var is_underwater = depth > 3
 		
 		# Breath system
 		if is_underwater:

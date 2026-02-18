@@ -22,6 +22,11 @@ func _enemy_ready():
 	elif sprite:
 		# For regular Sprite2D, just tint it
 		sprite.modulate = Color(1.2, 0.5, 0.5)
+		
+func _animate_swimming(delta: float):
+	if _is_playing_damage_animation:
+		return
+	super._animate_swimming(delta)
 
 ## Override die() to show this was a tougher enemy
 func die():

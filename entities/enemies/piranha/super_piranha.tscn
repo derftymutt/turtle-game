@@ -1,35 +1,35 @@
-[gd_scene load_steps=13 format=3 uid="uid://ikqnal6kalcc"]
+[gd_scene format=3 uid="uid://ikqnal6kalcc"]
 
 [ext_resource type="Script" uid="uid://b1n37gdnklwmu" path="res://entities/enemies/piranha/super_piranha.gd" id="1_rtrrk"]
-[ext_resource type="Texture2D" uid="uid://ci7vocey1j8md" path="res://entities/enemies/piranha/sprites/super_piranha.png" id="2_rtrrk"]
+[ext_resource type="Texture2D" uid="uid://cjo6hqbhdkpt6" path="res://entities/enemies/piranha/sprites/piranha_sheet.png" id="2_rtrrk"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_kavyd"]
 atlas = ExtResource("2_rtrrk")
-region = Rect2(0, 0, 16, 16)
+region = Rect2(64, 0, 16, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_pwofs"]
 atlas = ExtResource("2_rtrrk")
-region = Rect2(16, 0, 16, 16)
+region = Rect2(80, 0, 16, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_gvrga"]
 atlas = ExtResource("2_rtrrk")
-region = Rect2(32, 0, 16, 16)
+region = Rect2(96, 0, 16, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_5eoxq"]
 atlas = ExtResource("2_rtrrk")
-region = Rect2(0, 16, 16, 16)
+region = Rect2(32, 0, 16, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_rj33i"]
 atlas = ExtResource("2_rtrrk")
-region = Rect2(16, 16, 16, 16)
+region = Rect2(48, 0, 16, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_6epuu"]
 atlas = ExtResource("2_rtrrk")
-region = Rect2(32, 16, 16, 16)
+region = Rect2(0, 0, 16, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_0hjmn"]
 atlas = ExtResource("2_rtrrk")
-region = Rect2(0, 32, 16, 16)
+region = Rect2(16, 0, 16, 16)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_tb8k7"]
 animations = [{
@@ -42,13 +42,23 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_gvrga")
+}],
+"loop": false,
+"name": &"damage",
+"speed": 10.0
 }, {
+"frames": [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_5eoxq")
 }, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_rj33i")
+}],
+"loop": true,
+"name": &"default",
+"speed": 10.0
 }, {
+"frames": [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_6epuu")
 }, {
@@ -56,8 +66,8 @@ animations = [{
 "texture": SubResource("AtlasTexture_0hjmn")
 }],
 "loop": true,
-"name": &"default",
-"speed": 15.0
+"name": &"near_death",
+"speed": 6.0
 }]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_qj0xi"]
@@ -66,23 +76,23 @@ radius = 7.0
 [sub_resource type="CircleShape2D" id="CircleShape2D_2xr4y"]
 radius = 8.0
 
-[node name="SuperPiranha" type="RigidBody2D"]
+[node name="SuperPiranha" type="RigidBody2D" unique_id=153230010]
 collision_layer = 4
 script = ExtResource("1_rtrrk")
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1092740509]
 sprite_frames = SubResource("SpriteFrames_tb8k7")
+animation = &"damage"
 autoplay = "default"
-frame_progress = 0.86868274
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1236123365]
 visible = false
 shape = SubResource("CircleShape2D_qj0xi")
 
-[node name="DamageArea" type="Area2D" parent="."]
+[node name="DamageArea" type="Area2D" parent="." unique_id=1018046530]
 visible = false
 collision_layer = 0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="DamageArea"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DamageArea" unique_id=1147343515]
 visible = false
 shape = SubResource("CircleShape2D_2xr4y")

@@ -13,16 +13,11 @@ class_name Ocean
 @export_group("Buoyancy Zones")
 @export var shallow_depth: float = 100.0  # Shallow zone depth in pixels (0 to 100 below surface)
 @export var mid_depth: float = 200.0  # Mid zone depth in pixels (100 to 200 below surface)
-@export var shallow_buoyancy: float = 175.0  # INCREASED: Was 100.0 - faster rise in shallow
+@export var shallow_buoyancy: float = 150.0  # INCREASED: Was 100.0 - faster rise in shallow
 @export var mid_buoyancy_base: float = 225.0  # INCREASED: Was 175.0 - faster rise in mid
 @export var mid_buoyancy_rate: float = 4.0  # INCREASED: Was 3.0 - stronger gradient
 @export var deep_buoyancy_base: float = 275.0  # INCREASED: Was 200.0 - stronger deep push
 @export var deep_buoyancy_curve: float = 0.10   # INCREASED: Was 0.07 - more exponential growth
-
-
-#@export var shallow_buoyancy: float = 275.0  # INCREASED: Was 100.0 - faster rise in shallow
-#@export var mid_buoyancy_base: float = 375.0  # INCREASED: Was 175.0 - faster rise in mid
-#@export var deep_buoyancy_base: float = 475.0  # INCREASED: Was 200.0 - stronger deep push
 
 # Visual effects
 @export_group("Visual Settings")
@@ -31,20 +26,18 @@ class_name Ocean
 @export var mid_color: Color = Color(0.0, 0.6, 1.0, 1.0)  # Bright sky blue
 @export var deep_color: Color = Color(0.0, 0.3, 1.0, 1.0)  # True vibrant blue
 @export var show_gradient: bool = true  # Toggle ocean gradient rendering
+@export var show_debug_zones: bool = false  # Toggle depth zone debug overlay
 
 func _ready():
 	add_to_group("ocean")
-	
-	# Always draw (not just in editor)
 	queue_redraw()
 
 func _draw():
 	if show_gradient:
 		draw_ocean_gradient()
 	
-	# Draw debug lines in editor only
-	if Engine.is_editor_hint():
-		draw_debug_lines()
+	if show_debug_zones:
+		draw_debug_zones()
 
 func draw_ocean_gradient():
 	"""Draw a gradient from surface to ocean floor"""
@@ -81,29 +74,58 @@ func draw_ocean_gradient():
 			band_color
 		)
 
-func draw_debug_lines():
-	"""Draw debug visualization lines (editor only)"""
-	# Draw water surface line
-	draw_line(
-		Vector2(-10000, surface_y),
-		Vector2(10000, surface_y),
-		Color.CYAN,
-		2.0
+func draw_debug_zones():
+	"""Draw colored zone overlays with boundary lines and labels for development"""
+	var w = 640.0
+	var left = -w
+	var right = w * 2.0
+	var band_width = right - left
+	
+	var shallow_y = surface_y + shallow_depth
+	var mid_y = surface_y + mid_depth
+	
+	# --- Zone tint bands (semi-transparent) ---
+	# Shallow zone: surface_y -> shallow_y (green tint)
+	draw_rect(
+		Rect2(Vector2(left, surface_y), Vector2(band_width, shallow_depth)),
+		Color(0.0, 1.0, 0.4, 0.15)
+	)
+	# Mid zone: shallow_y -> mid_y (yellow tint)
+	draw_rect(
+		Rect2(Vector2(left, shallow_y), Vector2(band_width, mid_depth - shallow_depth)),
+		Color(1.0, 0.9, 0.0, 0.15)
+	)
+	# Deep zone: mid_y -> floor_y (red tint)
+	draw_rect(
+		Rect2(Vector2(left, mid_y), Vector2(band_width, floor_y - mid_y)),
+		Color(1.0, 0.2, 0.0, 0.15)
 	)
 	
-	# Draw depth zone markers
-	draw_line(
-		Vector2(-10000, surface_y + shallow_depth),
-		Vector2(10000, surface_y + shallow_depth),
-		Color.YELLOW,
-		1.0
-	)
-	draw_line(
-		Vector2(-10000, surface_y + mid_depth),
-		Vector2(10000, surface_y + mid_depth),
-		Color.ORANGE,
-		1.0
-	)
+	# --- Boundary lines ---
+	# Water surface (bright cyan, thick)
+	draw_line(Vector2(left, surface_y), Vector2(right, surface_y), Color.CYAN, 3.0)
+	# Shallow/mid boundary (yellow)
+	draw_line(Vector2(left, shallow_y), Vector2(right, shallow_y), Color.YELLOW, 2.0)
+	# Mid/deep boundary (orange-red)
+	draw_line(Vector2(left, mid_y), Vector2(right, mid_y), Color.ORANGE_RED, 2.0)
+	# Ocean floor (white, dashed via short segments)
+	draw_line(Vector2(left, floor_y), Vector2(right, floor_y), Color.WHITE, 2.0)
+	
+	# --- Zone labels (drawn at a fixed x, centered in each zone) ---
+	var label_x = -200.0
+	var font_size = 12
+	
+	draw_string(ThemeDB.fallback_font, Vector2(label_x, surface_y - 6.0),
+		"SURFACE  y=%.0f" % surface_y, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color.CYAN)
+	
+	draw_string(ThemeDB.fallback_font, Vector2(label_x, surface_y + shallow_depth * 0.5),
+		"SHALLOW  (0 – %.0fpx)" % shallow_depth, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color(0.2, 1.0, 0.5))
+	
+	draw_string(ThemeDB.fallback_font, Vector2(label_x, shallow_y + (mid_depth - shallow_depth) * 0.5),
+		"MID  (%.0f – %.0fpx)" % [shallow_depth, mid_depth], HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color.YELLOW)
+	
+	draw_string(ThemeDB.fallback_font, Vector2(label_x, mid_y + (floor_y - mid_y) * 0.5),
+		"DEEP  (%.0fpx+)" % mid_depth, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color.ORANGE_RED)
 
 func is_in_water(global_pos: Vector2) -> bool:
 	"""Check if a position is below the water surface"""

@@ -23,6 +23,7 @@ class_name BaseEnemy
 var current_health: float
 var sprite: Node2D = null
 var damage_area: Area2D = null
+var _is_playing_damage_animation: bool = false
 
 func _ready():
 	current_health = max_health
@@ -62,14 +63,59 @@ func take_damage(amount: float):
 
 ## Visual feedback when damaged
 func _play_damage_feedback():
-	if not sprite:
+	if not sprite or not sprite is AnimatedSprite2D:
+		# Fallback for Sprite2D - just flash
+		if sprite:
+			sprite.modulate = damage_flash_color
+			await get_tree().create_timer(damage_flash_duration).timeout
+			if sprite and is_instance_valid(sprite):
+				sprite.modulate = Color.WHITE
 		return
 	
-	sprite.modulate = damage_flash_color
-	await get_tree().create_timer(damage_flash_duration).timeout
-	if sprite and is_instance_valid(sprite):
-		sprite.modulate = Color.WHITE
+	var animated_sprite := sprite as AnimatedSprite2D
+	
+	# Don't restart if already playing - just let it finish
+	if _is_playing_damage_animation:
+		return
+	
+	_is_playing_damage_animation = true
+	
+	# Save what we were doing before the hit
+	var previous_animation: String = animated_sprite.animation
+	var previous_frame: int = animated_sprite.frame
+	
+	# Play damage animation if it exists
+	if animated_sprite.sprite_frames and animated_sprite.sprite_frames.has_animation("damage"):
+		animated_sprite.play("damage")
+		await animated_sprite.animation_finished
+	else:
+		# Fallback: color flash
+		animated_sprite.modulate = damage_flash_color
+		await get_tree().create_timer(damage_flash_duration).timeout
+		if animated_sprite and is_instance_valid(animated_sprite):
+			animated_sprite.modulate = Color.WHITE
+	
+	_is_playing_damage_animation = false
+	
+	if not animated_sprite or not is_instance_valid(animated_sprite):
+		return
+	
+	# Decide what to play after the damage animation
+	_resume_animation_after_damage(animated_sprite, previous_animation, previous_frame)
 
+## Determines the correct animation to resume after taking damage
+func _resume_animation_after_damage(animated_sprite: AnimatedSprite2D, previous_animation: String, previous_frame: int) -> void:
+	# Near-death check: 10hp or less triggers near_death animation if available
+	if current_health <= 10.0 and animated_sprite.sprite_frames.has_animation("near_death"):
+		animated_sprite.play("near_death")
+		return
+	
+	# Otherwise restore previous animation
+	# Only restore frame if the animation loops - for one-shots it makes more sense to restart
+	animated_sprite.play(previous_animation)
+	if animated_sprite.sprite_frames.get_animation_loop(previous_animation):
+		animated_sprite.frame = previous_frame
+		
 ## Visual feedback when invincible (bounce off, sparkle, etc.)
 func _play_invincible_feedback():
 	if not sprite:

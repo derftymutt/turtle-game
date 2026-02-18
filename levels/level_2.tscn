@@ -90,6 +90,15 @@ point_count = 7
 [node name="LevelBase" unique_id=202497572 instance=ExtResource("1_mi4ay")]
 level_number = 2
 
+[node name="HUD" parent="." index="0" unique_id=1369229575]
+visible = false
+
+[node name="GameOverScreen" parent="." index="1" unique_id=301166293]
+visible = false
+
+[node name="LevelCompleteScreen" parent="." index="2" unique_id=1103608067]
+visible = false
+
 [node name="Ocean" parent="." index="3" unique_id=863147586 instance=ExtResource("3_0srwa")]
 
 [node name="Camera2D" type="Camera2D" parent="." index="4" unique_id=1199674617 node_paths=PackedStringArray("follow_target")]
@@ -209,7 +218,7 @@ physics_material_override = SubResource("PhysicsMaterial_jqt73")
 radius = 10.0
 
 [node name="CircularBumper2" parent="CircularBumpers" index="1" unique_id=285227436 instance=ExtResource("17_uo0vl")]
-position = Vector2(-216, 126)
+position = Vector2(-213, 122)
 physics_material_override = SubResource("PhysicsMaterial_00pa0")
 radius = 10.0
 
@@ -229,7 +238,7 @@ physics_material_override = SubResource("PhysicsMaterial_wgvos")
 radius = 10.0
 
 [node name="CircularBumper6" parent="CircularBumpers" index="5" unique_id=1105303705 instance=ExtResource("17_uo0vl")]
-position = Vector2(196, 130)
+position = Vector2(193, 127)
 physics_material_override = SubResource("PhysicsMaterial_m4706")
 radius = 10.0
 
@@ -333,7 +342,7 @@ physics_material_override = SubResource("PhysicsMaterial_qthv2")
 angle_preset = 1
 
 [node name="BumperWall2" parent="." index="42" unique_id=1997660828 instance=ExtResource("25_amxoe")]
-position = Vector2(-216, 126)
+position = Vector2(-213, 122)
 angle_preset = 1
 mirrored = true
 
@@ -347,7 +356,7 @@ position = Vector2(113, 54)
 angle_preset = 1
 
 [node name="BumperWall5" parent="." index="45" unique_id=1903210993 instance=ExtResource("25_amxoe")]
-position = Vector2(196, 130)
+position = Vector2(193, 127)
 angle_preset = 1
 
 [node name="OceanCurrent" parent="." index="46" unique_id=1683655070 instance=ExtResource("26_jqt73")]
@@ -369,6 +378,7 @@ active_duration = 7.0
 inactive_duration = 7.0
 start_delay = 10.0
 fade_duration = 1.0
+show_debug_arrows = false
 
 [node name="Path2D" parent="OceanCurrent2" index="0" unique_id=1461068862]
 curve = SubResource("Curve2D_jqt73")
