@@ -428,3 +428,13 @@ mirrored = true
 
 [node name="BumperWall3" parent="." unique_id=1997660828 instance=ExtResource("18_o6ev6")]
 position = Vector2(39, -1)
+
+[node name="DeadWall3" parent="." unique_id=142956685 instance=ExtResource("17_f33k1")]
+position = Vector2(-137, 45)
+angle_preset = 2
+length_units = 1
+
+[node name="DeadWall4" parent="." unique_id=525452990 instance=ExtResource("17_f33k1")]
+position = Vector2(-73, 45)
+angle_preset = 1
+length_units = 1

@@ -35,31 +35,31 @@ size = Vector2(9.999756, 465.00012)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_dp1ib"]
 size = Vector2(640, 40)
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ohjdc"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ntdhj"]
 friction = 0.1
 bounce = 1.2
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_e5brb"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_0fu15"]
 friction = 0.1
 bounce = 1.2
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_rf48r"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_4knja"]
 friction = 0.1
 bounce = 1.2
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_toluw"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_voubc"]
 friction = 0.1
 bounce = 1.2
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_dp1ib"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_0x1rk"]
 friction = 0.1
 bounce = 1.2
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_5t0se"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_pnpm1"]
 friction = 0.1
 bounce = 1.2
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_tqj1w"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_06ecp"]
 friction = 0.1
 bounce = 1.2
 
@@ -104,9 +104,6 @@ horizontal_follow_enabled = false
 [node name="TurtlePlayer" parent="." index="5" unique_id=1163425295 instance=ExtResource("4_jkxa6")]
 position = Vector2(-13, 16)
 kick_animation_duration = 0.15
-horizontal_thrust = 100.0
-upward_thrust = 25.0
-downward_thrust = 175.0
 
 [node name="Crocodile" parent="." index="6" unique_id=781536171 instance=ExtResource("6_udfhf")]
 position = Vector2(-264, -124)
@@ -216,33 +213,33 @@ seed_count_min = 5
 
 [node name="CircularBumper" parent="CircularBumpers" index="0" unique_id=110944296 instance=ExtResource("18_oqlok")]
 position = Vector2(-175, -26)
-physics_material_override = SubResource("PhysicsMaterial_ohjdc")
+physics_material_override = SubResource("PhysicsMaterial_ntdhj")
 radius = 15.0
 
 [node name="CircularBumper2" parent="CircularBumpers" index="1" unique_id=699960614 instance=ExtResource("18_oqlok")]
 position = Vector2(-199, 97)
-physics_material_override = SubResource("PhysicsMaterial_e5brb")
+physics_material_override = SubResource("PhysicsMaterial_0fu15")
 
 [node name="CircularBumper3" parent="CircularBumpers" index="2" unique_id=1564020895 instance=ExtResource("18_oqlok")]
 position = Vector2(-10, 60.000004)
-physics_material_override = SubResource("PhysicsMaterial_rf48r")
+physics_material_override = SubResource("PhysicsMaterial_4knja")
 
 [node name="CircularBumper4" parent="CircularBumpers" index="3" unique_id=1506783036 instance=ExtResource("18_oqlok")]
 position = Vector2(-10, 112)
-physics_material_override = SubResource("PhysicsMaterial_toluw")
+physics_material_override = SubResource("PhysicsMaterial_voubc")
 
 [node name="CircularBumper5" parent="CircularBumpers" index="4" unique_id=1937263089 instance=ExtResource("18_oqlok")]
 position = Vector2(-7, -64)
-physics_material_override = SubResource("PhysicsMaterial_dp1ib")
+physics_material_override = SubResource("PhysicsMaterial_0x1rk")
 
 [node name="CircularBumper6" parent="CircularBumpers" index="5" unique_id=1003900960 instance=ExtResource("18_oqlok")]
 position = Vector2(166, -26)
-physics_material_override = SubResource("PhysicsMaterial_5t0se")
+physics_material_override = SubResource("PhysicsMaterial_pnpm1")
 radius = 15.0
 
 [node name="CircularBumper7" parent="CircularBumpers" index="6" unique_id=365714998 instance=ExtResource("18_oqlok")]
 position = Vector2(177, 95)
-physics_material_override = SubResource("PhysicsMaterial_tqj1w")
+physics_material_override = SubResource("PhysicsMaterial_06ecp")
 
 [node name="TrashSequenceSpawner" parent="." index="17" unique_id=435128493 instance=ExtResource("19_7nvrk")]
 

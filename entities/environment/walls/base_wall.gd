@@ -7,7 +7,8 @@ class_name BaseWall
 ## PIXEL-PERFECT RULE (same as FlipperBase):
 ##   - StaticBody2D NEVER rotates (stays at 0°)
 ##   - CollisionShape2D.rotation_degrees is set to match the angle preset
-##   - Sprite2D will swap textures per angle+length combo (when art arrives)
+##   - Sprite2D swaps textures per angle+length combo
+##   - Polygon2D is the placeholder — hidden automatically when a sprite loads
 ##   - Mirroring is handled via flip_h on the sprite + negating collision rotation
 ##
 ## GRID SYSTEM:
@@ -15,26 +16,44 @@ class_name BaseWall
 ##   - Segment size: 32px = 4 tiles  (SEGMENT_SIZE constant)
 ##   - length_units drives how many segments long the wall is
 ##   - Final pixel length = length_units * SEGMENT_SIZE
+##
+## ADDING SPRITES:
+##   1. Export PNGs from Aseprite named: wall_<angle>_<length>u.png
+##      e.g. wall_vertical_1u.png, wall_shallow_2u.png
+##   2. Place all PNGs in: res://assets/sprites/walls/
+##   3. Set each texture's filter to Nearest in the Import tab
+##   4. Add a Sprite2D child to your wall scene
+##   5. The script handles everything else automatically
 
 ## --- Constants ---
 
 const TILE_SIZE: int = 8       ## Smallest pixel unit
 const SEGMENT_SIZE: int = 32   ## 4 tiles — base length unit for wall segments
 
-## Pixel-perfect angles derived from clean pixel ratios.
-## These are exact — do not round them. The sprites in Aseprite should be
-## drawn using the matching rise:run ratio for each preset:
-##   VERTICAL   → vertical line            (no ratio)
-##   STEEP      → 2 pixels down : 1 right  → atan2(2,1) = 63.43°
-##   DIAGONAL   → 1 pixel down  : 1 right  → 45°
-##   SHALLOW    → 1 pixel down  : 2 right  → atan2(1,2) = 26.57°
-##   HORIZONTAL → horizontal line          (no ratio)
+## Sprite folder — change this if you move your wall art
+const SPRITE_PATH: String = "res://entities/environment/walls/dead_wall/sprites/"
+
+## Angle name strings — must match your PNG filenames exactly
+const ANGLE_NAMES: Dictionary = {
+	0: "vertical",
+	1: "steep",
+	2: "diagonal",
+	3: "shallow",
+	4: "horizontal",
+}
+
+## Pixel-perfect angles derived from clean pixel ratios:
+##   VERTICAL   → 0°      (straight up)
+##   STEEP      → 63.43°  (2:1 rise:run)
+##   DIAGONAL   → 45°     (1:1 rise:run)
+##   SHALLOW    → 26.57°  (1:2 rise:run)
+##   HORIZONTAL → 90°     (straight across)
 const ANGLE_ROTATIONS: Dictionary = {
-	0: 0.0,    ## VERTICAL
-	1: 63.43,  ## STEEP
-	2: 45.0,   ## DIAGONAL
-	3: 26.57,  ## SHALLOW
-	4: 90.0,   ## HORIZONTAL
+	0: 0.0,
+	1: 63.43,
+	2: 45.0,
+	3: 26.57,
+	4: 90.0,
 }
 
 ## --- Enums ---
@@ -70,10 +89,13 @@ enum AnglePreset {
 
 ## --- Internal State ---
 
-## Cached child references — found once in _ready(), never recreated.
 var _collision_shape: CollisionShape2D
 var _polygon: Polygon2D
-var _sprite: Sprite2D  ## nil until art is added — safe to leave empty
+var _sprite: Sprite2D
+
+## Cache loaded textures so we only hit disk once per unique combination.
+## This is a class-level (static) cache shared across all wall instances.
+static var _texture_cache: Dictionary = {}
 
 ## --- Lifecycle ---
 
@@ -83,9 +105,6 @@ func _ready() -> void:
 	_update_wall()
 
 func _find_children() -> void:
-	## Cache node references by type. Using typed iteration is safer than get_node()
-	## because it works regardless of child order or name changes.
-	## Subclasses call super._find_children() then locate their own Area2D children.
 	for child in get_children():
 		if child is CollisionShape2D:
 			_collision_shape = child
@@ -95,49 +114,35 @@ func _find_children() -> void:
 			_sprite = child
 
 func _ensure_unique_shapes() -> void:
-	## CRITICAL: Duplicate shared resources so each instance is independent.
-	## Without this, editing one wall's CollisionShape2D size in the editor
-	## changes ALL walls that were instantiated from the same .tscn, because
-	## they share the same RectangleShape2D sub-resource by default.
 	if _collision_shape and _collision_shape.shape:
 		_collision_shape.shape = _collision_shape.shape.duplicate()
 
 ## --- Core Update ---
 
 func _update_wall() -> void:
-	## Guard: node must be in the tree before touching child nodes.
-	## Export setters fire during scene loading before _ready() runs —
-	## this check prevents null-reference crashes during that window.
 	if not is_inside_tree():
 		return
-
 	_apply_collision_shape()
 	_apply_visual()
 	_apply_sprite()
-	_on_wall_updated()  ## Hook for subclasses to resize their own Area2D shapes
+	_on_wall_updated()
 
 func _apply_collision_shape() -> void:
 	if not _collision_shape:
 		return
 
-	## Size: always TILE_SIZE thick, length_units * SEGMENT_SIZE long.
-	## RectangleShape2D.size is the FULL extent (not half-extent).
 	var pixel_length: float = float(length_units * SEGMENT_SIZE)
 	var pixel_thickness: float = float(TILE_SIZE)
 
 	if not _collision_shape.shape:
 		_collision_shape.shape = RectangleShape2D.new()
 	_collision_shape.shape.size = Vector2(pixel_length, pixel_thickness)
-
-	## Rotate the CollisionShape2D child — never the StaticBody2D root.
-	## Negating the angle for mirrored flips the wall to the opposite diagonal.
 	_collision_shape.rotation_degrees = get_collision_rotation_degrees()
-	_collision_shape.position = Vector2.ZERO  ## Always centered on parent origin
+	_collision_shape.position = Vector2.ZERO
 
 func _apply_visual() -> void:
-	## Placeholder polygon that matches the collision shape exactly.
-	## Rotated the same way so the visual always lines up with physics.
-	## Removed and replaced by _apply_sprite() once sprite art arrives.
+	## Polygon2D placeholder — only visible when no sprite texture is loaded.
+	## Hidden automatically in _apply_sprite() once art is available.
 	if not _polygon:
 		return
 
@@ -148,7 +153,6 @@ func _apply_visual() -> void:
 
 	_polygon.rotation_degrees = get_collision_rotation_degrees()
 	_polygon.position = Vector2.ZERO
-
 	_polygon.polygon = PackedVector2Array([
 		Vector2(-half_l, -half_t),
 		Vector2( half_l, -half_t),
@@ -157,19 +161,52 @@ func _apply_visual() -> void:
 	])
 
 func _apply_sprite() -> void:
-	## Called every update. Safe no-op if no Sprite2D exists in the scene yet.
-	## When art arrives: add a Sprite2D child to the scene, then implement
-	## _get_texture_for_preset() to return the correct texture per angle+length.
 	if not _sprite:
 		return
-	_sprite.flip_h = mirrored
-	## TODO: _sprite.texture = _get_texture_for_preset(angle_preset, length_units)
+
+	var texture := _load_wall_texture(angle_preset, length_units)
+
+	if texture:
+		_sprite.texture = texture
+		_sprite.flip_h = mirrored
+		_sprite.visible = true
+		## Hide the placeholder polygon — sprite has taken over
+		if _polygon:
+			_polygon.visible = false
+	else:
+		## No sprite found — fall back to polygon placeholder
+		_sprite.visible = false
+		if _polygon:
+			_polygon.visible = true
+
+func _load_wall_texture(preset: AnglePreset, units: int) -> Texture2D:
+	## Build the cache key and return immediately if already loaded.
+	var cache_key: String = "%d_%d" % [int(preset), units]
+	if _texture_cache.has(cache_key):
+		return _texture_cache[cache_key]
+
+	## Build the expected file path from the naming convention.
+	## e.g. res://assets/sprites/walls/wall_shallow_2u.png
+	var angle_name: String = ANGLE_NAMES.get(int(preset), "unknown")
+	var path: String = "%swall_%s_%du.png" % [SPRITE_PATH, angle_name, units]
+	
+	print("Wall texture path: ", path, " | exists: ", ResourceLoader.exists(path))
+
+	var texture: Texture2D = null
+	if ResourceLoader.exists(path):
+		texture = load(path)
+	else:
+		## Not a crash — just means this combo has no art yet.
+		## Polygon2D placeholder will show instead.
+		pass
+
+	## Cache the result (even if null) so we don't retry on every update.
+	_texture_cache[cache_key] = texture
+	return texture
 
 ## --- Subclass Hook ---
 
 func _on_wall_updated() -> void:
-	## Override in subclasses to react when shape/angle/length/mirror changes.
-	## Called at the END of _update_wall(), after collision and visual are applied.
 	pass
 
 ## --- Public Helpers ---
@@ -181,7 +218,5 @@ func get_pixel_thickness() -> float:
 	return float(TILE_SIZE)
 
 func get_collision_rotation_degrees() -> float:
-	## Single source of truth for the wall's rotation.
-	## Always use this — never read ANGLE_ROTATIONS directly in subclasses.
 	var degrees: float = ANGLE_ROTATIONS.get(int(angle_preset), 0.0)
 	return -degrees if mirrored else degrees
