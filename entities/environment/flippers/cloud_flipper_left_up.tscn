@@ -1,0 +1,91 @@
+[gd_scene format=3 uid="uid://u02ifu2255ot"]
+
+[ext_resource type="Script" uid="uid://n2e4j146y83t" path="res://entities/environment/flippers/cloud_flipper_left_up.gd" id="1_rewmb"]
+[ext_resource type="Texture2D" uid="uid://dnr708jsb6xrb" path="res://entities/environment/flippers/sprites/flipper-cloud-left-up.png" id="2_rewmb"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_b1k27"]
+atlas = ExtResource("2_rewmb")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hwbyo"]
+atlas = ExtResource("2_rewmb")
+region = Rect2(128, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_io722"]
+atlas = ExtResource("2_rewmb")
+region = Rect2(0, 32, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ktyce"]
+atlas = ExtResource("2_rewmb")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cc76b"]
+atlas = ExtResource("2_rewmb")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7lqj0"]
+atlas = ExtResource("2_rewmb")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_6ad38"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_b1k27")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hwbyo")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_io722")
+}],
+"loop": true,
+"name": &"extend",
+"speed": 2.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ktyce")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cc76b")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7lqj0")
+}],
+"loop": true,
+"name": &"rest",
+"speed": 2.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_j537t"]
+radius = 6.0
+height = 33.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_vewl4"]
+radius = 6.0
+height = 33.0
+
+[node name="CloudFlipperLeftUp" type="StaticBody2D" unique_id=1447591536]
+collision_layer = 16
+script = ExtResource("1_rewmb")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=896963701]
+position = Vector2(12.000001, -5.9604645e-08)
+sprite_frames = SubResource("SpriteFrames_6ad38")
+animation = &"rest"
+autoplay = "rest"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=944965431]
+position = Vector2(12, 0)
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_j537t")
+one_way_collision_margin = 0.0
+
+[node name="Area2D" type="Area2D" parent="." unique_id=906731839]
+collision_layer = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=635072278]
+position = Vector2(12, 0)
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_vewl4")

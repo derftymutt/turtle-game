@@ -347,7 +347,6 @@ func _set_emitters_emitting(enabled: bool) -> void:
 	for emitter in _emitters:
 		if is_instance_valid(emitter):
 			emitter.emitting = enabled
-			print("  emitter at %s emitting=%s valid=%s" % [emitter.position, emitter.emitting, is_instance_valid(emitter)])
 
 
 # ── Area signals ──────────────────────────────────────────────────────────────

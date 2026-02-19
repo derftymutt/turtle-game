@@ -1,0 +1,91 @@
+[gd_scene format=3 uid="uid://p32a3utahssn"]
+
+[ext_resource type="Script" uid="uid://c1mgtjgrcbvm5" path="res://entities/environment/flippers/cloud_flipper_right_up.gd" id="1_21qo2"]
+[ext_resource type="Texture2D" uid="uid://drx5ygef014i8" path="res://entities/environment/flippers/sprites/flipper-cloud-right-up.png" id="2_21qo2"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_egmpu"]
+atlas = ExtResource("2_21qo2")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gg6cc"]
+atlas = ExtResource("2_21qo2")
+region = Rect2(128, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ejrsq"]
+atlas = ExtResource("2_21qo2")
+region = Rect2(0, 32, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_s6mc1"]
+atlas = ExtResource("2_21qo2")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nwv0r"]
+atlas = ExtResource("2_21qo2")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yerbj"]
+atlas = ExtResource("2_21qo2")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_mocik"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_egmpu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gg6cc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ejrsq")
+}],
+"loop": true,
+"name": &"extend",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_s6mc1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nwv0r")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yerbj")
+}],
+"loop": true,
+"name": &"rest",
+"speed": 5.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_j537t"]
+radius = 6.0
+height = 33.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_vewl4"]
+radius = 6.0
+height = 33.0
+
+[node name="CloudFlipperRightUp" type="StaticBody2D" unique_id=1447591536]
+collision_layer = 16
+script = ExtResource("1_21qo2")
+pass_through_velocity_threshold = -50.0
+flip_input = "flipper_right"
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1889361272]
+position = Vector2(-12, 0)
+sprite_frames = SubResource("SpriteFrames_mocik")
+animation = &"rest"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=944965431]
+position = Vector2(-12, 0)
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_j537t")
+
+[node name="Area2D" type="Area2D" parent="." unique_id=906731839]
+collision_layer = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=635072278]
+position = Vector2(-12, 0)
+rotation = -1.5707964
+shape = SubResource("CapsuleShape2D_vewl4")

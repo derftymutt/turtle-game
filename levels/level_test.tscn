@@ -19,6 +19,8 @@
 [ext_resource type="PackedScene" uid="uid://jylpdfwgd8wo" path="res://entities/environment/flippers/flipper_right_up.tscn" id="18_p60vf"]
 [ext_resource type="PackedScene" uid="uid://ko8xdpxfr5ej" path="res://entities/environment/ocean_current/ocean_current.tscn" id="19_o6ev6"]
 [ext_resource type="PackedScene" uid="uid://4het8fdlmvgj" path="res://entities/environment/flippers/flipper_left_down.tscn" id="19_p60vf"]
+[ext_resource type="PackedScene" uid="uid://u02ifu2255ot" path="res://entities/environment/flippers/cloud_flipper_left_up.tscn" id="20_4skyc"]
+[ext_resource type="PackedScene" uid="uid://p32a3utahssn" path="res://entities/environment/flippers/cloud_flipper_right_up.tscn" id="21_b545k"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_6hwsd"]
 size = Vector2(9.000052, 471.00015)
@@ -28,12 +30,6 @@ size = Vector2(9.999756, 465.00012)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_o6ev6"]
 size = Vector2(640, 40)
-
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_p60vf"]
-friction = 0.0
-
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_o6ev6"]
-friction = 0.0
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_4skyc"]
 friction = 0.0
@@ -59,14 +55,14 @@ friction = 0.0
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_f0ksa"]
 friction = 0.0
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_emlfc"]
-friction = 0.0
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_emlfc"]
+size = Vector2(80, 5)
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_olub7"]
 friction = 0.0
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_wgqfy"]
-friction = 0.0
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wgqfy"]
+size = Vector2(60, 5)
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_qf8ve"]
 friction = 0.0
@@ -75,26 +71,50 @@ friction = 0.0
 friction = 0.0
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_4qim1"]
-friction = 0.1
-bounce = 1.2
+friction = 0.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_4skyc"]
+size = Vector2(60, 5)
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_5ecl0"]
-friction = 0.1
-bounce = 1.2
+friction = 0.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_b545k"]
+size = Vector2(80, 5)
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ikbjk"]
-friction = 0.1
-bounce = 1.2
+friction = 0.0
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_cga3n"]
-friction = 0.1
-bounce = 1.2
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_cga3n"]
+size = Vector2(30, 5)
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_xhe6y"]
+friction = 0.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_unp1l"]
+size = Vector2(30, 5)
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_nr1ke"]
 friction = 0.1
 bounce = 1.2
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_unp1l"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_6hqcu"]
+friction = 0.1
+bounce = 1.2
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_8xpto"]
+friction = 0.1
+bounce = 1.2
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_h07m1"]
+friction = 0.1
+bounce = 1.2
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_a2dh2"]
+friction = 0.1
+bounce = 1.2
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_sq6ca"]
 friction = 0.1
 bounce = 1.2
 
@@ -182,39 +202,11 @@ color = Color(0.17755811, 0.12329503, 0.02367841, 1)
 
 [node name="Flippers" type="Node2D" parent="." unique_id=488184852]
 
-[node name="Flipper Left11" parent="Flippers" unique_id=1936447414 instance=ExtResource("8_qyf36")]
-position = Vector2(-47.00003, -188.00002)
-rest_angle = 30.0
-is_skyward_flipper = true
-
-[node name="Flipper Left9" parent="Flippers" unique_id=1447591536 instance=ExtResource("8_qyf36")]
-position = Vector2(240.99997, -189.00002)
-rest_angle = -30.0
-flip_input = "flipper_right"
-flip_sprite_h = true
-is_right_flipper = true
-is_skyward_flipper = true
-
-[node name="Flipper Left8" parent="Flippers" unique_id=1776711244 instance=ExtResource("8_qyf36")]
-position = Vector2(118.99997, -189.00002)
-rest_angle = 30.0
-is_skyward_flipper = true
-
-[node name="Flipper Left13" parent="Flippers" unique_id=856905058 instance=ExtResource("8_qyf36")]
-position = Vector2(126, -84)
-rest_angle = 30.0
-is_skyward_flipper = true
-
 [node name="Flipper Left2" parent="Flippers" unique_id=1779063152 instance=ExtResource("8_qyf36")]
 position = Vector2(-58, 101)
 
-[node name="Flipper Left3" parent="Flippers" unique_id=7648173 instance=ExtResource("8_qyf36")]
-position = Vector2(-236.00003, -190.00002)
-rest_angle = 30.0
-is_skyward_flipper = true
-
 [node name="Flipper Right2" parent="Flippers" unique_id=164917568 instance=ExtResource("8_qyf36")]
-position = Vector2(67, -40)
+position = Vector2(79, -40)
 rest_angle = 50.0
 flip_input = "flipper_right"
 flip_sprite_h = true
@@ -240,167 +232,185 @@ position = Vector2(-267, 62)
 [node name="Flipper Left6" parent="Flippers" unique_id=233226988 instance=ExtResource("8_qyf36")]
 position = Vector2(-110.99999, 95)
 
-[node name="Flipper Left4" parent="Flippers" unique_id=1050893388 instance=ExtResource("8_qyf36")]
-position = Vector2(-114, -190.00002)
-rest_angle = -30.0
-flip_input = "flipper_right"
-flip_sprite_h = true
-is_right_flipper = true
-is_skyward_flipper = true
-
-[node name="Flipper Left7" parent="Flippers" unique_id=1937463334 instance=ExtResource("8_qyf36")]
-position = Vector2(193, -82)
-rest_angle = -30.0
-flip_input = "flipper_right"
-flip_sprite_h = true
-is_right_flipper = true
-is_skyward_flipper = true
-
-[node name="Flipper Left10" parent="Flippers" unique_id=820553794 instance=ExtResource("8_qyf36")]
-position = Vector2(31.99997, -188.00002)
-rest_angle = -30.0
-flip_input = "flipper_right"
-flip_sprite_h = true
-is_right_flipper = true
-is_skyward_flipper = true
-
 [node name="DeadWalls" type="Node2D" parent="." unique_id=724785319]
 
 [node name="DeadWall3" parent="DeadWalls" unique_id=417655296 instance=ExtResource("9_f33k1")]
-position = Vector2(-237, -77.99999)
+position = Vector2(-245, -89.99999)
 rotation = -0.7853982
-physics_material_override = SubResource("PhysicsMaterial_p60vf")
+physics_material_override = SubResource("PhysicsMaterial_4skyc")
 wall_length = 75.0
 
 [node name="DeadWall11" parent="DeadWalls" unique_id=1169863889 instance=ExtResource("9_f33k1")]
-position = Vector2(108, -99)
+position = Vector2(120, -99)
 rotation = -0.7853982
-physics_material_override = SubResource("PhysicsMaterial_o6ev6")
+physics_material_override = SubResource("PhysicsMaterial_b545k")
 wall_length = 40.0
 
 [node name="DeadWall4" parent="DeadWalls" unique_id=1150564769 instance=ExtResource("9_f33k1")]
 position = Vector2(87, -10.000004)
 rotation = 0.7853982
 scale = Vector2(0.99999994, 0.99999994)
-physics_material_override = SubResource("PhysicsMaterial_4skyc")
+physics_material_override = SubResource("PhysicsMaterial_sr3fv")
 wall_length = 60.0
 
 [node name="DeadWall5" parent="DeadWalls" unique_id=926190261 instance=ExtResource("9_f33k1")]
 position = Vector2(-283.00003, 87.99999)
 rotation = -0.7853982
 scale = Vector2(0.9999999, 0.9999999)
-physics_material_override = SubResource("PhysicsMaterial_b545k")
+physics_material_override = SubResource("PhysicsMaterial_pxnvp")
 wall_length = 40.0
 
 [node name="DeadWall6" parent="DeadWalls" unique_id=2123344687 instance=ExtResource("9_f33k1")]
 position = Vector2(89.000015, 121.000015)
 rotation = 0.7853982
 scale = Vector2(0.99999994, 0.99999994)
-physics_material_override = SubResource("PhysicsMaterial_sr3fv")
+physics_material_override = SubResource("PhysicsMaterial_0brv5")
 wall_length = 45.0
 
 [node name="DeadWall7" parent="DeadWalls" unique_id=12959658 instance=ExtResource("9_f33k1")]
 position = Vector2(-126, 120)
 rotation = -0.7853982
 scale = Vector2(0.9999999, 0.9999999)
-physics_material_override = SubResource("PhysicsMaterial_pxnvp")
+physics_material_override = SubResource("PhysicsMaterial_3y2y2")
 wall_length = 45.0
 
 [node name="DeadWall8" parent="DeadWalls" unique_id=656534300 instance=ExtResource("9_f33k1")]
 position = Vector2(285, 91.000015)
 rotation = 0.7853982
 scale = Vector2(0.99999994, 0.99999994)
-physics_material_override = SubResource("PhysicsMaterial_0brv5")
+physics_material_override = SubResource("PhysicsMaterial_euh2h")
 wall_length = 40.0
 
 [node name="DeadWall9" parent="DeadWalls" unique_id=2012367493 instance=ExtResource("9_f33k1")]
 position = Vector2(-89, -226)
 rotation = -0.7853982
 scale = Vector2(0.9999999, 0.9999999)
-physics_material_override = SubResource("PhysicsMaterial_3y2y2")
+physics_material_override = SubResource("PhysicsMaterial_f0ksa")
 wall_length = 80.0
+
+[node name="CollisionShape2D" parent="DeadWalls/DeadWall9" index="0" unique_id=1455125516]
+shape = SubResource("RectangleShape2D_emlfc")
+one_way_collision = true
+
+[node name="Polygon2D" parent="DeadWalls/DeadWall9" index="1" unique_id=560731279]
+polygon = PackedVector2Array(-40, -2.5, 40, -2.5, 40, 2.5, -40, 2.5)
 
 [node name="DeadWall10" parent="DeadWalls" unique_id=1199588045 instance=ExtResource("9_f33k1")]
 position = Vector2(-262, -218.99997)
 rotation = 0.7853982
 scale = Vector2(0.9999998, 0.9999998)
-physics_material_override = SubResource("PhysicsMaterial_euh2h")
+physics_material_override = SubResource("PhysicsMaterial_olub7")
 wall_length = 60.0
 
+[node name="CollisionShape2D" parent="DeadWalls/DeadWall10" index="0" unique_id=1455125516]
+shape = SubResource("RectangleShape2D_wgqfy")
+one_way_collision = true
+
+[node name="Polygon2D" parent="DeadWalls/DeadWall10" index="1" unique_id=560731279]
+polygon = PackedVector2Array(-30, -2.5, 30, -2.5, 30, 2.5, -30, 2.5)
+
 [node name="DeadWall12" parent="DeadWalls" unique_id=100906926 instance=ExtResource("9_f33k1")]
-position = Vector2(223, -88.999985)
+position = Vector2(235, -88.999985)
 rotation = 0.7853982
 scale = Vector2(0.99999994, 0.99999994)
-physics_material_override = SubResource("PhysicsMaterial_f0ksa")
+physics_material_override = SubResource("PhysicsMaterial_qf8ve")
 wall_length = 75.0
 
 [node name="DeadWall13" parent="DeadWalls" unique_id=641696376 instance=ExtResource("9_f33k1")]
-position = Vector2(-112.00001, -87.00001)
+position = Vector2(-120, -99.00001)
 rotation = 0.7853982
 scale = Vector2(0.99999994, 0.99999994)
-physics_material_override = SubResource("PhysicsMaterial_emlfc")
+physics_material_override = SubResource("PhysicsMaterial_b7m18")
 wall_length = 40.0
 
 [node name="DeadWall14" parent="DeadWalls" unique_id=187558299 instance=ExtResource("9_f33k1")]
 position = Vector2(260.99988, -219.00003)
 rotation = -0.7853982
 scale = Vector2(0.9999999, 0.9999999)
-physics_material_override = SubResource("PhysicsMaterial_olub7")
+physics_material_override = SubResource("PhysicsMaterial_4qim1")
 wall_length = 60.0
+
+[node name="CollisionShape2D" parent="DeadWalls/DeadWall14" index="0" unique_id=1455125516]
+shape = SubResource("RectangleShape2D_4skyc")
+one_way_collision = true
+
+[node name="Polygon2D" parent="DeadWalls/DeadWall14" index="1" unique_id=560731279]
+polygon = PackedVector2Array(-30, -2.5, 30, -2.5, 30, 2.5, -30, 2.5)
 
 [node name="DeadWall15" parent="DeadWalls" unique_id=1847249712 instance=ExtResource("9_f33k1")]
 position = Vector2(87, -227.00002)
 rotation = 0.7853982
 scale = Vector2(0.9999998, 0.9999998)
-physics_material_override = SubResource("PhysicsMaterial_wgqfy")
+physics_material_override = SubResource("PhysicsMaterial_5ecl0")
 wall_length = 80.0
+
+[node name="CollisionShape2D" parent="DeadWalls/DeadWall15" index="0" unique_id=1455125516]
+shape = SubResource("RectangleShape2D_b545k")
+one_way_collision = true
+
+[node name="Polygon2D" parent="DeadWalls/DeadWall15" index="1" unique_id=560731279]
+polygon = PackedVector2Array(-40, -2.5, 40, -2.5, 40, 2.5, -40, 2.5)
 
 [node name="DeadWall16" parent="DeadWalls" unique_id=843268918 instance=ExtResource("9_f33k1")]
 position = Vector2(45.99994, -209.00003)
 rotation = -0.7853982
 scale = Vector2(0.9999999, 0.9999999)
-physics_material_override = SubResource("PhysicsMaterial_qf8ve")
+physics_material_override = SubResource("PhysicsMaterial_ikbjk")
 wall_length = 30.0
+
+[node name="CollisionShape2D" parent="DeadWalls/DeadWall16" index="0" unique_id=1455125516]
+shape = SubResource("RectangleShape2D_cga3n")
+one_way_collision = true
+
+[node name="Polygon2D" parent="DeadWalls/DeadWall16" index="1" unique_id=560731279]
+polygon = PackedVector2Array(-15, -2.5, 15, -2.5, 15, 2.5, -15, 2.5)
 
 [node name="DeadWall17" parent="DeadWalls" unique_id=616464207 instance=ExtResource("9_f33k1")]
 position = Vector2(-58.000015, -204.00003)
 rotation = 0.7853982
 scale = Vector2(0.9999998, 0.9999998)
-physics_material_override = SubResource("PhysicsMaterial_b7m18")
+physics_material_override = SubResource("PhysicsMaterial_xhe6y")
 wall_length = 30.0
+
+[node name="CollisionShape2D" parent="DeadWalls/DeadWall17" index="0" unique_id=1455125516]
+shape = SubResource("RectangleShape2D_unp1l")
+one_way_collision = true
+
+[node name="Polygon2D" parent="DeadWalls/DeadWall17" index="1" unique_id=560731279]
+polygon = PackedVector2Array(-15, -2.5, 15, -2.5, 15, 2.5, -15, 2.5)
 
 [node name="FloorSeeder" parent="." unique_id=1662612070 instance=ExtResource("11_gcim3")]
 
 [node name="BumperWall" parent="." unique_id=84755984 instance=ExtResource("13_41qk1")]
 position = Vector2(-321, -368)
 rotation = 1.5707964
-physics_material_override = SubResource("PhysicsMaterial_4qim1")
+physics_material_override = SubResource("PhysicsMaterial_nr1ke")
 wall_length = 200.0
 
 [node name="BumperWall2" parent="." unique_id=1241573116 instance=ExtResource("13_41qk1")]
 position = Vector2(315, -362)
 rotation = 1.5707964
-physics_material_override = SubResource("PhysicsMaterial_5ecl0")
+physics_material_override = SubResource("PhysicsMaterial_6hqcu")
 wall_length = 200.0
 
 [node name="CircularBumper" parent="." unique_id=623492784 instance=ExtResource("14_ca4i1")]
 position = Vector2(-297, -191)
-physics_material_override = SubResource("PhysicsMaterial_ikbjk")
+physics_material_override = SubResource("PhysicsMaterial_8xpto")
 radius = 8.0
 
 [node name="CircularBumper2" parent="." unique_id=608845771 instance=ExtResource("14_ca4i1")]
 position = Vector2(-313, -219)
-physics_material_override = SubResource("PhysicsMaterial_cga3n")
+physics_material_override = SubResource("PhysicsMaterial_h07m1")
 radius = 8.0
 
 [node name="CircularBumper3" parent="." unique_id=2016267216 instance=ExtResource("14_ca4i1")]
 position = Vector2(289, -188)
-physics_material_override = SubResource("PhysicsMaterial_xhe6y")
+physics_material_override = SubResource("PhysicsMaterial_a2dh2")
 radius = 8.0
 
 [node name="CircularBumper4" parent="." unique_id=1213590522 instance=ExtResource("14_ca4i1")]
 position = Vector2(308, -217)
-physics_material_override = SubResource("PhysicsMaterial_unp1l")
+physics_material_override = SubResource("PhysicsMaterial_sq6ca")
 radius = 8.0
 
 [node name="UfoWorkshop" parent="." unique_id=625327535 instance=ExtResource("15_8sp67")]
@@ -409,17 +419,23 @@ position = Vector2(276, -134)
 [node name="FlipperLeftUp" parent="." unique_id=944981894 instance=ExtResource("16_qyf36")]
 position = Vector2(-38, -107)
 
-[node name="FlipperLeftDown" parent="." unique_id=109040077 instance=ExtResource("19_p60vf")]
-position = Vector2(-37, -30)
+[node name="FlipperLeftUp6" parent="." unique_id=1447591536 instance=ExtResource("16_qyf36")]
+position = Vector2(-41, -31)
+
+[node name="FlipperLeftUp7" parent="." unique_id=57095794 instance=ExtResource("16_qyf36")]
+position = Vector2(141, -86)
 
 [node name="FlipperRightUp" parent="." unique_id=1667218853 instance=ExtResource("18_p60vf")]
 position = Vector2(36, -106)
 
+[node name="FlipperRightUp3" parent="." unique_id=981012263 instance=ExtResource("18_p60vf")]
+position = Vector2(214, -86)
+
 [node name="FlipperLeftUp2" parent="." unique_id=1848675677 instance=ExtResource("16_qyf36")]
-position = Vector2(-208, -70)
+position = Vector2(-216, -81.99999)
 
 [node name="FlipperRightUp2" parent="." unique_id=1016001302 instance=ExtResource("18_p60vf")]
-position = Vector2(-134, -69)
+position = Vector2(-142, -80.99999)
 
 [node name="FlipperLeftDownPixelPerfect" parent="." unique_id=94480237 instance=ExtResource("19_p60vf")]
 position = Vector2(-168, -16)
@@ -447,7 +463,7 @@ angle_preset = 1
 length_units = 1
 
 [node name="OceanCurrent" parent="." unique_id=1683655070 instance=ExtResource("19_o6ev6")]
-position = Vector2(48, -22)
+position = Vector2(281, 1)
 cycle_active = true
 current_color = Color(0.72281885, 0.92093396, 0.99999994, 0.7019608)
 show_debug_arrows = false
@@ -455,4 +471,28 @@ show_debug_arrows = false
 [node name="Path2D" parent="OceanCurrent" index="0" unique_id=1461068862]
 curve = SubResource("Curve2D_e8afl")
 
+[node name="FlipperLeftUp3" parent="." unique_id=1765128814 instance=ExtResource("20_4skyc")]
+position = Vector2(-235, -186)
+
+[node name="FlipperLeftUp4" parent="." unique_id=1813592518 instance=ExtResource("20_4skyc")]
+position = Vector2(-41, -184)
+
+[node name="FlipperLeftUp5" parent="." unique_id=1061196867 instance=ExtResource("20_4skyc")]
+position = Vector2(119, -188)
+
+[node name="CloudFlipperRightUp" parent="." unique_id=457523947 instance=ExtResource("21_b545k")]
+position = Vector2(-122, -185)
+
+[node name="CloudFlipperRightUp2" parent="." unique_id=550657981 instance=ExtResource("21_b545k")]
+position = Vector2(31, -186)
+
+[node name="CloudFlipperRightUp3" parent="." unique_id=420986090 instance=ExtResource("21_b545k")]
+position = Vector2(236, -186)
+
+[editable path="DeadWalls/DeadWall9"]
+[editable path="DeadWalls/DeadWall10"]
+[editable path="DeadWalls/DeadWall14"]
+[editable path="DeadWalls/DeadWall15"]
+[editable path="DeadWalls/DeadWall16"]
+[editable path="DeadWalls/DeadWall17"]
 [editable path="OceanCurrent"]
