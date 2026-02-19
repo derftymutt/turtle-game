@@ -13,7 +13,7 @@ class_name Ocean
 @export_group("Buoyancy Zones")
 @export var shallow_depth: float = 100.0  # Shallow zone depth in pixels (0 to 100 below surface)
 @export var mid_depth: float = 200.0  # Mid zone depth in pixels (100 to 200 below surface)
-@export var shallow_buoyancy: float = 150.0  # INCREASED: Was 100.0 - faster rise in shallow
+@export var shallow_buoyancy: float = 185.0  # INCREASED: Was 100.0 - faster rise in shallow
 @export var mid_buoyancy_base: float = 225.0  # INCREASED: Was 175.0 - faster rise in mid
 @export var mid_buoyancy_rate: float = 4.0  # INCREASED: Was 3.0 - stronger gradient
 @export var deep_buoyancy_base: float = 275.0  # INCREASED: Was 200.0 - stronger deep push
