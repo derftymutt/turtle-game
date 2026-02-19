@@ -90,16 +90,8 @@ point_count = 7
 [node name="LevelBase" unique_id=202497572 instance=ExtResource("1_mi4ay")]
 level_number = 2
 
-[node name="HUD" parent="." index="0" unique_id=1369229575]
-visible = false
-
-[node name="GameOverScreen" parent="." index="1" unique_id=301166293]
-visible = false
-
-[node name="LevelCompleteScreen" parent="." index="2" unique_id=1103608067]
-visible = false
-
 [node name="Ocean" parent="." index="3" unique_id=863147586 instance=ExtResource("3_0srwa")]
+show_debug_zones = false
 
 [node name="Camera2D" type="Camera2D" parent="." index="4" unique_id=1199674617 node_paths=PackedStringArray("follow_target")]
 script = ExtResource("3_ndgrd")

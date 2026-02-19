@@ -4,7 +4,6 @@
 
 [node name="Ocean" type="Node2D" unique_id=1274260941 groups=["ocean"]]
 script = ExtResource("1_tiovm")
-show_debug_zones = true
 
 [node name="WaterSurface" type="Line2D" parent="." unique_id=1813623130]
 position = Vector2(0, -126)
