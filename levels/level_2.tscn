@@ -21,7 +21,7 @@
 [ext_resource type="PackedScene" uid="uid://bgrcf873d7ity" path="res://entities/collectibles/health_plant/health_plant_spawner.tscn" id="22_ngvhw"]
 [ext_resource type="PackedScene" uid="uid://d3ui83o5ln2lj" path="res://entities/environment/flippers/flipper_left_east.tscn" id="23_itbe0"]
 [ext_resource type="PackedScene" uid="uid://brjd5ho5mmmy4" path="res://entities/environment/flippers/flipper_right_west.tscn" id="24_xrja0"]
-[ext_resource type="PackedScene" uid="uid://8edo3etakc1a" path="res://entities/environment/walls/dead_wall/dead_wall_2.tscn" id="25_00pa0"]
+[ext_resource type="PackedScene" uid="uid://8edo3etakc1a" path="res://entities/environment/walls/dead_wall/dead_wall.tscn" id="25_00pa0"]
 [ext_resource type="PackedScene" uid="uid://bwdbbu1jhxn2n" path="res://entities/environment/walls/bumper_wall/bumper_wall_2.tscn" id="25_amxoe"]
 [ext_resource type="PackedScene" uid="uid://4het8fdlmvgj" path="res://entities/environment/flippers/flipper_left_down.tscn" id="25_he6wg"]
 [ext_resource type="PackedScene" uid="uid://b5olvcks1vnwn" path="res://entities/environment/flippers/flipper_right_down.tscn" id="25_jqt73"]
@@ -91,7 +91,6 @@ point_count = 7
 level_number = 2
 
 [node name="Ocean" parent="." index="3" unique_id=863147586 instance=ExtResource("3_0srwa")]
-show_debug_zones = false
 
 [node name="Camera2D" type="Camera2D" parent="." index="4" unique_id=1199674617 node_paths=PackedStringArray("follow_target")]
 script = ExtResource("3_ndgrd")

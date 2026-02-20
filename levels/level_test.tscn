@@ -6,21 +6,19 @@
 [ext_resource type="PackedScene" uid="uid://btbnsn74vk1b" path="res://entities/player/turtle_player.tscn" id="4_d4l3b"]
 [ext_resource type="PackedScene" uid="uid://bahema85c45s" path="res://ui/hud/hud.tscn" id="5_41qk1"]
 [ext_resource type="PackedScene" uid="uid://cn5v270vtn1pl" path="res://ui/menus/game_over_screen.tscn" id="6_ca4i1"]
-[ext_resource type="PackedScene" uid="uid://r0k3freedece" path="res://entities/environment/flippers/flipper-legacy/flipper.tscn" id="8_qyf36"]
-[ext_resource type="PackedScene" uid="uid://dtqni7qbnvils" path="res://entities/environment/walls/dead_wall/dead_wall.tscn" id="9_f33k1"]
 [ext_resource type="PackedScene" uid="uid://bwyt5nkmne05h" path="res://entities/collectibles/ufo_piece/ufo_piece_seeder.tscn" id="11_gcim3"]
 [ext_resource type="PackedScene" uid="uid://bgoopne83ygdj" path="res://entities/environment/walls/bumper_wall/bumper_wall.tscn" id="13_41qk1"]
 [ext_resource type="PackedScene" uid="uid://bp6g8v1jmnruo" path="res://entities/environment/walls/circular_bumper/circular_bumper.tscn" id="14_ca4i1"]
 [ext_resource type="PackedScene" uid="uid://cxt44kcegt0ah" path="res://entities/environment/ufo_workshop/ufo_workshop.tscn" id="15_8sp67"]
 [ext_resource type="PackedScene" uid="uid://ntfpaqi03yfr" path="res://entities/environment/flippers/flipper_left_up.tscn" id="16_qyf36"]
-[ext_resource type="PackedScene" uid="uid://8edo3etakc1a" path="res://entities/environment/walls/dead_wall/dead_wall_2.tscn" id="17_f33k1"]
-[ext_resource type="PackedScene" uid="uid://b5olvcks1vnwn" path="res://entities/environment/flippers/flipper_right_down.tscn" id="18_6hwsd"]
-[ext_resource type="PackedScene" uid="uid://bwdbbu1jhxn2n" path="res://entities/environment/walls/bumper_wall/bumper_wall_2.tscn" id="18_o6ev6"]
+[ext_resource type="PackedScene" uid="uid://8edo3etakc1a" path="res://entities/environment/walls/dead_wall/dead_wall.tscn" id="17_f33k1"]
 [ext_resource type="PackedScene" uid="uid://jylpdfwgd8wo" path="res://entities/environment/flippers/flipper_right_up.tscn" id="18_p60vf"]
+[ext_resource type="Texture2D" uid="uid://8det4aydy3r5" path="res://entities/environment/walls/dead_wall/sprites/wall_diagonal_2u.png" id="18_pxnvp"]
+[ext_resource type="Texture2D" uid="uid://bq2m8w5vouuyn" path="res://entities/environment/walls/dead_wall/sprites/wall_diagonal_1u.png" id="19_0brv5"]
 [ext_resource type="PackedScene" uid="uid://ko8xdpxfr5ej" path="res://entities/environment/ocean_current/ocean_current.tscn" id="19_o6ev6"]
-[ext_resource type="PackedScene" uid="uid://4het8fdlmvgj" path="res://entities/environment/flippers/flipper_left_down.tscn" id="19_p60vf"]
 [ext_resource type="PackedScene" uid="uid://u02ifu2255ot" path="res://entities/environment/flippers/cloud_flipper_left_up.tscn" id="20_4skyc"]
 [ext_resource type="PackedScene" uid="uid://p32a3utahssn" path="res://entities/environment/flippers/cloud_flipper_right_up.tscn" id="21_b545k"]
+[ext_resource type="PackedScene" uid="uid://rkinsjd2v3bk" path="res://entities/collectibles/ufo_piece/ufo_piece.tscn" id="22_b545k"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_6hwsd"]
 size = Vector2(9.000052, 471.00015)
@@ -31,95 +29,68 @@ size = Vector2(9.999756, 465.00012)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_o6ev6"]
 size = Vector2(640, 40)
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_4skyc"]
-friction = 0.0
-
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_b545k"]
-friction = 0.0
-
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_sr3fv"]
-friction = 0.0
-
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_pxnvp"]
-friction = 0.0
-
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_0brv5"]
-friction = 0.0
-
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_3y2y2"]
-friction = 0.0
-
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_euh2h"]
-friction = 0.0
-
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_f0ksa"]
-friction = 0.0
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_emlfc"]
-size = Vector2(80, 5)
-
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_olub7"]
-friction = 0.0
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_wgqfy"]
-size = Vector2(60, 5)
-
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_qf8ve"]
-friction = 0.0
-
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_b7m18"]
-friction = 0.0
-
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_4qim1"]
-friction = 0.0
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_4skyc"]
-size = Vector2(60, 5)
-
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_5ecl0"]
-friction = 0.0
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_b545k"]
-size = Vector2(80, 5)
+friction = 0.1
+bounce = 1.2
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ikbjk"]
-friction = 0.0
+friction = 0.1
+bounce = 1.2
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_cga3n"]
-size = Vector2(30, 5)
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_cga3n"]
+friction = 0.1
+bounce = 1.2
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_xhe6y"]
-friction = 0.0
+friction = 0.1
+bounce = 1.2
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_unp1l"]
-size = Vector2(30, 5)
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_unp1l"]
+friction = 0.1
+bounce = 1.2
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_nr1ke"]
 friction = 0.1
 bounce = 1.2
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_6hqcu"]
-friction = 0.1
-bounce = 1.2
-
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_8xpto"]
-friction = 0.1
-bounce = 1.2
-
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_h07m1"]
-friction = 0.1
-bounce = 1.2
-
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_a2dh2"]
-friction = 0.1
-bounce = 1.2
-
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_sq6ca"]
-friction = 0.1
-bounce = 1.2
-
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_e8afl"]
 friction = 0.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_6hqcu"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_8xpto"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_h07m1"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_a2dh2"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_sq6ca"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5xcwp"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_7sul6"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ut470"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_u6ecb"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_a8tjx"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_g2ty6"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hvk5x"]
+size = Vector2(32, 8)
 
 [sub_resource type="Curve2D" id="Curve2D_e8afl"]
 _data = {
@@ -202,225 +173,47 @@ color = Color(0.17755811, 0.12329503, 0.02367841, 1)
 
 [node name="Flippers" type="Node2D" parent="." unique_id=488184852]
 
-[node name="Flipper Left2" parent="Flippers" unique_id=1779063152 instance=ExtResource("8_qyf36")]
-position = Vector2(-58, 101)
-
-[node name="Flipper Right2" parent="Flippers" unique_id=164917568 instance=ExtResource("8_qyf36")]
-position = Vector2(79, -40)
-rest_angle = 50.0
-flip_input = "flipper_right"
-flip_sprite_h = true
-is_right_flipper = true
-
-[node name="Flipper Right3" parent="Flippers" unique_id=186817381 instance=ExtResource("8_qyf36")]
-position = Vector2(74, 95)
-rest_angle = 50.0
-flip_input = "flipper_right"
-flip_sprite_h = true
-is_right_flipper = true
-
-[node name="Flipper Right4" parent="Flippers" unique_id=1829352443 instance=ExtResource("8_qyf36")]
-position = Vector2(269, 66)
-rest_angle = 50.0
-flip_input = "flipper_right"
-flip_sprite_h = true
-is_right_flipper = true
-
-[node name="Flipper Left5" parent="Flippers" unique_id=1833033378 instance=ExtResource("8_qyf36")]
-position = Vector2(-267, 62)
-
-[node name="Flipper Left6" parent="Flippers" unique_id=233226988 instance=ExtResource("8_qyf36")]
-position = Vector2(-110.99999, 95)
-
 [node name="DeadWalls" type="Node2D" parent="." unique_id=724785319]
-
-[node name="DeadWall3" parent="DeadWalls" unique_id=417655296 instance=ExtResource("9_f33k1")]
-position = Vector2(-245, -89.99999)
-rotation = -0.7853982
-physics_material_override = SubResource("PhysicsMaterial_4skyc")
-wall_length = 75.0
-
-[node name="DeadWall11" parent="DeadWalls" unique_id=1169863889 instance=ExtResource("9_f33k1")]
-position = Vector2(120, -99)
-rotation = -0.7853982
-physics_material_override = SubResource("PhysicsMaterial_b545k")
-wall_length = 40.0
-
-[node name="DeadWall4" parent="DeadWalls" unique_id=1150564769 instance=ExtResource("9_f33k1")]
-position = Vector2(87, -10.000004)
-rotation = 0.7853982
-scale = Vector2(0.99999994, 0.99999994)
-physics_material_override = SubResource("PhysicsMaterial_sr3fv")
-wall_length = 60.0
-
-[node name="DeadWall5" parent="DeadWalls" unique_id=926190261 instance=ExtResource("9_f33k1")]
-position = Vector2(-283.00003, 87.99999)
-rotation = -0.7853982
-scale = Vector2(0.9999999, 0.9999999)
-physics_material_override = SubResource("PhysicsMaterial_pxnvp")
-wall_length = 40.0
-
-[node name="DeadWall6" parent="DeadWalls" unique_id=2123344687 instance=ExtResource("9_f33k1")]
-position = Vector2(89.000015, 121.000015)
-rotation = 0.7853982
-scale = Vector2(0.99999994, 0.99999994)
-physics_material_override = SubResource("PhysicsMaterial_0brv5")
-wall_length = 45.0
-
-[node name="DeadWall7" parent="DeadWalls" unique_id=12959658 instance=ExtResource("9_f33k1")]
-position = Vector2(-126, 120)
-rotation = -0.7853982
-scale = Vector2(0.9999999, 0.9999999)
-physics_material_override = SubResource("PhysicsMaterial_3y2y2")
-wall_length = 45.0
-
-[node name="DeadWall8" parent="DeadWalls" unique_id=656534300 instance=ExtResource("9_f33k1")]
-position = Vector2(285, 91.000015)
-rotation = 0.7853982
-scale = Vector2(0.99999994, 0.99999994)
-physics_material_override = SubResource("PhysicsMaterial_euh2h")
-wall_length = 40.0
-
-[node name="DeadWall9" parent="DeadWalls" unique_id=2012367493 instance=ExtResource("9_f33k1")]
-position = Vector2(-89, -226)
-rotation = -0.7853982
-scale = Vector2(0.9999999, 0.9999999)
-physics_material_override = SubResource("PhysicsMaterial_f0ksa")
-wall_length = 80.0
-
-[node name="CollisionShape2D" parent="DeadWalls/DeadWall9" index="0" unique_id=1455125516]
-shape = SubResource("RectangleShape2D_emlfc")
-one_way_collision = true
-
-[node name="Polygon2D" parent="DeadWalls/DeadWall9" index="1" unique_id=560731279]
-polygon = PackedVector2Array(-40, -2.5, 40, -2.5, 40, 2.5, -40, 2.5)
-
-[node name="DeadWall10" parent="DeadWalls" unique_id=1199588045 instance=ExtResource("9_f33k1")]
-position = Vector2(-262, -218.99997)
-rotation = 0.7853982
-scale = Vector2(0.9999998, 0.9999998)
-physics_material_override = SubResource("PhysicsMaterial_olub7")
-wall_length = 60.0
-
-[node name="CollisionShape2D" parent="DeadWalls/DeadWall10" index="0" unique_id=1455125516]
-shape = SubResource("RectangleShape2D_wgqfy")
-one_way_collision = true
-
-[node name="Polygon2D" parent="DeadWalls/DeadWall10" index="1" unique_id=560731279]
-polygon = PackedVector2Array(-30, -2.5, 30, -2.5, 30, 2.5, -30, 2.5)
-
-[node name="DeadWall12" parent="DeadWalls" unique_id=100906926 instance=ExtResource("9_f33k1")]
-position = Vector2(235, -88.999985)
-rotation = 0.7853982
-scale = Vector2(0.99999994, 0.99999994)
-physics_material_override = SubResource("PhysicsMaterial_qf8ve")
-wall_length = 75.0
-
-[node name="DeadWall13" parent="DeadWalls" unique_id=641696376 instance=ExtResource("9_f33k1")]
-position = Vector2(-120, -99.00001)
-rotation = 0.7853982
-scale = Vector2(0.99999994, 0.99999994)
-physics_material_override = SubResource("PhysicsMaterial_b7m18")
-wall_length = 40.0
-
-[node name="DeadWall14" parent="DeadWalls" unique_id=187558299 instance=ExtResource("9_f33k1")]
-position = Vector2(260.99988, -219.00003)
-rotation = -0.7853982
-scale = Vector2(0.9999999, 0.9999999)
-physics_material_override = SubResource("PhysicsMaterial_4qim1")
-wall_length = 60.0
-
-[node name="CollisionShape2D" parent="DeadWalls/DeadWall14" index="0" unique_id=1455125516]
-shape = SubResource("RectangleShape2D_4skyc")
-one_way_collision = true
-
-[node name="Polygon2D" parent="DeadWalls/DeadWall14" index="1" unique_id=560731279]
-polygon = PackedVector2Array(-30, -2.5, 30, -2.5, 30, 2.5, -30, 2.5)
-
-[node name="DeadWall15" parent="DeadWalls" unique_id=1847249712 instance=ExtResource("9_f33k1")]
-position = Vector2(87, -227.00002)
-rotation = 0.7853982
-scale = Vector2(0.9999998, 0.9999998)
-physics_material_override = SubResource("PhysicsMaterial_5ecl0")
-wall_length = 80.0
-
-[node name="CollisionShape2D" parent="DeadWalls/DeadWall15" index="0" unique_id=1455125516]
-shape = SubResource("RectangleShape2D_b545k")
-one_way_collision = true
-
-[node name="Polygon2D" parent="DeadWalls/DeadWall15" index="1" unique_id=560731279]
-polygon = PackedVector2Array(-40, -2.5, 40, -2.5, 40, 2.5, -40, 2.5)
-
-[node name="DeadWall16" parent="DeadWalls" unique_id=843268918 instance=ExtResource("9_f33k1")]
-position = Vector2(45.99994, -209.00003)
-rotation = -0.7853982
-scale = Vector2(0.9999999, 0.9999999)
-physics_material_override = SubResource("PhysicsMaterial_ikbjk")
-wall_length = 30.0
-
-[node name="CollisionShape2D" parent="DeadWalls/DeadWall16" index="0" unique_id=1455125516]
-shape = SubResource("RectangleShape2D_cga3n")
-one_way_collision = true
-
-[node name="Polygon2D" parent="DeadWalls/DeadWall16" index="1" unique_id=560731279]
-polygon = PackedVector2Array(-15, -2.5, 15, -2.5, 15, 2.5, -15, 2.5)
-
-[node name="DeadWall17" parent="DeadWalls" unique_id=616464207 instance=ExtResource("9_f33k1")]
-position = Vector2(-58.000015, -204.00003)
-rotation = 0.7853982
-scale = Vector2(0.9999998, 0.9999998)
-physics_material_override = SubResource("PhysicsMaterial_xhe6y")
-wall_length = 30.0
-
-[node name="CollisionShape2D" parent="DeadWalls/DeadWall17" index="0" unique_id=1455125516]
-shape = SubResource("RectangleShape2D_unp1l")
-one_way_collision = true
-
-[node name="Polygon2D" parent="DeadWalls/DeadWall17" index="1" unique_id=560731279]
-polygon = PackedVector2Array(-15, -2.5, 15, -2.5, 15, 2.5, -15, 2.5)
 
 [node name="FloorSeeder" parent="." unique_id=1662612070 instance=ExtResource("11_gcim3")]
 
 [node name="BumperWall" parent="." unique_id=84755984 instance=ExtResource("13_41qk1")]
 position = Vector2(-321, -368)
 rotation = 1.5707964
-physics_material_override = SubResource("PhysicsMaterial_nr1ke")
+physics_material_override = SubResource("PhysicsMaterial_5ecl0")
 wall_length = 200.0
 
 [node name="BumperWall2" parent="." unique_id=1241573116 instance=ExtResource("13_41qk1")]
 position = Vector2(315, -362)
 rotation = 1.5707964
-physics_material_override = SubResource("PhysicsMaterial_6hqcu")
+physics_material_override = SubResource("PhysicsMaterial_ikbjk")
 wall_length = 200.0
 
 [node name="CircularBumper" parent="." unique_id=623492784 instance=ExtResource("14_ca4i1")]
 position = Vector2(-297, -191)
-physics_material_override = SubResource("PhysicsMaterial_8xpto")
+physics_material_override = SubResource("PhysicsMaterial_cga3n")
 radius = 8.0
 
 [node name="CircularBumper2" parent="." unique_id=608845771 instance=ExtResource("14_ca4i1")]
 position = Vector2(-313, -219)
-physics_material_override = SubResource("PhysicsMaterial_h07m1")
+physics_material_override = SubResource("PhysicsMaterial_xhe6y")
 radius = 8.0
 
 [node name="CircularBumper3" parent="." unique_id=2016267216 instance=ExtResource("14_ca4i1")]
 position = Vector2(289, -188)
-physics_material_override = SubResource("PhysicsMaterial_a2dh2")
+physics_material_override = SubResource("PhysicsMaterial_unp1l")
 radius = 8.0
 
 [node name="CircularBumper4" parent="." unique_id=1213590522 instance=ExtResource("14_ca4i1")]
 position = Vector2(308, -217)
-physics_material_override = SubResource("PhysicsMaterial_sq6ca")
+physics_material_override = SubResource("PhysicsMaterial_nr1ke")
 radius = 8.0
 
 [node name="UfoWorkshop" parent="." unique_id=625327535 instance=ExtResource("15_8sp67")]
-position = Vector2(276, -134)
+position = Vector2(-179, -305)
 
 [node name="FlipperLeftUp" parent="." unique_id=944981894 instance=ExtResource("16_qyf36")]
 position = Vector2(-38, -107)
-
-[node name="FlipperLeftUp6" parent="." unique_id=1447591536 instance=ExtResource("16_qyf36")]
-position = Vector2(-41, -31)
 
 [node name="FlipperLeftUp7" parent="." unique_id=57095794 instance=ExtResource("16_qyf36")]
 position = Vector2(141, -86)
@@ -437,30 +230,169 @@ position = Vector2(-216, -81.99999)
 [node name="FlipperRightUp2" parent="." unique_id=1016001302 instance=ExtResource("18_p60vf")]
 position = Vector2(-142, -80.99999)
 
-[node name="FlipperLeftDownPixelPerfect" parent="." unique_id=94480237 instance=ExtResource("19_p60vf")]
-position = Vector2(-168, -16)
-
-[node name="FlipperRightDownPixelPerfect" parent="." unique_id=183342601 instance=ExtResource("18_6hwsd")]
-position = Vector2(-94, -15)
-
-[node name="DeadWall2" parent="." unique_id=797132162 instance=ExtResource("17_f33k1")]
-position = Vector2(-196, 17)
+[node name="DeadWall12" parent="." unique_id=1599388304 instance=ExtResource("17_f33k1")]
+position = Vector2(-242, -93)
 physics_material_override = SubResource("PhysicsMaterial_e8afl")
 angle_preset = 2
 mirrored = true
 
-[node name="BumperWall3" parent="." unique_id=1997660828 instance=ExtResource("18_o6ev6")]
-position = Vector2(-98, 67)
+[node name="DeadWall15" parent="." unique_id=1367015735 instance=ExtResource("17_f33k1")]
+position = Vector2(235, -98)
+physics_material_override = SubResource("PhysicsMaterial_e8afl")
+angle_preset = 2
 
-[node name="DeadWall3" parent="." unique_id=142956685 instance=ExtResource("17_f33k1")]
-position = Vector2(-137, 45)
+[node name="DeadWall6" parent="." unique_id=1147389054 instance=ExtResource("17_f33k1")]
+position = Vector2(-94, -216)
+physics_material_override = SubResource("PhysicsMaterial_e8afl")
+angle_preset = 2
+mirrored = true
+
+[node name="CollisionShape2D" parent="DeadWall6" index="0" unique_id=1644951480]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_6hqcu")
+one_way_collision = true
+
+[node name="Sprite2D" parent="DeadWall6" index="1" unique_id=804434373]
+visible = true
+texture = ExtResource("18_pxnvp")
+flip_h = true
+
+[node name="Polygon2D" parent="DeadWall6" index="2" unique_id=138368735]
+visible = false
+rotation = -0.7853982
+
+[node name="CollisionShape2D" parent="DeadWall6/SlipperyArea" parent_id_path=PackedInt32Array(1147389054, 773978709) index="0" unique_id=2040614053]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_8xpto")
+
+[node name="DeadWall7" parent="." unique_id=465070693 instance=ExtResource("17_f33k1")]
+position = Vector2(264, -216)
+physics_material_override = SubResource("PhysicsMaterial_e8afl")
+angle_preset = 2
+mirrored = true
+
+[node name="CollisionShape2D" parent="DeadWall7" index="0" unique_id=1644951480]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_h07m1")
+one_way_collision = true
+
+[node name="Sprite2D" parent="DeadWall7" index="1" unique_id=804434373]
+visible = true
+texture = ExtResource("18_pxnvp")
+flip_h = true
+
+[node name="Polygon2D" parent="DeadWall7" index="2" unique_id=138368735]
+visible = false
+rotation = -0.7853982
+
+[node name="CollisionShape2D" parent="DeadWall7/SlipperyArea" parent_id_path=PackedInt32Array(465070693, 773978709) index="0" unique_id=2040614053]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_a2dh2")
+
+[node name="DeadWall8" parent="." unique_id=753708131 instance=ExtResource("17_f33k1")]
+position = Vector2(91, -219)
+physics_material_override = SubResource("PhysicsMaterial_e8afl")
+angle_preset = 2
+
+[node name="CollisionShape2D" parent="DeadWall8" index="0" unique_id=1644951480]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_sq6ca")
+one_way_collision = true
+
+[node name="Sprite2D" parent="DeadWall8" index="1" unique_id=804434373]
+visible = true
+texture = ExtResource("18_pxnvp")
+
+[node name="Polygon2D" parent="DeadWall8" index="2" unique_id=138368735]
+visible = false
+rotation = 0.7853982
+
+[node name="CollisionShape2D" parent="DeadWall8/SlipperyArea" parent_id_path=PackedInt32Array(753708131, 773978709) index="0" unique_id=2040614053]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_5xcwp")
+
+[node name="DeadWall9" parent="." unique_id=225731195 instance=ExtResource("17_f33k1")]
+position = Vector2(-263, -218)
+physics_material_override = SubResource("PhysicsMaterial_e8afl")
+angle_preset = 2
+
+[node name="CollisionShape2D" parent="DeadWall9" index="0" unique_id=1644951480]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_7sul6")
+one_way_collision = true
+
+[node name="Sprite2D" parent="DeadWall9" index="1" unique_id=804434373]
+visible = true
+texture = ExtResource("18_pxnvp")
+
+[node name="Polygon2D" parent="DeadWall9" index="2" unique_id=138368735]
+visible = false
+rotation = 0.7853982
+
+[node name="CollisionShape2D" parent="DeadWall9/SlipperyArea" parent_id_path=PackedInt32Array(225731195, 773978709) index="0" unique_id=2040614053]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_ut470")
+
+[node name="DeadWall10" parent="." unique_id=1107429021 instance=ExtResource("17_f33k1")]
+position = Vector2(-57, -203)
+physics_material_override = SubResource("PhysicsMaterial_e8afl")
 angle_preset = 2
 length_units = 1
 
-[node name="DeadWall4" parent="." unique_id=525452990 instance=ExtResource("17_f33k1")]
-position = Vector2(-73, 45)
-angle_preset = 1
+[node name="CollisionShape2D" parent="DeadWall10" index="0" unique_id=1644951480]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_u6ecb")
+one_way_collision = true
+
+[node name="Sprite2D" parent="DeadWall10" index="1" unique_id=804434373]
+visible = true
+texture = ExtResource("19_0brv5")
+
+[node name="Polygon2D" parent="DeadWall10" index="2" unique_id=138368735]
+visible = false
+rotation = 0.7853982
+polygon = PackedVector2Array(-16, -4, 16, -4, 16, 4, -16, 4)
+
+[node name="CollisionShape2D" parent="DeadWall10/SlipperyArea" parent_id_path=PackedInt32Array(1107429021, 773978709) index="0" unique_id=2040614053]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_a8tjx")
+
+[node name="DeadWall11" parent="." unique_id=1004482291 instance=ExtResource("17_f33k1")]
+position = Vector2(50, -206)
+physics_material_override = SubResource("PhysicsMaterial_e8afl")
+angle_preset = 2
 length_units = 1
+mirrored = true
+
+[node name="CollisionShape2D" parent="DeadWall11" index="0" unique_id=1644951480]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_g2ty6")
+one_way_collision = true
+
+[node name="Sprite2D" parent="DeadWall11" index="1" unique_id=804434373]
+visible = true
+texture = ExtResource("19_0brv5")
+flip_h = true
+
+[node name="Polygon2D" parent="DeadWall11" index="2" unique_id=138368735]
+visible = false
+rotation = -0.7853982
+polygon = PackedVector2Array(-16, -4, 16, -4, 16, 4, -16, 4)
+
+[node name="CollisionShape2D" parent="DeadWall11/SlipperyArea" parent_id_path=PackedInt32Array(1004482291, 773978709) index="0" unique_id=2040614053]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_hvk5x")
+
+[node name="DeadWall13" parent="." unique_id=1146484172 instance=ExtResource("17_f33k1")]
+position = Vector2(-127, -103)
+angle_preset = 2
+length_units = 1
+
+[node name="DeadWall14" parent="." unique_id=2008037395 instance=ExtResource("17_f33k1")]
+position = Vector2(120, -102)
+angle_preset = 2
+length_units = 1
+mirrored = true
 
 [node name="OceanCurrent" parent="." unique_id=1683655070 instance=ExtResource("19_o6ev6")]
 position = Vector2(281, 1)
@@ -489,10 +421,23 @@ position = Vector2(31, -186)
 [node name="CloudFlipperRightUp3" parent="." unique_id=420986090 instance=ExtResource("21_b545k")]
 position = Vector2(236, -186)
 
-[editable path="DeadWalls/DeadWall9"]
-[editable path="DeadWalls/DeadWall10"]
-[editable path="DeadWalls/DeadWall14"]
-[editable path="DeadWalls/DeadWall15"]
-[editable path="DeadWalls/DeadWall16"]
-[editable path="DeadWalls/DeadWall17"]
+[node name="DeadWall5" parent="." unique_id=1287884763 instance=ExtResource("17_f33k1")]
+position = Vector2(179, -284)
+angle_preset = 4
+length_units = 1
+
+[node name="DeadWall16" parent="." unique_id=797132162 instance=ExtResource("17_f33k1")]
+position = Vector2(-180, -292)
+angle_preset = 4
+length_units = 1
+
+[node name="UfoPiece" parent="." unique_id=664197637 instance=ExtResource("22_b545k")]
+position = Vector2(179, -297)
+
+[editable path="DeadWall6"]
+[editable path="DeadWall7"]
+[editable path="DeadWall8"]
+[editable path="DeadWall9"]
+[editable path="DeadWall10"]
+[editable path="DeadWall11"]
 [editable path="OceanCurrent"]

@@ -49,11 +49,11 @@ const ANGLE_NAMES: Dictionary = {
 ##   SHALLOW    → 26.57°  (1:2 rise:run)
 ##   HORIZONTAL → 90°     (straight across)
 const ANGLE_ROTATIONS: Dictionary = {
-	0: 0.0,
+	0: 90.0,
 	1: 63.43,
 	2: 45.0,
 	3: 26.57,
-	4: 90.0,
+	4: 0.0,
 }
 
 ## --- Enums ---
