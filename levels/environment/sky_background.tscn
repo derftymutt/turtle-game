@@ -1,0 +1,16 @@
+[gd_scene format=3 uid="uid://b6mqqn1jgl6of"]
+
+[ext_resource type="Texture2D" uid="uid://biv61kif2ioog" path="res://levels/environment/sprites/sky.png" id="1_0iqeg"]
+
+[node name="SkyBackground" type="CanvasLayer" unique_id=967020750]
+layer = -1
+
+[node name="SkyTexture" type="TextureRect" parent="." unique_id=1658081521]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_0iqeg")
+expand_mode = 1
+stretch_mode = 1

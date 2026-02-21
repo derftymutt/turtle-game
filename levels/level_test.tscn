@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cc1pfhtxq4cat" path="res://levels/shared/level_base.gd" id="1_vac4a"]
 [ext_resource type="PackedScene" uid="uid://qd5yfrw7588i" path="res://entities/environment/ocean/ocean.tscn" id="2_cd850"]
+[ext_resource type="PackedScene" uid="uid://dysmgxrg7t1o4" path="res://entities/environment/ocean_background/ocean_background.tscn" id="3_4skyc"]
 [ext_resource type="Script" uid="uid://c3i3p77jm22vp" path="res://systems/camera_2d.gd" id="3_gcim3"]
 [ext_resource type="PackedScene" uid="uid://btbnsn74vk1b" path="res://entities/player/turtle_player.tscn" id="4_d4l3b"]
 [ext_resource type="PackedScene" uid="uid://bahema85c45s" path="res://ui/hud/hud.tscn" id="5_41qk1"]
@@ -10,6 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://bgoopne83ygdj" path="res://entities/environment/walls/bumper_wall/bumper_wall.tscn" id="13_41qk1"]
 [ext_resource type="PackedScene" uid="uid://bp6g8v1jmnruo" path="res://entities/environment/walls/circular_bumper/circular_bumper.tscn" id="14_ca4i1"]
 [ext_resource type="PackedScene" uid="uid://cxt44kcegt0ah" path="res://entities/environment/ufo_workshop/ufo_workshop.tscn" id="15_8sp67"]
+[ext_resource type="Texture2D" uid="uid://8det4aydy3r5" path="res://entities/environment/walls/dead_wall/sprites/wall_diagonal_2u.png" id="16_b545k"]
 [ext_resource type="PackedScene" uid="uid://ntfpaqi03yfr" path="res://entities/environment/flippers/flipper_left_up.tscn" id="16_qyf36"]
 [ext_resource type="PackedScene" uid="uid://8edo3etakc1a" path="res://entities/environment/walls/dead_wall/dead_wall.tscn" id="17_f33k1"]
 [ext_resource type="PackedScene" uid="uid://jylpdfwgd8wo" path="res://entities/environment/flippers/flipper_right_up.tscn" id="18_p60vf"]
@@ -17,6 +19,7 @@
 [ext_resource type="PackedScene" uid="uid://ko8xdpxfr5ej" path="res://entities/environment/ocean_current/ocean_current.tscn" id="19_o6ev6"]
 [ext_resource type="PackedScene" uid="uid://bwdbbu1jhxn2n" path="res://entities/environment/walls/bumper_wall/bumper_wall_2.tscn" id="19_p60vf"]
 [ext_resource type="PackedScene" uid="uid://u02ifu2255ot" path="res://entities/environment/flippers/cloud_flipper_left_up.tscn" id="20_4skyc"]
+[ext_resource type="PackedScene" uid="uid://b6mqqn1jgl6of" path="res://levels/environment/sky_background.tscn" id="20_o6ev6"]
 [ext_resource type="PackedScene" uid="uid://p32a3utahssn" path="res://entities/environment/flippers/cloud_flipper_right_up.tscn" id="21_b545k"]
 [ext_resource type="PackedScene" uid="uid://rkinsjd2v3bk" path="res://entities/collectibles/ufo_piece/ufo_piece.tscn" id="22_b545k"]
 
@@ -29,11 +32,11 @@ size = Vector2(9.999756, 465.00012)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_o6ev6"]
 size = Vector2(640, 40)
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_p60vf"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_o6ev6"]
 friction = 0.1
 bounce = 1.2
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_o6ev6"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_0brv5"]
 friction = 0.1
 bounce = 1.2
 
@@ -56,40 +59,40 @@ bounce = 1.2
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_e8afl"]
 friction = 0.0
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_4skyc"]
-size = Vector2(32, 8)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_b545k"]
-size = Vector2(32, 8)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_3y2y2"]
+size = Vector2(64, 8)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_sr3fv"]
-size = Vector2(32, 8)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_pxnvp"]
-size = Vector2(32, 8)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_0brv5"]
-size = Vector2(32, 8)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_3y2y2"]
-size = Vector2(32, 8)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_euh2h"]
-size = Vector2(32, 8)
+size = Vector2(64, 8)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_f0ksa"]
-size = Vector2(32, 8)
+size = Vector2(64, 8)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_emlfc"]
-size = Vector2(32, 8)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pxnvp"]
+size = Vector2(64, 8)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_olub7"]
-size = Vector2(32, 8)
+size = Vector2(64, 8)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_wgqfy"]
-size = Vector2(32, 8)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_0brv5"]
+size = Vector2(64, 8)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_qf8ve"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_euh2h"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_4qim1"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5ecl0"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ikbjk"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_cga3n"]
 size = Vector2(32, 8)
 
 [sub_resource type="Curve2D" id="Curve2D_e8afl"]
@@ -102,7 +105,12 @@ point_count = 6
 script = ExtResource("1_vac4a")
 metadata/_custom_type_script = "uid://cc1pfhtxq4cat"
 
+[node name="SkyBackground" parent="." unique_id=967020750 instance=ExtResource("20_o6ev6")]
+
+[node name="OceanBackground" parent="." unique_id=593268214 instance=ExtResource("3_4skyc")]
+
 [node name="Ocean" parent="." unique_id=673352481 instance=ExtResource("2_cd850")]
+show_gradient = false
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=2078644764 node_paths=PackedStringArray("follow_target")]
 script = ExtResource("3_gcim3")
@@ -180,13 +188,13 @@ color = Color(0.17755811, 0.12329503, 0.02367841, 1)
 [node name="BumperWall" parent="." unique_id=84755984 instance=ExtResource("13_41qk1")]
 position = Vector2(-321, -368)
 rotation = 1.5707964
-physics_material_override = SubResource("PhysicsMaterial_p60vf")
+physics_material_override = SubResource("PhysicsMaterial_o6ev6")
 wall_length = 200.0
 
 [node name="BumperWall2" parent="." unique_id=1241573116 instance=ExtResource("13_41qk1")]
 position = Vector2(315, -362)
 rotation = 1.5707964
-physics_material_override = SubResource("PhysicsMaterial_o6ev6")
+physics_material_override = SubResource("PhysicsMaterial_0brv5")
 wall_length = 200.0
 
 [node name="CircularBumper" parent="." unique_id=623492784 instance=ExtResource("14_ca4i1")]
@@ -241,41 +249,45 @@ angle_preset = 2
 position = Vector2(-94, -216)
 physics_material_override = SubResource("PhysicsMaterial_e8afl")
 angle_preset = 2
+length_units = 2
 mirrored = true
 
 [node name="CollisionShape2D" parent="DeadWall6" index="0" unique_id=1644951480]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_4skyc")
+shape = SubResource("RectangleShape2D_3y2y2")
 one_way_collision = true
 
 [node name="Sprite2D" parent="DeadWall6" index="1" unique_id=804434373]
-texture = ExtResource("19_0brv5")
+texture = ExtResource("16_b545k")
 flip_h = true
 
 [node name="Polygon2D" parent="DeadWall6" index="2" unique_id=138368735]
 rotation = -0.7853982
+polygon = PackedVector2Array(-32, -4, 32, -4, 32, 4, -32, 4)
 
 [node name="CollisionShape2D" parent="DeadWall6/SlipperyArea" parent_id_path=PackedInt32Array(1147389054, 773978709) index="0" unique_id=2040614053]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_b545k")
+shape = SubResource("RectangleShape2D_sr3fv")
 
 [node name="DeadWall7" parent="." unique_id=465070693 instance=ExtResource("17_f33k1")]
 position = Vector2(264, -216)
 physics_material_override = SubResource("PhysicsMaterial_e8afl")
 angle_preset = 2
+length_units = 2
 mirrored = true
 
 [node name="CollisionShape2D" parent="DeadWall7" index="0" unique_id=1644951480]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_sr3fv")
+shape = SubResource("RectangleShape2D_f0ksa")
 one_way_collision = true
 
 [node name="Sprite2D" parent="DeadWall7" index="1" unique_id=804434373]
-texture = ExtResource("19_0brv5")
+texture = ExtResource("16_b545k")
 flip_h = true
 
 [node name="Polygon2D" parent="DeadWall7" index="2" unique_id=138368735]
 rotation = -0.7853982
+polygon = PackedVector2Array(-32, -4, 32, -4, 32, 4, -32, 4)
 
 [node name="CollisionShape2D" parent="DeadWall7/SlipperyArea" parent_id_path=PackedInt32Array(465070693, 773978709) index="0" unique_id=2040614053]
 rotation = -0.7853982
@@ -285,41 +297,45 @@ shape = SubResource("RectangleShape2D_pxnvp")
 position = Vector2(91, -219)
 physics_material_override = SubResource("PhysicsMaterial_e8afl")
 angle_preset = 2
+length_units = 2
 
 [node name="CollisionShape2D" parent="DeadWall8" index="0" unique_id=1644951480]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_0brv5")
+shape = SubResource("RectangleShape2D_olub7")
 one_way_collision = true
 
 [node name="Sprite2D" parent="DeadWall8" index="1" unique_id=804434373]
-texture = ExtResource("19_0brv5")
+texture = ExtResource("16_b545k")
 
 [node name="Polygon2D" parent="DeadWall8" index="2" unique_id=138368735]
 rotation = 0.7853982
+polygon = PackedVector2Array(-32, -4, 32, -4, 32, 4, -32, 4)
 
 [node name="CollisionShape2D" parent="DeadWall8/SlipperyArea" parent_id_path=PackedInt32Array(753708131, 773978709) index="0" unique_id=2040614053]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_3y2y2")
+shape = SubResource("RectangleShape2D_0brv5")
 
 [node name="DeadWall9" parent="." unique_id=225731195 instance=ExtResource("17_f33k1")]
 position = Vector2(-263, -218)
 physics_material_override = SubResource("PhysicsMaterial_e8afl")
 angle_preset = 2
+length_units = 2
 
 [node name="CollisionShape2D" parent="DeadWall9" index="0" unique_id=1644951480]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_euh2h")
+shape = SubResource("RectangleShape2D_qf8ve")
 one_way_collision = true
 
 [node name="Sprite2D" parent="DeadWall9" index="1" unique_id=804434373]
-texture = ExtResource("19_0brv5")
+texture = ExtResource("16_b545k")
 
 [node name="Polygon2D" parent="DeadWall9" index="2" unique_id=138368735]
 rotation = 0.7853982
+polygon = PackedVector2Array(-32, -4, 32, -4, 32, 4, -32, 4)
 
 [node name="CollisionShape2D" parent="DeadWall9/SlipperyArea" parent_id_path=PackedInt32Array(225731195, 773978709) index="0" unique_id=2040614053]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_f0ksa")
+shape = SubResource("RectangleShape2D_euh2h")
 
 [node name="DeadWall10" parent="." unique_id=1107429021 instance=ExtResource("17_f33k1")]
 position = Vector2(-57, -203)
@@ -328,7 +344,7 @@ angle_preset = 2
 
 [node name="CollisionShape2D" parent="DeadWall10" index="0" unique_id=1644951480]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_emlfc")
+shape = SubResource("RectangleShape2D_4qim1")
 one_way_collision = true
 
 [node name="Sprite2D" parent="DeadWall10" index="1" unique_id=804434373]
@@ -339,7 +355,7 @@ rotation = 0.7853982
 
 [node name="CollisionShape2D" parent="DeadWall10/SlipperyArea" parent_id_path=PackedInt32Array(1107429021, 773978709) index="0" unique_id=2040614053]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_olub7")
+shape = SubResource("RectangleShape2D_5ecl0")
 
 [node name="DeadWall11" parent="." unique_id=1004482291 instance=ExtResource("17_f33k1")]
 position = Vector2(50, -206)
@@ -349,7 +365,7 @@ mirrored = true
 
 [node name="CollisionShape2D" parent="DeadWall11" index="0" unique_id=1644951480]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_wgqfy")
+shape = SubResource("RectangleShape2D_ikbjk")
 one_way_collision = true
 
 [node name="Sprite2D" parent="DeadWall11" index="1" unique_id=804434373]
@@ -361,7 +377,7 @@ rotation = -0.7853982
 
 [node name="CollisionShape2D" parent="DeadWall11/SlipperyArea" parent_id_path=PackedInt32Array(1004482291, 773978709) index="0" unique_id=2040614053]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_qf8ve")
+shape = SubResource("RectangleShape2D_cga3n")
 
 [node name="DeadWall13" parent="." unique_id=1146484172 instance=ExtResource("17_f33k1")]
 position = Vector2(-127, -103)

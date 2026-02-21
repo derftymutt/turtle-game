@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://dysmgxrg7t1o4"]
+
+[ext_resource type="Texture2D" uid="uid://pegnlelo20bw" path="res://entities/environment/ocean_background/sprites/ocean_background.png" id="1_8xcjk"]
+
+[node name="OceanBackground" type="Node2D" unique_id=593268214]
+position = Vector2(0, -126)
+
+[node name="OceanGradient" type="Sprite2D" parent="." unique_id=2001845761]
+texture_repeat = 2
+position = Vector2(0, 153)
+texture = ExtResource("1_8xcjk")
+region_enabled = true
+region_rect = Rect2(0, 0, 1000, 306)
+
+[node name="WaveSurface" type="AnimatedSprite2D" parent="." unique_id=1487877736]
