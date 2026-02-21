@@ -6,29 +6,35 @@
 friction = 0.0
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wqjma"]
-size = Vector2(64, 8)
+size = Vector2(32, 8)
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_wqjma"]
+load_path = "res://.godot/imported/wall_shallow_1u.png-af3ad06eaa3c1c479dbb30f650fec7ba.ctex"
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_uxycr"]
-size = Vector2(64, 8)
+size = Vector2(32, 8)
 
 [node name="DeadWall" type="StaticBody2D" unique_id=797132162]
 physics_material_override = SubResource("PhysicsMaterial_2cgpa")
 script = ExtResource("1_2cgpa")
+angle_preset = 3
+length_units = 1
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1644951480]
-rotation = 1.5707964
+rotation = 0.46373397
 shape = SubResource("RectangleShape2D_wqjma")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=804434373]
-visible = false
+texture = SubResource("CompressedTexture2D_wqjma")
 
 [node name="Polygon2D" type="Polygon2D" parent="." unique_id=138368735]
-rotation = 1.5707964
+visible = false
+rotation = 0.46373397
 color = Color(0.3, 0.3, 0.4, 1)
-polygon = PackedVector2Array(-32, -4, 32, -4, 32, 4, -32, 4)
+polygon = PackedVector2Array(-16, -4, 16, -4, 16, 4, -16, 4)
 
 [node name="SlipperyArea" type="Area2D" parent="." unique_id=773978709]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="SlipperyArea" unique_id=2040614053]
-rotation = 1.5707964
+rotation = 0.46373397
 shape = SubResource("RectangleShape2D_uxycr")

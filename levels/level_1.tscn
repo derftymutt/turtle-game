@@ -552,8 +552,6 @@ length_units = 1
 
 [node name="BumperWall2" parent="." index="38" unique_id=1997660828 instance=ExtResource("25_ntdhj")]
 position = Vector2(177, 96)
-angle_preset = 0
 
 [node name="BumperWall3" parent="." index="39" unique_id=1609845940 instance=ExtResource("25_ntdhj")]
 position = Vector2(-199, 98)
-angle_preset = 0
