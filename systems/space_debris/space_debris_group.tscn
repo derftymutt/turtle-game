@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://c41fis6pd8gh2"]
+
+[ext_resource type="Script" uid="uid://d17eq0aewtebk" path="res://systems/space_debris/space_debris_group.gd" id="1_vqwp3"]
+
+[node name="SpaceDebrisGroup" type="Node2D" unique_id=511816800]
+script = ExtResource("1_vqwp3")
