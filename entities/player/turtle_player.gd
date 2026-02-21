@@ -7,7 +7,7 @@ extends RigidBody2D
 @export var kick_animation_duration_with_ufo_piece: float = 0.5
 
 # Shooting properties
-@export var shoot_cooldown: float = 0.2
+@export var shoot_cooldown: float = 0.25
 @export var bullet_speed: float = 500.0
 @export var bullet_scene: PackedScene
 

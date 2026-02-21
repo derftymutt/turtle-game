@@ -1,24 +1,111 @@
 [gd_scene format=3 uid="uid://bp6g8v1jmnruo"]
 
 [ext_resource type="Script" uid="uid://cfjwjd8atp8tn" path="res://entities/environment/walls/circular_bumper/circular_bumper.gd" id="1_ir1ke"]
+[ext_resource type="Texture2D" uid="uid://dob235kl6yvxk" path="res://entities/environment/walls/circular_bumper/sprites/circular_bumper_sm_1.png" id="2_qkehw"]
+[ext_resource type="Texture2D" uid="uid://dopvxto7megm6" path="res://entities/environment/walls/circular_bumper/sprites/circular_bumper_medium_1.png" id="2_r86cj"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ir1ke"]
 friction = 0.1
 bounce = 1.2
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_so3fd"]
+atlas = ExtResource("2_r86cj")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_asmjg"]
+atlas = ExtResource("2_r86cj")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_57bv2"]
+atlas = ExtResource("2_r86cj")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_r86cj"]
+atlas = ExtResource("2_qkehw")
+region = Rect2(24, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_d374g"]
+atlas = ExtResource("2_qkehw")
+region = Rect2(48, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lk6ni"]
+atlas = ExtResource("2_qkehw")
+region = Rect2(0, 0, 24, 24)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_so3fd"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_so3fd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_asmjg")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_so3fd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_asmjg")
+}],
+"loop": false,
+"name": &"medium_1_hit",
+"speed": 11.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_57bv2")
+}],
+"loop": true,
+"name": &"medium_1_idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_r86cj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_d374g")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_r86cj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_d374g")
+}],
+"loop": false,
+"name": &"small_1_hit",
+"speed": 11.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lk6ni")
+}],
+"loop": true,
+"name": &"small_1_idle",
+"speed": 5.0
+}]
+
 [sub_resource type="CircleShape2D" id="CircleShape2D_qkehw"]
 radius = 12.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_ir1ke"]
 
 [node name="CircularBumper" type="StaticBody2D" unique_id=2098876600]
 physics_material_override = SubResource("PhysicsMaterial_ir1ke")
 script = ExtResource("1_ir1ke")
-bumper_color = Color(0.7882353, 0.3019608, 0.3019608, 1)
-
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=362712420]
 
 [node name="Polygon2D" type="Polygon2D" parent="." unique_id=1795892724]
 color = Color(0.7882353, 0.3019608, 0.3019608, 1)
 polygon = PackedVector2Array(12, 0, 11.7694235, 2.3410838, 11.086555, 4.592201, 9.977635, 6.666843, 8.485281, 8.485281, 6.666843, 9.977635, 4.592201, 11.086555, 2.3410838, 11.7694235, 7.3478806e-16, 12, -2.3410838, 11.7694235, -4.592201, 11.086555, -6.666843, 9.977635, -8.485281, 8.485281, -9.977635, 6.666843, -11.086555, 4.592201, -11.7694235, 2.3410838, -12, 1.4695761e-15, -11.7694235, -2.3410838, -11.086555, -4.592201, -9.977635, -6.666843, -8.485281, -8.485281, -6.666843, -9.977635, -4.592201, -11.086555, -2.3410838, -11.7694235, -2.2043643e-15, -12, 2.3410838, -11.7694235, 4.592201, -11.086555, 6.666843, -9.977635, 8.485281, -8.485281, 9.977635, -6.666843, 11.086555, -4.592201, 11.7694235, -2.3410838)
 
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=362712420]
+sprite_frames = SubResource("SpriteFrames_so3fd")
+animation = &"medium_1_idle"
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=82633015]
 shape = SubResource("CircleShape2D_qkehw")
+
+[node name="HitArea" type="Area2D" parent="." unique_id=652902053]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitArea" unique_id=1931715867]
+shape = SubResource("CircleShape2D_ir1ke")

@@ -436,7 +436,8 @@ seed_count_min = 5
 [node name="CircularBumper" parent="CircularBumpers" index="0" unique_id=110944296 instance=ExtResource("18_oqlok")]
 position = Vector2(-175, -26)
 physics_material_override = SubResource("PhysicsMaterial_ryfpa")
-radius = 15.0
+size_preset = 1
+radius = 16.0
 
 [node name="CircularBumper2" parent="CircularBumpers" index="1" unique_id=699960614 instance=ExtResource("18_oqlok")]
 position = Vector2(-199, 97)
@@ -457,7 +458,8 @@ physics_material_override = SubResource("PhysicsMaterial_voubc")
 [node name="CircularBumper6" parent="CircularBumpers" index="5" unique_id=1003900960 instance=ExtResource("18_oqlok")]
 position = Vector2(166, -26)
 physics_material_override = SubResource("PhysicsMaterial_0x1rk")
-radius = 15.0
+size_preset = 1
+radius = 16.0
 
 [node name="CircularBumper7" parent="CircularBumpers" index="6" unique_id=365714998 instance=ExtResource("18_oqlok")]
 position = Vector2(177, 95)

@@ -29,67 +29,67 @@ size = Vector2(9.999756, 465.00012)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_o6ev6"]
 size = Vector2(640, 40)
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_5ecl0"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_p60vf"]
 friction = 0.1
 bounce = 1.2
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ikbjk"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_o6ev6"]
 friction = 0.1
 bounce = 1.2
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_cga3n"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_4skyc"]
 friction = 0.1
 bounce = 1.2
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_xhe6y"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_b545k"]
 friction = 0.1
 bounce = 1.2
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_unp1l"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_sr3fv"]
 friction = 0.1
 bounce = 1.2
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_nr1ke"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_pxnvp"]
 friction = 0.1
 bounce = 1.2
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_e8afl"]
 friction = 0.0
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_6hqcu"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_4skyc"]
 size = Vector2(64, 8)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_8xpto"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_b545k"]
 size = Vector2(64, 8)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_h07m1"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_sr3fv"]
 size = Vector2(64, 8)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_a2dh2"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pxnvp"]
 size = Vector2(64, 8)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_sq6ca"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_0brv5"]
 size = Vector2(64, 8)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_5xcwp"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_3y2y2"]
 size = Vector2(64, 8)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_7sul6"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_euh2h"]
 size = Vector2(64, 8)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_ut470"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_f0ksa"]
 size = Vector2(64, 8)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_u6ecb"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_emlfc"]
 size = Vector2(32, 8)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_a8tjx"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_olub7"]
 size = Vector2(32, 8)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_g2ty6"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wgqfy"]
 size = Vector2(32, 8)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_hvk5x"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_qf8ve"]
 size = Vector2(32, 8)
 
 [sub_resource type="Curve2D" id="Curve2D_e8afl"]
@@ -180,34 +180,38 @@ color = Color(0.17755811, 0.12329503, 0.02367841, 1)
 [node name="BumperWall" parent="." unique_id=84755984 instance=ExtResource("13_41qk1")]
 position = Vector2(-321, -368)
 rotation = 1.5707964
-physics_material_override = SubResource("PhysicsMaterial_5ecl0")
+physics_material_override = SubResource("PhysicsMaterial_p60vf")
 wall_length = 200.0
 
 [node name="BumperWall2" parent="." unique_id=1241573116 instance=ExtResource("13_41qk1")]
 position = Vector2(315, -362)
 rotation = 1.5707964
-physics_material_override = SubResource("PhysicsMaterial_ikbjk")
+physics_material_override = SubResource("PhysicsMaterial_o6ev6")
 wall_length = 200.0
 
 [node name="CircularBumper" parent="." unique_id=623492784 instance=ExtResource("14_ca4i1")]
 position = Vector2(-297, -191)
-physics_material_override = SubResource("PhysicsMaterial_cga3n")
-radius = 8.0
+physics_material_override = SubResource("PhysicsMaterial_4skyc")
+size_preset = 0
+variant = "1"
 
 [node name="CircularBumper2" parent="." unique_id=608845771 instance=ExtResource("14_ca4i1")]
 position = Vector2(-313, -219)
-physics_material_override = SubResource("PhysicsMaterial_xhe6y")
-radius = 8.0
+physics_material_override = SubResource("PhysicsMaterial_b545k")
+size_preset = 0
+variant = "1"
 
 [node name="CircularBumper3" parent="." unique_id=2016267216 instance=ExtResource("14_ca4i1")]
 position = Vector2(289, -188)
-physics_material_override = SubResource("PhysicsMaterial_unp1l")
-radius = 8.0
+physics_material_override = SubResource("PhysicsMaterial_sr3fv")
+size_preset = 0
+variant = "1"
 
 [node name="CircularBumper4" parent="." unique_id=1213590522 instance=ExtResource("14_ca4i1")]
 position = Vector2(308, -217)
-physics_material_override = SubResource("PhysicsMaterial_nr1ke")
-radius = 8.0
+physics_material_override = SubResource("PhysicsMaterial_pxnvp")
+size_preset = 0
+variant = "1"
 
 [node name="UfoWorkshop" parent="." unique_id=625327535 instance=ExtResource("15_8sp67")]
 position = Vector2(-179, -305)
@@ -249,7 +253,7 @@ mirrored = true
 
 [node name="CollisionShape2D" parent="DeadWall6" index="0" unique_id=1644951480]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_6hqcu")
+shape = SubResource("RectangleShape2D_4skyc")
 one_way_collision = true
 
 [node name="Sprite2D" parent="DeadWall6" index="1" unique_id=804434373]
@@ -263,7 +267,7 @@ rotation = -0.7853982
 
 [node name="CollisionShape2D" parent="DeadWall6/SlipperyArea" parent_id_path=PackedInt32Array(1147389054, 773978709) index="0" unique_id=2040614053]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_8xpto")
+shape = SubResource("RectangleShape2D_b545k")
 
 [node name="DeadWall7" parent="." unique_id=465070693 instance=ExtResource("17_f33k1")]
 position = Vector2(264, -216)
@@ -273,7 +277,7 @@ mirrored = true
 
 [node name="CollisionShape2D" parent="DeadWall7" index="0" unique_id=1644951480]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_h07m1")
+shape = SubResource("RectangleShape2D_sr3fv")
 one_way_collision = true
 
 [node name="Sprite2D" parent="DeadWall7" index="1" unique_id=804434373]
@@ -287,7 +291,7 @@ rotation = -0.7853982
 
 [node name="CollisionShape2D" parent="DeadWall7/SlipperyArea" parent_id_path=PackedInt32Array(465070693, 773978709) index="0" unique_id=2040614053]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_a2dh2")
+shape = SubResource("RectangleShape2D_pxnvp")
 
 [node name="DeadWall8" parent="." unique_id=753708131 instance=ExtResource("17_f33k1")]
 position = Vector2(91, -219)
@@ -296,7 +300,7 @@ angle_preset = 2
 
 [node name="CollisionShape2D" parent="DeadWall8" index="0" unique_id=1644951480]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_sq6ca")
+shape = SubResource("RectangleShape2D_0brv5")
 one_way_collision = true
 
 [node name="Sprite2D" parent="DeadWall8" index="1" unique_id=804434373]
@@ -309,7 +313,7 @@ rotation = 0.7853982
 
 [node name="CollisionShape2D" parent="DeadWall8/SlipperyArea" parent_id_path=PackedInt32Array(753708131, 773978709) index="0" unique_id=2040614053]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_5xcwp")
+shape = SubResource("RectangleShape2D_3y2y2")
 
 [node name="DeadWall9" parent="." unique_id=225731195 instance=ExtResource("17_f33k1")]
 position = Vector2(-263, -218)
@@ -318,7 +322,7 @@ angle_preset = 2
 
 [node name="CollisionShape2D" parent="DeadWall9" index="0" unique_id=1644951480]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_7sul6")
+shape = SubResource("RectangleShape2D_euh2h")
 one_way_collision = true
 
 [node name="Sprite2D" parent="DeadWall9" index="1" unique_id=804434373]
@@ -331,7 +335,7 @@ rotation = 0.7853982
 
 [node name="CollisionShape2D" parent="DeadWall9/SlipperyArea" parent_id_path=PackedInt32Array(225731195, 773978709) index="0" unique_id=2040614053]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_ut470")
+shape = SubResource("RectangleShape2D_f0ksa")
 
 [node name="DeadWall10" parent="." unique_id=1107429021 instance=ExtResource("17_f33k1")]
 position = Vector2(-57, -203)
@@ -341,7 +345,7 @@ length_units = 1
 
 [node name="CollisionShape2D" parent="DeadWall10" index="0" unique_id=1644951480]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_u6ecb")
+shape = SubResource("RectangleShape2D_emlfc")
 one_way_collision = true
 
 [node name="Sprite2D" parent="DeadWall10" index="1" unique_id=804434373]
@@ -355,7 +359,7 @@ polygon = PackedVector2Array(-16, -4, 16, -4, 16, 4, -16, 4)
 
 [node name="CollisionShape2D" parent="DeadWall10/SlipperyArea" parent_id_path=PackedInt32Array(1107429021, 773978709) index="0" unique_id=2040614053]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_a8tjx")
+shape = SubResource("RectangleShape2D_olub7")
 
 [node name="DeadWall11" parent="." unique_id=1004482291 instance=ExtResource("17_f33k1")]
 position = Vector2(50, -206)
@@ -366,7 +370,7 @@ mirrored = true
 
 [node name="CollisionShape2D" parent="DeadWall11" index="0" unique_id=1644951480]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_g2ty6")
+shape = SubResource("RectangleShape2D_wgqfy")
 one_way_collision = true
 
 [node name="Sprite2D" parent="DeadWall11" index="1" unique_id=804434373]
@@ -381,7 +385,7 @@ polygon = PackedVector2Array(-16, -4, 16, -4, 16, 4, -16, 4)
 
 [node name="CollisionShape2D" parent="DeadWall11/SlipperyArea" parent_id_path=PackedInt32Array(1004482291, 773978709) index="0" unique_id=2040614053]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_hvk5x")
+shape = SubResource("RectangleShape2D_qf8ve")
 
 [node name="DeadWall13" parent="." unique_id=1146484172 instance=ExtResource("17_f33k1")]
 position = Vector2(-127, -103)
@@ -433,6 +437,11 @@ length_units = 1
 
 [node name="UfoPiece" parent="." unique_id=664197637 instance=ExtResource("22_b545k")]
 position = Vector2(179, -297)
+
+[node name="CircularBumper5" parent="." unique_id=2098876600 instance=ExtResource("14_ca4i1")]
+position = Vector2(-71, -50)
+size_preset = 0
+variant = "1"
 
 [editable path="DeadWall6"]
 [editable path="DeadWall7"]

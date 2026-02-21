@@ -1,59 +1,61 @@
 extends Node
 class_name HealthPlantSpawner
 
-## Spawns health plants on DeadWalls when score thresholds are reached
-## Automatically finds walls and picks random spawn locations
+## Spawns health plants on DeadWalls when score thresholds are reached.
+## Updated to work with BaseWall's dynamic length system:
+##   - wall.get_pixel_length()    replaces wall.wall_length
+##   - wall.get_pixel_thickness() replaces wall.wall_thickness
+##   - wall.get_collision_rotation_degrees() replaces wall.global_rotation
+##     (StaticBody2D no longer rotates — only the CollisionShape2D child does)
 
 @export var health_plant_scene: PackedScene
 
 @export_group("Spawn Thresholds")
-@export var spawn_thresholds: Array[int] = [500, 1000, 1500, 2000]  # Score values that trigger spawns
-@export var max_simultaneous_plants: int = 2  # Maximum plants that can exist at once
+@export var spawn_thresholds: Array[int] = [400, 800, 1200, 1600]
+@export var max_simultaneous_plants: int = 2
 
 @export_group("Wall Selection")
-@export var min_wall_length: float = 30.0  # Only spawn on walls this long or longer
-@export var edge_margin: float = 20.0  # Stay this far from wall edges
+## Minimum wall pixel length to be eligible. 1 length_unit = 32px, so all
+## walls (minimum 32px) are eligible by default.
+@export var min_wall_length: float = 30.0
+@export var edge_margin: float = 20.0
 
-# Internal state
+## --- Internal State ---
+
 var current_threshold_index: int = 0
 var active_plants: Array[Node] = []
 var hud: HUD = null
 var last_known_score: int = 0
 
-func _ready():
-	# Find HUD to monitor score
+func _ready() -> void:
 	hud = get_tree().get_first_node_in_group("hud")
-	
+
 	if not hud:
 		push_warning("HealthPlantSpawner: No HUD found! Cannot monitor score.")
 		return
-	
+
 	if not health_plant_scene:
 		push_error("HealthPlantSpawner: No health_plant_scene assigned!")
 		return
-	
+
 	print("🌿 Health Plant Spawner ready. Thresholds: ", spawn_thresholds)
 
-func _process(_delta):
+func _process(_delta: float) -> void:
 	if not hud:
 		return
-	
-	# Check for score threshold crossings
-	var current_score = hud.current_score
-	
+
+	var current_score: int = hud.current_score
+
 	if current_score != last_known_score:
 		_check_spawn_thresholds(current_score)
 		last_known_score = current_score
-	
-	# Clean up destroyed plants from tracking
+
+	## Clean up any plants that have been destroyed
 	active_plants = active_plants.filter(func(plant): return is_instance_valid(plant))
 
-func _check_spawn_thresholds(score: int):
-	"""Check if we've crossed any spawn thresholds"""
-	# Check all thresholds we haven't processed yet
+func _check_spawn_thresholds(score: int) -> void:
 	while current_threshold_index < spawn_thresholds.size():
-		var threshold = spawn_thresholds[current_threshold_index]
-		
+		var threshold: int = spawn_thresholds[current_threshold_index]
 		if score >= threshold:
 			print("🌿 Score threshold reached: ", threshold)
 			_try_spawn_plant()
@@ -61,125 +63,99 @@ func _check_spawn_thresholds(score: int):
 		else:
 			break
 
-func _try_spawn_plant():
-	"""Attempt to spawn a health plant on a random wall"""
-	# Check if we're at the simultaneous plant limit
+func _try_spawn_plant() -> void:
 	if active_plants.size() >= max_simultaneous_plants:
 		print("🌿 Cannot spawn - at max simultaneous plants (", max_simultaneous_plants, ")")
 		return
-	
-	# Find all eligible walls
-	var walls = _find_eligible_walls()
-	
+
+	var walls := _find_eligible_walls()
+
 	if walls.is_empty():
 		push_warning("HealthPlantSpawner: No eligible walls found!")
 		return
-	
-	# Pick a random wall
-	var chosen_wall = walls.pick_random()
-	
-	# Spawn plant on this wall
-	_spawn_plant_on_wall(chosen_wall)
+
+	_spawn_plant_on_wall(walls.pick_random())
 
 func _find_eligible_walls() -> Array:
-	"""Find all DeadWalls that meet spawning criteria"""
-	var eligible_walls = []
-	
-	# Get all walls in the scene
-	var all_walls = get_tree().get_nodes_in_group("walls")
-	
-	for wall in all_walls:
-		# Only spawn on DeadWalls (not flippers or other wall types)
+	var eligible: Array = []
+
+	for wall in get_tree().get_nodes_in_group("walls"):
 		if not wall is DeadWall:
 			continue
-		
-		# Check minimum length
-		if wall.wall_length < min_wall_length:
+
+		## Use BaseWall's helper — no more direct wall_length property
+		if wall.get_pixel_length() < min_wall_length:
 			continue
-		
-		# Check if wall already has a plant attached
+
 		if _wall_has_plant(wall):
 			continue
-		
-		eligible_walls.append(wall)
-	
-	return eligible_walls
+
+		eligible.append(wall)
+
+	return eligible
 
 func _wall_has_plant(wall: Node2D) -> bool:
-	"""Check if a wall already has a plant on it"""
 	for plant in active_plants:
-		if plant.attached_wall == wall:
+		if is_instance_valid(plant) and plant.attached_wall == wall:
 			return true
 	return false
 
-func _spawn_plant_on_wall(wall: DeadWall):
-	"""Spawn a health plant on the specified wall"""
+func _spawn_plant_on_wall(wall: DeadWall) -> void:
 	if not health_plant_scene:
 		return
-	
-	# Create plant instance
-	var plant = health_plant_scene.instantiate()
-	
-	# Add to scene (parent of spawner)
+
+	var plant := health_plant_scene.instantiate()
 	get_parent().add_child(plant)
-	
-	# Calculate spawn position along wall
-	var spawn_info = _calculate_wall_spawn_position(wall)
-	
-	# Attach plant to wall
+
+	var spawn_info := _calculate_wall_spawn_position(wall)
 	plant.attach_to_wall_surface(wall, spawn_info.position, spawn_info.normal)
-	
-	# Track active plant
+
 	active_plants.append(plant)
-	
 	print("🌿 Spawned health plant on wall: ", wall.name)
 
 func _calculate_wall_spawn_position(wall: DeadWall) -> Dictionary:
-	"""Calculate a random position along the wall surface"""
-	# Wall is a rectangle, we want to spawn along one of its edges
-	# For simplicity, we'll spawn along the top edge (before rotation)
-	
-	# Random position along wall length (with edge margins)
-	var wall_half_length = wall.wall_length / 2.0
-	
-	# Use smart edge margin: minimum of specified margin or 25% of wall length
-	# This prevents negative safe space on small walls
-	var actual_margin = min(edge_margin, wall.wall_length * 0.25)
-	var safe_length = wall_half_length - actual_margin
-	
-	# Clamp to ensure we always have some safe space
-	safe_length = max(safe_length, 5.0)
-	
-	var random_offset = randf_range(-safe_length, safe_length)
-	
-	# Local position on wall (top edge in local space)
-	var local_pos = Vector2(random_offset, -wall.wall_thickness / 2.0)
-	
-	# Transform to global position using wall's transform
-	var global_pos = wall.global_position + local_pos.rotated(wall.global_rotation)
-	
-	# Normal direction (perpendicular to wall, pointing outward)
-	# For top edge, normal points up in local space
-	var local_normal = Vector2(0, -1)
-	var global_normal = local_normal.rotated(wall.global_rotation)
-	
+	## BaseWall exposes get_pixel_length() and get_pixel_thickness() for this.
+	## The StaticBody2D no longer carries the wall rotation — that lives on the
+	## CollisionShape2D child. We retrieve it via get_collision_rotation_degrees()
+	## and convert to radians for Vector2.rotated().
+	var pixel_length: float = wall.get_pixel_length()
+	var pixel_thickness: float = wall.get_pixel_thickness()
+	var wall_rotation_rad: float = deg_to_rad(wall.get_collision_rotation_degrees())
+
+	## Calculate safe spawn range along the wall length
+	var half_length: float = pixel_length * 0.5
+	var actual_margin: float = min(edge_margin, pixel_length * 0.25)
+	var safe_length: float = max(half_length - actual_margin, 5.0)
+	var random_offset: float = randf_range(-safe_length, safe_length)
+
+	## Local position: along wall centerline, offset to top surface.
+	## CollisionShape2D is centered at the wall's origin, so local space
+	## still has the wall centered at (0,0) — same as before.
+	var local_pos := Vector2(random_offset, -pixel_thickness * 0.5)
+
+	## Rotate into global space using the wall's collision rotation.
+	## wall.global_position is still valid — the StaticBody2D root is
+	## placed in the world normally, only its child shape is rotated.
+	var global_pos: Vector2 = wall.global_position + local_pos.rotated(wall_rotation_rad)
+
+	## Surface normal: perpendicular to wall, pointing away from wall face.
+	## In local space this is straight up (0, -1), rotated into world space.
+	var global_normal: Vector2 = Vector2(0.0, -1.0).rotated(wall_rotation_rad)
+
 	return {
 		"position": global_pos,
-		"normal": global_normal
+		"normal": global_normal,
 	}
 
-## Public method to manually trigger a spawn (useful for testing)
-func spawn_plant_now():
+## --- Public API ---
+
+func spawn_plant_now() -> void:
 	_try_spawn_plant()
 
-## Public method to reset thresholds (e.g., on level restart)
-func reset_thresholds():
+func reset_thresholds() -> void:
 	current_threshold_index = 0
-	
-	# Remove all active plants
 	for plant in active_plants:
 		if is_instance_valid(plant):
 			plant.queue_free()
-	
 	active_plants.clear()
 	print("🌿 Health plant spawner reset")
