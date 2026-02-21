@@ -18,7 +18,7 @@ class_name BumperWall2
 
 @export_group("Bumper Physics")
 @export var bounce_multiplier: float = 1.5   ## Multiplier on incoming speed
-@export var min_bounce_force: float = 400.0  ## Floor on bounce velocity
+@export var min_bounce_force: float = 200.0  ## Floor on bounce velocity
 @export var max_bounce_force: float = 800.0  ## Ceiling on bounce velocity
 
 @export_group("Visual Feedback")
@@ -73,6 +73,16 @@ func _find_children() -> void:
 func _on_wall_updated() -> void:
 	_resize_hit_area()
 	_sync_color()
+
+## --- Sprite Overrides ---
+
+func get_sprite_path() -> String:
+	## Bumper wall sprites live in their own subfolder.
+	return "res://entities/environment/walls/bumper_wall/sprites/"
+
+func get_sprite_prefix() -> String:
+	## Produces filenames like: bumperwall_vertical_1u.png
+	return "bumperwall"
 
 ## --- Hit Area ---
 

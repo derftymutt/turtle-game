@@ -30,8 +30,24 @@ class_name BaseWall
 const TILE_SIZE: int = 8       ## Smallest pixel unit
 const SEGMENT_SIZE: int = 32   ## 4 tiles — base length unit for wall segments
 
-## Sprite folder — change this if you move your wall art
+## Default sprite folder and prefix — override get_sprite_path() and
+## get_sprite_prefix() in subclasses to use different art per wall type.
+## e.g. DeadWall  → res://assets/sprites/walls/dead/   prefix: "deadwall"
+##      BumperWall → res://assets/sprites/walls/bumper/ prefix: "bumperwall"
 const SPRITE_PATH: String = "res://entities/environment/walls/dead_wall/sprites/"
+
+## --- Virtual Sprite Helpers (override in subclasses) ---
+
+func get_sprite_path() -> String:
+	## Folder containing this wall type's sprites.
+	## Override in subclass to point to a different folder.
+	return SPRITE_PATH
+
+func get_sprite_prefix() -> String:
+	## Filename prefix for this wall type.
+	## Override in subclass to change the naming convention.
+	## Default produces: wall_vertical_1u.png, wall_shallow_2u.png etc.
+	return "wall"
 
 ## Angle name strings — must match your PNG filenames exactly
 const ANGLE_NAMES: Dictionary = {
@@ -180,17 +196,16 @@ func _apply_sprite() -> void:
 			_polygon.visible = true
 
 func _load_wall_texture(preset: AnglePreset, units: int) -> Texture2D:
-	## Build the cache key and return immediately if already loaded.
-	var cache_key: String = "%d_%d" % [int(preset), units]
+	## Build the cache key — include the prefix so DeadWall and BumperWall
+	## caches never collide even if they share the same preset+units combo.
+	var cache_key: String = "%s_%d_%d" % [get_sprite_prefix(), int(preset), units]
 	if _texture_cache.has(cache_key):
 		return _texture_cache[cache_key]
 
-	## Build the expected file path from the naming convention.
-	## e.g. res://assets/sprites/walls/wall_shallow_2u.png
+	## Build path from virtual helpers so subclasses control folder and prefix.
+	## e.g. bumperwall_shallow_2u.png in res://assets/sprites/walls/bumper/
 	var angle_name: String = ANGLE_NAMES.get(int(preset), "unknown")
-	var path: String = "%swall_%s_%du.png" % [SPRITE_PATH, angle_name, units]
-	
-	print("Wall texture path: ", path, " | exists: ", ResourceLoader.exists(path))
+	var path: String = "%s%s_%s_%du.png" % [get_sprite_path(), get_sprite_prefix(), angle_name, units]
 
 	var texture: Texture2D = null
 	if ResourceLoader.exists(path):

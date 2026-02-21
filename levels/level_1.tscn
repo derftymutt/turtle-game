@@ -313,7 +313,14 @@ friction = 0.0
 position = Vector2(7, 0)
 
 [node name="HUD" parent="." index="0" unique_id=1369229575]
+visible = false
 exhaustion_recovery_rate = 20.0
+
+[node name="GameOverScreen" parent="." index="1" unique_id=301166293]
+visible = false
+
+[node name="LevelCompleteScreen" parent="." index="2" unique_id=1103608067]
+visible = false
 
 [node name="Ocean" parent="." index="3" unique_id=2062759388 instance=ExtResource("2_oqlok")]
 
@@ -528,30 +535,27 @@ angle_preset = 2
 position = Vector2(-280, 86)
 physics_material_override = SubResource("PhysicsMaterial_0wxk8")
 angle_preset = 2
-length_units = 1
 mirrored = true
 
 [node name="DeadWall7" parent="." index="35" unique_id=1215911155 instance=ExtResource("24_ryfpa")]
 position = Vector2(-131, 116)
 physics_material_override = SubResource("PhysicsMaterial_stsco")
 angle_preset = 2
-length_units = 1
 mirrored = true
 
 [node name="DeadWall8" parent="." index="36" unique_id=872710593 instance=ExtResource("24_ryfpa")]
 position = Vector2(111, 115)
 physics_material_override = SubResource("PhysicsMaterial_4cd1h")
 angle_preset = 2
-length_units = 1
 
 [node name="DeadWall9" parent="." index="37" unique_id=377725974 instance=ExtResource("24_ryfpa")]
 position = Vector2(282, 84)
 physics_material_override = SubResource("PhysicsMaterial_ai2ei")
 angle_preset = 2
-length_units = 1
 
 [node name="BumperWall2" parent="." index="38" unique_id=1997660828 instance=ExtResource("25_ntdhj")]
 position = Vector2(177, 96)
+mirrored = true
 
 [node name="BumperWall3" parent="." index="39" unique_id=1609845940 instance=ExtResource("25_ntdhj")]
 position = Vector2(-199, 98)

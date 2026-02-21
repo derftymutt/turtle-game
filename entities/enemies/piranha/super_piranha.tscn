@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://b1n37gdnklwmu" path="res://entities/enemies/piranha/super_piranha.gd" id="1_rtrrk"]
 [ext_resource type="Texture2D" uid="uid://cjo6hqbhdkpt6" path="res://entities/enemies/piranha/sprites/piranha_sheet.png" id="2_rtrrk"]
+[ext_resource type="Texture2D" uid="uid://2bek8f0718kv" path="res://entities/enemies/piranha/sprites/piranha.png" id="3_kavyd"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_kavyd"]
 atlas = ExtResource("2_rtrrk")
@@ -16,19 +17,19 @@ atlas = ExtResource("2_rtrrk")
 region = Rect2(96, 0, 16, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_5eoxq"]
-atlas = ExtResource("2_rtrrk")
+atlas = ExtResource("3_kavyd")
 region = Rect2(32, 0, 16, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_rj33i"]
-atlas = ExtResource("2_rtrrk")
+atlas = ExtResource("3_kavyd")
 region = Rect2(48, 0, 16, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_6epuu"]
-atlas = ExtResource("2_rtrrk")
+atlas = ExtResource("3_kavyd")
 region = Rect2(0, 0, 16, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_0hjmn"]
-atlas = ExtResource("2_rtrrk")
+atlas = ExtResource("3_kavyd")
 region = Rect2(16, 0, 16, 16)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_tb8k7"]
@@ -82,7 +83,7 @@ script = ExtResource("1_rtrrk")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1092740509]
 sprite_frames = SubResource("SpriteFrames_tb8k7")
-animation = &"damage"
+animation = &"near_death"
 autoplay = "default"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1236123365]

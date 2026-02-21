@@ -15,6 +15,7 @@
 [ext_resource type="PackedScene" uid="uid://jylpdfwgd8wo" path="res://entities/environment/flippers/flipper_right_up.tscn" id="18_p60vf"]
 [ext_resource type="Texture2D" uid="uid://bq2m8w5vouuyn" path="res://entities/environment/walls/dead_wall/sprites/wall_diagonal_1u.png" id="19_0brv5"]
 [ext_resource type="PackedScene" uid="uid://ko8xdpxfr5ej" path="res://entities/environment/ocean_current/ocean_current.tscn" id="19_o6ev6"]
+[ext_resource type="PackedScene" uid="uid://bwdbbu1jhxn2n" path="res://entities/environment/walls/bumper_wall/bumper_wall_2.tscn" id="19_p60vf"]
 [ext_resource type="PackedScene" uid="uid://u02ifu2255ot" path="res://entities/environment/flippers/cloud_flipper_left_up.tscn" id="20_4skyc"]
 [ext_resource type="PackedScene" uid="uid://p32a3utahssn" path="res://entities/environment/flippers/cloud_flipper_right_up.tscn" id="21_b545k"]
 [ext_resource type="PackedScene" uid="uid://rkinsjd2v3bk" path="res://entities/collectibles/ufo_piece/ufo_piece.tscn" id="22_b545k"]
@@ -28,11 +29,11 @@ size = Vector2(9.999756, 465.00012)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_o6ev6"]
 size = Vector2(640, 40)
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_6hwsd"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_p60vf"]
 friction = 0.1
 bounce = 1.2
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_p60vf"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_o6ev6"]
 friction = 0.1
 bounce = 1.2
 
@@ -179,13 +180,13 @@ color = Color(0.17755811, 0.12329503, 0.02367841, 1)
 [node name="BumperWall" parent="." unique_id=84755984 instance=ExtResource("13_41qk1")]
 position = Vector2(-321, -368)
 rotation = 1.5707964
-physics_material_override = SubResource("PhysicsMaterial_6hwsd")
+physics_material_override = SubResource("PhysicsMaterial_p60vf")
 wall_length = 200.0
 
 [node name="BumperWall2" parent="." unique_id=1241573116 instance=ExtResource("13_41qk1")]
 position = Vector2(315, -362)
 rotation = 1.5707964
-physics_material_override = SubResource("PhysicsMaterial_p60vf")
+physics_material_override = SubResource("PhysicsMaterial_o6ev6")
 wall_length = 200.0
 
 [node name="CircularBumper" parent="." unique_id=623492784 instance=ExtResource("14_ca4i1")]
@@ -411,6 +412,16 @@ position = Vector2(179, -297)
 
 [node name="CircularBumper5" parent="." unique_id=2098876600 instance=ExtResource("14_ca4i1")]
 position = Vector2(-71, -50)
+
+[node name="BumperWall3" parent="." unique_id=1997660828 instance=ExtResource("19_p60vf")]
+position = Vector2(-71, -50)
+
+[node name="CircularBumper6" parent="." unique_id=1837343521 instance=ExtResource("14_ca4i1")]
+position = Vector2(11, -40)
+
+[node name="BumperWall4" parent="." unique_id=1880220799 instance=ExtResource("19_p60vf")]
+position = Vector2(11, -40)
+mirrored = true
 
 [editable path="DeadWall6"]
 [editable path="DeadWall7"]
