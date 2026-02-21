@@ -326,7 +326,6 @@ show_gradient = false
 [node name="Camera2D" type="Camera2D" parent="." index="6" unique_id=380561311 node_paths=PackedStringArray("follow_target")]
 script = ExtResource("3_7nvrk")
 follow_target = NodePath("../TurtlePlayer")
-vertical_zoom_speed = 4.0
 horizontal_follow_enabled = false
 
 [node name="TurtlePlayer" parent="." index="7" unique_id=1163425295 instance=ExtResource("4_jkxa6")]

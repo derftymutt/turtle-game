@@ -35,11 +35,11 @@ size = Vector2(9.999756, 465.00012)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_o6ev6"]
 size = Vector2(640, 40)
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_jabta"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_y6uxk"]
 friction = 0.1
 bounce = 1.2
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_gqoh8"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_0s4jt"]
 friction = 0.1
 bounce = 1.2
 
@@ -62,40 +62,40 @@ bounce = 1.2
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_e8afl"]
 friction = 0.0
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_7t351"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_x8kha"]
 size = Vector2(64, 8)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_3wjuj"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xp73u"]
 size = Vector2(64, 8)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_2vuy6"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_uc31k"]
 size = Vector2(64, 8)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_y0yef"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_n1v2q"]
 size = Vector2(64, 8)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_j6f0o"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_l3k41"]
 size = Vector2(64, 8)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_0m7jc"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_8f13l"]
 size = Vector2(64, 8)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_hmrch"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wyylw"]
 size = Vector2(64, 8)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_24mgf"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_w74m8"]
 size = Vector2(64, 8)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_8hcc6"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_dl2yu"]
 size = Vector2(64, 8)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_ktlnh"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ogjq1"]
 size = Vector2(64, 8)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_rgjc2"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_awhew"]
 size = Vector2(64, 8)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_va3j3"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ghmi4"]
 size = Vector2(64, 8)
 
 [sub_resource type="Curve2D" id="Curve2D_e8afl"]
@@ -123,7 +123,6 @@ show_gradient = false
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1602563695 node_paths=PackedStringArray("follow_target")]
 script = ExtResource("8_l3k41")
 follow_target = NodePath("../TurtlePlayer")
-vertical_zoom_speed = 4.0
 horizontal_follow_enabled = false
 
 [node name="TurtlePlayer" parent="." unique_id=1971009088 instance=ExtResource("9_8f13l")]
@@ -196,13 +195,13 @@ color = Color(0.17755811, 0.12329503, 0.02367841, 1)
 [node name="BumperWall" parent="." unique_id=1377981615 instance=ExtResource("11_w74m8")]
 position = Vector2(-321, -368)
 rotation = 1.5707964
-physics_material_override = SubResource("PhysicsMaterial_jabta")
+physics_material_override = SubResource("PhysicsMaterial_y6uxk")
 wall_length = 200.0
 
 [node name="BumperWall2" parent="." unique_id=1950333992 instance=ExtResource("11_w74m8")]
 position = Vector2(315, -362)
 rotation = 1.5707964
-physics_material_override = SubResource("PhysicsMaterial_gqoh8")
+physics_material_override = SubResource("PhysicsMaterial_0s4jt")
 wall_length = 200.0
 
 [node name="CircularBumper" parent="." unique_id=2098876600 instance=ExtResource("12_dl2yu")]
@@ -261,7 +260,7 @@ mirrored = true
 
 [node name="CollisionShape2D" parent="DeadWall6" index="0" unique_id=1644951480]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_7t351")
+shape = SubResource("RectangleShape2D_x8kha")
 one_way_collision = true
 
 [node name="Sprite2D" parent="DeadWall6" index="1" unique_id=804434373]
@@ -273,7 +272,7 @@ rotation = -0.7853982
 
 [node name="CollisionShape2D" parent="DeadWall6/SlipperyArea" parent_id_path=PackedInt32Array(1744963289, 773978709) index="0" unique_id=2040614053]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_3wjuj")
+shape = SubResource("RectangleShape2D_xp73u")
 
 [node name="DeadWall7" parent="." unique_id=1465333887 instance=ExtResource("16_ccxm6")]
 position = Vector2(264, -216)
@@ -283,7 +282,7 @@ mirrored = true
 
 [node name="CollisionShape2D" parent="DeadWall7" index="0" unique_id=1644951480]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_2vuy6")
+shape = SubResource("RectangleShape2D_uc31k")
 one_way_collision = true
 
 [node name="Sprite2D" parent="DeadWall7" index="1" unique_id=804434373]
@@ -295,7 +294,7 @@ rotation = -0.7853982
 
 [node name="CollisionShape2D" parent="DeadWall7/SlipperyArea" parent_id_path=PackedInt32Array(1465333887, 773978709) index="0" unique_id=2040614053]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_y0yef")
+shape = SubResource("RectangleShape2D_n1v2q")
 
 [node name="DeadWall8" parent="." unique_id=1760671165 instance=ExtResource("16_ccxm6")]
 position = Vector2(91, -219)
@@ -304,7 +303,7 @@ angle_preset = 2
 
 [node name="CollisionShape2D" parent="DeadWall8" index="0" unique_id=1644951480]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_j6f0o")
+shape = SubResource("RectangleShape2D_l3k41")
 one_way_collision = true
 
 [node name="Sprite2D" parent="DeadWall8" index="1" unique_id=804434373]
@@ -315,7 +314,7 @@ rotation = 0.7853982
 
 [node name="CollisionShape2D" parent="DeadWall8/SlipperyArea" parent_id_path=PackedInt32Array(1760671165, 773978709) index="0" unique_id=2040614053]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_0m7jc")
+shape = SubResource("RectangleShape2D_8f13l")
 
 [node name="DeadWall9" parent="." unique_id=1298091870 instance=ExtResource("16_ccxm6")]
 position = Vector2(-263, -218)
@@ -324,7 +323,7 @@ angle_preset = 2
 
 [node name="CollisionShape2D" parent="DeadWall9" index="0" unique_id=1644951480]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_hmrch")
+shape = SubResource("RectangleShape2D_wyylw")
 one_way_collision = true
 
 [node name="Sprite2D" parent="DeadWall9" index="1" unique_id=804434373]
@@ -335,7 +334,7 @@ rotation = 0.7853982
 
 [node name="CollisionShape2D" parent="DeadWall9/SlipperyArea" parent_id_path=PackedInt32Array(1298091870, 773978709) index="0" unique_id=2040614053]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_24mgf")
+shape = SubResource("RectangleShape2D_w74m8")
 
 [node name="DeadWall10" parent="." unique_id=243636058 instance=ExtResource("16_ccxm6")]
 position = Vector2(-57, -203)
@@ -344,7 +343,7 @@ angle_preset = 2
 
 [node name="CollisionShape2D" parent="DeadWall10" index="0" unique_id=1644951480]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_8hcc6")
+shape = SubResource("RectangleShape2D_dl2yu")
 one_way_collision = true
 
 [node name="Sprite2D" parent="DeadWall10" index="1" unique_id=804434373]
@@ -355,7 +354,7 @@ rotation = 0.7853982
 
 [node name="CollisionShape2D" parent="DeadWall10/SlipperyArea" parent_id_path=PackedInt32Array(243636058, 773978709) index="0" unique_id=2040614053]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_ktlnh")
+shape = SubResource("RectangleShape2D_ogjq1")
 
 [node name="DeadWall11" parent="." unique_id=1833053243 instance=ExtResource("16_ccxm6")]
 position = Vector2(50, -206)
@@ -365,7 +364,7 @@ mirrored = true
 
 [node name="CollisionShape2D" parent="DeadWall11" index="0" unique_id=1644951480]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_rgjc2")
+shape = SubResource("RectangleShape2D_awhew")
 one_way_collision = true
 
 [node name="Sprite2D" parent="DeadWall11" index="1" unique_id=804434373]
@@ -377,7 +376,7 @@ rotation = -0.7853982
 
 [node name="CollisionShape2D" parent="DeadWall11/SlipperyArea" parent_id_path=PackedInt32Array(1833053243, 773978709) index="0" unique_id=2040614053]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_va3j3")
+shape = SubResource("RectangleShape2D_ghmi4")
 
 [node name="DeadWall13" parent="." unique_id=1568901573 instance=ExtResource("16_ccxm6")]
 position = Vector2(-127, -103)
