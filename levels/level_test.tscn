@@ -98,27 +98,37 @@ size = Vector2(64, 8)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xhe6y"]
 size = Vector2(64, 8)
 
-[sub_resource type="Curve2D" id="Curve2D_e8afl"]
+[sub_resource type="Curve2D" id="Curve2D_0brv5"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, 0, -1, 0, 0, 0, 0, -17, 41, 0, 0, 0, 0, -5, 62, 0, 0, 0, 0, -10, 85, 0, 0, 0, 0, -17, 117, 0, 0, 0, 0, -17, 126)
+"points": PackedVector2Array(0, 0, 0, 0, 13, 23, 0, 0, 0, 0, -9, 63, 0, 0, 0, 0, -1, 99, 0, 0, 0, 0, 2, 126)
 }
-point_count = 6
+point_count = 4
+
+[sub_resource type="Curve2D" id="Curve2D_3y2y2"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 12, -36, 0, 0, 0, 0, -12, -75, 0, 0, 0, 0, 11, -104, 0, 0, 0, 0, -8, -139)
+}
+point_count = 4
 
 [node name="LevelBase" type="Node2D" unique_id=1013451131 groups=["level"]]
 script = ExtResource("1_vac4a")
 
 [node name="HUD" parent="." unique_id=1369229575 instance=ExtResource("2_0brv5")]
+visible = false
 
 [node name="GameOverScreen" parent="." unique_id=301166293 instance=ExtResource("3_3y2y2")]
+visible = false
 
 [node name="LevelCompleteScreen" parent="." unique_id=1103608067 instance=ExtResource("4_euh2h")]
+visible = false
 
 [node name="SkyBackground" parent="." unique_id=967020750 instance=ExtResource("5_f0ksa")]
+visible = false
 
 [node name="OceanBackground" parent="." unique_id=593268214 instance=ExtResource("6_emlfc")]
+visible = false
 
 [node name="Ocean" parent="." unique_id=1274260941 instance=ExtResource("7_olub7")]
-show_gradient = false
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1602563695 node_paths=PackedStringArray("follow_target")]
 script = ExtResource("8_wgqfy")
@@ -127,10 +137,6 @@ horizontal_follow_enabled = false
 
 [node name="TurtlePlayer" parent="." unique_id=1971009088 instance=ExtResource("9_qf8ve")]
 position = Vector2(-13, 16)
-
-[node name="HUD2" parent="." unique_id=113944192 instance=ExtResource("2_0brv5")]
-
-[node name="GameOverScreen2" parent="." unique_id=1463834460 instance=ExtResource("3_3y2y2")]
 
 [node name="WorldBoundaries" type="Node2D" parent="." unique_id=1014588514]
 
@@ -387,15 +393,6 @@ position = Vector2(120, -102)
 angle_preset = 2
 mirrored = true
 
-[node name="OceanCurrent" parent="." unique_id=1683655070 instance=ExtResource("18_nr1ke")]
-position = Vector2(281, 1)
-cycle_active = true
-current_color = Color(0.72281885, 0.92093396, 0.99999994, 0.7019608)
-show_debug_arrows = false
-
-[node name="Path2D" parent="OceanCurrent" index="0" unique_id=1461068862]
-curve = SubResource("Curve2D_e8afl")
-
 [node name="FlipperLeftUp3" parent="." unique_id=427628229 instance=ExtResource("19_6hqcu")]
 position = Vector2(-235, -186)
 
@@ -470,6 +467,18 @@ debris_animation = &"default_purple"
 position = Vector2(220, -353)
 debris_animation = &"default_purple"
 
+[node name="OceanCurrent" parent="." unique_id=1683655070 instance=ExtResource("18_nr1ke")]
+position = Vector2(77, -2)
+
+[node name="Path2D" parent="OceanCurrent" index="0" unique_id=1461068862]
+curve = SubResource("Curve2D_0brv5")
+
+[node name="OceanCurrent2" parent="." unique_id=698840735 instance=ExtResource("18_nr1ke")]
+position = Vector2(0, -240)
+
+[node name="Path2D" parent="OceanCurrent2" index="0" unique_id=1461068862]
+curve = SubResource("Curve2D_3y2y2")
+
 [editable path="DeadWall6"]
 [editable path="DeadWall7"]
 [editable path="DeadWall8"]
@@ -477,3 +486,4 @@ debris_animation = &"default_purple"
 [editable path="DeadWall10"]
 [editable path="DeadWall11"]
 [editable path="OceanCurrent"]
+[editable path="OceanCurrent2"]
