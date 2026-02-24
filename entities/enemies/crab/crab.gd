@@ -144,25 +144,24 @@ func _relocating_behavior(delta: float):
 	var distance = to_target.length()
 	
 	if distance < 20.0:
-		# Reached target
 		var animated_sprite = get_node_or_null("AnimatedSprite2D")
 		if animated_sprite and animated_sprite.sprite_frames and animated_sprite.sprite_frames.has_animation("default"):
 			animated_sprite.play('default')
 		
 		starting_position = global_position
 		current_state = State.IDLE
-		throw_timer = throw_cooldown * 0.5  # Shorter cooldown after relocation
+		throw_timer = throw_cooldown * 0.5
 		return
 	
-	# Move toward target
-	var animated_sprite = get_node_or_null("AnimatedSprite2D")
-	if animated_sprite and animated_sprite.sprite_frames and animated_sprite.sprite_frames.has_animation("move"):
-		animated_sprite.play('move')
+	# Don't interrupt a damage animation mid-play
+	if not _is_playing_damage_animation:
+		var animated_sprite = get_node_or_null("AnimatedSprite2D")
+		if animated_sprite and animated_sprite.sprite_frames and animated_sprite.sprite_frames.has_animation("move"):
+			animated_sprite.play('move')
 	
 	var direction = to_target.normalized()
 	apply_central_force(direction * relocation_speed * 10)
 	
-	# Face movement direction
 	if sprite:
 		sprite.flip_h = direction.x < 0
 

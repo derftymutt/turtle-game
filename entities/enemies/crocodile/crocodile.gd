@@ -126,7 +126,6 @@ func _update_sprite_state(movement_x: float):
 	if is_in_vertical_attack:
 		if sprite.animation != "vertical_attack":
 			sprite.play("vertical_attack")
-		sprite.flip_h = false
 	else:
 		if sprite.animation != "swim":
 			sprite.play("swim")

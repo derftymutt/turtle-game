@@ -3,32 +3,84 @@
 [ext_resource type="Script" uid="uid://bdl5mblpii608" path="res://entities/enemies/electric_eel/electric_eel.gd" id="1_rf52h"]
 [ext_resource type="Texture2D" uid="uid://ba3n5g6v6pfg8" path="res://entities/enemies/electric_eel/sprites/electric_eel.png" id="2_fsk80"]
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_qwcig"]
+atlas = ExtResource("2_fsk80")
+region = Rect2(144, 0, 24, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_uccnl"]
+atlas = ExtResource("2_fsk80")
+region = Rect2(168, 0, 24, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qgh8x"]
+atlas = ExtResource("2_fsk80")
+region = Rect2(192, 0, 24, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fsk80"]
+atlas = ExtResource("2_fsk80")
+region = Rect2(0, 0, 24, 16)
+
 [sub_resource type="AtlasTexture" id="AtlasTexture_05rkc"]
 atlas = ExtResource("2_fsk80")
-region = Rect2(0, 0, 24, 12)
+region = Rect2(24, 0, 24, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_vs171"]
 atlas = ExtResource("2_fsk80")
-region = Rect2(24, 0, 24, 12)
+region = Rect2(48, 0, 24, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_qwcig"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_ywjiv"]
 atlas = ExtResource("2_fsk80")
-region = Rect2(48, 0, 24, 12)
+region = Rect2(72, 0, 24, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3pfa1"]
+atlas = ExtResource("2_fsk80")
+region = Rect2(96, 0, 24, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mhqn5"]
+atlas = ExtResource("2_fsk80")
+region = Rect2(120, 0, 24, 16)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_uccnl"]
 animations = [{
 "frames": [{
 "duration": 1.0,
+"texture": SubResource("AtlasTexture_qwcig")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_uccnl")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qgh8x")
+}],
+"loop": false,
+"name": &"damage",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fsk80")
+}, {
+"duration": 1.0,
 "texture": SubResource("AtlasTexture_05rkc")
 }, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_vs171")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_qwcig")
 }],
 "loop": true,
 "name": &"default",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ywjiv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3pfa1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mhqn5")
+}],
+"loop": true,
+"name": &"near_death",
 "speed": 4.0
 }]
 
@@ -46,8 +98,8 @@ script = ExtResource("1_rf52h")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=950464802]
 sprite_frames = SubResource("SpriteFrames_uccnl")
+animation = &"damage"
 autoplay = "default"
-frame_progress = 0.21433742
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1207589692]
 rotation = 1.5707964

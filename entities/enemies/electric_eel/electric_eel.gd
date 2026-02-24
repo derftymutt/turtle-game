@@ -243,7 +243,7 @@ func _maintain_depth():
 func _face_direction(direction: Vector2):
 	"""Flip sprite to face movement direction"""
 	if sprite:
-		sprite.flip_h = direction.x < 0
+		sprite.flip_h = direction.x > 0
 
 func _animate_swimming(delta: float):
 	"""Wiggle animation - more intense during telegraph/shock"""
@@ -251,9 +251,9 @@ func _animate_swimming(delta: float):
 	
 	var intensity = 1.0
 	if current_state == State.TELEGRAPHING:
-		intensity = 2.0
+		intensity = 1.5
 	elif current_state == State.SHOCKING:
-		intensity = 3.0
+		intensity = 2.0
 	
 	rotation = sin(wiggle_offset) * wiggle_amount * intensity
 

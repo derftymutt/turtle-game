@@ -126,9 +126,9 @@ visible = false
 visible = false
 
 [node name="OceanBackground" parent="." unique_id=593268214 instance=ExtResource("6_emlfc")]
-visible = false
 
 [node name="Ocean" parent="." unique_id=1274260941 instance=ExtResource("7_olub7")]
+show_gradient = false
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1602563695 node_paths=PackedStringArray("follow_target")]
 script = ExtResource("8_wgqfy")
