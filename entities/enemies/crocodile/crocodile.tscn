@@ -1,15 +1,32 @@
-[gd_scene load_steps=11 format=3 uid="uid://bu0sjqqm7uvm1"]
+[gd_scene format=3 uid="uid://bu0sjqqm7uvm1"]
 
 [ext_resource type="Script" uid="uid://ulntc5hpw7kl" path="res://entities/enemies/crocodile/crocodile.gd" id="1_36s23"]
 [ext_resource type="Texture2D" uid="uid://bbc04t00qgkb5" path="res://entities/enemies/crocodile/sprites/crocodile2.png" id="2_36s23"]
+[ext_resource type="Texture2D" uid="uid://cxjsnmcw65yuk" path="res://entities/enemies/crocodile/sprites/crocodile.png" id="2_mdbsh"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_ivdnp"]
-atlas = ExtResource("2_36s23")
-region = Rect2(0, 0, 32, 10)
+[sub_resource type="AtlasTexture" id="AtlasTexture_8fx7b"]
+atlas = ExtResource("2_mdbsh")
+region = Rect2(0, 0, 32, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_d24gk"]
-atlas = ExtResource("2_36s23")
-region = Rect2(0, 10, 32, 10)
+[sub_resource type="AtlasTexture" id="AtlasTexture_i2icg"]
+atlas = ExtResource("2_mdbsh")
+region = Rect2(32, 0, 32, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ugq5u"]
+atlas = ExtResource("2_mdbsh")
+region = Rect2(64, 0, 32, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_us2kn"]
+atlas = ExtResource("2_mdbsh")
+region = Rect2(96, 0, 32, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nl080"]
+atlas = ExtResource("2_mdbsh")
+region = Rect2(128, 0, 32, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fcm3d"]
+atlas = ExtResource("2_mdbsh")
+region = Rect2(160, 0, 32, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_bumr2"]
 atlas = ExtResource("2_36s23")
@@ -23,10 +40,22 @@ region = Rect2(0, 30, 32, 10)
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_ivdnp")
+"texture": SubResource("AtlasTexture_8fx7b")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_d24gk")
+"texture": SubResource("AtlasTexture_i2icg")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ugq5u")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_us2kn")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nl080")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fcm3d")
 }],
 "loop": true,
 "name": &"swim",
@@ -45,8 +74,8 @@ animations = [{
 }]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ivdnp"]
-radius = 5.0
-height = 32.0
+radius = 7.0
+height = 34.0
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_36s23"]
 radius = 40.0
@@ -56,30 +85,31 @@ height = 200.0
 radius = 6.0
 height = 34.0
 
-[node name="Crocodile" type="AnimatableBody2D" groups=["enemies"]]
+[node name="Crocodile" type="AnimatableBody2D" unique_id=787732993 groups=["enemies"]]
 collision_layer = 5
 script = ExtResource("1_36s23")
 is_invincible = true
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=433242944]
 sprite_frames = SubResource("SpriteFrames_d24gk")
 animation = &"swim"
 autoplay = "swim"
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=923001718]
 rotation = 1.5707964
 shape = SubResource("CapsuleShape2D_ivdnp")
 
-[node name="PatrolArea" type="Area2D" parent="."]
+[node name="PatrolArea" type="Area2D" parent="." unique_id=796255259]
 collision_layer = 0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="PatrolArea"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PatrolArea" unique_id=217441440]
+visible = false
 rotation = 1.5707964
 shape = SubResource("CapsuleShape2D_36s23")
 
-[node name="DamageArea" type="Area2D" parent="."]
+[node name="DamageArea" type="Area2D" parent="." unique_id=775188070]
 collision_layer = 0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="DamageArea"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DamageArea" unique_id=883204350]
 rotation = 1.5707964
 shape = SubResource("CapsuleShape2D_bumr2")

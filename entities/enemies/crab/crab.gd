@@ -55,7 +55,7 @@ func _enemy_ready():
 	lock_rotation = true
 	
 	# Set health
-	max_health = 50.0
+	max_health = 30.0
 	current_health = max_health
 	contact_damage = 10.0
 	

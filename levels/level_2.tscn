@@ -186,12 +186,6 @@ position = Vector2(287, 4)
 [node name="ElectricEel2" parent="Eels" index="1" unique_id=1683561160 instance=ExtResource("21_dpc8t")]
 position = Vector2(-279, 3)
 
-[node name="ElectricEel3" parent="Eels" index="2" unique_id=1769943764 instance=ExtResource("21_dpc8t")]
-position = Vector2(-200, 104)
-
-[node name="ElectricEel4" parent="Eels" index="3" unique_id=1893263053 instance=ExtResource("21_dpc8t")]
-position = Vector2(158, 90)
-
 [node name="PiranhaSpawner" parent="." index="11" unique_id=968566836 instance=ExtResource("11_00pa0")]
 position = Vector2(-175, 40)
 
