@@ -74,6 +74,15 @@ friction = 0.0
 [node name="LevelBase" unique_id=158370714 instance=ExtResource("1_vkd0v")]
 level_number = 3
 
+[node name="HUD" parent="." index="0" unique_id=1369229575]
+visible = false
+
+[node name="GameOverScreen" parent="." index="1" unique_id=301166293]
+visible = false
+
+[node name="LevelCompleteScreen" parent="." index="2" unique_id=1103608067]
+visible = false
+
 [node name="Ocean" parent="." index="3" unique_id=1413146336 instance=ExtResource("2_bmgug")]
 
 [node name="Camera2D" type="Camera2D" parent="." index="4" unique_id=1753987136 node_paths=PackedStringArray("follow_target")]
@@ -148,23 +157,17 @@ color = Color(0.17755811, 0.12329503, 0.02367841, 1)
 [node name="SeaUrchin" parent="SeaUrchins" index="0" unique_id=511668719 instance=ExtResource("8_u4kh1")]
 position = Vector2(-295, -110)
 
-[node name="SeaUrchin5" parent="SeaUrchins" index="1" unique_id=800438987 instance=ExtResource("8_u4kh1")]
-position = Vector2(-130, 120)
-
-[node name="SeaUrchin2" parent="SeaUrchins" index="2" unique_id=1925304990 instance=ExtResource("8_u4kh1")]
+[node name="SeaUrchin2" parent="SeaUrchins" index="1" unique_id=1925304990 instance=ExtResource("8_u4kh1")]
 position = Vector2(-150, -90)
 
-[node name="SeaUrchin3" parent="SeaUrchins" index="3" unique_id=193513502 instance=ExtResource("8_u4kh1")]
+[node name="SeaUrchin3" parent="SeaUrchins" index="2" unique_id=193513502 instance=ExtResource("8_u4kh1")]
 position = Vector2(150, -90)
 
-[node name="SeaUrchin7" parent="SeaUrchins" index="4" unique_id=66989983 instance=ExtResource("8_u4kh1")]
+[node name="SeaUrchin7" parent="SeaUrchins" index="3" unique_id=66989983 instance=ExtResource("8_u4kh1")]
 position = Vector2(0, 25)
 
-[node name="SeaUrchin4" parent="SeaUrchins" index="5" unique_id=785923782 instance=ExtResource("8_u4kh1")]
+[node name="SeaUrchin4" parent="SeaUrchins" index="4" unique_id=785923782 instance=ExtResource("8_u4kh1")]
 position = Vector2(295, -110)
-
-[node name="SeaUrchin6" parent="SeaUrchins" index="6" unique_id=782730886 instance=ExtResource("8_u4kh1")]
-position = Vector2(130, 120)
 
 [node name="Crocodile" parent="." index="11" unique_id=666111827 instance=ExtResource("9_svivd")]
 position = Vector2(0, -128)
@@ -191,6 +194,8 @@ position = Vector2(196, 94)
 [node name="CircularBumper" parent="." index="17" unique_id=1304879177 instance=ExtResource("17_svivd")]
 position = Vector2(-200, -35)
 physics_material_override = SubResource("PhysicsMaterial_tv8m3")
+size_preset = 1
+radius = 16.0
 
 [node name="CircularBumper2" parent="." index="18" unique_id=1704268783 instance=ExtResource("17_svivd")]
 position = Vector2(-260, -85)
@@ -213,8 +218,10 @@ position = Vector2(275, 110)
 physics_material_override = SubResource("PhysicsMaterial_mb3d3")
 
 [node name="CircularBumper8" parent="." index="22" unique_id=921027548 instance=ExtResource("17_svivd")]
-position = Vector2(187, -37)
+position = Vector2(200, -35)
 physics_material_override = SubResource("PhysicsMaterial_q26s8")
+size_preset = 1
+radius = 16.0
 
 [node name="CircularBumper6" parent="." index="23" unique_id=2054911253 instance=ExtResource("17_svivd")]
 position = Vector2(0, 76)
@@ -259,10 +266,10 @@ position = Vector2(40, -65)
 position = Vector2(245, 25)
 
 [node name="FlipperLeftEast" parent="." index="37" unique_id=1178739332 instance=ExtResource("25_tv8m3")]
-position = Vector2(-80, 115)
+position = Vector2(-70, 115)
 
 [node name="FlipperRightWest" parent="." index="38" unique_id=976369529 instance=ExtResource("26_8nkwk")]
-position = Vector2(80, 115)
+position = Vector2(70, 115)
 
 [node name="DeadWall2" parent="." index="39" unique_id=797132162 instance=ExtResource("26_e28pm")]
 position = Vector2(-66, -38)
