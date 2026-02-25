@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://bacwotwye1v3u"]
+[gd_scene format=4 uid="uid://bacwotwye1v3u"]
 
 [ext_resource type="Script" uid="uid://cc1pfhtxq4cat" path="res://levels/shared/level_base.gd" id="1_vac4a"]
 [ext_resource type="PackedScene" uid="uid://bahema85c45s" path="res://ui/hud/hud.tscn" id="2_0brv5"]
@@ -25,15 +25,14 @@
 [ext_resource type="PackedScene" uid="uid://c41fis6pd8gh2" path="res://systems/space_debris/space_debris_group.tscn" id="23_sq6ca"]
 [ext_resource type="PackedScene" uid="uid://dq7r6j7ritsv7" path="res://entities/collectibles/powerup/powerup.tscn" id="24_5xcwp"]
 [ext_resource type="PackedScene" uid="uid://q614lo3kanxc" path="res://systems/space_debris/space_debris.tscn" id="25_7sul6"]
+[ext_resource type="Texture2D" uid="uid://bm428btwp720u" path="res://entities/environment/ocean_boundaries/ocean_floor.png" id="26_3y2y2"]
+[ext_resource type="TileSet" uid="uid://dyl02kfc4a681" path="res://entities/environment/ocean_boundaries/ocean_wall.tres" id="27_euh2h"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_6hwsd"]
-size = Vector2(9.000052, 471.00015)
+size = Vector2(8.000166, 471.00015)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_p60vf"]
-size = Vector2(9.999756, 465.00012)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_o6ev6"]
-size = Vector2(640, 40)
+size = Vector2(8.000183, 465.00012)
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_0brv5"]
 friction = 0.1
@@ -110,6 +109,19 @@ _data = {
 }
 point_count = 4
 
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_euh2h"]
+texture = ExtResource("26_3y2y2")
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+1:0/0 = 0
+1:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+2:0/0 = 0
+2:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+
+[sub_resource type="TileSet" id="TileSet_f0ksa"]
+physics_layer_0/collision_layer = 1
+sources/0 = SubResource("TileSetAtlasSource_euh2h")
+
 [node name="LevelBase" type="Node2D" unique_id=1013451131 groups=["level"]]
 script = ExtResource("1_vac4a")
 
@@ -123,7 +135,6 @@ visible = false
 visible = false
 
 [node name="SkyBackground" parent="." unique_id=967020750 instance=ExtResource("5_f0ksa")]
-visible = false
 
 [node name="OceanBackground" parent="." unique_id=593268214 instance=ExtResource("6_emlfc")]
 
@@ -136,61 +147,49 @@ follow_target = NodePath("../TurtlePlayer")
 horizontal_follow_enabled = false
 
 [node name="TurtlePlayer" parent="." unique_id=1971009088 instance=ExtResource("9_qf8ve")]
-position = Vector2(-13, 16)
+position = Vector2(-5, 35)
 
-[node name="WorldBoundaries" type="Node2D" parent="." unique_id=1014588514]
+[node name="WorldSafetyBoundaries" type="Node2D" parent="." unique_id=1014588514]
 
-[node name="BoundaryLeft" type="StaticBody2D" parent="WorldBoundaries" unique_id=2049786488]
-position = Vector2(-15.000001, -27.000008)
+[node name="BoundaryLeft" type="StaticBody2D" parent="WorldSafetyBoundaries" unique_id=2049786488]
+position = Vector2(-9, -376)
 rotation = -3.1415925
 scale = Vector2(0.99999994, 0.99999994)
 metadata/_edit_group_ = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldBoundaries/BoundaryLeft" unique_id=2085122498]
-position = Vector2(307.49997, -32.50003)
-scale = Vector2(0.9999995, 0.9999995)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldSafetyBoundaries/BoundaryLeft" unique_id=2085122498]
+position = Vector2(306.99988, -32.50003)
+scale = Vector2(0.9999994, 0.9999994)
 shape = SubResource("RectangleShape2D_6hwsd")
 debug_color = Color(0, 0.6, 0.7, 0.42)
 
-[node name="ColorRect" type="ColorRect" parent="WorldBoundaries/BoundaryLeft" unique_id=1807865211]
+[node name="ColorRect" type="ColorRect" parent="WorldSafetyBoundaries/BoundaryLeft" unique_id=1807865211]
+visible = false
 offset_left = 303.51578
 offset_top = -269.00006
 offset_right = 311.90527
 offset_bottom = 62.268463
 color = Color(0.1764706, 0.12156863, 0.023529412, 1)
 
-[node name="BoundaryRight" type="StaticBody2D" parent="WorldBoundaries" unique_id=1273002753]
-position = Vector2(-9.999999, -28.000004)
+[node name="BoundaryRight" type="StaticBody2D" parent="WorldSafetyBoundaries" unique_id=1273002753]
+position = Vector2(-11, -393)
 rotation = -3.1415925
 scale = Vector2(0.99999994, 0.99999994)
 metadata/_edit_group_ = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldBoundaries/BoundaryRight" unique_id=975550859]
-position = Vector2(-327.9998, -36.49993)
-scale = Vector2(0.99999976, 0.99999976)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldSafetyBoundaries/BoundaryRight" unique_id=975550859]
+position = Vector2(-326.99988, -36.499878)
+scale = Vector2(0.99999964, 0.99999964)
 shape = SubResource("RectangleShape2D_p60vf")
 debug_color = Color(0, 0.6, 0.7, 0.42)
 
-[node name="ColorRect" type="ColorRect" parent="WorldBoundaries/BoundaryRight" unique_id=1405737378]
+[node name="ColorRect" type="ColorRect" parent="WorldSafetyBoundaries/BoundaryRight" unique_id=1405737378]
+visible = false
 offset_left = -333.00003
 offset_top = -269.0
 offset_right = -323.4816
 offset_bottom = 62.268524
 color = Color(0.1764706, 0.12156863, 0.023529412, 1)
-
-[node name="OceanFloor" type="StaticBody2D" parent="WorldBoundaries" unique_id=687229651]
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldBoundaries/OceanFloor" unique_id=725744685]
-position = Vector2(0, 185)
-shape = SubResource("RectangleShape2D_o6ev6")
-debug_color = Color(0, 0.6, 0.7, 0.42)
-
-[node name="ColorRect" type="ColorRect" parent="WorldBoundaries/OceanFloor" unique_id=1850332190]
-offset_left = -320.0
-offset_top = 165.0
-offset_right = 320.0
-offset_bottom = 205.0
-color = Color(0.17755811, 0.12329503, 0.02367841, 1)
 
 [node name="Flippers" type="Node2D" parent="." unique_id=25122695]
 
@@ -199,12 +198,14 @@ color = Color(0.17755811, 0.12329503, 0.02367841, 1)
 [node name="FloorSeeder" parent="." unique_id=1662612070 instance=ExtResource("10_b7m18")]
 
 [node name="BumperWall" parent="." unique_id=1377981615 instance=ExtResource("11_4qim1")]
+visible = false
 position = Vector2(-321, -368)
 rotation = 1.5707964
 physics_material_override = SubResource("PhysicsMaterial_0brv5")
 wall_length = 200.0
 
 [node name="BumperWall2" parent="." unique_id=1950333992 instance=ExtResource("11_4qim1")]
+visible = false
 position = Vector2(315, -362)
 rotation = 1.5707964
 physics_material_override = SubResource("PhysicsMaterial_3y2y2")
@@ -478,6 +479,21 @@ position = Vector2(0, -240)
 
 [node name="Path2D" parent="OceanCurrent2" index="0" unique_id=1461068862]
 curve = SubResource("Curve2D_3y2y2")
+
+[node name="OceanFloor" type="TileMapLayer" parent="." unique_id=277196261]
+position = Vector2(0, 4)
+tile_map_data = PackedByteArray("AADs/woAAAABAAAAAADt/woAAAAAAAAAAADu/woAAAACAAAAAADv/woAAAABAAAAAADw/woAAAAAAAAAAADx/woAAAAAAAAAAADy/woAAAAAAAAAAADz/woAAAAAAAAAAAD0/woAAAACAAAAAAD1/woAAAAAAAAAAAD2/woAAAAAAAAAAAD3/woAAAAAAAAAAAD4/woAAAAAAAAAAAD5/woAAAACAAAAAAD6/woAAAAAAAAAAAD7/woAAAABAAAAAAD8/woAAAACAAAAAAD9/woAAAABAAAAAAD+/woAAAAAAAAAAAD//woAAAAAAAAAAAAAAAoAAAACAAAAAAABAAoAAAAAAAAAAAACAAoAAAABAAAAAAADAAoAAAAAAAAAAAAEAAoAAAAAAAAAAAAFAAoAAAABAAAAAAAGAAoAAAACAAAAAAAHAAoAAAAAAAAAAAAIAAoAAAABAAAAAAAJAAoAAAABAAAAAAAKAAoAAAAAAAAAAAALAAoAAAABAAAAAAAMAAoAAAAAAAAAAAANAAoAAAAAAAAAAAAOAAoAAAACAAAAAAAPAAoAAAAAAAAAAAAQAAoAAAABAAAAAAARAAoAAAAAAAAAAAASAAoAAAAAAAAAAAATAAoAAAACAAAAAAA=")
+tile_set = SubResource("TileSet_f0ksa")
+
+[node name="OceanWallLeft" type="TileMapLayer" parent="." unique_id=540761257]
+position = Vector2(0, 4)
+tile_map_data = PackedByteArray("AADY/wkAAAAAAAAAAADY/wgAAAACAAAAAADY/wcAAAABAAAAAADY/wYAAAAAAAAAAADY/wUAAAACAAAAAADY/wQAAAAAAAAAAADY/wMAAAABAAAAAADY/wIAAAACAAAAAADY/wEAAAAAAAAAAADY/wAAAAACAAAAAADY////AAAAAAAAAADY//7/AAAAAAAAAADY//3/AAAAAAAAAADY//z/AAACAAAAAADY//v/AAAAAAAAAADY//r/AAABAAAAAADY//n/AAAAAAAAAADY//j/AAACAAAAAAA=")
+tile_set = ExtResource("27_euh2h")
+
+[node name="OceanWallRight" type="TileMapLayer" parent="." unique_id=379300267]
+position = Vector2(632, 4)
+tile_map_data = PackedByteArray("AADY/wkAAAAAAAAAAADY/wgAAAACAAAAAADY/wcAAAABAAAAAADY/wYAAAAAAAAAAADY/wUAAAACAAAAAADY/wQAAAAAAAAAAADY/wMAAAABAAAAAADY/wIAAAACAAAAAADY/wEAAAAAAAAAAADY/wAAAAACAAAAAADY////AAAAAAAAAADY//7/AAAAAAAAAADY//3/AAAAAAAAAADY//z/AAACAAAAAADY//v/AAAAAAAAAADY//r/AAABAAAAAADY//n/AAAAAAAAAADY//j/AAACAAAAAAA=")
+tile_set = ExtResource("27_euh2h")
 
 [editable path="DeadWall6"]
 [editable path="DeadWall7"]

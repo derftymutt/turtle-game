@@ -1,9 +1,10 @@
-[gd_scene format=3 uid="uid://ckonw8pq3soib"]
+[gd_scene format=4 uid="uid://ckonw8pq3soib"]
 
 [ext_resource type="PackedScene" uid="uid://dgwg5saty0h76" path="res://levels/shared/level_base.tscn" id="1_lrvbd"]
 [ext_resource type="PackedScene" uid="uid://b6mqqn1jgl6of" path="res://levels/environment/sky_background.tscn" id="2_ntdhj"]
 [ext_resource type="PackedScene" uid="uid://qd5yfrw7588i" path="res://entities/environment/ocean/ocean.tscn" id="2_oqlok"]
 [ext_resource type="Script" uid="uid://c3i3p77jm22vp" path="res://systems/camera_2d.gd" id="3_7nvrk"]
+[ext_resource type="PackedScene" uid="uid://dysmgxrg7t1o4" path="res://entities/environment/ocean_background/ocean_background.tscn" id="4_4knja"]
 [ext_resource type="PackedScene" uid="uid://btbnsn74vk1b" path="res://entities/player/turtle_player.tscn" id="4_jkxa6"]
 [ext_resource type="PackedScene" uid="uid://bu0sjqqm7uvm1" path="res://entities/enemies/crocodile/crocodile.tscn" id="6_udfhf"]
 [ext_resource type="PackedScene" uid="uid://d2kw7hdpyp6d0" path="res://entities/enemies/sea_urchin/sea_urchin.tscn" id="7_i6od7"]
@@ -23,16 +24,9 @@
 [ext_resource type="PackedScene" uid="uid://4het8fdlmvgj" path="res://entities/environment/flippers/flipper_left_down.tscn" id="22_ryfpa"]
 [ext_resource type="PackedScene" uid="uid://b5olvcks1vnwn" path="res://entities/environment/flippers/flipper_right_down.tscn" id="23_ntdhj"]
 [ext_resource type="PackedScene" uid="uid://8edo3etakc1a" path="res://entities/environment/walls/dead_wall/dead_wall.tscn" id="24_ryfpa"]
+[ext_resource type="Texture2D" uid="uid://bm428btwp720u" path="res://entities/environment/ocean_boundaries/ocean_floor.png" id="25_0fu15"]
 [ext_resource type="PackedScene" uid="uid://bwdbbu1jhxn2n" path="res://entities/environment/walls/bumper_wall/bumper_wall_2.tscn" id="25_ntdhj"]
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_rf48r"]
-size = Vector2(9.000052, 471.00015)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_toluw"]
-size = Vector2(9.999756, 465.00012)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_dp1ib"]
-size = Vector2(640, 40)
+[ext_resource type="TileSet" uid="uid://dyl02kfc4a681" path="res://entities/environment/ocean_boundaries/ocean_wall.tres" id="26_4knja"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_wqjma"]
 friction = 0.0
@@ -309,6 +303,25 @@ friction = 0.0
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_4cd1h"]
 friction = 0.0
 
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_0fu15"]
+texture = ExtResource("25_0fu15")
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+1:0/0 = 0
+1:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+2:0/0 = 0
+2:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+
+[sub_resource type="TileSet" id="TileSet_0x1rk"]
+physics_layer_0/collision_layer = 1
+sources/0 = SubResource("TileSetAtlasSource_0fu15")
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_4knja"]
+size = Vector2(8.000166, 471.00015)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_voubc"]
+size = Vector2(8.000183, 465.00012)
+
 [node name="LevelBase" unique_id=519430445 instance=ExtResource("1_lrvbd")]
 
 [node name="HUD" parent="." index="0" unique_id=1369229575]
@@ -317,19 +330,22 @@ exhaustion_recovery_rate = 20.0
 [node name="SkyBackground" parent="." index="3" unique_id=967020750 instance=ExtResource("2_ntdhj")]
 
 [node name="Ocean" parent="." index="4" unique_id=2062759388 instance=ExtResource("2_oqlok")]
+visible = false
 
-[node name="Camera2D" type="Camera2D" parent="." index="5" unique_id=380561311 node_paths=PackedStringArray("follow_target")]
+[node name="OceanBackground" parent="." index="5" unique_id=593268214 instance=ExtResource("4_4knja")]
+
+[node name="Camera2D" type="Camera2D" parent="." index="6" unique_id=380561311 node_paths=PackedStringArray("follow_target")]
 script = ExtResource("3_7nvrk")
 follow_target = NodePath("../TurtlePlayer")
 horizontal_follow_enabled = false
 
-[node name="TurtlePlayer" parent="." index="6" unique_id=1163425295 instance=ExtResource("4_jkxa6")]
+[node name="TurtlePlayer" parent="." index="7" unique_id=1163425295 instance=ExtResource("4_jkxa6")]
 
-[node name="Crocodile" parent="." index="7" unique_id=781536171 instance=ExtResource("6_udfhf")]
+[node name="Crocodile" parent="." index="8" unique_id=781536171 instance=ExtResource("6_udfhf")]
 position = Vector2(-264, -124)
 patrol_speed = 60.0
 
-[node name="SeaUrchins" type="Node2D" parent="." index="8" unique_id=673576481]
+[node name="SeaUrchins" type="Node2D" parent="." index="9" unique_id=673576481]
 
 [node name="SeaUrchin" parent="SeaUrchins" index="0" unique_id=37824323 instance=ExtResource("7_i6od7")]
 position = Vector2(221, 138)
@@ -349,61 +365,7 @@ position = Vector2(-142, -80)
 [node name="SeaUrchin6" parent="SeaUrchins" index="5" unique_id=876129622 instance=ExtResource("7_i6od7")]
 position = Vector2(62, -103)
 
-[node name="BumperWalls" type="Node2D" parent="." index="9" unique_id=1803017627]
-
-[node name="WorldBoundaries" type="Node2D" parent="." index="10" unique_id=953225133]
-
-[node name="BoundaryLeft" type="StaticBody2D" parent="WorldBoundaries" index="0" unique_id=1983000424]
-position = Vector2(-12.000001, -63.000004)
-rotation = -3.1415925
-scale = Vector2(0.99999994, 0.99999994)
-metadata/_edit_group_ = true
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldBoundaries/BoundaryLeft" index="0" unique_id=939840781]
-position = Vector2(307.49997, -32.50003)
-scale = Vector2(0.9999995, 0.9999995)
-shape = SubResource("RectangleShape2D_rf48r")
-debug_color = Color(0, 0.6, 0.7, 0.42)
-
-[node name="ColorRect" type="ColorRect" parent="WorldBoundaries/BoundaryLeft" index="1" unique_id=989716401]
-offset_left = 303.51578
-offset_top = -269.00006
-offset_right = 311.90527
-offset_bottom = 62.268463
-color = Color(0.1764706, 0.12156863, 0.023529412, 1)
-
-[node name="BoundaryRight" type="StaticBody2D" parent="WorldBoundaries" index="1" unique_id=743884693]
-position = Vector2(-6.9999995, -64)
-rotation = -3.1415925
-scale = Vector2(0.99999994, 0.99999994)
-metadata/_edit_group_ = true
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldBoundaries/BoundaryRight" index="0" unique_id=1243346416]
-position = Vector2(-327.9998, -36.49993)
-scale = Vector2(0.99999976, 0.99999976)
-shape = SubResource("RectangleShape2D_toluw")
-debug_color = Color(0, 0.6, 0.7, 0.42)
-
-[node name="ColorRect" type="ColorRect" parent="WorldBoundaries/BoundaryRight" index="1" unique_id=1725622750]
-offset_left = -333.00003
-offset_top = -269.0
-offset_right = -323.4816
-offset_bottom = 62.268524
-color = Color(0.1764706, 0.12156863, 0.023529412, 1)
-
-[node name="OceanFloor" type="StaticBody2D" parent="WorldBoundaries" index="2" unique_id=1771330071]
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldBoundaries/OceanFloor" index="0" unique_id=570056648]
-position = Vector2(0, 185)
-shape = SubResource("RectangleShape2D_dp1ib")
-debug_color = Color(0, 0.6, 0.7, 0.42)
-
-[node name="ColorRect" type="ColorRect" parent="WorldBoundaries/OceanFloor" index="1" unique_id=314540750]
-offset_left = -320.0
-offset_top = 165.0
-offset_right = 320.0
-offset_bottom = 205.0
-color = Color(0.17755811, 0.12329503, 0.02367841, 1)
+[node name="BumperWalls" type="Node2D" parent="." index="10" unique_id=1803017627]
 
 [node name="PiranhaSpawner" parent="." index="11" unique_id=664138342 instance=ExtResource("11_4knja")]
 position = Vector2(-175, 40)
@@ -560,3 +522,60 @@ position = Vector2(115, 85)
 position = Vector2(141, 113)
 physics_material_override = SubResource("PhysicsMaterial_4cd1h")
 angle_preset = 2
+
+[node name="OceanFloor" type="TileMapLayer" parent="." index="29" unique_id=435019183]
+position = Vector2(0, 4)
+tile_map_data = PackedByteArray("AADs/woAAAABAAAAAADt/woAAAAAAAAAAADu/woAAAACAAAAAADv/woAAAABAAAAAADw/woAAAAAAAAAAADx/woAAAAAAAAAAADy/woAAAAAAAAAAADz/woAAAAAAAAAAAD0/woAAAACAAAAAAD1/woAAAAAAAAAAAD2/woAAAAAAAAAAAD3/woAAAAAAAAAAAD4/woAAAAAAAAAAAD5/woAAAACAAAAAAD6/woAAAAAAAAAAAD7/woAAAABAAAAAAD8/woAAAACAAAAAAD9/woAAAABAAAAAAD+/woAAAAAAAAAAAD//woAAAAAAAAAAAAAAAoAAAACAAAAAAABAAoAAAAAAAAAAAACAAoAAAABAAAAAAADAAoAAAAAAAAAAAAEAAoAAAAAAAAAAAAFAAoAAAABAAAAAAAGAAoAAAACAAAAAAAHAAoAAAAAAAAAAAAIAAoAAAABAAAAAAAJAAoAAAABAAAAAAAKAAoAAAAAAAAAAAALAAoAAAABAAAAAAAMAAoAAAAAAAAAAAANAAoAAAAAAAAAAAAOAAoAAAACAAAAAAAPAAoAAAAAAAAAAAAQAAoAAAABAAAAAAARAAoAAAAAAAAAAAASAAoAAAAAAAAAAAATAAoAAAACAAAAAAA=")
+tile_set = SubResource("TileSet_0x1rk")
+
+[node name="OceanWallLeft" type="TileMapLayer" parent="." index="30" unique_id=256635777]
+position = Vector2(0, 4)
+tile_map_data = PackedByteArray("AADY/wkAAAAAAAAAAADY/wgAAAACAAAAAADY/wcAAAABAAAAAADY/wYAAAAAAAAAAADY/wUAAAACAAAAAADY/wQAAAAAAAAAAADY/wMAAAABAAAAAADY/wIAAAACAAAAAADY/wEAAAAAAAAAAADY/wAAAAACAAAAAADY////AAAAAAAAAADY//7/AAAAAAAAAADY//3/AAAAAAAAAADY//z/AAACAAAAAADY//v/AAAAAAAAAADY//r/AAABAAAAAADY//n/AAAAAAAAAADY//j/AAACAAAAAAA=")
+tile_set = ExtResource("26_4knja")
+
+[node name="OceanWallRight" type="TileMapLayer" parent="." index="31" unique_id=1620327425]
+position = Vector2(632, 4)
+tile_map_data = PackedByteArray("AADY/wkAAAAAAAAAAADY/wgAAAACAAAAAADY/wcAAAABAAAAAADY/wYAAAAAAAAAAADY/wUAAAACAAAAAADY/wQAAAAAAAAAAADY/wMAAAABAAAAAADY/wIAAAACAAAAAADY/wEAAAAAAAAAAADY/wAAAAACAAAAAADY////AAAAAAAAAADY//7/AAAAAAAAAADY//3/AAAAAAAAAADY//z/AAACAAAAAADY//v/AAAAAAAAAADY//r/AAABAAAAAADY//n/AAAAAAAAAADY//j/AAACAAAAAAA=")
+tile_set = ExtResource("26_4knja")
+
+[node name="WorldSafetyBoundaries" type="Node2D" parent="." index="32" unique_id=1310245755]
+
+[node name="BoundaryLeft" type="StaticBody2D" parent="WorldSafetyBoundaries" index="0" unique_id=1729579633]
+position = Vector2(-9, -376)
+rotation = -3.1415925
+scale = Vector2(0.99999994, 0.99999994)
+metadata/_edit_group_ = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldSafetyBoundaries/BoundaryLeft" index="0" unique_id=75909132]
+position = Vector2(306.99988, -32.50003)
+scale = Vector2(0.9999994, 0.9999994)
+shape = SubResource("RectangleShape2D_4knja")
+debug_color = Color(0, 0.6, 0.7, 0.42)
+
+[node name="ColorRect" type="ColorRect" parent="WorldSafetyBoundaries/BoundaryLeft" index="1" unique_id=63317114]
+visible = false
+offset_left = 303.51578
+offset_top = -269.00006
+offset_right = 311.90527
+offset_bottom = 62.268463
+color = Color(0.1764706, 0.12156863, 0.023529412, 1)
+
+[node name="BoundaryRight" type="StaticBody2D" parent="WorldSafetyBoundaries" index="1" unique_id=492877316]
+position = Vector2(-11, -393)
+rotation = -3.1415925
+scale = Vector2(0.99999994, 0.99999994)
+metadata/_edit_group_ = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldSafetyBoundaries/BoundaryRight" index="0" unique_id=61054322]
+position = Vector2(-326.99988, -36.499878)
+scale = Vector2(0.99999964, 0.99999964)
+shape = SubResource("RectangleShape2D_voubc")
+debug_color = Color(0, 0.6, 0.7, 0.42)
+
+[node name="ColorRect" type="ColorRect" parent="WorldSafetyBoundaries/BoundaryRight" index="1" unique_id=142020140]
+visible = false
+offset_left = -333.00003
+offset_top = -269.0
+offset_right = -323.4816
+offset_bottom = 62.268524
+color = Color(0.1764706, 0.12156863, 0.023529412, 1)
