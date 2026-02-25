@@ -151,9 +151,10 @@ flipper_right={
 2d_physics/layer_1="World_Player"
 2d_physics/layer_2="Collectibles"
 2d_physics/layer_3="Enemies"
-2d_physics/layer_4="Bullets"
+2d_physics/layer_4="PlayerBullets"
 2d_physics/layer_5="CloudFlippers"
 2d_physics/layer_6="Player"
+2d_physics/layer_7="EnemyBullets"
 2d_physics/layer_8="Trash"
 
 [rendering]

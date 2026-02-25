@@ -27,9 +27,6 @@ func _ready():
 	linear_damp = 7.0
 	angular_damp = 3.0
 	
-	collision_layer = 2
-	collision_mask = 1
-	
 	ocean = get_tree().get_first_node_in_group("ocean")
 	add_to_group("collectibles")
 	
@@ -45,8 +42,6 @@ func _ready():
 	# Connect Area2D for player detection
 	if has_node("Area2D"):
 		$Area2D.body_entered.connect(_on_area_2d_body_entered)
-		$Area2D.collision_layer = 0
-		$Area2D.collision_mask = 1
 	else:
 		push_warning("%s has no Area2D child!" % name)
 	

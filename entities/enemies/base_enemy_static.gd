@@ -38,14 +38,9 @@ func _ready():
 	damage_area = get_node_or_null("DamageArea")
 	if damage_area:
 		damage_area.body_entered.connect(_on_damage_area_entered)
-		damage_area.collision_layer = 0
-		damage_area.collision_mask = 1  # Only detect layer 1 (player)
 	
 	# Call child class setup
 	_enemy_ready()
-	
-	print(name, " (STATIC) collision: layer=", collision_layer, " mask=", collision_mask, 
-		" | pass_through_player=", pass_through_player, " | invincible=", is_invincible)
 
 ## Override in child classes for custom initialization
 func _enemy_ready():

@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://cdmr2papqk2ih"]
+[gd_scene format=3 uid="uid://cdmr2papqk2ih"]
 
 [ext_resource type="Script" uid="uid://ca648mplrrwfx" path="res://entities/collectibles/air_bubble/air_bubble.gd" id="1_5t6o6"]
 [ext_resource type="Texture2D" uid="uid://b3h3k4sxpcm0k" path="res://entities/collectibles/air_bubble/sprites/airbubble1.png" id="2_f1ovj"]
@@ -38,21 +38,22 @@ radius = 6.0
 [sub_resource type="CircleShape2D" id="CircleShape2D_oispj"]
 radius = 9.0
 
-[node name="AirBubble" type="RigidBody2D"]
+[node name="AirBubble" type="RigidBody2D" unique_id=1446425365]
 collision_layer = 2
 collision_mask = 9
 script = ExtResource("1_5t6o6")
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=2048126209]
 sprite_frames = SubResource("SpriteFrames_jdq6t")
 autoplay = "default"
 frame_progress = 0.68084157
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1602673446]
 shape = SubResource("CircleShape2D_srvo7")
 
-[node name="Area2D" type="Area2D" parent="."]
+[node name="Area2D" type="Area2D" parent="." unique_id=326757806]
 collision_layer = 0
+collision_mask = 32
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=722537805]
 shape = SubResource("CircleShape2D_oispj")

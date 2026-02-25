@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://dq7r6j7ritsv7"]
+[gd_scene format=3 uid="uid://dq7r6j7ritsv7"]
 
 [ext_resource type="Script" uid="uid://dcd6f5ppbpoi3" path="res://entities/collectibles/powerup/powerup.gd" id="1_ieaf5"]
 [ext_resource type="Texture2D" uid="uid://bru3igffhmcii" path="res://entities/collectibles/powerup/sprites/powerups2.png" id="2_obmse"]
@@ -69,20 +69,21 @@ size = Vector2(14, 14)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_3f2u0"]
 size = Vector2(14, 14)
 
-[node name="Powerup" type="RigidBody2D"]
+[node name="Powerup" type="RigidBody2D" unique_id=99663413]
 collision_layer = 2
 script = ExtResource("1_ieaf5")
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1580218334]
 sprite_frames = SubResource("SpriteFrames_ghui4")
 animation = &"stamina"
 autoplay = "shield"
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=257228464]
 shape = SubResource("RectangleShape2D_u25je")
 
-[node name="Area2D" type="Area2D" parent="."]
+[node name="Area2D" type="Area2D" parent="." unique_id=372828179]
 collision_layer = 0
+collision_mask = 32
 
-[node name="CollisionPolygon2D" type="CollisionShape2D" parent="Area2D"]
+[node name="CollisionPolygon2D" type="CollisionShape2D" parent="Area2D" unique_id=625367971]
 shape = SubResource("RectangleShape2D_3f2u0")

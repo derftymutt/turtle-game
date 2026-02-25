@@ -54,6 +54,7 @@ frame_progress = 0.5759694
 
 [node name="Area2D" type="Area2D" parent="." unique_id=1256210444]
 collision_layer = 0
+collision_mask = 32
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=614366174]
 shape = SubResource("CircleShape2D_5e7ww")

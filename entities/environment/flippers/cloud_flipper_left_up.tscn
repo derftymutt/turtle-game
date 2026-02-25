@@ -68,6 +68,7 @@ height = 33.0
 
 [node name="CloudFlipperLeftUp" type="StaticBody2D" unique_id=1447591536]
 collision_layer = 16
+collision_mask = 32
 script = ExtResource("1_rewmb")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=896963701]
@@ -84,6 +85,7 @@ one_way_collision_margin = 0.0
 
 [node name="Area2D" type="Area2D" parent="." unique_id=906731839]
 collision_layer = 0
+collision_mask = 32
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=635072278]
 position = Vector2(12, 0)

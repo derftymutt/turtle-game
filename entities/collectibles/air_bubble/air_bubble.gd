@@ -62,8 +62,6 @@ func _ready():
 	# Connect Area2D for player detection
 	if has_node("Area2D"):
 		$Area2D.body_entered.connect(_on_area_2d_body_entered)
-		$Area2D.collision_layer = 0
-		$Area2D.collision_mask = 1  # Detect player only
 	else:
 		push_warning("AirBubble has no Area2D child!")
 

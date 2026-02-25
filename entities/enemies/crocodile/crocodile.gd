@@ -58,8 +58,6 @@ func _enemy_ready():
 	if patrol_area:
 		patrol_area.body_entered.connect(_on_player_detected)
 		patrol_area.body_exited.connect(_on_player_lost)
-		patrol_area.collision_layer = 0
-		patrol_area.collision_mask = 1
 	
 	# Random starting direction
 	if randf() > 0.5:

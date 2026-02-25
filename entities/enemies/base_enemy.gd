@@ -38,8 +38,6 @@ func _ready():
 	damage_area = get_node_or_null("DamageArea")
 	if damage_area:
 		damage_area.body_entered.connect(_on_damage_area_entered)
-		damage_area.collision_layer = 0
-		damage_area.collision_mask = 1  # Only detect layer 1 (player)
 	
 	# Call child class setup
 	_enemy_ready()

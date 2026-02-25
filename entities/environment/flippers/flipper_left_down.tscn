@@ -89,6 +89,7 @@ radius = 6.0
 height = 33.0
 
 [node name="FlipperLeftDown" type="StaticBody2D" unique_id=1447591536]
+collision_mask = 32
 script = SubResource("GDScript_7je5b")
 rest_angle_degrees = null
 flip_angle_degrees = null
@@ -108,6 +109,7 @@ rotation = 1.5707964
 shape = SubResource("CapsuleShape2D_j537t")
 
 [node name="Area2D" type="Area2D" parent="." unique_id=906731839]
+collision_mask = 32
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=635072278]
 position = Vector2(12, 0)

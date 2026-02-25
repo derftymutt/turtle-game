@@ -3,33 +3,34 @@ extends Node
 class_name MilitaryPlaneSpawner
 
 ## Triggers MilitaryPlane passes on a randomized timer.
-## Place this node in your sky level scene alongside the MilitaryPlane node.
+## Passes only occur while the player is in the sky (above the ocean surface).
+## If the player drops back to the ocean mid-countdown, the timer pauses
+## and resumes when they return to the sky.
 ##
 ## SETUP:
-##   1. Add MilitaryPlane node to the sky level scene.
-##   2. Add MilitaryPlaneSpawner node to the same scene.
+##   1. Add MilitaryPlane node to your sky level scene.
+##   2. Add MilitaryPlaneSpawner alongside it.
 ##   3. Assign the plane reference in the Inspector.
 
 @export var plane: MilitaryPlane
 
 @export_group("Timing")
-## Minimum seconds between passes.
 @export var interval_min: float = 6.0
-## Maximum seconds between passes.
 @export var interval_max: float = 12.0
-## Delay before the very first pass (gives the player a moment to settle).
+## Delay before the very first pass (gives the player a moment to settle in).
 @export var first_pass_delay: float = 4.0
 
 @export_group("Randomization")
-## If true, side (left/right entry) is randomized each pass.
-## If false, the plane always enters from the left.
 @export var randomize_side: bool = true
 ## Weight toward MISSILE type. 0.0 = always spread, 1.0 = always missile.
-## 0.5 = equal chance. Tweak to taste.
 @export var missile_weight: float = 0.5
 
+@export_group("Sky Detection")
+## Should match ocean_surface_y on your Ocean / Camera node.
+@export var ocean_surface_y: float = -126.0
+
 var _timer: float = 0.0
-var _active: bool = false
+var _player: Node2D = null
 
 
 func _ready() -> void:
@@ -39,11 +40,15 @@ func _ready() -> void:
 
 	plane.pass_completed.connect(_on_pass_completed)
 	_timer = first_pass_delay
-	_active = true
+	_player = get_tree().get_first_node_in_group("player")
 
 
 func _process(delta: float) -> void:
-	if not _active or not plane:
+	if not plane:
+		return
+
+	# Only tick the timer while the player is in the sky
+	if not _player_is_in_sky():
 		return
 
 	_timer -= delta
@@ -53,7 +58,7 @@ func _process(delta: float) -> void:
 
 func _trigger_pass() -> void:
 	if plane.active:
-		# Plane is mid-pass; try again shortly
+		# Plane is mid-pass — try again shortly
 		_timer = 1.0
 		return
 
@@ -68,3 +73,11 @@ func _trigger_pass() -> void:
 
 func _on_pass_completed() -> void:
 	_timer = randf_range(interval_min, interval_max)
+
+
+func _player_is_in_sky() -> bool:
+	if not _player or not is_instance_valid(_player):
+		# Re-search in case player spawned after this node
+		_player = get_tree().get_first_node_in_group("player")
+		return false
+	return _player.global_position.y < ocean_surface_y

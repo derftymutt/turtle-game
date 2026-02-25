@@ -6,19 +6,20 @@
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_2cgpa"]
 friction = 0.0
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_uxycr"]
+size = Vector2(64, 8)
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_iygoh"]
 size = Vector2(64, 8)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_f5jhh"]
-size = Vector2(64, 8)
-
 [node name="DeadWall" type="StaticBody2D" unique_id=797132162]
+collision_mask = 32
 physics_material_override = SubResource("PhysicsMaterial_2cgpa")
 script = ExtResource("1_2cgpa")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1644951480]
 rotation = 1.5707964
-shape = SubResource("RectangleShape2D_iygoh")
+shape = SubResource("RectangleShape2D_uxycr")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=804434373]
 texture = ExtResource("2_uxycr")
@@ -30,7 +31,8 @@ color = Color(0.3, 0.3, 0.4, 1)
 polygon = PackedVector2Array(-32, -4, 32, -4, 32, 4, -32, 4)
 
 [node name="SlipperyArea" type="Area2D" parent="." unique_id=773978709]
+collision_mask = 32
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="SlipperyArea" unique_id=2040614053]
 rotation = 1.5707964
-shape = SubResource("RectangleShape2D_f5jhh")
+shape = SubResource("RectangleShape2D_iygoh")

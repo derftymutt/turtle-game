@@ -3,10 +3,12 @@
 [ext_resource type="Script" uid="uid://dpjqpmie37dpv" path="res://entities/enemies/base_enemy.gd" id="1_n1jr3"]
 
 [node name="BaseEnemy" type="RigidBody2D" unique_id=387343334]
+collision_mask = 33
 script = ExtResource("1_n1jr3")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1583260484]
 
 [node name="DamageArea" type="Area2D" parent="." unique_id=201671195]
+collision_mask = 32
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="DamageArea" unique_id=2060091584]

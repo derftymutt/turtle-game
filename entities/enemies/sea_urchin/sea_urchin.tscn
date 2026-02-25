@@ -95,10 +95,10 @@ animations = [{
 "speed": 10.0
 }]
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_np7eh"]
+[sub_resource type="CircleShape2D" id="CircleShape2D_naeib"]
 radius = 9.0
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_naeib"]
+[sub_resource type="CircleShape2D" id="CircleShape2D_np7eh"]
 radius = 9.0
 
 [node name="SeaUrchin" type="RigidBody2D" unique_id=1964309753]
@@ -113,14 +113,15 @@ sprite_frames = SubResource("SpriteFrames_00yor")
 autoplay = "default"
 frame_progress = 0.031055208
 
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=463942550]
+visible = false
+shape = SubResource("CircleShape2D_naeib")
+
 [node name="DamageArea" type="Area2D" parent="." unique_id=575792045]
 visible = false
 collision_layer = 0
+collision_mask = 32
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="DamageArea" unique_id=1506986121]
 visible = false
 shape = SubResource("CircleShape2D_np7eh")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=463942550]
-visible = false
-shape = SubResource("CircleShape2D_naeib")

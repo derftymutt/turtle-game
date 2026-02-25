@@ -72,6 +72,7 @@ height = 22.0
 
 [node name="Crocodile" type="AnimatableBody2D" unique_id=787732993 groups=["enemies"]]
 collision_layer = 5
+collision_mask = 33
 script = ExtResource("1_36s23")
 is_invincible = true
 
@@ -86,6 +87,7 @@ shape = SubResource("CapsuleShape2D_ivdnp")
 
 [node name="PatrolArea" type="Area2D" parent="." unique_id=796255259]
 collision_layer = 0
+collision_mask = 32
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="PatrolArea" unique_id=217441440]
 visible = false
@@ -94,6 +96,7 @@ shape = SubResource("CapsuleShape2D_36s23")
 
 [node name="DamageArea" type="Area2D" parent="." unique_id=775188070]
 collision_layer = 0
+collision_mask = 32
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="DamageArea" unique_id=883204350]
 rotation = 1.5707964

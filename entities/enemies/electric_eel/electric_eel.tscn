@@ -94,6 +94,7 @@ height = 24.0
 
 [node name="ElectricEel" type="RigidBody2D" unique_id=286190206]
 collision_layer = 4
+collision_mask = 33
 script = ExtResource("1_rf52h")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=950464802]
@@ -107,6 +108,7 @@ shape = SubResource("CapsuleShape2D_qgh8x")
 
 [node name="DamageArea" type="Area2D" parent="." unique_id=117864233]
 collision_layer = 0
+collision_mask = 32
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="DamageArea" unique_id=266112622]
 rotation = 1.5707964
