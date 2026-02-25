@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://8vp5bo4724mv"]
+
+[ext_resource type="Script" uid="uid://dq76lgmim5s4j" path="res://entities/enemies/military_plane/military_plane.gd" id="1_dfhlq"]
+[ext_resource type="Texture2D" uid="uid://p6dbblqumcb6" path="res://entities/enemies/military_plane/sprites/military_plane_bullet.png" id="2_b3yco"]
+[ext_resource type="PackedScene" uid="uid://cxl5auaaixqe3" path="res://entities/enemies/military_plane/plane_bullet.tscn" id="2_edxlo"]
+[ext_resource type="Texture2D" uid="uid://c8mvmbn6ys2f7" path="res://entities/enemies/military_plane/sprites/military_plane_missile.png" id="3_5cw81"]
+[ext_resource type="PackedScene" uid="uid://xf26uh36bbtq" path="res://entities/enemies/military_plane/homing_missile.tscn" id="3_lhtbd"]
+
+[node name="MilitaryPlane" type="Node2D" unique_id=597526725]
+script = ExtResource("1_dfhlq")
+plane_bullet_scene = ExtResource("2_edxlo")
+homing_missile_scene = ExtResource("3_lhtbd")
+
+[node name="SpreadSprite" type="Sprite2D" parent="." unique_id=1822408025]
+texture = ExtResource("2_b3yco")
+
+[node name="MissileSprite" type="Sprite2D" parent="." unique_id=360605974]
+texture = ExtResource("3_5cw81")

@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://cxl5auaaixqe3"]
+
+[ext_resource type="Script" uid="uid://dcthj8q38hsl0" path="res://entities/enemies/military_plane/plane_bullet.gd" id="1_535a6"]
+[ext_resource type="Texture2D" uid="uid://u1ejv2u64yn8" path="res://entities/enemies/military_plane/sprites/military_plane_bullet_bullet.png" id="2_5ffsn"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_h2nfw"]
+radius = 3.0
+
+[node name="PlaneBullet" type="CharacterBody2D" unique_id=1430612788]
+collision_layer = 8
+script = ExtResource("1_535a6")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1783449900]
+texture = ExtResource("2_5ffsn")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2140938112]
+shape = SubResource("CircleShape2D_h2nfw")

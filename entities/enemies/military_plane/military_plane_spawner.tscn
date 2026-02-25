@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://j42vb8rqa1ng"]
+
+[ext_resource type="Script" uid="uid://c6ifntqtj1y3v" path="res://entities/enemies/military_plane/military_plane_spawner.gd" id="1_wn1ms"]
+
+[node name="MilitaryPlaneSpawner" type="Node2D" unique_id=640021632]
+script = ExtResource("1_wn1ms")
+interval_min = 2.0
+interval_max = 4.0
+first_pass_delay = 2.0

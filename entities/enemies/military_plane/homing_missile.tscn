@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://xf26uh36bbtq"]
+
+[ext_resource type="Script" uid="uid://c6ngt4mynh8lo" path="res://entities/enemies/military_plane/homing_missile.gd" id="1_fx3ld"]
+[ext_resource type="Texture2D" uid="uid://c3fv5irwro077" path="res://entities/enemies/military_plane/sprites/military_plane_honing_missile.png" id="2_le4bw"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_vituq"]
+radius = 4.1231055
+
+[node name="HomingMissile" type="CharacterBody2D" unique_id=2141911666]
+collision_layer = 8
+script = ExtResource("1_fx3ld")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=140076746]
+texture = ExtResource("2_le4bw")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2120162757]
+shape = SubResource("CircleShape2D_vituq")
