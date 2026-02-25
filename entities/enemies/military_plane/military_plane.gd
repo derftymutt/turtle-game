@@ -5,16 +5,14 @@ class_name MilitaryPlane
 ## Invincible military plane that flies horizontally through the sky
 ## and fires at the turtle. Two variants:
 ##
-##   SPREAD  — fires a 3-bullet spread arc, twice per pass
-##   MISSILE — fires a single homing missile, once per pass
+##   SPREAD  — fires a 3-bullet spread arc, spread_shot_count times per pass
+##   MISSILE — fires homing missiles, missile_count times per pass
 ##
-## The plane is a plain Node2D with no physics body — it cannot be hit.
-## Projectiles are spawned directly into the level root so they persist
-## independently after the plane exits.
+## Shots are distributed evenly across the pass duration using a time-based
+## approach, so they always spread out regardless of entry direction or speed.
 ##
 ## SCENE SETUP:
 ##   Add two sprite children named "SpreadSprite" and "MissileSprite".
-##   Only the active one is shown during a pass.
 ##   Assign plane_bullet_scene and homing_missile_scene in the Inspector.
 
 signal pass_started(plane_type: PlaneType)
@@ -32,26 +30,30 @@ enum PlaneType { SPREAD, MISSILE }
 @export var spawn_x_margin: float = 400.0
 ## Y position the plane flies at. Tune to sit within your visible sky area.
 @export var fly_y: float = -400.0
-@export var fly_speed: float = 220.0
+@export var fly_speed: float = 175.0
 
 @export_group("Spread Shot")
 @export var spread_bullet_count: int = 3
 ## Total arc width in degrees. 40° gives a readable fan.
 @export var spread_angle_deg: float = 40.0
 @export var spread_bullet_speed: float = 300.0
-## How many times the plane fires during one spread pass.
-@export var spread_shot_count: int = 2
+## How many spread bursts fire during one pass.
+@export var spread_shot_count: int = 3
 
 @export_group("Homing Missile")
-@export var missile_count: int = 1
+## How many missiles fire during one pass.
+@export var missile_count: int = 2
 
 # ── Internal State ─────────────────────────────────────────────────────────
 var active: bool = false
 var plane_type: PlaneType = PlaneType.SPREAD
-var travel_direction: float = 1.0  # +1 = left→right, -1 = right→left
+var travel_direction: float = 1.0
 var target_x: float = 0.0
 
-var _fire_x_positions: Array[float] = []
+# Time-based firing
+var _pass_duration: float = 0.0    # Total time the pass takes
+var _pass_elapsed: float = 0.0     # Time since pass started
+var _fire_times: Array[float] = [] # Pre-calculated times to fire (seconds into pass)
 var _fired_count: int = 0
 
 var _spread_sprite: Node2D = null
@@ -70,23 +72,18 @@ func _process(delta: float) -> void:
 		return
 
 	position.x += travel_direction * fly_speed * delta
+	_pass_elapsed += delta
 
-	# Fire when crossing pre-calculated X positions
-	if _fired_count < _fire_x_positions.size():
-		var next_fire_x: float = _fire_x_positions[_fired_count]
-		var crossed: bool = (travel_direction > 0.0 and position.x >= next_fire_x) \
-						 or (travel_direction < 0.0 and position.x <= next_fire_x)
-		if crossed:
-			if plane_type == PlaneType.SPREAD:
-				_fire_spread()
-			else:
-				_fire_missile()
-			_fired_count += 1
+	# Fire at pre-calculated times during the pass
+	while _fired_count < _fire_times.size() and _pass_elapsed >= _fire_times[_fired_count]:
+		if plane_type == PlaneType.SPREAD:
+			_fire_spread()
+		else:
+			_fire_missile()
+		_fired_count += 1
 
-	# End pass once off the far side of the screen
-	var exited: bool = (travel_direction > 0.0 and position.x > target_x) \
-					or (travel_direction < 0.0 and position.x < target_x)
-	if exited:
+	# End pass once the full duration has elapsed
+	if _pass_elapsed >= _pass_duration:
 		_finish_pass()
 
 
@@ -99,33 +96,39 @@ func launch(type: PlaneType = PlaneType.SPREAD, from_left: bool = true) -> void:
 	plane_type       = type
 	travel_direction = 1.0 if from_left else -1.0
 
-	# Use half the viewport width to place the plane just off screen.
-	# position (local) is used throughout — the plane is a direct child of
-	# the level root, so local and global coords are identical.
 	var half_w: float = get_viewport_rect().size.x / 2.0
+	var total_distance: float = half_w * 2.0 + spawn_x_margin * 2.0
+
 	position = Vector2(
 		(-half_w - spawn_x_margin) if from_left else (half_w + spawn_x_margin),
 		fly_y
 	)
 	target_x = (half_w + spawn_x_margin) if from_left else (-half_w - spawn_x_margin)
 
+	# Total time for the plane to cross from spawn to exit
+	_pass_duration = total_distance / fly_speed
+	_pass_elapsed  = 0.0
+	_fired_count   = 0
+	_fire_times.clear()
+
+	# How many shots this pass
+	var shot_count: int = spread_shot_count if type == PlaneType.SPREAD else missile_count
+
+	# Distribute shots evenly across the VISIBLE portion of the pass.
+	# We only fire while the plane is on screen, not during the off-screen margins.
+	# on_screen_start/end are the times when the plane enters/exits the viewport.
+	var margin_time: float = spawn_x_margin / fly_speed
+	var on_screen_start: float = margin_time
+	var on_screen_end: float   = _pass_duration - margin_time
+
+	for i in range(shot_count):
+		# Distribute evenly: frac goes from 0 to 1 across the on-screen window.
+		# Using (i + 1) / (shot_count + 1) keeps shots away from the very edges.
+		var frac: float = float(i + 1) / float(shot_count + 1)
+		_fire_times.append(lerp(on_screen_start, on_screen_end, frac))
+
 	_set_sprite_flip(travel_direction < 0.0)
 	_set_sprites_visible(type == PlaneType.SPREAD, type == PlaneType.MISSILE)
-
-	# Pre-calculate X positions where the plane fires.
-	# Shots are distributed evenly across the visible screen width.
-	_fired_count = 0
-	_fire_x_positions.clear()
-
-	var shot_count: int = spread_shot_count if type == PlaneType.SPREAD else missile_count
-	for i in range(shot_count):
-		var frac: float = float(i + 1) / float(shot_count + 1)
-		var fire_x: float = lerp(-half_w, half_w, frac)
-		# For right→left passes, mirror the positions
-		_fire_x_positions.append(fire_x if from_left else -fire_x)
-
-	if not from_left:
-		_fire_x_positions.reverse()
 
 	visible = true
 	active  = true
