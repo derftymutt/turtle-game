@@ -10,6 +10,7 @@ exit_impulse = 300.0
 
 [node name="Area2D" type="Area2D" parent="Path2D" unique_id=719841149]
 collision_layer = 0
+collision_mask = 32
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Path2D/Area2D" unique_id=1995390763]
 

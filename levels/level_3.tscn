@@ -86,15 +86,6 @@ size = Vector2(8.000183, 465.00012)
 [node name="LevelBase" unique_id=158370714 instance=ExtResource("1_vkd0v")]
 level_number = 3
 
-[node name="HUD" parent="." index="0" unique_id=1369229575]
-visible = false
-
-[node name="GameOverScreen" parent="." index="1" unique_id=301166293]
-visible = false
-
-[node name="LevelCompleteScreen" parent="." index="2" unique_id=1103608067]
-visible = false
-
 [node name="Ocean" parent="." index="3" unique_id=1413146336 instance=ExtResource("2_bmgug")]
 
 [node name="Camera2D" type="Camera2D" parent="." index="4" unique_id=1753987136 node_paths=PackedStringArray("follow_target")]
