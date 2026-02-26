@@ -30,6 +30,7 @@
 [ext_resource type="Texture2D" uid="uid://bm428btwp720u" path="res://entities/environment/ocean_boundaries/ocean_floor.png" id="27_8nkwk"]
 [ext_resource type="PackedScene" uid="uid://bwdbbu1jhxn2n" path="res://entities/environment/walls/bumper_wall/bumper_wall_2.tscn" id="27_tv8m3"]
 [ext_resource type="TileSet" uid="uid://dyl02kfc4a681" path="res://entities/environment/ocean_boundaries/ocean_wall.tres" id="28_kyq6o"]
+[ext_resource type="PackedScene" uid="uid://ko8xdpxfr5ej" path="res://entities/environment/ocean_current/ocean_current.tscn" id="31_4gw27"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_tv8m3"]
 friction = 0.1
@@ -84,6 +85,12 @@ size = Vector2(8.000166, 471.00015)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_8nkwk"]
 size = Vector2(8.000183, 465.00012)
+
+[sub_resource type="Curve2D" id="Curve2D_mb3d3"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, -1, 2, 0, 0, 0, 0, -15, 22, 0, 0, 0, 0, -26, 41, 0, 0, 0, 0, -27, 66, 0, 0, 0, 0, -11, 96)
+}
+point_count = 5
 
 [node name="LevelBase" unique_id=158370714 instance=ExtResource("1_vkd0v")]
 level_number = 3
@@ -148,7 +155,7 @@ seed_count_max = 4
 position = Vector2(196, 94)
 
 [node name="CircularBumper" parent="." index="18" unique_id=1304879177 instance=ExtResource("17_svivd")]
-position = Vector2(-200, -35)
+position = Vector2(-200, -40)
 physics_material_override = SubResource("PhysicsMaterial_tv8m3")
 size_preset = 1
 radius = 16.0
@@ -174,7 +181,7 @@ position = Vector2(275, 110)
 physics_material_override = SubResource("PhysicsMaterial_mb3d3")
 
 [node name="CircularBumper8" parent="." index="23" unique_id=921027548 instance=ExtResource("17_svivd")]
-position = Vector2(200, -35)
+position = Vector2(200, -40)
 physics_material_override = SubResource("PhysicsMaterial_q26s8")
 size_preset = 1
 radius = 16.0
@@ -323,3 +330,12 @@ offset_top = -269.0
 offset_right = -323.4816
 offset_bottom = 62.268524
 color = Color(0.1764706, 0.12156863, 0.023529412, 1)
+
+[node name="OceanCurrent" parent="." index="52" unique_id=1683655070 instance=ExtResource("31_4gw27")]
+position = Vector2(-119, -88)
+show_debug_arrows = false
+
+[node name="Path2D" parent="OceanCurrent" index="0" unique_id=1461068862]
+curve = SubResource("Curve2D_mb3d3")
+
+[editable path="OceanCurrent"]
