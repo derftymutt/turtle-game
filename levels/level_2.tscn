@@ -119,6 +119,7 @@ horizontal_follow_enabled = false
 
 [node name="TurtlePlayer" parent="." index="7" unique_id=1487317846 instance=ExtResource("4_h351q")]
 position = Vector2(0, 16)
+super_speed_color = Color(0.778, 1.504, 0, 1)
 
 [node name="Crocodile" parent="." index="8" unique_id=239984108 instance=ExtResource("6_ngvhw")]
 position = Vector2(212, -124)

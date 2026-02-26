@@ -108,24 +108,7 @@ follow_target = NodePath("../TurtlePlayer")
 horizontal_follow_enabled = false
 
 [node name="TurtlePlayer" parent="." index="7" unique_id=788886819 instance=ExtResource("4_8l0e1")]
-thrust_force = null
-max_velocity = null
-kick_animation_duration = null
-kick_animation_duration_with_ufo_piece = null
-shoot_cooldown = null
-bullet_speed = null
-bullet_scene = null
-horizontal_thrust = null
-upward_thrust = null
-downward_thrust = null
-horizontal_thrust_with_piece = null
-upward_thrust_with_piece = null
-downward_thrust_with_piece = null
-max_health = null
-super_speed_threshold = null
-super_speed_damage = null
-super_speed_color = null
-super_speed_cooldown_duration = null
+super_speed_color = Color(0.778, 1.504, 0, 1)
 
 [node name="DeadWalls" type="Node2D" parent="." index="8" unique_id=7027181]
 

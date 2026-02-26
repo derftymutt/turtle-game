@@ -98,7 +98,7 @@ point_count = 4
 
 [sub_resource type="Curve2D" id="Curve2D_3y2y2"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, 12, -36, 0, 0, 0, 0, -12, -75, 0, 0, 0, 0, 11, -104, 0, 0, 0, 0, -8, -139)
+"points": PackedVector2Array(0, 0, 0, 0, 8, -69, 0, 0, 0, 0, 56, -77, 0, 0, 0, 0, 108, -77, 0, 0, 0, 0, 235, -70)
 }
 point_count = 4
 
@@ -114,6 +114,18 @@ texture = ExtResource("26_3y2y2")
 [sub_resource type="TileSet" id="TileSet_f0ksa"]
 physics_layer_0/collision_layer = 1
 sources/0 = SubResource("TileSetAtlasSource_euh2h")
+
+[sub_resource type="Curve2D" id="Curve2D_f0ksa"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 5, 19, 0, 0, 0, 0, 9, 43, 0, 0, 0, 0, 8, 67, 0, 0, 0, 0, 12, 93, 0, 0, 0, 0, 12, 117)
+}
+point_count = 6
+
+[sub_resource type="Curve2D" id="Curve2D_emlfc"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 1, -2, 0, 0, 0, 0, 13, -31, 0, 0, 0, 0, 29, -56, 0, 0, 0, 0, 46, -83, 0, 0, 0, 0, 63, -98)
+}
+point_count = 5
 
 [node name="LevelBase" type="Node2D" unique_id=1013451131 groups=["level"]]
 script = ExtResource("1_vac4a")
@@ -137,7 +149,8 @@ follow_target = NodePath("../TurtlePlayer")
 horizontal_follow_enabled = false
 
 [node name="TurtlePlayer" parent="." unique_id=1971009088 instance=ExtResource("9_qf8ve")]
-position = Vector2(23, -227)
+position = Vector2(-26, -262)
+super_speed_color = Color(0.778, 1.504, 0, 1)
 
 [node name="WorldSafetyBoundaries" type="Node2D" parent="." unique_id=1014588514]
 
@@ -477,6 +490,9 @@ curve = SubResource("Curve2D_0brv5")
 
 [node name="OceanCurrent2" parent="." unique_id=698840735 instance=ExtResource("18_nr1ke")]
 position = Vector2(0, -240)
+propulsion_force = 6000.0
+centering_force = 1000.0
+lateral_damping = 1.0
 
 [node name="Path2D" parent="OceanCurrent2" index="0" unique_id=1461068862]
 curve = SubResource("Curve2D_3y2y2")
@@ -503,6 +519,29 @@ position = Vector2(-3, -335)
 position = Vector2(-34, -21)
 plane = NodePath("../MilitaryPlane")
 
+[node name="OceanCurrent3" parent="." unique_id=1274902031 instance=ExtResource("18_nr1ke")]
+position = Vector2(90, -358)
+centering_force = 500.0
+lateral_damping = 0.9
+exit_impulse = 100.0
+
+[node name="Path2D" parent="OceanCurrent3" index="0" unique_id=1461068862]
+position = Vector2(161, 0)
+curve = SubResource("Curve2D_f0ksa")
+
+[node name="Visuals" parent="OceanCurrent3" index="1" unique_id=2005124627]
+position = Vector2(161, -1)
+
+[node name="OceanCurrent4" parent="." unique_id=1347150650 instance=ExtResource("18_nr1ke")]
+position = Vector2(-114, -275)
+propulsion_force = 3000.0
+centering_force = 1000.0
+lateral_damping = 1.0
+exit_impulse = 200.0
+
+[node name="Path2D" parent="OceanCurrent4" index="0" unique_id=1461068862]
+curve = SubResource("Curve2D_emlfc")
+
 [editable path="DeadWall6"]
 [editable path="DeadWall7"]
 [editable path="DeadWall8"]
@@ -511,3 +550,5 @@ plane = NodePath("../MilitaryPlane")
 [editable path="DeadWall11"]
 [editable path="OceanCurrent"]
 [editable path="OceanCurrent2"]
+[editable path="OceanCurrent3"]
+[editable path="OceanCurrent4"]

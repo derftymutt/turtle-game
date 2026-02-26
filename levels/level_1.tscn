@@ -340,6 +340,7 @@ follow_target = NodePath("../TurtlePlayer")
 horizontal_follow_enabled = false
 
 [node name="TurtlePlayer" parent="." index="7" unique_id=1163425295 instance=ExtResource("4_jkxa6")]
+super_speed_color = Color(0.778, 1.504, 0, 1)
 
 [node name="Crocodile" parent="." index="8" unique_id=781536171 instance=ExtResource("6_udfhf")]
 position = Vector2(-264, -124)

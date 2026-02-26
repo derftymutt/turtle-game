@@ -15,10 +15,10 @@ class_name MilitaryPlaneSpawner
 @export var plane: MilitaryPlane
 
 @export_group("Timing")
-@export var interval_min: float = 6.0
-@export var interval_max: float = 12.0
+@export var interval_min: float = 1.0
+@export var interval_max: float = 3.0
 ## Delay before the very first pass (gives the player a moment to settle in).
-@export var first_pass_delay: float = 4.0
+@export var first_pass_delay: float = 2.0
 
 @export_group("Randomization")
 @export var randomize_side: bool = true

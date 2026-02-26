@@ -16,13 +16,13 @@ class_name HomingMissile
 @export_group("Movement")
 @export var initial_speed: float = 40.0
 @export var max_speed: float = 260.0
-@export var acceleration: float = 90.0
+@export var acceleration: float = 150.0
 @export var turn_speed: float = 2.2
 @export var tracking_delay: float = 0.6
 
 @export_group("Damage & Lifetime")
 @export var damage: float = 20.0
-@export var lifetime: float = 7.0
+@export var lifetime: float = 2.0
 
 var target: Node2D = null
 var current_speed: float = 0.0

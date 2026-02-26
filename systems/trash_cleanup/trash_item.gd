@@ -8,7 +8,7 @@ class_name TrashItem
 signal trash_destroyed(trash_item)
 
 # Score
-@export var points: int = 5
+@export var points: int = 25
 
 # Movement properties
 @export var drift_speed: Vector2 = Vector2(-80, 0)  # Default: drift left
