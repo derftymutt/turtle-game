@@ -246,6 +246,11 @@ func _physics_process(delta):
 
 	if shoot_input.length() > 0.1 and can_shoot:
 		shoot(shoot_input.normalized())
+		
+	# Drop carried UFO piece on button press
+	if Input.is_action_just_pressed("drop_piece"):
+		if GameManager.is_carrying_piece and GameManager.carried_piece:
+			GameManager.carried_piece.drop_piece()
 
 	# Clamp velocity
 	if linear_velocity.length() > max_velocity:
