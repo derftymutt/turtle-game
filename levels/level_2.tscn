@@ -25,7 +25,7 @@
 [ext_resource type="PackedScene" uid="uid://d3ui83o5ln2lj" path="res://entities/environment/flippers/flipper_left_east.tscn" id="23_itbe0"]
 [ext_resource type="PackedScene" uid="uid://brjd5ho5mmmy4" path="res://entities/environment/flippers/flipper_right_west.tscn" id="24_xrja0"]
 [ext_resource type="PackedScene" uid="uid://8edo3etakc1a" path="res://entities/environment/walls/dead_wall/dead_wall.tscn" id="25_00pa0"]
-[ext_resource type="PackedScene" uid="uid://bwdbbu1jhxn2n" path="res://entities/environment/walls/bumper_wall/bumper_wall_2.tscn" id="25_amxoe"]
+[ext_resource type="PackedScene" uid="uid://bwdbbu1jhxn2n" path="res://entities/environment/walls/bumper_wall/bumper_wall.tscn" id="25_amxoe"]
 [ext_resource type="PackedScene" uid="uid://4het8fdlmvgj" path="res://entities/environment/flippers/flipper_left_down.tscn" id="25_he6wg"]
 [ext_resource type="PackedScene" uid="uid://b5olvcks1vnwn" path="res://entities/environment/flippers/flipper_right_down.tscn" id="25_jqt73"]
 [ext_resource type="PackedScene" uid="uid://ko8xdpxfr5ej" path="res://entities/environment/current/current.tscn" id="26_jqt73"]
@@ -70,13 +70,13 @@ bounce = 1.2
 
 [sub_resource type="Curve2D" id="Curve2D_00pa0"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, -1, 7, 0, 0, 0, 0, -15, 49, 0, 0, 0, 0, -42, 83, 0, 0, 0, 0, -52, 111, 0, 0, 0, 0, -62, 147, 0, 0, 0, 0, -63, 192)
+"points": PackedVector2Array(0, 0, 0, 0, -16, 7, 0, 0, 0, 0, -29, 47, 0, 0, 0, 0, -42, 83, 0, 0, 0, 0, -52, 111, 0, 0, 0, 0, -62, 147, 0, 0, 0, 0, -63, 192)
 }
 point_count = 6
 
 [sub_resource type="Curve2D" id="Curve2D_jqt73"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 6, 32, 0, 0, 0, 0, 24, 59, 0, 0, 0, 0, 41, 88, 0, 0, 0, 0, 54, 116, 0, 0, 0, 0, 60, 147, 0, 0, 0, 0, 64, 191)
+"points": PackedVector2Array(0, 0, 0, 0, 13, 4, 0, 0, 0, 0, 22, 32, 0, 0, 0, 0, 35, 58, 0, 0, 0, 0, 44, 88, 0, 0, 0, 0, 54, 116, 0, 0, 0, 0, 60, 147, 0, 0, 0, 0, 64, 191)
 }
 point_count = 7
 
@@ -108,7 +108,7 @@ level_number = 2
 [node name="SkyBackground" parent="." index="3" unique_id=967020750 instance=ExtResource("2_m4706")]
 
 [node name="Ocean" parent="." index="4" unique_id=863147586 instance=ExtResource("3_0srwa")]
-show_gradient = false
+visible = false
 
 [node name="OceanBackground" parent="." index="5" unique_id=593268214 instance=ExtResource("4_4xp61")]
 

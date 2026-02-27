@@ -32,12 +32,10 @@ size = Vector2(8.000183, 465.00012)
 [node name="OceanBackground" parent="." index="3" unique_id=593268214 instance=ExtResource("3_53psx")]
 
 [node name="Ocean" parent="." index="4" unique_id=1274260941 instance=ExtResource("2_exe16")]
-show_gradient = false
 show_debug_zones = true
 
-[node name="Camera2D" type="Camera2D" parent="." index="5" unique_id=1441995173 node_paths=PackedStringArray("follow_target")]
+[node name="Camera2D" type="Camera2D" parent="." index="5" unique_id=1441995173]
 script = ExtResource("4_d1puf")
-follow_target = NodePath("")
 horizontal_follow_enabled = false
 
 [node name="TurtlePlayer" parent="." index="6" unique_id=1971009088 instance=ExtResource("5_gvi3i")]

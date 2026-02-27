@@ -1,6 +1,55 @@
 [gd_scene format=3 uid="uid://dysmgxrg7t1o4"]
 
 [ext_resource type="Texture2D" uid="uid://dh1ijqpgoj7nn" path="res://entities/environment/ocean_background/sprites/ocean_background_3.png" id="1_8xcjk"]
+[ext_resource type="Texture2D" uid="uid://bai2hiv3n5xs4" path="res://entities/environment/ocean_background/sprites/ocean_wave.png" id="2_4y8sk"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4y8sk"]
+atlas = ExtResource("2_4y8sk")
+region = Rect2(0, 0, 700, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gvdok"]
+atlas = ExtResource("2_4y8sk")
+region = Rect2(0, 16, 700, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2ce1k"]
+atlas = ExtResource("2_4y8sk")
+region = Rect2(0, 32, 700, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_g2cre"]
+atlas = ExtResource("2_4y8sk")
+region = Rect2(0, 48, 700, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_1n4o0"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4y8sk")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gvdok")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2ce1k")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_g2cre")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_g2cre")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2ce1k")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gvdok")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4y8sk")
+}],
+"loop": true,
+"name": &"default",
+"speed": 4.0
+}]
 
 [node name="OceanBackground" type="Node2D" unique_id=593268214]
 position = Vector2(0, -126)
@@ -13,3 +62,7 @@ region_enabled = true
 region_rect = Rect2(0, 0, 1000, 306)
 
 [node name="WaveSurface" type="AnimatedSprite2D" parent="." unique_id=1487877736]
+sprite_frames = SubResource("SpriteFrames_1n4o0")
+autoplay = "default"
+frame_progress = 0.55535513
+offset = Vector2(0, -5)

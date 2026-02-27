@@ -28,7 +28,7 @@
 [ext_resource type="PackedScene" uid="uid://brjd5ho5mmmy4" path="res://entities/environment/flippers/flipper_right_west.tscn" id="26_8nkwk"]
 [ext_resource type="PackedScene" uid="uid://8edo3etakc1a" path="res://entities/environment/walls/dead_wall/dead_wall.tscn" id="26_e28pm"]
 [ext_resource type="Texture2D" uid="uid://bm428btwp720u" path="res://entities/environment/ocean_boundaries/ocean_floor.png" id="27_8nkwk"]
-[ext_resource type="PackedScene" uid="uid://bwdbbu1jhxn2n" path="res://entities/environment/walls/bumper_wall/bumper_wall_2.tscn" id="27_tv8m3"]
+[ext_resource type="PackedScene" uid="uid://bwdbbu1jhxn2n" path="res://entities/environment/walls/bumper_wall/bumper_wall.tscn" id="27_tv8m3"]
 [ext_resource type="TileSet" uid="uid://dyl02kfc4a681" path="res://entities/environment/ocean_boundaries/ocean_wall.tres" id="28_kyq6o"]
 [ext_resource type="PackedScene" uid="uid://ko8xdpxfr5ej" path="res://entities/environment/current/current.tscn" id="31_4gw27"]
 
@@ -98,7 +98,7 @@ level_number = 3
 [node name="SkyBackground" parent="." index="3" unique_id=967020750 instance=ExtResource("2_8nkwk")]
 
 [node name="Ocean" parent="." index="4" unique_id=1413146336 instance=ExtResource("2_bmgug")]
-show_gradient = false
+visible = false
 
 [node name="OceanBackground" parent="." index="5" unique_id=593268214 instance=ExtResource("4_kyq6o")]
 
