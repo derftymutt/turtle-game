@@ -78,9 +78,23 @@ func check_initial_overlaps():
 		if body and body.is_in_group("enemies"):
 			# Verify it's actually close (within ~30 pixels)
 			var distance = global_position.distance_to(body.global_position)
-			if distance < 35.0:  # Point-blank range
+			if distance < 35.0 and not _wall_between(space_state, body):
 				_hit_enemy(body)
 				return
+
+func _wall_between(space_state: PhysicsDirectSpaceState2D, target: Node2D) -> bool:
+	"""Returns true if a wall/solid object blocks the line of sight to the target."""
+	var ray = PhysicsRayQueryParameters2D.create(
+		global_position,
+		target.global_position
+	)
+	# Collision mask 1 = world/walls layer. Adjust if your wall layer differs.
+	ray.collision_mask = 1
+	ray.exclude = [self]
+	
+	var hit = space_state.intersect_ray(ray)
+	# If we hit something that isn't the target enemy, a wall is in the way
+	return hit and hit.collider != target
 
 func _on_body_entered(body):
 	# Ignore player

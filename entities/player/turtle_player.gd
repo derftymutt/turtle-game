@@ -346,11 +346,36 @@ func shoot(direction: Vector2):
 
 	var bullet = bullet_scene.instantiate()
 	get_parent().add_child(bullet)
-	bullet.global_position = global_position + direction * 15
+	bullet.global_position = _safe_bullet_spawn(direction)
 	bullet.set_velocity(direction * bullet_speed)
 
 	can_shoot = false
 	shoot_timer = shoot_cooldown
+
+func _safe_bullet_spawn(direction: Vector2) -> Vector2:
+	"""Raycast in the shoot direction and spawn the bullet just before any wall,
+	   so it can never teleport through geometry."""
+	const DESIRED_OFFSET: float = 15.0  # Ideal distance from turtle centre
+	const MIN_OFFSET: float = 4.0       # Never spawn closer than this (avoids self-collision)
+
+	var space_state = get_world_2d().direct_space_state
+	var ray = PhysicsRayQueryParameters2D.create(
+		global_position,
+		global_position + direction * DESIRED_OFFSET
+	)
+	# Layer 1 = world/walls. Add other solid layers here if needed (e.g. 1 | 2).
+	ray.collision_mask = 1
+	ray.exclude = [self]
+
+	var hit = space_state.intersect_ray(ray)
+	if hit:
+		# Pull the spawn point back from the wall surface so the bullet
+		# starts on the correct side with a small safe margin.
+		var distance_to_wall = global_position.distance_to(hit.position)
+		var safe_distance = max(MIN_OFFSET, distance_to_wall - 2.0)
+		return global_position + direction * safe_distance
+
+	return global_position + direction * DESIRED_OFFSET
 
 func apply_flipper_force(direction: Vector2, force_multiplier: float = 5.0):
 	"""Apply strong pinball-like forces from flippers"""
