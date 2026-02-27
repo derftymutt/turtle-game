@@ -66,19 +66,15 @@ func _enemy_ready():
 	# Random starting wiggle
 	wiggle_offset = randf() * TAU
 	
-	# Setup damage area
+	# damage area
 	if not damage_area:
-		_setup_damage_area()
-	else:
-		# Reconnect signal to use our override
-		if damage_area.body_entered.is_connected(_on_damage_area_entered):
-			damage_area.body_entered.disconnect(_on_damage_area_entered)
-		damage_area.body_entered.connect(_on_damage_area_entered)
+		push_error("ElectricEel: damage_area not found! Assign it in the scene.")
+		return
 	
-	# Ensure damage area is configured correctly
-	if damage_area:
-		damage_area.collision_layer = 0
-		damage_area.collision_mask = 1
+	# Reconnect signal to use our override
+	if damage_area.body_entered.is_connected(_on_damage_area_entered):
+		damage_area.body_entered.disconnect(_on_damage_area_entered)
+	damage_area.body_entered.connect(_on_damage_area_entered)
 
 func _physics_process(delta):
 	if not player or not is_instance_valid(player):
@@ -181,7 +177,7 @@ func _cooldown_behavior(_delta: float):
 func _scan_for_walls():
 	"""Find all nearby walls and flippers"""
 	nearby_walls.clear()
-	var all_walls = get_tree().get_nodes_in_group("walls")
+	var all_walls = get_tree().get_nodes_in_group("eel_targetable")
 	
 	for wall in all_walls:
 		if not wall is Node2D:
@@ -345,19 +341,6 @@ func _cleanup_all_shocked_walls() -> void:
 	shocked_walls.clear()
 
 func _setup_damage_area():
-	"""Create DamageArea if it doesn't exist"""
-	damage_area = Area2D.new()
-	damage_area.name = "DamageArea"
-	damage_area.collision_layer = 0
-	damage_area.collision_mask = 1
-	
-	var collision_shape = CollisionShape2D.new()
-	var circle = CircleShape2D.new()
-	circle.radius = 16.0
-	collision_shape.shape = circle
-	
-	damage_area.add_child(collision_shape)
-	add_child(damage_area)
 	damage_area.body_entered.connect(_on_damage_area_entered)
 
 func _on_damage_area_entered(body: Node2D):
@@ -453,11 +436,11 @@ class ShockedWall extends Node:
 					_shock_player(body)
 	
 	func _setup_detection_area():
-		"""Create Area2D to detect player touching wall"""
+		#"""Create Area2D to detect player touching wall"""
 		detection_area = Area2D.new()
 		detection_area.name = "ShockDetection"
 		detection_area.collision_layer = 0
-		detection_area.collision_mask = 1
+		detection_area.collision_mask = 32
 		detection_area.monitoring = true
 		detection_area.monitorable = false
 		
@@ -470,9 +453,9 @@ class ShockedWall extends Node:
 				new_shape.rotation = child.rotation
 				detection_area.add_child(new_shape)
 		
-		add_child(detection_area)
-		detection_area.global_position = parent_wall.global_position
-		detection_area.global_rotation = parent_wall.global_rotation
+		# Add to parent_wall so it inherits the correct transform automatically
+		parent_wall.add_child(detection_area)
+		# No need to set global_position/rotation - it's inherited from parent_wall
 	
 	func _create_shock_visual():
 		"""Create crackling electric effect on wall"""
@@ -544,4 +527,9 @@ class ShockedWall extends Node:
 		queue_free()
 	
 	func _expire():
-		cleanup()
+		#"""Remove shock effect when timer expires"""
+		if shock_overlay and is_instance_valid(shock_overlay):
+			shock_overlay.queue_free()
+		if detection_area and is_instance_valid(detection_area):
+			detection_area.queue_free()
+		queue_free()

@@ -36,6 +36,7 @@ var _slippery_area: Area2D
 
 func _ready() -> void:
 	add_to_group("walls")
+	add_to_group("eel_targetable")
 	super._ready()  ## BaseWall: _find_children() → _ensure_unique_shapes() → _update_wall()
 
 	## Physics material must be set in the Inspector.

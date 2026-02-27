@@ -41,6 +41,7 @@ var _original_color: Color
 func _ready() -> void:
 	_original_color = wall_color
 	add_to_group("walls")
+	add_to_group("bumpers")
 	super._ready()  ## BaseWall: _find_children() → _ensure_unique_shapes() → _update_wall()
 
 	## Physics material must be set in the Inspector.

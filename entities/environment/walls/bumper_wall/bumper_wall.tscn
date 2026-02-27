@@ -7,13 +7,13 @@
 friction = 0.1
 bounce = 1.2
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_7ug30"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_3pqy4"]
 size = Vector2(32, 8)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_2whvu"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_4rygd"]
 size = Vector2(32, 8)
 
-[node name="BumperWall2" type="StaticBody2D" unique_id=1997660828]
+[node name="BumperWall" type="StaticBody2D" unique_id=1997660828]
 collision_mask = 32
 physics_material_override = SubResource("PhysicsMaterial_wtod3")
 script = ExtResource("1_wtod3")
@@ -23,7 +23,7 @@ length_units = 1
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1343515061]
 rotation = 0.46373397
-shape = SubResource("RectangleShape2D_7ug30")
+shape = SubResource("RectangleShape2D_3pqy4")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=853628928]
 texture = ExtResource("2_v6wjl")
@@ -39,4 +39,4 @@ collision_mask = 32
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="HitArea" unique_id=33980710]
 rotation = 0.46373397
-shape = SubResource("RectangleShape2D_2whvu")
+shape = SubResource("RectangleShape2D_4rygd")
