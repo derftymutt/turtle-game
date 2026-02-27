@@ -99,7 +99,7 @@ script = ExtResource("1_rf52h")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=950464802]
 sprite_frames = SubResource("SpriteFrames_uccnl")
-animation = &"damage"
+animation = &"near_death"
 autoplay = "default"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1207589692]
