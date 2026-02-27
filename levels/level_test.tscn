@@ -16,7 +16,7 @@
 [ext_resource type="PackedScene" uid="uid://jylpdfwgd8wo" path="res://entities/environment/flippers/flipper_right_up.tscn" id="15_xhe6y"]
 [ext_resource type="PackedScene" uid="uid://8edo3etakc1a" path="res://entities/environment/walls/dead_wall/dead_wall.tscn" id="16_unp1l"]
 [ext_resource type="Texture2D" uid="uid://8det4aydy3r5" path="res://entities/environment/walls/dead_wall/sprites/wall_diagonal_2u.png" id="17_e8afl"]
-[ext_resource type="PackedScene" uid="uid://ko8xdpxfr5ej" path="res://entities/environment/ocean_current/ocean_current.tscn" id="18_nr1ke"]
+[ext_resource type="PackedScene" uid="uid://ko8xdpxfr5ej" path="res://entities/environment/current/current.tscn" id="18_nr1ke"]
 [ext_resource type="PackedScene" uid="uid://u02ifu2255ot" path="res://entities/environment/flippers/cloud_flipper_left_up.tscn" id="19_6hqcu"]
 [ext_resource type="PackedScene" uid="uid://p32a3utahssn" path="res://entities/environment/flippers/cloud_flipper_right_up.tscn" id="20_8xpto"]
 [ext_resource type="PackedScene" uid="uid://rkinsjd2v3bk" path="res://entities/collectibles/ufo_piece/ufo_piece.tscn" id="21_h07m1"]
@@ -141,7 +141,9 @@ script = ExtResource("1_vac4a")
 [node name="OceanBackground" parent="." unique_id=593268214 instance=ExtResource("6_emlfc")]
 
 [node name="Ocean" parent="." unique_id=1274260941 instance=ExtResource("7_olub7")]
+shallow_buoyancy = 200.0
 show_gradient = false
+show_debug_zones = true
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1602563695 node_paths=PackedStringArray("follow_target")]
 script = ExtResource("8_wgqfy")

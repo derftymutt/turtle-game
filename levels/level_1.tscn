@@ -303,7 +303,7 @@ friction = 0.0
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_4cd1h"]
 friction = 0.0
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_0fu15"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4knja"]
 texture = ExtResource("25_0fu15")
 0:0/0 = 0
 0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
@@ -314,7 +314,7 @@ texture = ExtResource("25_0fu15")
 
 [sub_resource type="TileSet" id="TileSet_0x1rk"]
 physics_layer_0/collision_layer = 1
-sources/0 = SubResource("TileSetAtlasSource_0fu15")
+sources/0 = SubResource("TileSetAtlasSource_4knja")
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_4knja"]
 size = Vector2(8.000166, 471.00015)
