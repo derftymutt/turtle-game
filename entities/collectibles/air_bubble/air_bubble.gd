@@ -1,11 +1,11 @@
 extends RigidBody2D
 class_name AirBubble
 
-## Air bubble collectible that floats upward and restores breath
-## Integrates with existing HUD breath system
+## Air bubble collectible that floats upward and restores air
+## Integrates with existing HUD air system
 
 # Bubble properties
-@export var breath_restore_amount: float = 20.0  # Full restore by default (matches HUD max_breath)
+@export var air_restore_amount: float = 20.0  # Full restore by default (matches HUD max_air)
 @export var rise_speed: float = 80.0  # Upward force
 @export var wobble_amount: float = 20.0  # Side-to-side wobble
 @export var wobble_speed: float = 2.0
@@ -117,7 +117,7 @@ func animate_bubble(delta: float):
 	bob_offset += bob_speed * delta
 	visual_node.position.y = sin(bob_offset) * bob_amount
 	
-	# Pulsing scale (breathe in and out)
+	# Pulsing scale (pulse in and out)
 	pulse_offset += pulse_speed * delta
 	var pulse_scale = 1.0 + (sin(pulse_offset) * pulse_amount)
 	visual_node.scale = Vector2(pulse_scale, pulse_scale)
@@ -127,27 +127,25 @@ func _on_area_2d_body_entered(body: Node2D) -> void:
 		collect(body)
 
 func collect(collector):
-	"""Collect bubble and restore breath via HUD"""
+	"""Collect bubble and restore air via HUD"""
 	if collected:
 		return
 	
 	collected = true
 	freeze = true
 	
-	# Find HUD and restore breath
+	# Find HUD and restore air
 	var hud = get_tree().get_first_node_in_group("hud")
-	if hud and hud.has_method("refill_breath_instant"):
+	if hud and hud.has_method("refill_air_instant"):
 		# Use instant refill method if available
-		hud.refill_breath_instant(breath_restore_amount)
-		print("💨 Air bubble collected! Breath restored: +", breath_restore_amount)
+		hud.refill_air_instant(air_restore_amount)
 	elif hud:
-		# Fallback: directly set breath (works with current HUD)
-		var new_breath = min(hud.max_breath, hud.current_breath + breath_restore_amount)
-		hud.update_breath(new_breath, hud.max_breath)
-		hud.current_breath = new_breath
-		print("💨 Air bubble collected! Breath restored: +", breath_restore_amount)
+		# Fallback: directly set air (works with current HUD)
+		var new_air = min(hud.max_air, hud.current_air + air_restore_amount)
+		hud.update_air(new_air, hud.max_air)
+		hud.current_air = new_air
 	else:
-		push_warning("No HUD found! Cannot restore breath.")
+		push_warning("No HUD found! Cannot restore air.")
 	
 	# Satisfying collection animation - bubble pops!
 	var tween = create_tween()
@@ -184,7 +182,7 @@ func pop_at_surface():
 	
 ## Pop when hit by bullet
 func pop_from_bullet():
-	#"""Called when shot by a bullet - immediate pop without breath restore"""
+	#"""Called when shot by a bullet - immediate pop without air restore"""
 	if collected or despawning:
 		return
 	

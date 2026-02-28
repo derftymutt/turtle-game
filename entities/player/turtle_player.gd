@@ -55,7 +55,7 @@ var ocean: Ocean = null
 # HUD reference
 var hud: HUD = null
 
-# Wall contact tracking for exhaustion bonus
+# Wall contact tracking for energy recovery bonus
 var touching_walls: Array = []
 
 # Super speed damage detection
@@ -68,9 +68,9 @@ var shield_timer: float = 0.0
 
 var air_reserve_bonus: float = 20.0
 
-var stamina_freeze_active: bool = false
-var stamina_freeze_duration: float = 20.0
-var stamina_freeze_timer: float = 0.0
+var energy_freeze_active: bool = false
+var energy_freeze_duration: float = 20.0
+var energy_freeze_timer: float = 0.0
 
 var is_player_controlling_rotation: bool = false
 
@@ -182,10 +182,10 @@ func _physics_process(delta):
 		if shield_timer <= 0:
 			deactivate_shield()
 
-	if stamina_freeze_active:
-		stamina_freeze_timer -= delta
-		if stamina_freeze_timer <= 0:
-			deactivate_stamina_freeze()
+	if energy_freeze_active:
+		energy_freeze_timer -= delta
+		if energy_freeze_timer <= 0:
+			deactivate_energy_freeze()
 
 	# Ocean physics
 	if ocean:
@@ -206,13 +206,13 @@ func _physics_process(delta):
 		var is_underwater = depth > 3
 
 		if is_underwater:
-			var out_of_breath = hud.drain_breath(delta)
-			if out_of_breath:
+			var out_of_air = hud.drain_air(delta)
+			if out_of_air:
 				take_damage(10.0 * delta)
 		else:
-			hud.refill_breath(delta)
+			hud.refill_air(delta)
 
-		hud.recover_exhaustion(delta, touching_walls.size() > 0)
+		hud.recover_energy(delta, touching_walls.size() > 0)
 
 	# Control suspension timer — runs even while suspended so it keeps counting down
 	control_suspend_timer -= delta
@@ -236,9 +236,9 @@ func _physics_process(delta):
 		Input.get_axis("shoot_up", "shoot_down")
 	)
 
-	# Movement — check exhaustion unless stamina freeze is active
+	# Movement — check energy unless energy freeze is active
 	var can_actually_thrust = can_thrust
-	if hud and movement_input.length() > 0.1 and not stamina_freeze_active:
+	if hud and movement_input.length() > 0.1 and not energy_freeze_active:
 		can_actually_thrust = can_actually_thrust and hud.can_thrust()
 
 	if movement_input.length() > 0.1 and can_actually_thrust:
@@ -297,7 +297,7 @@ func apply_thrust(direction: Vector2):
 	if ocean and ocean.get_depth(global_position) <= 0 and kick_direction.y < 0:
 		return
 
-	if hud and not stamina_freeze_active and not hud.try_thrust():
+	if hud and not energy_freeze_active and not hud.try_thrust():
 		return
 
 	is_player_controlling_rotation = true
@@ -458,7 +458,7 @@ func die():
 # ---------------------------------------------------------------------------
 
 func _on_body_entered(body: Node):
-	"""Track walls for exhaustion recovery bonus"""
+	"""Track walls for energy recovery bonus"""
 	if body.is_in_group("walls") or body is StaticBody2D:
 		if not body in touching_walls:
 			touching_walls.append(body)
@@ -620,7 +620,7 @@ func apply_powerup(powerup_type: int):
 	match powerup_type:
 		0:  activate_shield()
 		1:  activate_air_reserve()
-		2:  activate_stamina_freeze()
+		2:  activate_energy_freeze()
 		_:  push_error("Unknown powerup type: ", powerup_type)
 
 func activate_shield():
@@ -643,17 +643,17 @@ func deactivate_shield():
 
 func activate_air_reserve():
 	if hud:
-		hud.max_breath += air_reserve_bonus
-		hud.current_breath = hud.max_breath
-		hud.update_breath(hud.current_breath, hud.max_breath)
-		print("AIR RESERVE! +", air_reserve_bonus, " max breath! (new max: ", hud.max_breath, ")")
+		hud.max_air += air_reserve_bonus
+		hud.current_air = hud.max_air
+		hud.update_air(hud.current_air, hud.max_air)
+		print("AIR RESERVE! +", air_reserve_bonus, " max air! (new max: ", hud.max_air, ")")
 	else:
 		push_error("No HUD found! Can't apply air reserve.")
 
-func activate_stamina_freeze():
-	stamina_freeze_active = true
-	stamina_freeze_timer = stamina_freeze_duration
-	print("STAMINA FREEZE! No exhaustion for ", stamina_freeze_duration, " seconds!")
+func activate_energy_freeze():
+	energy_freeze_active = true
+	energy_freeze_timer = energy_freeze_duration
+	print("ENERGY FREEZE! No energy drain for ", energy_freeze_duration, " seconds!")
 
 	if not is_super_speed:
 		var sprite = $AnimatedSprite2D
@@ -662,9 +662,9 @@ func activate_stamina_freeze():
 			tween.tween_property(sprite, "modulate", Color(1.0, 1.0, 0.4, 1.0), 0.25)
 			tween.tween_property(sprite, "modulate", Color(1.0, 1.0, 0.7, 1.0), 0.25)
 
-func deactivate_stamina_freeze():
-	stamina_freeze_active = false
-	print("Stamina freeze expired")
+func deactivate_energy_freeze():
+	energy_freeze_active = false
+	print("Energy freeze expired")
 
 	if not shield_active and not is_super_speed:
 		var sprite = $AnimatedSprite2D

@@ -2,16 +2,16 @@ extends CanvasLayer
 class_name HUD
 
 ## Heads-Up Display for score, health, and experimental meters
-## Breath and exhaustion systems are toggleable for prototyping
+## Air and energy systems are toggleable for prototyping
 
 # References (will be found dynamically)
 var score_label: Label
 var ufo_pieces_label: Label
 var health_bar: ProgressBar
-var breath_container: Control
-var breath_bar: ProgressBar
-var exhaustion_container: Control
-var exhaustion_bar: ProgressBar
+var air_container: Control
+var air_bar: ProgressBar
+var energy_container: Control
+var energy_bar: ProgressBar
 var super_speed_indicator: Label
 var hud_container: Control  # Container for flash effect
 
@@ -26,34 +26,34 @@ var pieces_needed: int = 0
 func get_current_score() -> int:
 	return current_score
 
-# Breath system (experimental - toggleable)
-@export_group("Breath System")
-@export var breath_enabled: bool = true
-@export var max_breath: float = 30.0
-@export var breath_drain_rate: float = 1.0
-@export var breath_refill_rate: float = 30.0
-@export var breath_warning_threshold: float = 10.0
-var current_breath: float = 30.0
-var breath_warning: bool = false
+# Air system (experimental - toggleable)
+@export_group("Air System")
+@export var air_enabled: bool = true
+@export var max_air: float = 30.0
+@export var air_drain_rate: float = 1.0
+@export var air_refill_rate: float = 30.0
+@export var air_warning_threshold: float = 10.0
+var current_air: float = 30.0
+var air_warning: bool = false
 
-# Exhaustion system (experimental - toggleable)
-@export_group("Exhaustion System")
-@export var exhaustion_enabled: bool = true
-@export var max_exhaustion: float = 100.0
-@export var exhaustion_per_thrust: float = 12.0
-@export var exhaustion_recovery_rate: float = 15.0
-@export var exhaustion_wall_bonus: float = 40.0
-@export var exhaustion_threshold: float = 15.0
-var current_exhaustion: float = 100.0
+# Energy system (experimental - toggleable)
+@export_group("Energy System")
+@export var energy_enabled: bool = true
+@export var max_energy: float = 100.0
+@export var energy_per_thrust: float = 12.0
+@export var energy_recovery_rate: float = 15.0
+@export var energy_wall_bonus: float = 40.0
+@export var energy_threshold: float = 15.0
+var current_energy: float = 100.0
 var is_touching_wall: bool = false
 var wall_recovery_active: bool = false  # NEW: Track if we're actively recovering from wall
 
 # Visual feedback
-var breath_flash_timer: float = 0.0
-var breath_flash_interval: float = 0.5
+var air_flash_timer: float = 0.0
+var air_flash_interval: float = 0.5
 var hud_layer_flash_speed: float = 5.0
-var exhaustion_pulse_timer: float = 0.0  # NEW: For wall recovery pulse
-var exhaustion_pulse_speed: float = 8.0  # NEW: How fast the pulse is
+var energy_pulse_timer: float = 0.0  # NEW: For wall recovery pulse
+var energy_pulse_speed: float = 8.0  # NEW: How fast the pulse is
 
 func _ready():
 	add_to_group("hud")
@@ -71,10 +71,10 @@ func _ready():
 	score_label = find_child("ScoreLabel")
 	ufo_pieces_label = find_child("UFOPiecesLabel")
 	health_bar = find_child("HealthBar")
-	breath_container = find_child("BreathContainer")
-	breath_bar = find_child("BreathBar")
-	exhaustion_container = find_child("ExhaustionContainer")
-	exhaustion_bar = find_child("ExhaustionBar")
+	air_container = find_child("AirContainer")
+	air_bar = find_child("AirBar")
+	energy_container = find_child("EnergyContainer")
+	energy_bar = find_child("EnergyBar")
 	super_speed_indicator = find_child("SuperSpeedIndicator")
 	
 	# Debug: verify we found everything
@@ -84,66 +84,66 @@ func _ready():
 		push_warning("HUD: Could not find UFOPiecesLabel!")
 	if not health_bar:
 		push_warning("HUD: Could not find HealthBar!")
-	if not breath_bar:
-		push_warning("HUD: Could not find BreathBar!")
-	if not exhaustion_bar:
-		push_warning("HUD: Could not find ExhaustionBar!")
+	if not air_bar:
+		push_warning("HUD: Could not find AirBar!")
+	if not energy_bar:
+		push_warning("HUD: Could not find EnergyBar!")
 	
 	# Initialize displays
 	update_score(0)
 	update_ufo_pieces(0, 0)
 	update_health(max_health, max_health)
-	update_breath(max_breath, max_breath)
-	update_exhaustion(max_exhaustion, max_exhaustion)
+	update_air(max_air, max_air)
+	update_energy(max_energy, max_energy)
 	set_super_speed_active(false)
 	
 	# Hide experimental meters if disabled
-	if breath_container:
-		breath_container.visible = breath_enabled
-	if exhaustion_container:
-		exhaustion_container.visible = exhaustion_enabled
+	if air_container:
+		air_container.visible = air_enabled
+	if energy_container:
+		energy_container.visible = energy_enabled
 	
 	if LevelManager:
 		LevelManager.piece_delivered.connect(_on_piece_delivered)
 		LevelManager.level_started.connect(_on_level_started)
 
 func _process(delta):
-	# Handle breath warning flash - entire HUD layer pulses red
-	if breath_warning and breath_enabled and hud_container:
-		breath_flash_timer += delta * hud_layer_flash_speed
-		var pulse = (sin(breath_flash_timer) + 1.0) / 2.0
+	# Handle air warning flash - entire HUD layer pulses red
+	if air_warning and air_enabled and hud_container:
+		air_flash_timer += delta * hud_layer_flash_speed
+		var pulse = (sin(air_flash_timer) + 1.0) / 2.0
 		var warning_color = Color.WHITE.lerp(Color(1.0, 0.3, 0.3, 1.0), pulse)
 		hud_container.modulate = warning_color
 		
-		if breath_bar:
-			breath_bar.modulate = Color.CYAN
+		if air_bar:
+			air_bar.modulate = Color.CYAN
 	else:
 		if hud_container:
 			hud_container.modulate = Color.WHITE
-		breath_flash_timer = 0.0
+		air_flash_timer = 0.0
 	
-	# NEW: Handle wall recovery visual feedback
-	if wall_recovery_active and exhaustion_bar:
-		exhaustion_pulse_timer += delta * exhaustion_pulse_speed
+	# Handle wall recovery visual feedback
+	if wall_recovery_active and energy_bar:
+		energy_pulse_timer += delta * energy_pulse_speed
 		
 		# Pulse between current color and bright cyan
-		var pulse = (sin(exhaustion_pulse_timer) + 1.0) / 2.0
+		var pulse = (sin(energy_pulse_timer) + 1.0) / 2.0
 		
-		# Get the base color (green/yellow/red based on exhaustion level)
+		# Get the base color (green/yellow/red based on energy level)
 		var base_color = Color.GREEN
-		var exhaustion_ratio = current_exhaustion / max_exhaustion
-		if exhaustion_ratio <= 0.2:
+		var energy_ratio = current_energy / max_energy
+		if energy_ratio <= 0.2:
 			base_color = Color.RED
-		elif exhaustion_ratio <= 0.5:
+		elif energy_ratio <= 0.5:
 			base_color = Color.YELLOW
 		
 		# Pulse to bright cyan to indicate wall recovery
 		var recovery_color = base_color.lerp(Color.CYAN, pulse * 0.7)
-		exhaustion_bar.modulate = recovery_color
+		energy_bar.modulate = recovery_color
 	else:
-		exhaustion_pulse_timer = 0.0
+		energy_pulse_timer = 0.0
 		# Reset to normal color coding when not recovering from wall
-		update_exhaustion(current_exhaustion, max_exhaustion)
+		update_energy(current_energy, max_energy)
 
 ## Update score display
 func update_score(new_score: int):
@@ -172,102 +172,102 @@ func update_health(health: float, max_hp: float):
 		else:
 			health_bar.modulate = Color.RED
 
-## Update breath display
-func update_breath(breath: float, max_br: float):
-	if not breath_enabled:
+## Update air display
+func update_air(air: float, max_a: float):
+	if not air_enabled:
 		return
 	
-	current_breath = breath
-	max_breath = max_br
+	current_air = air
+	max_air = max_a
 	
-	if breath_bar:
-		breath_bar.max_value = max_br
-		breath_bar.value = breath
+	if air_bar:
+		air_bar.max_value = max_a
+		air_bar.value = air
 		
 		# Warning state
-		if breath <= breath_warning_threshold:
-			if not breath_warning:
-				breath_warning = true
-				breath_flash_timer = 0.0
+		if air <= air_warning_threshold:
+			if not air_warning:
+				air_warning = true
+				air_flash_timer = 0.0
 		else:
-			breath_warning = false
-			breath_bar.modulate = Color.CYAN
+			air_warning = false
+			air_bar.modulate = Color.CYAN
 
-## Drain breath while underwater
-func drain_breath(delta: float):
-	if not breath_enabled:
+## Drain air while underwater
+func drain_air(delta: float):
+	if not air_enabled:
 		return
 	
-	current_breath = max(0.0, current_breath - breath_drain_rate * delta)
-	update_breath(current_breath, max_breath)
+	current_air = max(0.0, current_air - air_drain_rate * delta)
+	update_air(current_air, max_air)
 	
-	# Return true if out of breath (for damage/warning)
-	return current_breath <= 0.0
+	# Return true if out of air (for damage/warning)
+	return current_air <= 0.0
 
-## Refill breath at surface
-func refill_breath(delta: float):
-	if not breath_enabled:
+## Refill air at surface
+func refill_air(delta: float):
+	if not air_enabled:
 		return
 	
-	current_breath = min(max_breath, current_breath + breath_refill_rate * delta)
-	update_breath(current_breath, max_breath)
+	current_air = min(max_air, current_air + air_refill_rate * delta)
+	update_air(current_air, max_air)
 
-## Update exhaustion display
-func update_exhaustion(exhaustion: float, max_ex: float):
-	if not exhaustion_enabled:
+## Update energy display
+func update_energy(energy: float, max_en: float):
+	if not energy_enabled:
 		return
 	
-	current_exhaustion = exhaustion
-	max_exhaustion = max_ex
+	current_energy = energy
+	max_energy = max_en
 	
-	if exhaustion_bar:
-		exhaustion_bar.max_value = max_ex
-		exhaustion_bar.value = exhaustion
+	if energy_bar:
+		energy_bar.max_value = max_en
+		energy_bar.value = energy
 		
 		# Only update color if NOT actively recovering from wall
 		# (wall recovery has its own pulsing color in _process)
 		if not wall_recovery_active:
-			# Color code exhaustion bar
-			if exhaustion / max_ex > 0.5:
-				exhaustion_bar.modulate = Color.GREEN
-			elif exhaustion / max_ex > 0.2:
-				exhaustion_bar.modulate = Color.YELLOW
+			# Color code energy bar
+			if energy / max_en > 0.5:
+				energy_bar.modulate = Color.GREEN
+			elif energy / max_en > 0.2:
+				energy_bar.modulate = Color.YELLOW
 			else:
-				exhaustion_bar.modulate = Color.RED
+				energy_bar.modulate = Color.RED
 
-## Try to use exhaustion for a thrust
+## Try to use energy for a thrust
 func try_thrust() -> bool:
-	if not exhaustion_enabled:
+	if not energy_enabled:
 		return true
 	
-	if current_exhaustion >= exhaustion_threshold:
-		current_exhaustion -= exhaustion_per_thrust
-		update_exhaustion(current_exhaustion, max_exhaustion)
+	if current_energy >= energy_threshold:
+		current_energy -= energy_per_thrust
+		update_energy(current_energy, max_energy)
 		return true
 	else:
 		return false
 
-## Recover exhaustion over time
-func recover_exhaustion(delta: float, touching_wall: bool = false):
-	if not exhaustion_enabled:
+## Recover energy over time
+func recover_energy(delta: float, touching_wall: bool = false):
+	if not energy_enabled:
 		return
 	
 	# Track if we're getting wall bonus
 	var was_wall_recovery = wall_recovery_active
 	wall_recovery_active = touching_wall
 	
-	var recovery = exhaustion_recovery_rate * delta
+	var recovery = energy_recovery_rate * delta
 	if touching_wall:
-		recovery += exhaustion_wall_bonus * delta
+		recovery += energy_wall_bonus * delta
 	
-	current_exhaustion = min(max_exhaustion, current_exhaustion + recovery)
-	update_exhaustion(current_exhaustion, max_exhaustion)
+	current_energy = min(max_energy, current_energy + recovery)
+	update_energy(current_energy, max_energy)
 
-## Check if player can thrust
+## Check if player can thrust (has enough energy)
 func can_thrust() -> bool:
-	if not exhaustion_enabled:
+	if not energy_enabled:
 		return true
-	return current_exhaustion >= exhaustion_threshold
+	return current_energy >= energy_threshold
 
 ## Update super speed indicator
 func set_super_speed_active(active: bool):

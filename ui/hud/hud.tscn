@@ -54,32 +54,32 @@ layout_mode = 2
 value = 100.0
 show_percentage = false
 
-[node name="BreathContainer" type="VBoxContainer" parent="MarginContainer/HBoxContainer" unique_id=1472468396]
+[node name="AirContainer" type="VBoxContainer" parent="MarginContainer/HBoxContainer" unique_id=1472468396]
 layout_mode = 2
 theme_override_constants/separation = 2
 
-[node name="BreathLabel" type="Label" parent="MarginContainer/HBoxContainer/BreathContainer" unique_id=1351889758]
+[node name="AirLabel" type="Label" parent="MarginContainer/HBoxContainer/AirContainer" unique_id=1351889758]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
-text = "Breath"
+text = "Air"
 
-[node name="BreathBar" type="ProgressBar" parent="MarginContainer/HBoxContainer/BreathContainer" unique_id=117113140]
+[node name="AirBar" type="ProgressBar" parent="MarginContainer/HBoxContainer/AirContainer" unique_id=117113140]
 custom_minimum_size = Vector2(120, 20)
 layout_mode = 2
 max_value = 30.0
 value = 30.0
 show_percentage = false
 
-[node name="ExhaustionContainer" type="VBoxContainer" parent="MarginContainer/HBoxContainer" unique_id=698796016]
+[node name="EnergyContainer" type="VBoxContainer" parent="MarginContainer/HBoxContainer" unique_id=698796016]
 layout_mode = 2
 theme_override_constants/separation = 2
 
-[node name="ExhaustionLabel" type="Label" parent="MarginContainer/HBoxContainer/ExhaustionContainer" unique_id=1123686249]
+[node name="EnergyLabel" type="Label" parent="MarginContainer/HBoxContainer/EnergyContainer" unique_id=1123686249]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
-text = "Stamina"
+text = "Energy"
 
-[node name="ExhaustionBar" type="ProgressBar" parent="MarginContainer/HBoxContainer/ExhaustionContainer" unique_id=1827549335]
+[node name="EnergyBar" type="ProgressBar" parent="MarginContainer/HBoxContainer/EnergyContainer" unique_id=1827549335]
 custom_minimum_size = Vector2(120, 20)
 layout_mode = 2
 value = 100.0
