@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://b8df8qps2nshf"]
+
+[ext_resource type="Script" uid="uid://dh6doe8lka2eq" path="res://entities/collectibles/star/sky_star_seeder.gd" id="1_skysdr"]
+[ext_resource type="PackedScene" path="res://entities/collectibles/star/sky_star.tscn" id="2_tekw1"]
+
+[node name="SkyStarSeeder" type="Node2D" unique_id=1683964135]
+script = ExtResource("1_skysdr")
+sky_star_scene = ExtResource("2_tekw1")

@@ -1,0 +1,67 @@
+[gd_scene format=3 uid="uid://bskystar00001"]
+
+[ext_resource type="Script" path="res://entities/collectibles/star/sky_star.gd" id="1_skystar"]
+[ext_resource type="Texture2D" uid="uid://cdxjp3suyrrts" path="res://entities/collectibles/star/sprites/star2.png" id="2_skystar"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sky01"]
+atlas = ExtResource("2_skystar")
+region = Rect2(0, 0, 8, 8)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sky02"]
+atlas = ExtResource("2_skystar")
+region = Rect2(8, 0, 8, 8)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sky03"]
+atlas = ExtResource("2_skystar")
+region = Rect2(16, 0, 8, 8)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sky04"]
+atlas = ExtResource("2_skystar")
+region = Rect2(0, 8, 8, 8)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_sky01"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sky01")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sky02")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sky03")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sky04")
+}],
+"loop": true,
+"name": &"default",
+"speed": 6.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_sky01"]
+radius = 4.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_sky02"]
+radius = 4.0
+
+[node name="SkyStar" type="RigidBody2D"]
+collision_layer = 2
+script = ExtResource("1_skystar")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_sky01")
+animation = &"default"
+autoplay = "default"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_sky01")
+
+[node name="Area2D" type="Area2D" parent="."]
+collision_layer = 2
+collision_mask = 32
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("CircleShape2D_sky02")
+
+[connection signal="body_entered" from="Area2D" to="." method="_on_area_2d_body_entered"]

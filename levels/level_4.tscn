@@ -40,6 +40,7 @@
 [ext_resource type="PackedScene" uid="uid://c4nfx87cjbiwf" path="res://entities/collectibles/air_bubble/air_bubble_spawner.tscn" id="38_hg54l"]
 [ext_resource type="PackedScene" uid="uid://cdmr2papqk2ih" path="res://entities/collectibles/air_bubble/air_bubble.tscn" id="39_p3k1n"]
 [ext_resource type="PackedScene" uid="uid://bu0sjqqm7uvm1" path="res://entities/enemies/crocodile/crocodile.tscn" id="40_kqeme"]
+[ext_resource type="PackedScene" uid="uid://b8df8qps2nshf" path="res://entities/collectibles/star/sky_star_seeder.tscn" id="41_pb5nj"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_gvi3i"]
 texture = ExtResource("7_4h4lk")
@@ -63,43 +64,43 @@ size = Vector2(8.000183, 465.00012)
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ncbyy"]
 friction = 0.0
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_kqeme"]
-size = Vector2(64, 8)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_pb5nj"]
-size = Vector2(64, 8)
-
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_egtcm"]
-size = Vector2(32, 8)
+size = Vector2(64, 8)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_x44s7"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_e7hc3"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_4h4lk"]
 size = Vector2(32, 8)
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ixhsu"]
 friction = 0.0
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_e7hc3"]
-size = Vector2(64, 8)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_4h4lk"]
-size = Vector2(64, 8)
-
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_yp04h"]
-size = Vector2(32, 8)
+size = Vector2(64, 8)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_vc6ux"]
-size = Vector2(32, 8)
+size = Vector2(64, 8)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1gtbd"]
-size = Vector2(64, 8)
+size = Vector2(32, 8)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_0quxv"]
-size = Vector2(64, 8)
+size = Vector2(32, 8)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_g22rd"]
 size = Vector2(64, 8)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_m0qt0"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wred1"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_65scv"]
 size = Vector2(64, 8)
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_w8olu"]
@@ -135,15 +136,6 @@ _data = {
 point_count = 9
 
 [node name="LevelBase" unique_id=1013451131 instance=ExtResource("1_vov61")]
-
-[node name="HUD" parent="." index="0" unique_id=1369229575]
-visible = false
-
-[node name="GameOverScreen" parent="." index="1" unique_id=301166293]
-visible = false
-
-[node name="LevelCompleteScreen" parent="." index="2" unique_id=1103608067]
-visible = false
 
 [node name="SkyBackground" parent="." index="3" unique_id=967020750 instance=ExtResource("2_kqeme")]
 
@@ -231,7 +223,7 @@ angle_preset = 2
 
 [node name="CollisionShape2D" parent="FlipperSkyCenterLeft/DeadWall10" index="0" unique_id=1644951480]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_kqeme")
+shape = SubResource("RectangleShape2D_egtcm")
 one_way_collision = true
 
 [node name="Sprite2D" parent="FlipperSkyCenterLeft/DeadWall10" index="1" unique_id=804434373]
@@ -242,7 +234,7 @@ rotation = 0.7853982
 
 [node name="CollisionShape2D" parent="FlipperSkyCenterLeft/DeadWall10/SlipperyArea" parent_id_path=PackedInt32Array(797132162, 773978709) index="0" unique_id=2040614053]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_pb5nj")
+shape = SubResource("RectangleShape2D_x44s7")
 
 [node name="FlipperLeftUp4" parent="FlipperSkyCenterLeft" index="1" unique_id=1447591536 instance=ExtResource("12_g22rd")]
 position = Vector2(-45, -185)
@@ -257,7 +249,7 @@ length_units = 1
 
 [node name="CollisionShape2D" parent="FlipperSkyCenterLeft2/DeadWall10" index="0" unique_id=1644951480]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_egtcm")
+shape = SubResource("RectangleShape2D_e7hc3")
 one_way_collision = true
 
 [node name="Sprite2D" parent="FlipperSkyCenterLeft2/DeadWall10" index="1" unique_id=804434373]
@@ -269,7 +261,7 @@ polygon = PackedVector2Array(-16, -4, 16, -4, 16, 4, -16, 4)
 
 [node name="CollisionShape2D" parent="FlipperSkyCenterLeft2/DeadWall10/SlipperyArea" parent_id_path=PackedInt32Array(1589161516, 773978709) index="0" unique_id=2040614053]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_x44s7")
+shape = SubResource("RectangleShape2D_4h4lk")
 
 [node name="FlipperLeftUp4" parent="FlipperSkyCenterLeft2" index="1" unique_id=1104846566 instance=ExtResource("12_g22rd")]
 position = Vector2(-130, -285)
@@ -284,7 +276,7 @@ mirrored = true
 
 [node name="CollisionShape2D" parent="CloudFlipperCenterRight/DeadWall11" index="0" unique_id=1644951480]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_e7hc3")
+shape = SubResource("RectangleShape2D_yp04h")
 one_way_collision = true
 
 [node name="Sprite2D" parent="CloudFlipperCenterRight/DeadWall11" index="1" unique_id=804434373]
@@ -296,7 +288,7 @@ rotation = -0.7853982
 
 [node name="CollisionShape2D" parent="CloudFlipperCenterRight/DeadWall11/SlipperyArea" parent_id_path=PackedInt32Array(243008370, 773978709) index="0" unique_id=2040614053]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_4h4lk")
+shape = SubResource("RectangleShape2D_vc6ux")
 
 [node name="CloudFlipperRightUp2" parent="CloudFlipperCenterRight" index="1" unique_id=33507880 instance=ExtResource("14_wred1")]
 position = Vector2(45, -185)
@@ -312,7 +304,7 @@ mirrored = true
 
 [node name="CollisionShape2D" parent="CloudFlipperCenterRight2/DeadWall11" index="0" unique_id=1644951480]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_yp04h")
+shape = SubResource("RectangleShape2D_1gtbd")
 one_way_collision = true
 
 [node name="Sprite2D" parent="CloudFlipperCenterRight2/DeadWall11" index="1" unique_id=804434373]
@@ -325,7 +317,7 @@ polygon = PackedVector2Array(-16, -4, 16, -4, 16, 4, -16, 4)
 
 [node name="CollisionShape2D" parent="CloudFlipperCenterRight2/DeadWall11/SlipperyArea" parent_id_path=PackedInt32Array(215607130, 773978709) index="0" unique_id=2040614053]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_vc6ux")
+shape = SubResource("RectangleShape2D_0quxv")
 
 [node name="CloudFlipperRightUp2" parent="CloudFlipperCenterRight2" index="1" unique_id=1172357705 instance=ExtResource("14_wred1")]
 position = Vector2(130, -285)
@@ -339,7 +331,7 @@ angle_preset = 2
 
 [node name="CollisionShape2D" parent="CloudFlipperRightLower/DeadWall11" index="0" unique_id=1644951480]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_1gtbd")
+shape = SubResource("RectangleShape2D_g22rd")
 one_way_collision = true
 
 [node name="Sprite2D" parent="CloudFlipperRightLower/DeadWall11" index="1" unique_id=804434373]
@@ -350,7 +342,7 @@ rotation = 0.7853982
 
 [node name="CollisionShape2D" parent="CloudFlipperRightLower/DeadWall11/SlipperyArea" parent_id_path=PackedInt32Array(203471, 773978709) index="0" unique_id=2040614053]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_0quxv")
+shape = SubResource("RectangleShape2D_m0qt0")
 
 [node name="FlipperLeftUp5" parent="CloudFlipperRightLower" index="1" unique_id=1197315435 instance=ExtResource("12_g22rd")]
 position = Vector2(190, -185)
@@ -368,7 +360,7 @@ mirrored = true
 
 [node name="CollisionShape2D" parent="CloudFlipperLeftLower/DeadWall12" index="0" unique_id=1644951480]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_g22rd")
+shape = SubResource("RectangleShape2D_wred1")
 one_way_collision = true
 
 [node name="Sprite2D" parent="CloudFlipperLeftLower/DeadWall12" index="1" unique_id=804434373]
@@ -380,7 +372,7 @@ rotation = -0.7853982
 
 [node name="CollisionShape2D" parent="CloudFlipperLeftLower/DeadWall12/SlipperyArea" parent_id_path=PackedInt32Array(1268673111, 773978709) index="0" unique_id=2040614053]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_m0qt0")
+shape = SubResource("RectangleShape2D_65scv")
 
 [node name="FlipperLeftDown" parent="." index="19" unique_id=598735619 instance=ExtResource("15_65scv")]
 position = Vector2(-40, -90)
@@ -700,6 +692,8 @@ position = Vector2(20, 6)
 
 [node name="Visuals" parent="OceanCurrent3" index="1" unique_id=2005124627]
 position = Vector2(20, 6)
+
+[node name="SkyStarSeeder" parent="." index="78" unique_id=712381982 instance=ExtResource("41_pb5nj")]
 
 [editable path="FlipperSkyCenterLeft/DeadWall10"]
 [editable path="FlipperSkyCenterLeft2/DeadWall10"]
