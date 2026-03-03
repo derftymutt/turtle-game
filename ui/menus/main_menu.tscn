@@ -49,3 +49,4 @@ theme_override_constants/separation = 10
 alignment = 1
 
 [node name="GuideScreen" parent="." unique_id=1279051161 instance=ExtResource("2_qc8qn")]
+visible = false

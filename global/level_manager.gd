@@ -17,6 +17,7 @@ var level_scenes: Dictionary = {
 	1: "res://levels/level_1.tscn",
 	2: "res://levels/level_2.tscn",
 	3: "res://levels/level_3.tscn",
+	4: "res://levels/level_4.tscn",
 	# Add more as you create them
 }
 
@@ -25,6 +26,7 @@ var pieces_needed_by_level: Dictionary = {
 	1: 3,
 	2: 3,
 	3: 4,
+	4: 4
 	# etc...
 }
 

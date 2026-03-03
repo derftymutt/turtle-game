@@ -21,7 +21,7 @@ func _create_level_buttons():
 	# === START GAME BUTTON (Big, prominent) ===
 	var start_button = Button.new()
 	start_button.text = "Start Game"
-	start_button.custom_minimum_size = Vector2(150, 40)
+	start_button.custom_minimum_size = Vector2(150, 30)
 	start_button.add_theme_font_size_override("font_size", 18)
 	start_button.pressed.connect(_on_start_game_pressed)
 	
@@ -30,9 +30,9 @@ func _create_level_buttons():
 	
 	# Add spacing
 	var spacer1 = Control.new()
-	spacer1.custom_minimum_size = Vector2(0, 10)
-	if level_container:
-		level_container.add_child(spacer1)
+	spacer1.custom_minimum_size = Vector2(0, 5)
+	#if level_container:
+		#level_container.add_child(spacer1)
 	
 	# === LEVEL SELECT BUTTONS (Smaller, dev tools) ===
 	# Get levels from LevelManager instead of GameManager
@@ -44,8 +44,8 @@ func _create_level_buttons():
 		var display_name = "Level %d" % level_num
 		var high_score = GameManager.get_high_score(level_name)
 		button.text = "%s\nHigh Score: %d" % [display_name, high_score]
-		button.custom_minimum_size = Vector2(100, 30)
-		button.add_theme_font_size_override("font_size", 12)
+		button.custom_minimum_size = Vector2(100, 10)
+		button.add_theme_font_size_override("font_size", 8)
 		
 		# Connect button to load level by number
 		button.pressed.connect(func(): _on_level_selected(level_num))
@@ -55,15 +55,15 @@ func _create_level_buttons():
 	
 	# Add spacing
 	var spacer2 = Control.new()
-	spacer2.custom_minimum_size = Vector2(0, 10)
+	spacer2.custom_minimum_size = Vector2(0, 5)
 	if level_container:
 		level_container.add_child(spacer2)
 	
 	# === GUIDE BUTTON ===
 	var guide_button = Button.new()
 	guide_button.text = "Guide"
-	guide_button.custom_minimum_size = Vector2(100, 20)
-	guide_button.add_theme_font_size_override("font_size", 12)
+	guide_button.custom_minimum_size = Vector2(100, 10)
+	guide_button.add_theme_font_size_override("font_size", 8)
 	guide_button.pressed.connect(_on_guide_pressed)
 	
 	if level_container:
@@ -72,8 +72,8 @@ func _create_level_buttons():
 	# === QUIT BUTTON ===
 	var quit_button = Button.new()
 	quit_button.text = "Quit"
-	quit_button.custom_minimum_size = Vector2(100, 20)
-	quit_button.add_theme_font_size_override("font_size", 12)
+	quit_button.custom_minimum_size = Vector2(100, 10)
+	quit_button.add_theme_font_size_override("font_size", 8)
 	quit_button.pressed.connect(_on_quit_pressed)
 	
 	if level_container:

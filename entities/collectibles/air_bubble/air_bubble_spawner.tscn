@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://c4nfx87cjbiwf"]
+
+[ext_resource type="Script" uid="uid://3jp0yf3qb8pa" path="res://entities/collectibles/air_bubble/air_bubble_spawner.gd" id="1_oprb2"]
+
+[node name="AirBubbleSpawner" type="Node2D" unique_id=1547445684]
+script = ExtResource("1_oprb2")
