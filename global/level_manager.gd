@@ -25,8 +25,8 @@ var level_scenes: Dictionary = {
 var pieces_needed_by_level: Dictionary = {
 	1: 3,
 	2: 3,
-	3: 4,
-	4: 4
+	3: 3,
+	4: 3
 	# etc...
 }
 

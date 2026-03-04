@@ -210,7 +210,6 @@ offset_bottom = 62.268524
 color = Color(0.1764706, 0.12156863, 0.023529412, 1)
 
 [node name="UfoPieceSeeder" parent="." index="12" unique_id=1662612070 instance=ExtResource("9_vc6ux")]
-use_level_manager_count = false
 seed_count_min = 2
 seed_count_max = 2
 

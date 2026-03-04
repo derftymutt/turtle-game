@@ -149,7 +149,7 @@ spawn_count_max = 2
 collectible_scene = ExtResource("15_mqvtj")
 
 [node name="UfoPieceSeeder" parent="." index="16" unique_id=897832258 instance=ExtResource("16_8swdu")]
-seed_count_min = 4
+use_level_manager_count = false
 seed_count_max = 4
 
 [node name="Piranha" parent="." index="17" unique_id=1416722191 instance=ExtResource("11_46211")]
