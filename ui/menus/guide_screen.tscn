@@ -1,11 +1,11 @@
-[gd_scene load_steps=2 format=3 uid="uid://cmdqgqfevkvly"]
+[gd_scene format=3 uid="uid://cmdqgqfevkvly"]
 
 [ext_resource type="Script" uid="uid://bkgq4dxiho3sk" path="res://ui/menus/guide_screen.gd" id="1_clbic"]
 
-[node name="GuideScreen" type="CanvasLayer" groups=["guide_screen"]]
+[node name="GuideScreen" type="CanvasLayer" unique_id=1230647368 groups=["guide_screen"]]
 script = ExtResource("1_clbic")
 
-[node name="Control" type="Control" parent="."]
+[node name="Control" type="Control" parent="." unique_id=311954864]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -13,7 +13,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="CenterContainer" type="CenterContainer" parent="Control"]
+[node name="CenterContainer" type="CenterContainer" parent="Control" unique_id=265787282]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -23,59 +23,62 @@ offset_bottom = 70.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="PanelContainer" type="PanelContainer" parent="Control/CenterContainer"]
+[node name="PanelContainer" type="PanelContainer" parent="Control/CenterContainer" unique_id=1537559523]
 custom_minimum_size = Vector2(600, 500)
 layout_mode = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="Control/CenterContainer/PanelContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="Control/CenterContainer/PanelContainer" unique_id=42866289]
 layout_mode = 2
 theme_override_constants/margin_left = 20
 theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/MarginContainer"]
-layout_mode = 2
-theme_override_constants/separation = 15
-
-[node name="ContentLabel" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 12
-
-[node name="ControlsContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/MarginContainer" unique_id=173318421]
 layout_mode = 2
 
-[node name="ControlsText" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ControlsContainer"]
+[node name="ContentLabel" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1059922840]
 layout_mode = 2
 theme_override_font_sizes/font_size = 12
 
-[node name="InvertThrustCheckbox" type="CheckBox" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ControlsContainer"]
+[node name="ControlsContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1267646969]
+layout_mode = 2
+
+[node name="ControlsText" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ControlsContainer" unique_id=532728071]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+
+[node name="InvertThrustCheckbox" type="CheckBox" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ControlsContainer" unique_id=481502668]
 layout_mode = 2
 text = "Invert Thrust Direction (Kick left, propel turtle right)."
 
-[node name="PageIndicator" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="PageIndicator" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1908725756]
+visible = false
 layout_mode = 2
 theme_override_colors/font_color = Color(0.18001565, 0.20201895, 0.24752, 1)
 theme_override_font_sizes/font_size = 14
 text = "Page 1/2"
 horizontal_alignment = 1
 
-[node name="ButtonContainer" type="HBoxContainer" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="ButtonContainer" type="HBoxContainer" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=399392503]
 layout_mode = 2
 theme_override_constants/separation = 20
 alignment = 1
 
-[node name="PrevButton" type="Button" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonContainer"]
+[node name="PrevButton" type="Button" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonContainer" unique_id=1234037993]
 custom_minimum_size = Vector2(150, 40)
 layout_mode = 2
+theme_override_font_sizes/font_size = 10
 text = "< Guide"
 
-[node name="NextButton" type="Button" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonContainer"]
+[node name="NextButton" type="Button" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonContainer" unique_id=1275713490]
 custom_minimum_size = Vector2(150, 40)
 layout_mode = 2
+theme_override_font_sizes/font_size = 10
 text = "Controls >"
 
-[node name="BackButton" type="Button" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonContainer"]
+[node name="BackButton" type="Button" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonContainer" unique_id=1340934153]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
+theme_override_font_sizes/font_size = 10
 text = "Back to Menu"

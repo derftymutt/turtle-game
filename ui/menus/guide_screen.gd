@@ -52,31 +52,38 @@ func hide_guide():
 
 func _build_pages():
 	var page1 = """
-
-
-  ***HOW TO PLAY***
-
-- Collect stars for points. Twinkling stars on the sea floor are worth *ALOT* more
-- Avoid enemies! Shoot piranhas. Invincible enemies shake when shot.
-- Don't run out of breath! You will quickly lose health if you do. 
-	- Gain breath from air bubbles (but don't pop them!) or surfacing
-- Turtles can't kick forever! Mind your Stamina! (speed up recovery touching walls/flippers)
-- Super Speed (from bumpers, flippers, swimming in shallow water) = invincibility + damage
-- Stay alive and go for a high score! Can you get 500 points? 1000? More??"""
+	
+	
+- Pick up UFO scraps from the ocean floor and bring them to your UFO workshop to assemble
+the UFO and get to the next level. "X" will drop a carried piece pre delivery (they're heavy)
+- Each level requires a different amount of pieces, shown in top left of screen
+- Health: Lost from enemy contact/projectiles and running out of air. 
+	Gained by collecting health plants that spawn on walls every 300 points
+- Air: lost while underwater. Gained by surfacing or collecting air bubbles.
+- Energy: Lost by swimming. Gained by resting, especially on walls (the relief!)
+- Fast movement gives you a glowing trail of "Super Speed"
+	Super Speed = invincibility + damage enemies on contact
+- Cleanup ocean trash by shooting complete groups to spawn powerups
+- Cleanup space trash as well by shooting complete groups
+- Collect stars for points. Ocean floor stars are most valuable. 
+	Points also given for shooting ocean/space trash and UFO piece delivery. Leave no trace!
+- Invincible enemies shake when shot!
+"""
 	
 	# Page 2 is now just the basic controls text
 	# The checkbox will be shown separately below it
 	var page2 = """
 
 
-***CONTROLS***
+	***CONTROLS***
 
-THRUST: Left Stick / WASD
-SHOOT: Right Stick / IJKL
-FLIPPER LEFT: L Trigger / L Shift
-FLIPPER RIGHT: R Trigger / R Shift
+	THRUST: Left Stick / WASD
+	SHOOT: Right Stick / IJKL
+	FLIPPER LEFT: L Trigger / L Shift
+	FLIPPER RIGHT: R Trigger / R Shift
+	DROP UFO PIECE: X / Space
 
-CONTROL OPTIONS:"""
+	CONTROL OPTIONS:"""
 	
 	pages = [page1, page2]
 

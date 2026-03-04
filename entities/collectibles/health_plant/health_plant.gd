@@ -5,7 +5,7 @@ class_name HealthPlant
 ## Spawns at point thresholds and attaches to walls
 
 # Health properties
-@export var health_restore_amount: float = 30.0
+@export var health_restore_amount: float = 40.0
 @export var max_health_bonus: float = 0.0  # Optional max health increase
 
 # Visual feedback
@@ -18,7 +18,7 @@ class_name HealthPlant
 @export var attach_to_wall: bool = true
 
 # Despawn properties
-@export var lifetime: float = 20.0  # Despawn after this long if not collected
+@export var lifetime: float = 25.0  # Despawn after this long if not collected
 @export var warning_time: float = 5.0  # Start flashing this many seconds before despawn
 
 # Internal state
