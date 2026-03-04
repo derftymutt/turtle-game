@@ -9,6 +9,7 @@ class_name LevelBase
 
 @onready var hud: HUD = $HUD
 @onready var game_over_screen: GameOverScreen = $GameOverScreen
+@onready var pause_menu: PauseMenu = $PauseMenu
 
 func _ready():
 	# Ensure game is unpaused

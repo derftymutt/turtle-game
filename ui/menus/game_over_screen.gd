@@ -79,17 +79,8 @@ func _input(event):
 	if not visible:
 		return
 	
-	# Keyboard input
-	if event is InputEventKey and event.pressed and not event.echo:
-		if restart_button and restart_button.has_focus():
-			_on_restart_pressed()
-		elif menu_button and menu_button.has_focus():
-			_on_menu_pressed()
-		elif quit_button and quit_button.has_focus():
-			_on_quit_pressed()
-	
-	# Controller buttons
-	if event is InputEventJoypadButton and event.pressed:
+	# Keyboard/controller confirm
+	if event.is_action_pressed("ui_accept"):
 		if restart_button and restart_button.has_focus():
 			_on_restart_pressed()
 		elif menu_button and menu_button.has_focus():
