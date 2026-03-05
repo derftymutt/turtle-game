@@ -49,6 +49,7 @@ var current_kick_animation_duration: float = kick_animation_duration
 # Drowning calls take_damage() every frame; without this, hundreds of competing
 # awaits all write Color.RED before any of them can write Color.WHITE back.
 var _is_flashing: bool = false
+var _health_restore_flash_timer: float = 0.0
 
 # Ocean reference
 var ocean: Ocean = null
@@ -68,15 +69,17 @@ var active_shoot_cooldown: float = shoot_cooldown
 var shield_active: bool = false
 var shield_duration: float = 8.0
 var shield_timer: float = 0.0
+var _shield_tween: Tween = null
 
 var air_reserve_bonus: float = 20.0
 
 var energy_freeze_active: bool = false
-var energy_freeze_duration: float = 20.0
+var energy_freeze_duration: float = 10.0
 var energy_freeze_timer: float = 0.0
+var energy_freeze_tween: Tween = null
 
 var rapid_fire_active: bool = false
-var rapid_fire_duration: float = 20.0
+var rapid_fire_duration: float = 8.0
 var rapid_fire_timer: float = 0.0
 
 var is_player_controlling_rotation: bool = false
@@ -141,6 +144,13 @@ func _ready():
 
 	# Show the correct idle frame immediately on spawn
 	_play_animation("idle")
+
+	# Ensure the sprite always renders above motion trails (z_index = 10).
+	# z_as_relative = false makes this an absolute z, independent of the parent body's z.
+	var sprite = $AnimatedSprite2D
+	if sprite:
+		sprite.z_as_relative = false
+		sprite.z_index = 15
 
 # ---------------------------------------------------------------------------
 # PHYSICS PROCESS
@@ -231,7 +241,6 @@ func _physics_process(delta):
 	if control_suspend_timer <= 0 and control_suspended:
 		control_suspended = false
 		if animated_sprite and is_instance_valid(animated_sprite):
-			animated_sprite.modulate = Color.WHITE
 			animated_sprite.scale = Vector2.ONE
 
 	if control_suspended:
@@ -273,6 +282,31 @@ func _physics_process(delta):
 		var target_idle = "idle_" + facing_direction
 		if animated_sprite and animated_sprite.animation != target_idle:
 			animated_sprite.play(target_idle)
+
+# ---------------------------------------------------------------------------
+# SPRITE MODULATE (runs every rendered frame — single source of truth)
+# ---------------------------------------------------------------------------
+
+func _process(delta: float):
+	if _health_restore_flash_timer > 0.0:
+		_health_restore_flash_timer -= delta
+	_update_sprite_modulate()
+
+func _update_sprite_modulate():
+	var sprite = $AnimatedSprite2D
+	if not sprite or not is_instance_valid(sprite):
+		return
+	if _health_restore_flash_timer > 0.0:
+		sprite.modulate = Color.GREEN
+	elif shield_active or energy_freeze_active or rapid_fire_active:
+		sprite.modulate = _get_powerup_flash_color()
+	elif is_super_speed:
+		sprite.modulate = super_speed_color
+	elif is_super_speed_cooldown:
+		var fade_factor = super_speed_cooldown_timer / super_speed_cooldown_duration
+		sprite.modulate = super_speed_color.lerp(Color.WHITE, 1.0 - fade_factor)
+	else:
+		sprite.modulate = Color.WHITE
 
 # ---------------------------------------------------------------------------
 # OCEAN
@@ -437,13 +471,7 @@ func restore_health(amount: float):
 	if hud:
 		hud.update_health(current_health, max_health)
 
-	var sprite = $AnimatedSprite2D
-	if sprite:
-		sprite.modulate = Color.GREEN
-		await get_tree().create_timer(0.2).timeout
-		if sprite and is_instance_valid(sprite):
-			sprite.modulate = Color.WHITE
-
+	_health_restore_flash_timer = 0.2
 	print("Health restored! Current: ", current_health, "/", max_health)
 
 func die():
@@ -542,10 +570,20 @@ func _on_super_speed_area_entered(body: Node2D):
 # SUPER SPEED VISUALS
 # ---------------------------------------------------------------------------
 
+func _get_powerup_flash_color() -> Color:
+	# ~5 Hz sin wave matching original tween speed (0.1s per step = 5 Hz)
+	var flash = (sin(Time.get_ticks_msec() * 0.031) + 1.0) * 0.5  # 0.0–1.0
+	if shield_active:
+		return Color(8.05, 7.925, 0.0, 1.0).lerp(Color(0.02, 0.0, 0.0, 1.0), flash)
+	elif energy_freeze_active:
+		return Color(1.0, 0.536, 0.13, 1.0).lerp(Color(0.99, 0.949, 0.891, 1.0), flash)
+	elif rapid_fire_active:
+		return Color(0.0, 2.5, 0.5, 1.0).lerp(Color(0.4, 1.0, 0.4, 1.0), flash)
+	return Color.WHITE
+
 func _apply_super_speed_visuals(delta: float):
 	var sprite = $AnimatedSprite2D
 	if sprite:
-		sprite.modulate = super_speed_color
 		var pulse = 1.0 + sin(Time.get_ticks_msec() * 0.015) * 0.4
 		sprite.scale = Vector2.ONE * pulse
 
@@ -558,7 +596,6 @@ func _apply_cooldown_visuals(delta: float):
 	var sprite = $AnimatedSprite2D
 	if sprite:
 		var fade_factor = super_speed_cooldown_timer / super_speed_cooldown_duration
-		sprite.modulate = super_speed_color.lerp(Color.WHITE, 1.0 - fade_factor)
 		var pulse = 1.0 + sin(Time.get_ticks_msec() * 0.02) * (0.2 * fade_factor)
 		sprite.scale = Vector2.ONE * pulse
 
@@ -571,7 +608,6 @@ func _apply_cooldown_visuals(delta: float):
 func _remove_super_speed_visuals():
 	var sprite = $AnimatedSprite2D
 	if sprite and is_instance_valid(sprite):
-		sprite.modulate = Color.WHITE
 		sprite.scale = Vector2.ONE
 
 func _spawn_motion_trail(intensity: float = 1.0):
@@ -641,18 +677,9 @@ func activate_shield():
 	shield_timer = shield_duration
 	print("SHIELD ACTIVATED! Invincible for ", shield_duration, " seconds!")
 
-	var sprite = $AnimatedSprite2D
-	if sprite:
-		var tween = create_tween().set_loops()
-		tween.tween_property(sprite, "modulate", Color(0.3, 0.6, 1.0, 1.0), 0.3)
-		tween.tween_property(sprite, "modulate", Color(0.6, 0.9, 1.0, 1.0), 0.3)
-
 func deactivate_shield():
 	shield_active = false
 	print("Shield expired")
-	var sprite = $AnimatedSprite2D
-	if sprite:
-		sprite.modulate = Color.WHITE
 
 func activate_air_reserve():
 	if hud:
@@ -668,21 +695,9 @@ func activate_energy_freeze():
 	energy_freeze_timer = energy_freeze_duration
 	print("ENERGY FREEZE! No energy drain for ", energy_freeze_duration, " seconds!")
 
-	if not is_super_speed:
-		var sprite = $AnimatedSprite2D
-		if sprite:
-			var tween = create_tween().set_loops()
-			tween.tween_property(sprite, "modulate", Color(1.0, 1.0, 0.4, 1.0), 0.25)
-			tween.tween_property(sprite, "modulate", Color(1.0, 1.0, 0.7, 1.0), 0.25)
-
 func deactivate_energy_freeze():
 	energy_freeze_active = false
 	print("Energy freeze expired")
-
-	if not shield_active and not is_super_speed:
-		var sprite = $AnimatedSprite2D
-		if sprite:
-			sprite.modulate = Color.WHITE
 			
 func _flash(color: Color, duration: float):
 	if _is_flashing:
@@ -702,19 +717,10 @@ func activate_rapid_fire():
 	active_shoot_cooldown = rapid_fire_shoot_cooldown
 	print("RAPID FIRE activated", rapid_fire_duration, " seconds!")
 
-	#var sprite = $AnimatedSprite2D
-	#if sprite:
-		#var tween = create_tween().set_loops()
-		#tween.tween_property(sprite, "modulate", Color(0.3, 0.6, 1.0, 1.0), 0.3)
-		#tween.tween_property(sprite, "modulate", Color(0.6, 0.9, 1.0, 1.0), 0.3)
-
 func deactivate_rapid_fire():
 	rapid_fire_active = false
 	active_shoot_cooldown = shoot_cooldown
 	print("Rapid Fire expired")
-	#var sprite = $AnimatedSprite2D
-	#if sprite:
-		#sprite.modulate = Color.WHITE
 
 # ---------------------------------------------------------------------------
 # CONTROL SUSPENSION

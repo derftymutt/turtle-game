@@ -99,9 +99,6 @@ size = Vector2(8.000183, 465.00012)
 
 [node name="LevelBase" unique_id=519430445 instance=ExtResource("1_lrvbd")]
 
-[node name="HUD" parent="." index="0" unique_id=1369229575]
-exhaustion_recovery_rate = 20.0
-
 [node name="SkyBackground" parent="." index="3" unique_id=967020750 instance=ExtResource("2_ntdhj")]
 
 [node name="Ocean" parent="." index="4" unique_id=2062759388 instance=ExtResource("2_oqlok")]
