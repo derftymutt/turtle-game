@@ -35,7 +35,9 @@ class_name TrashSequenceSpawner
 @export var available_powerups: Array[Powerup.PowerupType] = [
 	Powerup.PowerupType.SHIELD,
 	Powerup.PowerupType.AIR_RESERVE,
-	Powerup.PowerupType.STAMINA_FREEZE,
+	Powerup.PowerupType.ENERGY_ENDLESS,
+	Powerup.PowerupType.RAPID_FIRE,
+	Powerup.PowerupType.RANDOM
 ]
 
 # Movement settings

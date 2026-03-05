@@ -10,11 +10,9 @@ signal powerup_collected(powerup_type)
 enum PowerupType {
 	SHIELD,          # Temporary invincibility
 	AIR_RESERVE,     # Extra breath capacity
-	STAMINA_FREEZE,  # Pause stamina drain
-	# Future powerups can be added here
-	# SPEED_BOOST,
-	# RAPID_FIRE,
-	# MAGNET,
+	ENERGY_ENDLESS,  # Pause stamina drain
+	RAPID_FIRE,      # Faster shooting
+	RANDOM,          # Randomly picks one of the above on collection
 }
 
 # Properties
@@ -144,15 +142,27 @@ func collect(collector):
 	collected = true
 	freeze = true
 	
+	# Resolve RANDOM to an actual powerup type at collection time
+	var resolved_type = powerup_type
+	if powerup_type == PowerupType.RANDOM:
+		var base_types = [
+			PowerupType.SHIELD,
+			PowerupType.AIR_RESERVE,
+			PowerupType.ENERGY_ENDLESS,
+			PowerupType.RAPID_FIRE,
+		]
+		resolved_type = base_types.pick_random()
+		print("🎲 RANDOM powerup resolved to: ", PowerupType.keys()[resolved_type])
+
 	# GIANT FLASH for visibility
-	print("💥💥💥 POWERUP COLLECTED: ", PowerupType.keys()[powerup_type], " 💥💥💥")
-	
-	# Emit signal with powerup type
-	powerup_collected.emit(powerup_type)
-	
+	print("💥💥💥 POWERUP COLLECTED: ", PowerupType.keys()[resolved_type], " 💥💥💥")
+
+	# Emit signal with resolved powerup type
+	powerup_collected.emit(resolved_type)
+
 	# Apply powerup effect to player
 	if collector.has_method("apply_powerup"):
-		collector.apply_powerup(powerup_type)
+		collector.apply_powerup(resolved_type)
 	else:
 		push_error("⚠️ Player doesn't have apply_powerup method! Powerup NOT applied!")
 	
@@ -204,7 +214,11 @@ func get_powerup_name() -> String:
 			return "Shield"
 		PowerupType.AIR_RESERVE:
 			return "Air Reserve"
-		PowerupType.STAMINA_FREEZE:
-			return "Stamina Freeze"
+		PowerupType.ENERGY_ENDLESS:
+			return "Endless Energy"
+		PowerupType.RAPID_FIRE:
+			return "Rapid Fire"
+		PowerupType.RANDOM:
+			return "Random"
 		_:
 			return "Unknown"

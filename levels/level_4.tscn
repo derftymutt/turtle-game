@@ -64,32 +64,35 @@ size = Vector2(8.000183, 465.00012)
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ncbyy"]
 friction = 0.0
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pb5nj"]
+size = Vector2(64, 8)
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_egtcm"]
 size = Vector2(64, 8)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_x44s7"]
-size = Vector2(64, 8)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_e7hc3"]
 size = Vector2(32, 8)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_4h4lk"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_e7hc3"]
 size = Vector2(32, 8)
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ixhsu"]
 friction = 0.0
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_4h4lk"]
+size = Vector2(64, 8)
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_yp04h"]
 size = Vector2(64, 8)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_vc6ux"]
-size = Vector2(64, 8)
+size = Vector2(32, 8)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1gtbd"]
 size = Vector2(32, 8)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_0quxv"]
-size = Vector2(32, 8)
+size = Vector2(64, 8)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_g22rd"]
 size = Vector2(64, 8)
@@ -98,9 +101,6 @@ size = Vector2(64, 8)
 size = Vector2(64, 8)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wred1"]
-size = Vector2(64, 8)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_65scv"]
 size = Vector2(64, 8)
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_w8olu"]
@@ -222,7 +222,7 @@ angle_preset = 2
 
 [node name="CollisionShape2D" parent="FlipperSkyCenterLeft/DeadWall10" index="0" unique_id=1644951480]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_egtcm")
+shape = SubResource("RectangleShape2D_pb5nj")
 one_way_collision = true
 
 [node name="Sprite2D" parent="FlipperSkyCenterLeft/DeadWall10" index="1" unique_id=804434373]
@@ -233,7 +233,7 @@ rotation = 0.7853982
 
 [node name="CollisionShape2D" parent="FlipperSkyCenterLeft/DeadWall10/SlipperyArea" parent_id_path=PackedInt32Array(797132162, 773978709) index="0" unique_id=2040614053]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_x44s7")
+shape = SubResource("RectangleShape2D_egtcm")
 
 [node name="FlipperLeftUp4" parent="FlipperSkyCenterLeft" index="1" unique_id=1447591536 instance=ExtResource("12_g22rd")]
 position = Vector2(-45, -185)
@@ -248,7 +248,7 @@ length_units = 1
 
 [node name="CollisionShape2D" parent="FlipperSkyCenterLeft2/DeadWall10" index="0" unique_id=1644951480]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_e7hc3")
+shape = SubResource("RectangleShape2D_x44s7")
 one_way_collision = true
 
 [node name="Sprite2D" parent="FlipperSkyCenterLeft2/DeadWall10" index="1" unique_id=804434373]
@@ -260,7 +260,7 @@ polygon = PackedVector2Array(-16, -4, 16, -4, 16, 4, -16, 4)
 
 [node name="CollisionShape2D" parent="FlipperSkyCenterLeft2/DeadWall10/SlipperyArea" parent_id_path=PackedInt32Array(1589161516, 773978709) index="0" unique_id=2040614053]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_4h4lk")
+shape = SubResource("RectangleShape2D_e7hc3")
 
 [node name="FlipperLeftUp4" parent="FlipperSkyCenterLeft2" index="1" unique_id=1104846566 instance=ExtResource("12_g22rd")]
 position = Vector2(-130, -285)
@@ -275,7 +275,7 @@ mirrored = true
 
 [node name="CollisionShape2D" parent="CloudFlipperCenterRight/DeadWall11" index="0" unique_id=1644951480]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_yp04h")
+shape = SubResource("RectangleShape2D_4h4lk")
 one_way_collision = true
 
 [node name="Sprite2D" parent="CloudFlipperCenterRight/DeadWall11" index="1" unique_id=804434373]
@@ -287,7 +287,7 @@ rotation = -0.7853982
 
 [node name="CollisionShape2D" parent="CloudFlipperCenterRight/DeadWall11/SlipperyArea" parent_id_path=PackedInt32Array(243008370, 773978709) index="0" unique_id=2040614053]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_vc6ux")
+shape = SubResource("RectangleShape2D_yp04h")
 
 [node name="CloudFlipperRightUp2" parent="CloudFlipperCenterRight" index="1" unique_id=33507880 instance=ExtResource("14_wred1")]
 position = Vector2(45, -185)
@@ -303,7 +303,7 @@ mirrored = true
 
 [node name="CollisionShape2D" parent="CloudFlipperCenterRight2/DeadWall11" index="0" unique_id=1644951480]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_1gtbd")
+shape = SubResource("RectangleShape2D_vc6ux")
 one_way_collision = true
 
 [node name="Sprite2D" parent="CloudFlipperCenterRight2/DeadWall11" index="1" unique_id=804434373]
@@ -316,7 +316,7 @@ polygon = PackedVector2Array(-16, -4, 16, -4, 16, 4, -16, 4)
 
 [node name="CollisionShape2D" parent="CloudFlipperCenterRight2/DeadWall11/SlipperyArea" parent_id_path=PackedInt32Array(215607130, 773978709) index="0" unique_id=2040614053]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_0quxv")
+shape = SubResource("RectangleShape2D_1gtbd")
 
 [node name="CloudFlipperRightUp2" parent="CloudFlipperCenterRight2" index="1" unique_id=1172357705 instance=ExtResource("14_wred1")]
 position = Vector2(130, -285)
@@ -330,7 +330,7 @@ angle_preset = 2
 
 [node name="CollisionShape2D" parent="CloudFlipperRightLower/DeadWall11" index="0" unique_id=1644951480]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_g22rd")
+shape = SubResource("RectangleShape2D_0quxv")
 one_way_collision = true
 
 [node name="Sprite2D" parent="CloudFlipperRightLower/DeadWall11" index="1" unique_id=804434373]
@@ -341,7 +341,7 @@ rotation = 0.7853982
 
 [node name="CollisionShape2D" parent="CloudFlipperRightLower/DeadWall11/SlipperyArea" parent_id_path=PackedInt32Array(203471, 773978709) index="0" unique_id=2040614053]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_m0qt0")
+shape = SubResource("RectangleShape2D_g22rd")
 
 [node name="FlipperLeftUp5" parent="CloudFlipperRightLower" index="1" unique_id=1197315435 instance=ExtResource("12_g22rd")]
 position = Vector2(190, -185)
@@ -359,7 +359,7 @@ mirrored = true
 
 [node name="CollisionShape2D" parent="CloudFlipperLeftLower/DeadWall12" index="0" unique_id=1644951480]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_wred1")
+shape = SubResource("RectangleShape2D_m0qt0")
 one_way_collision = true
 
 [node name="Sprite2D" parent="CloudFlipperLeftLower/DeadWall12" index="1" unique_id=804434373]
@@ -371,7 +371,7 @@ rotation = -0.7853982
 
 [node name="CollisionShape2D" parent="CloudFlipperLeftLower/DeadWall12/SlipperyArea" parent_id_path=PackedInt32Array(1268673111, 773978709) index="0" unique_id=2040614053]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_65scv")
+shape = SubResource("RectangleShape2D_wred1")
 
 [node name="FlipperLeftDown" parent="." index="19" unique_id=598735619 instance=ExtResource("15_65scv")]
 position = Vector2(-40, -90)
@@ -621,61 +621,62 @@ powerup_scene = ExtResource("36_uh3nw")
 
 [node name="SpaceDebris" parent="SpaceDebrisGroup2" index="0" unique_id=1800794425 instance=ExtResource("37_jvkrj")]
 position = Vector2(83, -261)
-debris_animation = &"green"
+debris_animation = &"random"
 
 [node name="SpaceDebris2" parent="SpaceDebrisGroup2" index="1" unique_id=1599503356 instance=ExtResource("37_jvkrj")]
 position = Vector2(-94, -313)
-debris_animation = &"green"
+debris_animation = &"random"
 
 [node name="SpaceDebrisGroup" parent="." index="71" unique_id=511816800 instance=ExtResource("35_oqno5")]
 powerup_scene = ExtResource("36_uh3nw")
 
 [node name="SpaceDebris" parent="SpaceDebrisGroup" index="0" unique_id=661989100 instance=ExtResource("37_jvkrj")]
 position = Vector2(-69, -284)
-debris_animation = &"white"
+debris_animation = &"air"
 
 [node name="SpaceDebris2" parent="SpaceDebrisGroup" index="1" unique_id=450991548 instance=ExtResource("37_jvkrj")]
 position = Vector2(-33, -361)
-debris_animation = &"white"
+debris_animation = &"air"
 
 [node name="SpaceDebrisGroup3" parent="." index="72" unique_id=711772414 instance=ExtResource("35_oqno5")]
 powerup_scene = ExtResource("36_uh3nw")
 
 [node name="SpaceDebris" parent="SpaceDebrisGroup3" index="0" unique_id=1233516766 instance=ExtResource("37_jvkrj")]
 position = Vector2(-149, -329)
-debris_animation = &"yellow"
+debris_animation = &"shield"
 
 [node name="SpaceDebris2" parent="SpaceDebrisGroup3" index="1" unique_id=37809506 instance=ExtResource("37_jvkrj")]
 position = Vector2(-1, -275)
-debris_animation = &"yellow"
+debris_animation = &"shield"
 
 [node name="SpaceDebrisGroup4" parent="." index="73" unique_id=1603659271 instance=ExtResource("35_oqno5")]
 powerup_scene = ExtResource("36_uh3nw")
 
 [node name="SpaceDebris" parent="SpaceDebrisGroup4" index="0" unique_id=1905238053 instance=ExtResource("37_jvkrj")]
 position = Vector2(62, -317)
-debris_animation = &"blue"
+debris_animation = &"bullet"
 
 [node name="SpaceDebris2" parent="SpaceDebrisGroup4" index="1" unique_id=157327983 instance=ExtResource("37_jvkrj")]
 position = Vector2(106, -366)
-debris_animation = &"blue"
+debris_animation = &"bullet"
 
 [node name="SpaceDebrisGroup5" parent="." index="74" unique_id=356934872 instance=ExtResource("35_oqno5")]
 powerup_scene = ExtResource("36_uh3nw")
 
 [node name="SpaceDebris" parent="SpaceDebrisGroup5" index="0" unique_id=1056723612 instance=ExtResource("37_jvkrj")]
 position = Vector2(-116, -361)
-debris_animation = &"orange"
+debris_animation = &"energy"
 
 [node name="SpaceDebris2" parent="SpaceDebrisGroup5" index="1" unique_id=403163321 instance=ExtResource("37_jvkrj")]
 position = Vector2(139, -342)
-debris_animation = &"orange"
+debris_animation = &"energy"
 
 [node name="AirBubbleSpawner" parent="." index="75" unique_id=1547445684 instance=ExtResource("38_hg54l")]
 bubble_scene = ExtResource("39_p3k1n")
 
 [node name="Crocodile" parent="." index="76" unique_id=787732993 instance=ExtResource("40_kqeme")]
 position = Vector2(-289, -130)
+patrol_speed = 60.0
 
 [node name="OceanCurrent3" parent="." index="77" unique_id=1000274685 instance=ExtResource("20_436cy")]
 position = Vector2(-293, -304)

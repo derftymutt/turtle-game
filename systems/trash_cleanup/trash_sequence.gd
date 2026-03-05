@@ -221,8 +221,12 @@ func spawn_powerup(position: Vector2):
 				powerup_sprite.play("shield")
 			elif powerup_type == Powerup.PowerupType.AIR_RESERVE:
 				powerup_sprite.play("air")
-			elif powerup_type == Powerup.PowerupType.STAMINA_FREEZE:
-				powerup_sprite.play("stamina")
+			elif powerup_type == Powerup.PowerupType.ENERGY_ENDLESS:
+				powerup_sprite.play("energy")
+			elif powerup_type == Powerup.PowerupType.RAPID_FIRE:
+				powerup_sprite.play("rapid_fire")
+			elif powerup_type == Powerup.PowerupType.RANDOM:
+				powerup_sprite.play("random")
 	
 	
 	

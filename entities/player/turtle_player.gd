@@ -8,6 +8,7 @@ extends RigidBody2D
 
 # Shooting properties
 @export var shoot_cooldown: float = 0.25
+@export var rapid_fire_shoot_cooldown: float = 0.1
 @export var bullet_speed: float = 500.0
 @export var bullet_scene: PackedScene
 
@@ -61,6 +62,8 @@ var touching_walls: Array = []
 # Super speed damage detection
 var super_speed_area: Area2D = null
 
+var active_shoot_cooldown: float = shoot_cooldown
+
 # Powerup states
 var shield_active: bool = false
 var shield_duration: float = 8.0
@@ -71,6 +74,10 @@ var air_reserve_bonus: float = 20.0
 var energy_freeze_active: bool = false
 var energy_freeze_duration: float = 20.0
 var energy_freeze_timer: float = 0.0
+
+var rapid_fire_active: bool = false
+var rapid_fire_duration: float = 20.0
+var rapid_fire_timer: float = 0.0
 
 var is_player_controlling_rotation: bool = false
 
@@ -186,6 +193,11 @@ func _physics_process(delta):
 		energy_freeze_timer -= delta
 		if energy_freeze_timer <= 0:
 			deactivate_energy_freeze()
+			
+	if rapid_fire_active:
+		rapid_fire_timer -= delta
+		if rapid_fire_timer <= 0:
+			deactivate_rapid_fire()
 
 	# Ocean physics
 	if ocean:
@@ -350,7 +362,7 @@ func shoot(direction: Vector2):
 	bullet.set_velocity(direction * bullet_speed)
 
 	can_shoot = false
-	shoot_timer = shoot_cooldown
+	shoot_timer = active_shoot_cooldown
 
 func _safe_bullet_spawn(direction: Vector2) -> Vector2:
 	"""Raycast in the shoot direction and spawn the bullet just before any wall,
@@ -621,6 +633,7 @@ func apply_powerup(powerup_type: int):
 		0:  activate_shield()
 		1:  activate_air_reserve()
 		2:  activate_energy_freeze()
+		3:  activate_rapid_fire()
 		_:  push_error("Unknown powerup type: ", powerup_type)
 
 func activate_shield():
@@ -682,6 +695,26 @@ func _flash(color: Color, duration: float):
 		tween.tween_property(overlay, "modulate:a", 0.0, duration)
 		await get_tree().create_timer(duration).timeout
 	_is_flashing = false
+	
+func activate_rapid_fire():
+	rapid_fire_active = true
+	rapid_fire_timer = rapid_fire_duration
+	active_shoot_cooldown = rapid_fire_shoot_cooldown
+	print("RAPID FIRE activated", rapid_fire_duration, " seconds!")
+
+	#var sprite = $AnimatedSprite2D
+	#if sprite:
+		#var tween = create_tween().set_loops()
+		#tween.tween_property(sprite, "modulate", Color(0.3, 0.6, 1.0, 1.0), 0.3)
+		#tween.tween_property(sprite, "modulate", Color(0.6, 0.9, 1.0, 1.0), 0.3)
+
+func deactivate_rapid_fire():
+	rapid_fire_active = false
+	active_shoot_cooldown = shoot_cooldown
+	print("Rapid Fire expired")
+	#var sprite = $AnimatedSprite2D
+	#if sprite:
+		#sprite.modulate = Color.WHITE
 
 # ---------------------------------------------------------------------------
 # CONTROL SUSPENSION

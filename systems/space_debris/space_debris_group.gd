@@ -148,8 +148,12 @@ func spawn_powerup(spawn_position: Vector2) -> void:
 				sprite.play("shield")
 			Powerup.PowerupType.AIR_RESERVE:
 				sprite.play("air")
-			Powerup.PowerupType.STAMINA_FREEZE:
-				sprite.play("stamina")
+			Powerup.PowerupType.ENERGY_ENDLESS:
+				sprite.play("energy")
+			Powerup.PowerupType.RAPID_FIRE:
+				sprite.play("rapid_fire")
+			Powerup.PowerupType.RANDOM:
+				sprite.play("random")
 
 	print("🎁 Powerup spawned at ", spawn_position, " type: ", Powerup.PowerupType.keys()[powerup_type])
 
