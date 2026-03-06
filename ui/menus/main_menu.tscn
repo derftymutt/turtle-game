@@ -41,7 +41,7 @@ layout_mode = 2
 layout_mode = 2
 theme_override_colors/font_color = Color(0.46710145, 0.93201816, 0.2886762, 1)
 theme_override_font_sizes/font_size = 48
-text = "Turtle Plunge"
+text = "Turtle Plunge!"
 
 [node name="LevelContainer" type="VBoxContainer" parent="Control/CenterContainer/VBoxContainer" unique_id=1613674440]
 layout_mode = 2
