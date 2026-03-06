@@ -145,19 +145,25 @@ func _relocating_behavior(delta: float):
 	
 	if distance < 20.0:
 		var animated_sprite = get_node_or_null("AnimatedSprite2D")
-		if animated_sprite and animated_sprite.sprite_frames and animated_sprite.sprite_frames.has_animation("default"):
-			animated_sprite.play('default')
-		
+		if animated_sprite and animated_sprite.sprite_frames:
+			if current_health <= 10.0 and animated_sprite.sprite_frames.has_animation("near_death"):
+				animated_sprite.play('near_death')
+			elif animated_sprite.sprite_frames.has_animation("default"):
+				animated_sprite.play('default')
+
 		starting_position = global_position
 		current_state = State.IDLE
 		throw_timer = throw_cooldown * 0.5
 		return
-	
+
 	# Don't interrupt a damage animation mid-play
 	if not _is_playing_damage_animation:
 		var animated_sprite = get_node_or_null("AnimatedSprite2D")
-		if animated_sprite and animated_sprite.sprite_frames and animated_sprite.sprite_frames.has_animation("move"):
-			animated_sprite.play('move')
+		if animated_sprite and animated_sprite.sprite_frames:
+			if current_health <= 10.0 and animated_sprite.sprite_frames.has_animation("near_death"):
+				animated_sprite.play('near_death')
+			elif animated_sprite.sprite_frames.has_animation("move"):
+				animated_sprite.play('move')
 	
 	var direction = to_target.normalized()
 	apply_central_force(direction * relocation_speed * 10)

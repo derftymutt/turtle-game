@@ -175,14 +175,18 @@ func _cooldown_behavior(_delta: float):
 		apply_central_force(to_player.normalized() * swim_speed * 0.3)
 
 func _scan_for_walls():
-	"""Find all nearby walls and flippers"""
+	"""Find all nearby walls and flippers that are inside the ocean"""
 	nearby_walls.clear()
 	var all_walls = get_tree().get_nodes_in_group("eel_targetable")
-	
+
 	for wall in all_walls:
 		if not wall is Node2D:
 			continue
-		
+
+		# Never target walls above the water surface
+		if ocean and not ocean.is_in_water(wall.global_position):
+			continue
+
 		var distance = global_position.distance_to(wall.global_position)
 		if distance < wall_detection_range:
 			nearby_walls.append(wall)
@@ -221,18 +225,21 @@ func _choose_best_wall() -> Node2D:
 	return best_wall
 
 func _maintain_depth():
-	"""Keep eel at preferred depth range"""
+	"""Keep eel at preferred depth range, with a hard barrier at the water surface"""
 	if not ocean:
 		return
-	
+
 	var depth = ocean.get_depth(global_position)
 	var correction = 0.0
-	
-	if depth < preferred_depth_min:
+
+	if depth < 0:
+		# Above the water surface - apply strong downward force that grows with distance
+		correction = depth_correction_force * 8.0 + abs(depth) * 2.0
+	elif depth < preferred_depth_min:
 		correction = depth_correction_force
 	elif depth > preferred_depth_max:
 		correction = -depth_correction_force
-	
+
 	if correction != 0:
 		apply_central_force(Vector2(0, correction))
 

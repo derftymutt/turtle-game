@@ -11,7 +11,7 @@ class_name HealthPlantSpawner
 @export var health_plant_scene: PackedScene
 
 @export_group("Spawn Thresholds")
-@export var spawn_thresholds: Array[int] = [300, 600, 900, 1200, 1500]
+@export var spawn_thresholds: Array[int] = [300, 600, 900, 1200, 1500, 1800, 2100, 2400]
 @export var max_simultaneous_plants: int = 2
 
 @export_group("Wall Selection")

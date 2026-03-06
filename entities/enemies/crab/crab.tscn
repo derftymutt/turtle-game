@@ -32,6 +32,14 @@ region = Rect2(48, 0, 24, 16)
 atlas = ExtResource("3_52iet")
 region = Rect2(72, 0, 24, 16)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_52iet"]
+atlas = ExtResource("3_52iet")
+region = Rect2(168, 0, 24, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0kt5w"]
+atlas = ExtResource("3_52iet")
+region = Rect2(192, 0, 24, 16)
+
 [sub_resource type="SpriteFrames" id="SpriteFrames_gq6gn"]
 animations = [{
 "frames": [{
@@ -75,6 +83,17 @@ animations = [{
 "loop": true,
 "name": &"move",
 "speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_52iet")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0kt5w")
+}],
+"loop": true,
+"name": &"near_death",
+"speed": 5.0
 }]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_0kt5w"]
@@ -97,7 +116,7 @@ projectile_scene = ExtResource("2_52iet")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1136099005]
 sprite_frames = SubResource("SpriteFrames_gq6gn")
-animation = &"damage"
+animation = &"near_death"
 autoplay = "default"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1761021674]

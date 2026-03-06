@@ -616,42 +616,46 @@ position = Vector2(-3, -335)
 
 [node name="CrabSpawner" parent="." index="70" unique_id=1296574206 instance=ExtResource("34_pka35")]
 
-[node name="SpaceDebrisGroup2" parent="." index="71" unique_id=1874176726 instance=ExtResource("35_oqno5")]
+[node name="SpaceDebrisGroup" parent="." index="71" unique_id=511816800 instance=ExtResource("35_oqno5")]
+powerup_scene = ExtResource("36_uh3nw")
+
+[node name="SpaceDebris" parent="SpaceDebrisGroup" index="0" unique_id=661989100 instance=ExtResource("37_jvkrj")]
+position = Vector2(-69, -284)
+debris_animation = &"shield"
+
+[node name="SpaceDebris2" parent="SpaceDebrisGroup" index="1" unique_id=450991548 instance=ExtResource("37_jvkrj")]
+position = Vector2(-33, -361)
+debris_animation = &"shield"
+
+[node name="SpaceDebrisGroup2" parent="." index="72" unique_id=1874176726 instance=ExtResource("35_oqno5")]
 group_label = "Group B"
 powerup_type = 1
 powerup_scene = ExtResource("36_uh3nw")
 
 [node name="SpaceDebris" parent="SpaceDebrisGroup2" index="0" unique_id=1800794425 instance=ExtResource("37_jvkrj")]
 position = Vector2(83, -261)
-debris_animation = &"random"
+debris_animation = &"air"
 
 [node name="SpaceDebris2" parent="SpaceDebrisGroup2" index="1" unique_id=1599503356 instance=ExtResource("37_jvkrj")]
 position = Vector2(-94, -313)
-debris_animation = &"random"
-
-[node name="SpaceDebrisGroup" parent="." index="72" unique_id=511816800 instance=ExtResource("35_oqno5")]
-powerup_scene = ExtResource("36_uh3nw")
-
-[node name="SpaceDebris" parent="SpaceDebrisGroup" index="0" unique_id=661989100 instance=ExtResource("37_jvkrj")]
-position = Vector2(-69, -284)
-debris_animation = &"air"
-
-[node name="SpaceDebris2" parent="SpaceDebrisGroup" index="1" unique_id=450991548 instance=ExtResource("37_jvkrj")]
-position = Vector2(-33, -361)
 debris_animation = &"air"
 
 [node name="SpaceDebrisGroup3" parent="." index="73" unique_id=711772414 instance=ExtResource("35_oqno5")]
+group_label = "Group C"
+powerup_type = 2
 powerup_scene = ExtResource("36_uh3nw")
 
 [node name="SpaceDebris" parent="SpaceDebrisGroup3" index="0" unique_id=1233516766 instance=ExtResource("37_jvkrj")]
 position = Vector2(-149, -329)
-debris_animation = &"shield"
+debris_animation = &"energy"
 
 [node name="SpaceDebris2" parent="SpaceDebrisGroup3" index="1" unique_id=37809506 instance=ExtResource("37_jvkrj")]
 position = Vector2(-1, -275)
-debris_animation = &"shield"
+debris_animation = &"energy"
 
 [node name="SpaceDebrisGroup4" parent="." index="74" unique_id=1603659271 instance=ExtResource("35_oqno5")]
+group_label = "Group D"
+powerup_type = 3
 powerup_scene = ExtResource("36_uh3nw")
 
 [node name="SpaceDebris" parent="SpaceDebrisGroup4" index="0" unique_id=1905238053 instance=ExtResource("37_jvkrj")]
@@ -663,15 +667,17 @@ position = Vector2(106, -366)
 debris_animation = &"bullet"
 
 [node name="SpaceDebrisGroup5" parent="." index="75" unique_id=356934872 instance=ExtResource("35_oqno5")]
+group_label = "Group E"
+powerup_type = 4
 powerup_scene = ExtResource("36_uh3nw")
 
 [node name="SpaceDebris" parent="SpaceDebrisGroup5" index="0" unique_id=1056723612 instance=ExtResource("37_jvkrj")]
 position = Vector2(-116, -361)
-debris_animation = &"energy"
+debris_animation = &"random"
 
 [node name="SpaceDebris2" parent="SpaceDebrisGroup5" index="1" unique_id=403163321 instance=ExtResource("37_jvkrj")]
 position = Vector2(139, -342)
-debris_animation = &"energy"
+debris_animation = &"random"
 
 [node name="AirBubbleSpawner" parent="." index="76" unique_id=1547445684 instance=ExtResource("38_hg54l")]
 bubble_scene = ExtResource("39_p3k1n")
