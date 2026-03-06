@@ -11,6 +11,7 @@ signal level_started(level_number)
 var current_level_number: int = 1
 var pieces_collected: int = 0
 var pieces_needed: int = 3
+var attempt_count: int = 1  # How many attempts on the current level
 
 # Level scene registry
 var level_scenes: Dictionary = {
@@ -95,7 +96,8 @@ func _show_level_complete_screen():
 			current_level_number,
 			GameManager.current_score,
 			pieces_collected,
-			pieces_needed
+			pieces_needed,
+			attempt_count
 		)
 	else:
 		# No screen found - this is okay, just log it
@@ -117,7 +119,10 @@ func load_level(level_number: int):
 	if not level_number in level_scenes:
 		push_error("Level %d not found in level_scenes!" % level_number)
 		return
-	
+
+	# Reset attempts only when loading a genuinely new level (not a retry)
+	if level_number != current_level_number:
+		attempt_count = 1
 	current_level_number = level_number
 	pieces_collected = 0  # Reset for new level
 	
@@ -132,6 +137,7 @@ func load_level(level_number: int):
 
 func restart_current_level():
 	"""Restart the current level (for game over)"""
+	attempt_count += 1
 	load_level(current_level_number)
 
 func get_current_level_name() -> String:

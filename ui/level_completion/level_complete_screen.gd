@@ -9,6 +9,7 @@ class_name LevelCompleteScreen
 @onready var title_label: Label = $CenterContainer/VBoxContainer/TitleLabel
 @onready var pieces_label: Label = $CenterContainer/VBoxContainer/StatsContainer/PiecesLabel
 @onready var score_label: Label = $CenterContainer/VBoxContainer/StatsContainer/ScoreLabel
+@onready var attempts_label: Label = $CenterContainer/VBoxContainer/StatsContainer/AttemptsLabel
 @onready var continue_label: Label = $CenterContainer/VBoxContainer/ContinueLabel
 
 # Animation
@@ -26,6 +27,8 @@ func _ready():
 		push_warning("LevelCompleteScreen: Missing ScoreLabel!")
 	if not pieces_label:
 		push_warning("LevelCompleteScreen: Missing PiecesLabel!")
+	if not attempts_label:
+		push_warning("LevelCompleteScreen: Missing AttemptsLabel!")
 	if not continue_label:
 		push_warning("LevelCompleteScreen: Missing ContinueLabel!")
 
@@ -36,7 +39,7 @@ func _process(delta):
 		var alpha = (sin(pulse_timer) + 1.0) / 2.0
 		continue_label.modulate.a = 0.5 + (alpha * 0.5)
 
-func show_completion(level_number: int, final_score: int, pieces_collected: int, pieces_needed: int):
+func show_completion(level_number: int, final_score: int, pieces_collected: int, pieces_needed: int, attempts: int = 1):
 	"""Display the level complete screen with stats"""
 	# Update labels
 	if title_label:
@@ -50,7 +53,10 @@ func show_completion(level_number: int, final_score: int, pieces_collected: int,
 	
 	if score_label:
 		score_label.text = "Score: %d" % final_score
-	
+
+	if attempts_label:
+		attempts_label.text = "Attempts: %d" % attempts
+
 	if continue_label:
 		continue_label.text = "Assembling UFO..."
 		pulse_timer = 0.0

@@ -7,7 +7,8 @@ class_name GameOverScreen
 @onready var game_over_panel = $Control/CenterContainer/PanelContainer
 @onready var final_score_label = $Control/CenterContainer/PanelContainer/VBoxContainer/FinalScoreLabel
 @onready var high_score_label = $Control/CenterContainer/PanelContainer/VBoxContainer/HighScoreLabel
-@onready var restart_button = $Control/CenterContainer/PanelContainer/VBoxContainer/RestartButton
+@onready var attempts_label = $Control/CenterContainer/PanelContainer/VBoxContainer/AttemptsLabel
+@onready var retry_button = $Control/CenterContainer/PanelContainer/VBoxContainer/RetryButton
 @onready var menu_button = $Control/CenterContainer/PanelContainer/VBoxContainer/MenuButton
 @onready var quit_button = $Control/CenterContainer/PanelContainer/VBoxContainer/QuitButton
 
@@ -20,8 +21,8 @@ func _ready():
 	visible = false
 	
 	# Connect buttons
-	if restart_button:
-		restart_button.pressed.connect(_on_restart_pressed)
+	if retry_button:
+		retry_button.pressed.connect(_on_retry_pressed)
 	if menu_button:
 		menu_button.pressed.connect(_on_menu_pressed)
 	if quit_button:
@@ -39,6 +40,10 @@ func show_game_over(score: int):
 	if final_score_label:
 		final_score_label.text = "Final Score: %d" % final_score
 	
+	# Show attempt count
+	if attempts_label:
+		attempts_label.text = "Attempts: %d" % LevelManager.attempt_count
+
 	# Show high score with "NEW HIGH SCORE!" if applicable
 	if high_score_label:
 		if score > high_score:
@@ -54,10 +59,10 @@ func show_game_over(score: int):
 	get_tree().paused = true
 	
 	# Focus the restart button for keyboard input
-	if restart_button:
-		restart_button.grab_focus()
+	if retry_button:
+		retry_button.grab_focus()
 
-func _on_restart_pressed():
+func _on_retry_pressed():
 	# Unpause
 	get_tree().paused = false
 	
@@ -81,8 +86,8 @@ func _input(event):
 	
 	# Keyboard/controller confirm
 	if event.is_action_pressed("ui_accept"):
-		if restart_button and restart_button.has_focus():
-			_on_restart_pressed()
+		if retry_button and retry_button.has_focus():
+			_on_retry_pressed()
 		elif menu_button and menu_button.has_focus():
 			_on_menu_pressed()
 		elif quit_button and quit_button.has_focus():
