@@ -238,7 +238,8 @@ position = Vector2(145, 50)
 position = Vector2(210, 120)
 
 [node name="UfoWorkshop" parent="." index="21" unique_id=625327535 instance=ExtResource("21_ngvhw")]
-position = Vector2(-235, -133)
+position = Vector2(-235, -138)
+metadata/_edit_group_ = true
 
 [node name="OceanCurrentLeft" parent="." index="22" unique_id=1683655070 instance=ExtResource("26_jqt73")]
 position = Vector2(-45, -85)

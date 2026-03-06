@@ -205,7 +205,7 @@ physics_material_override = SubResource("PhysicsMaterial_h3b7p")
 position = Vector2(95, 17)
 
 [node name="UfoWorkshop" parent="." index="29" unique_id=625327535 instance=ExtResource("22_8swdu")]
-position = Vector2(225, -133)
+position = Vector2(225, -138)
 
 [node name="ElectricEelSpawner" parent="." index="30" unique_id=1752833975 instance=ExtResource("22_67vg4")]
 

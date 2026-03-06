@@ -32,7 +32,15 @@ func _ready():
 	if invert_thrust_checkbox:
 		invert_thrust_checkbox.toggled.connect(_on_invert_thrust_toggled)
 		invert_thrust_checkbox.button_pressed = GameSettings.thrust_inverted
-	
+
+	# Fix focus navigation on page 2: the disabled NextButton sits between the
+	# checkbox and the other buttons, causing dpad DOWN from the checkbox to dead-end.
+	# Explicitly wire neighbors to route around it.
+	if invert_thrust_checkbox and prev_button and back_button:
+		invert_thrust_checkbox.focus_neighbor_bottom = invert_thrust_checkbox.get_path_to(prev_button)
+		prev_button.focus_neighbor_top = prev_button.get_path_to(invert_thrust_checkbox)
+		back_button.focus_neighbor_top = back_button.get_path_to(invert_thrust_checkbox)
+
 	_update_page()
 
 func show_guide():
@@ -52,11 +60,12 @@ func hide_guide():
 
 func _build_pages():
 	var page1 = """
-	
-	
-- Pick up UFO scraps from the ocean floor and bring them to your UFO workshop to assemble
+
+
+DONT PANIC!
+- Pick up UFO parts from the ocean floor and bring them to your UFO workshop to assemble
 the UFO and get to the next level. "X" will drop a carried piece pre delivery (they're heavy)
-- Each level requires a different amount of pieces, shown in top left of screen
+- Each level requires a different amount of parts, shown in top left of screen
 - Health: Lost from enemy contact/projectiles and running out of air. 
 	Gained by collecting health plants that spawn on walls every 300 points
 - Air: lost while underwater. Gained by surfacing or collecting air bubbles.
@@ -67,7 +76,6 @@ the UFO and get to the next level. "X" will drop a carried piece pre delivery (t
 - Cleanup space trash as well by shooting complete groups
 - Collect stars for points. Ocean floor stars are most valuable. 
 	Points also given for shooting ocean/space trash and UFO piece delivery. Leave no trace!
-- Invincible enemies shake when shot!
 """
 	
 	# Page 2 is now just the basic controls text
@@ -120,6 +128,17 @@ func _update_page():
 		prev_button.disabled = (current_page == 0)
 	if next_button:
 		next_button.disabled = (current_page == pages.size() - 1)
+
+	# When NextButton is disabled it blocks horizontal dpad movement between
+	# PrevButton and BackButton. Wire them directly on the last page and reset
+	# to automatic navigation on all other pages.
+	if prev_button and back_button:
+		if next_button.disabled:
+			prev_button.focus_neighbor_right = prev_button.get_path_to(back_button)
+			back_button.focus_neighbor_left = back_button.get_path_to(prev_button)
+		else:
+			prev_button.focus_neighbor_right = NodePath("")
+			back_button.focus_neighbor_left = NodePath("")
 
 func _on_prev_pressed():
 	if current_page > 0:

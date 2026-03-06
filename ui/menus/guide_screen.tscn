@@ -50,6 +50,7 @@ theme_override_font_sizes/font_size = 12
 
 [node name="InvertThrustCheckbox" type="CheckBox" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ControlsContainer" unique_id=481502668]
 layout_mode = 2
+theme_override_font_sizes/font_size = 10
 text = "Invert Thrust Direction (Kick left, propel turtle right)."
 
 [node name="PageIndicator" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1908725756]

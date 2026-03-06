@@ -89,6 +89,11 @@ func _ready():
 	if not energy_bar:
 		push_warning("HUD: Could not find EnergyBar!")
 	
+	# Apply black borders to all progress bars
+	_apply_bar_borders()
+	# Set all label text to black
+	_apply_label_colors()
+
 	# Initialize displays
 	update_score(0)
 	update_ufo_pieces(0, 0)
@@ -130,7 +135,7 @@ func _process(delta):
 		var pulse = (sin(energy_pulse_timer) + 1.0) / 2.0
 		
 		# Get the base color (green/yellow/red based on energy level)
-		var base_color = Color.GREEN
+		var base_color = Color.ORANGE
 		var energy_ratio = current_energy / max_energy
 		if energy_ratio <= 0.2:
 			base_color = Color.RED
@@ -138,12 +143,46 @@ func _process(delta):
 			base_color = Color.YELLOW
 		
 		# Pulse to bright cyan to indicate wall recovery
-		var recovery_color = base_color.lerp(Color.CYAN, pulse * 0.7)
+		var recovery_color = base_color.lerp(Color.GOLD, pulse * 0.7)
 		energy_bar.modulate = recovery_color
 	else:
 		energy_pulse_timer = 0.0
 		# Reset to normal color coding when not recovering from wall
 		update_energy(current_energy, max_energy)
+
+## Set all HUD labels to black text
+func _apply_label_colors() -> void:
+	for label in find_children("*", "Label", true, false):
+		label.add_theme_color_override("font_color", Color.WHITE)
+
+## Add a 2px black border around each progress bar for readability
+func _apply_bar_borders() -> void:
+	const RADIUS := 4
+
+	var bg_style := StyleBoxFlat.new()
+	bg_style.bg_color = Color(0.2, 0.2, 0.2, 1.0)
+	bg_style.border_width_left = 2
+	bg_style.border_width_top = 2
+	bg_style.border_width_right = 2
+	bg_style.border_width_bottom = 2
+	bg_style.border_color = Color(0.0, 0.0, 0.0, 1.0)
+	bg_style.corner_radius_top_left = RADIUS
+	bg_style.corner_radius_top_right = RADIUS
+	bg_style.corner_radius_bottom_left = RADIUS
+	bg_style.corner_radius_bottom_right = RADIUS
+
+	# Fill is white so the bar's modulate color (green/yellow/red/cyan) comes through cleanly
+	var fill_style := StyleBoxFlat.new()
+	fill_style.bg_color = Color.WHITE
+	fill_style.corner_radius_top_left = RADIUS
+	fill_style.corner_radius_top_right = RADIUS
+	fill_style.corner_radius_bottom_left = RADIUS
+	fill_style.corner_radius_bottom_right = RADIUS
+
+	for bar: ProgressBar in [health_bar, air_bar, energy_bar]:
+		if bar:
+			bar.add_theme_stylebox_override("background", bg_style)
+			bar.add_theme_stylebox_override("fill", fill_style)
 
 ## Update score display
 func update_score(new_score: int):
@@ -229,7 +268,7 @@ func update_energy(energy: float, max_en: float):
 		if not wall_recovery_active:
 			# Color code energy bar
 			if energy / max_en > 0.5:
-				energy_bar.modulate = Color.GREEN
+				energy_bar.modulate = Color.ORANGE
 			elif energy / max_en > 0.2:
 				energy_bar.modulate = Color.YELLOW
 			else:
@@ -284,13 +323,13 @@ func update_ufo_pieces(collected: int, needed: int):
 	pieces_needed = needed
 	
 	if ufo_pieces_label:
-		ufo_pieces_label.text = "UFO Pieces: %d/%d" % [collected, needed]
-		
-		# Color code: green when complete, white otherwise
+		ufo_pieces_label.text = "UFO Parts: %d/%d" % [collected, needed]
+
+		# Color code: green when complete, black otherwise
 		if collected >= needed and needed > 0:
-			ufo_pieces_label.modulate = Color.GREEN
+			ufo_pieces_label.add_theme_color_override("font_color", Color.GREEN)
 		else:
-			ufo_pieces_label.modulate = Color.WHITE
+			ufo_pieces_label.add_theme_color_override("font_color", Color.BLACK)
 
 ## Signal handlers for LevelManager
 func _on_piece_delivered(collected: int, needed: int):

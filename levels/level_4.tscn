@@ -435,7 +435,7 @@ length_units = 1
 mirrored = true
 
 [node name="UfoWorkshop" parent="." index="28" unique_id=625327535 instance=ExtResource("19_746kk")]
-position = Vector2(292, 53)
+position = Vector2(292, 49)
 
 [node name="DeadWall15" parent="." index="29" unique_id=1406475963 instance=ExtResource("10_1gtbd")]
 position = Vector2(296, 65)

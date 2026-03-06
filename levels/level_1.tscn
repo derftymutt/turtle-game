@@ -200,7 +200,7 @@ mirrored = true
 position = Vector2(-185, 80)
 
 [node name="UfoWorkshop" parent="." index="17" unique_id=625327535 instance=ExtResource("21_w75he")]
-position = Vector2(0, -133)
+position = Vector2(0, -138)
 
 [node name="Piranha" parent="." index="18" unique_id=923197771 instance=ExtResource("10_0fu15")]
 position = Vector2(-134, 77)
