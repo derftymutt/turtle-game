@@ -575,6 +575,7 @@ position = Vector2(165, 40)
 
 [node name="OceanCurrent2" parent="." index="56" unique_id=1661200675 instance=ExtResource("20_436cy")]
 position = Vector2(-273, -96)
+show_debug_arrows = false
 
 [node name="Path2D" parent="OceanCurrent2" index="0" unique_id=1461068862]
 curve = SubResource("Curve2D_m4oc1")
@@ -691,6 +692,7 @@ position = Vector2(-293, -304)
 propulsion_force = 3000.0
 centering_force = 1000.0
 lateral_damping = 1.0
+show_debug_arrows = false
 
 [node name="Path2D" parent="OceanCurrent3" index="0" unique_id=1461068862]
 curve = SubResource("Curve2D_kqeme")
