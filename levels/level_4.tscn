@@ -138,9 +138,6 @@ point_count = 9
 [node name="LevelBase" unique_id=1013451131 instance=ExtResource("1_vov61")]
 level_number = 4
 
-[node name="LevelCompleteScreen" parent="." index="2" unique_id=1103608067]
-visible = false
-
 [node name="SkyBackground" parent="." index="3" unique_id=967020750 instance=ExtResource("2_kqeme")]
 
 [node name="OceanBackground" parent="." index="5" unique_id=593268214 instance=ExtResource("3_pb5nj")]
