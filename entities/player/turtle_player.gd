@@ -67,7 +67,7 @@ var active_shoot_cooldown: float = shoot_cooldown
 
 # Powerup states
 var shield_active: bool = false
-var shield_duration: float = 8.0
+var shield_duration: float = 10.0
 var shield_timer: float = 0.0
 var _shield_tween: Tween = null
 
@@ -79,7 +79,7 @@ var energy_freeze_timer: float = 0.0
 var energy_freeze_tween: Tween = null
 
 var rapid_fire_active: bool = false
-var rapid_fire_duration: float = 8.0
+var rapid_fire_duration: float = 10.0
 var rapid_fire_timer: float = 0.0
 
 var is_player_controlling_rotation: bool = false

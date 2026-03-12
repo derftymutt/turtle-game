@@ -12,7 +12,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.05490196, 1, 1, 1)
+color = Color(0, 0.3019608, 1, 1)
 
 [node name="Control" type="Control" parent="." unique_id=2133766794]
 layout_mode = 3
@@ -39,7 +39,7 @@ layout_mode = 2
 
 [node name="TitleLabel" type="Label" parent="Control/CenterContainer/VBoxContainer" unique_id=1598903120]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.46710145, 0.93201816, 0.2886762, 1)
+theme_override_colors/font_color = Color(0.6, 0.8980392, 0.3137255, 1)
 theme_override_font_sizes/font_size = 48
 text = "Turtle Plunge"
 
