@@ -571,12 +571,12 @@ func _on_super_speed_area_entered(body: Node2D):
 # ---------------------------------------------------------------------------
 
 func _get_powerup_flash_color() -> Color:
-	# ~5 Hz sin wave matching original tween speed (0.1s per step = 5 Hz)
-	var flash = (sin(Time.get_ticks_msec() * 0.031) + 1.0) * 0.5  # 0.0–1.0
+	var flash = (sin(Time.get_ticks_msec() * 0.031) + 1.0) * 0.5
+
 	if shield_active:
 		return Color(8.05, 7.925, 0.0, 1.0).lerp(Color(0.02, 0.0, 0.0, 1.0), flash)
 	elif energy_freeze_active:
-		return Color(1.0, 0.536, 0.13, 1.0).lerp(Color(0.99, 0.949, 0.891, 1.0), flash)
+		return Color(2.0, 0.7, 0.0, 1.0).lerp(Color(0.4, 0.15, 0.0, 1.0), flash)
 	elif rapid_fire_active:
 		return Color(0.0, 2.5, 0.5, 1.0).lerp(Color(0.4, 1.0, 0.4, 1.0), flash)
 	return Color.WHITE
