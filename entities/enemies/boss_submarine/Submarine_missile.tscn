@@ -1,0 +1,33 @@
+[gd_scene format=3 uid="uid://bw05rgqhi8gad"]
+
+[ext_resource type="Script" uid="uid://du31gbcpgiq85" path="res://entities/enemies/boss_submarine/submarine_missile.gd" id="1_hjd7k"]
+[ext_resource type="Texture2D" uid="uid://cb5k17q2mchrt" path="res://entities/enemies/boss_submarine/sprites/submarine-missile.png" id="2_axfrp"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_47dd0"]
+atlas = ExtResource("2_axfrp")
+region = Rect2(0, 0, 8, 8)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_shype"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_47dd0")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_3h13k"]
+radius = 4.0
+
+[node name="SubmarineMissile" type="RigidBody2D" unique_id=1318285673]
+collision_layer = 64
+collision_mask = 33
+script = ExtResource("1_hjd7k")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=75769821]
+sprite_frames = SubResource("SpriteFrames_shype")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1950199794]
+shape = SubResource("CircleShape2D_3h13k")

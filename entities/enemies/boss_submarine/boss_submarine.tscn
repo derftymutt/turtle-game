@@ -1,0 +1,71 @@
+[gd_scene format=3 uid="uid://dovfspgddp3gh"]
+
+[ext_resource type="Script" uid="uid://t4e544u6xoc1" path="res://entities/enemies/boss_submarine/boss_submarine.gd" id="1_40hcg"]
+[ext_resource type="Texture2D" uid="uid://1hf6jptx25if" path="res://entities/enemies/boss_submarine/sprites/boss_submarine.png" id="2_6jxpy"]
+[ext_resource type="PackedScene" uid="uid://bw05rgqhi8gad" path="res://entities/enemies/boss_submarine/Submarine_missile.tscn" id="2_uj7so"]
+[ext_resource type="PackedScene" uid="uid://dyjj1076itg0g" path="res://entities/enemies/boss_submarine/submarine_drone.tscn" id="3_6yr3n"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yjcsj"]
+atlas = ExtResource("2_6jxpy")
+region = Rect2(0, 0, 96, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_uj7so"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yjcsj")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_6yr3n"]
+radius = 16.0
+height = 94.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_6jxpy"]
+radius = 16.0
+height = 94.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_yk2j0"]
+radius = 16.0
+height = 94.0
+
+[node name="BossSubmarine" type="AnimatableBody2D" unique_id=1228480230]
+collision_layer = 4
+collision_mask = 33
+script = ExtResource("1_40hcg")
+missile_scene = ExtResource("2_uj7so")
+drone_scene = ExtResource("3_6yr3n")
+metadata/_custom_type_script = "uid://d1bdqvo7gkaaa"
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1950644438]
+sprite_frames = SubResource("SpriteFrames_uj7so")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1817661990]
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_6yr3n")
+
+[node name="DamageArea" type="Area2D" parent="." unique_id=1093324315]
+collision_mask = 32
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DamageArea" unique_id=705111380]
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_6jxpy")
+
+[node name="SuperSpeedHitArea" type="Area2D" parent="." unique_id=1382566738]
+collision_layer = 0
+collision_mask = 32
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SuperSpeedHitArea" unique_id=775116716]
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_yk2j0")
+
+[node name="MissileLaunchPoint" type="Marker2D" parent="." unique_id=383945065]
+position = Vector2(0, -15)
+
+[node name="HatchPoint" type="Marker2D" parent="." unique_id=1800671678]
+position = Vector2(-31, -14)
+
+[connection signal="body_entered" from="SuperSpeedHitArea" to="." method="on_super_speed_hit"]

@@ -1,0 +1,41 @@
+[gd_scene format=3 uid="uid://dyjj1076itg0g"]
+
+[ext_resource type="Script" uid="uid://dfhc10q5yn0vm" path="res://entities/enemies/boss_submarine/submarine_drone.gd" id="1_jsqu6"]
+[ext_resource type="Texture2D" uid="uid://mdcobv0supma" path="res://entities/enemies/boss_submarine/sprites/submarine_drone.png" id="2_o0lct"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qvt0s"]
+atlas = ExtResource("2_o0lct")
+region = Rect2(0, 0, 8, 8)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_f1de6"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qvt0s")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_p8vif"]
+radius = 4.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_k3iy4"]
+radius = 6.0
+
+[node name="SubmarineDrone" type="RigidBody2D" unique_id=1389316831]
+collision_layer = 4
+collision_mask = 33
+script = ExtResource("1_jsqu6")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=968933857]
+sprite_frames = SubResource("SpriteFrames_f1de6")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1437494023]
+shape = SubResource("CircleShape2D_p8vif")
+
+[node name="DamageArea" type="Area2D" parent="." unique_id=655212640]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DamageArea" unique_id=1259641360]
+shape = SubResource("CircleShape2D_k3iy4")
