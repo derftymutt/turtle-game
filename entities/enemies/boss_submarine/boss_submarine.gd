@@ -155,8 +155,13 @@ func on_super_speed_hit(body: Node2D) -> void:
 	# Only react to the player
 	if not body.is_in_group("player"):
 		return
-	# Check player is actually in super speed
-	if not body.get("is_super_speed"):
+	# Accept hits during active super speed OR the cooldown window.
+	# The cooldown is a half-second grace period that visually looks like
+	# super speed — this is exactly when most contacts happen, because the
+	# collision response slows the turtle below the threshold on the same
+	# frame the signal fires, so is_super_speed is often already false.
+	var in_window: bool = body.get("is_super_speed") or body.get("is_super_speed_cooldown")
+	if not in_window:
 		return
 	# Don't double-hit during invincibility window
 	if _hit_invincible:
