@@ -129,7 +129,7 @@ tile_map_data = PackedByteArray("AADY/wkAAAAAAAAAAADY/wgAAAACAAAAAADY/wcAAAABAAA
 tile_set = ExtResource("8_ldpug")
 
 [node name="BossSubmarine" parent="." index="13" unique_id=1228480230 instance=ExtResource("9_ldpug")]
-position = Vector2(-196, 126)
+position = Vector2(-201, 143)
 
 [node name="FlipperCenterLeftTop" type="Node" parent="." index="14" unique_id=224108992]
 

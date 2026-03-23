@@ -5,18 +5,37 @@
 [ext_resource type="PackedScene" uid="uid://bw05rgqhi8gad" path="res://entities/enemies/boss_submarine/Submarine_missile.tscn" id="2_uj7so"]
 [ext_resource type="PackedScene" uid="uid://dyjj1076itg0g" path="res://entities/enemies/boss_submarine/submarine_drone.tscn" id="3_6yr3n"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_yjcsj"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_uj7so"]
 atlas = ExtResource("2_6jxpy")
-region = Rect2(0, 0, 96, 32)
+region = Rect2(0, 0, 96, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6yr3n"]
+atlas = ExtResource("2_6jxpy")
+region = Rect2(96, 0, 96, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_flxhu"]
+atlas = ExtResource("2_6jxpy")
+region = Rect2(384, 0, 96, 40)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_uj7so"]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_yjcsj")
+"texture": SubResource("AtlasTexture_uj7so")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6yr3n")
 }],
 "loop": true,
 "name": &"default",
+"speed": 2.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_flxhu")
+}],
+"loop": true,
+"name": &"open_hatch",
 "speed": 5.0
 }]
 
@@ -42,6 +61,10 @@ metadata/_custom_type_script = "uid://d1bdqvo7gkaaa"
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1950644438]
 sprite_frames = SubResource("SpriteFrames_uj7so")
+animation = &"open_hatch"
+autoplay = "default"
+frame_progress = 0.4080433
+offset = Vector2(0, -4)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1817661990]
 rotation = 1.5707964
@@ -66,6 +89,6 @@ shape = SubResource("CapsuleShape2D_yk2j0")
 position = Vector2(0, -15)
 
 [node name="HatchPoint" type="Marker2D" parent="." unique_id=1800671678]
-position = Vector2(-31, -14)
+position = Vector2(-21, -14)
 
 [connection signal="body_entered" from="SuperSpeedHitArea" to="." method="on_super_speed_hit"]

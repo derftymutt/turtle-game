@@ -97,6 +97,10 @@ var _hit_invincible: bool = false
 var _missile_launch: Marker2D = null
 var _hatch_point: Marker2D = null
 var _player: Node2D = null
+var _sprite: AnimatedSprite2D = null
+
+# Original local X of the hatch (mirrored when sprite flips)
+var _hatch_point_origin_x: float = 0.0
 
 # ─────────────────────────────────────────────────────────────
 # SETUP
@@ -118,6 +122,10 @@ func _enemy_ready() -> void:
 	_missile_launch = get_node_or_null("MissileLaunchPoint")
 	_hatch_point    = get_node_or_null("HatchPoint")
 	_player         = get_tree().get_first_node_in_group("player")
+	_sprite         = get_node_or_null("AnimatedSprite2D")
+
+	if _hatch_point:
+		_hatch_point_origin_x = _hatch_point.position.x
 
 	if not _missile_launch:
 		push_warning("SubmarineBoss: No MissileLaunchPoint Marker2D found!")
@@ -199,6 +207,9 @@ func _begin_move_phase() -> void:
 	var target_pos := Vector2(target_x, floor_patrol_y)
 	var distance := global_position.distance_to(target_pos)
 	var travel_time := distance / move_speed
+
+	# Flip sprite and markers to face the direction of travel
+	_set_facing(target_x > global_position.x)
 
 	# Tween handles the actual movement; AnimatableBody2D works perfectly with tweens.
 	var tween := create_tween()
@@ -383,10 +394,37 @@ func _try_deploy_drone() -> void:
 	if not drone_scene or not _hatch_point:
 		return
 
+	# Play open_hatch animation and deploy drone immediately while it plays,
+	# then return to default once the animation duration has elapsed.
+	if _sprite and _sprite.sprite_frames and _sprite.sprite_frames.has_animation("open_hatch"):
+		_sprite.play("open_hatch")
+
 	var drone = drone_scene.instantiate()
 	get_parent().add_child(drone)
 	drone.global_position = _hatch_point.global_position
 	_active_drones.append(drone)
+
+	if _sprite and _sprite.sprite_frames and _sprite.sprite_frames.has_animation("open_hatch"):
+		var duration := _get_animation_duration("open_hatch")
+		await get_tree().create_timer(duration).timeout
+		if not is_instance_valid(self) or _state == State.DYING:
+			return
+		_sprite.play("default")
+
+func _set_facing(facing_right: bool) -> void:
+	if _sprite:
+		_sprite.flip_h = facing_right
+	if _hatch_point:
+		_hatch_point.position.x = -_hatch_point_origin_x if facing_right else _hatch_point_origin_x
+
+func _get_animation_duration(anim_name: String) -> float:
+	if not _sprite or not _sprite.sprite_frames:
+		return 0.5
+	var frame_count := _sprite.sprite_frames.get_frame_count(anim_name)
+	var fps := _sprite.sprite_frames.get_animation_speed(anim_name)
+	if fps <= 0.0:
+		return 0.5
+	return frame_count / fps
 
 # ─────────────────────────────────────────────────────────────
 # DEATH
