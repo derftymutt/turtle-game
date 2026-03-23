@@ -23,7 +23,7 @@ radius = 4.0
 
 [node name="SubmarineMissile" type="RigidBody2D" unique_id=1318285673]
 collision_layer = 64
-collision_mask = 33
+collision_mask = 32
 script = ExtResource("1_hjd7k")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=75769821]

@@ -6,6 +6,7 @@ extends Node
 signal piece_delivered(pieces_collected, pieces_needed)
 signal level_complete
 signal level_started(level_number)
+signal boss_level_started(level_number)
 
 # Level progression
 var current_level_number: int = 1
@@ -19,6 +20,7 @@ var level_scenes: Dictionary = {
 	2: "res://levels/level_2.tscn",
 	3: "res://levels/level_3.tscn",
 	4: "res://levels/level_4.tscn",
+	5: "res://levels/level_5.tscn",
 	# Add more as you create them
 }
 
@@ -31,26 +33,52 @@ var pieces_needed_by_level: Dictionary = {
 	# etc...
 }
 
+# Boss levels — completion is triggered by defeating the boss, not delivering pieces
+var boss_levels: Dictionary = {
+	5: true,
+	# Add future boss levels here
+}
+
 func _ready():
 	print("🎮 LevelManager initialized")
+
+func is_boss_level(level_number: int = -1) -> bool:
+	"""Returns true if the given level (or current level) is a boss level"""
+	var lvl := level_number if level_number >= 0 else current_level_number
+	return lvl in boss_levels
 
 func start_level(level_number: int):
 	"""Initialize a new level (called after scene loads)"""
 	current_level_number = level_number
 	pieces_collected = 0
-	
+
+	if is_boss_level(level_number):
+		pieces_needed = 0
+		level_started.emit(level_number)
+		boss_level_started.emit(level_number)
+		print("🦈 Level %d started! Boss level — defeat the boss!" % level_number)
+		return
+
 	# Set piece requirement for this level
 	if level_number in pieces_needed_by_level:
 		pieces_needed = pieces_needed_by_level[level_number]
 	else:
 		# Default scaling: +1 piece every 2 levels
 		pieces_needed = 3 + int(level_number / 2)
-	
+
 	level_started.emit(level_number)
 	print("🌊 Level %d started! Collect %d UFO pieces" % [level_number, pieces_needed])
-	
+
 	# Emit initial piece count to update HUD (0/x)
 	piece_delivered.emit(0, pieces_needed)
+
+func boss_defeated():
+	"""Called by a boss enemy when it dies — triggers level completion"""
+	if not is_boss_level():
+		push_warning("boss_defeated() called on non-boss level %d!" % current_level_number)
+		return
+	print("💥 Boss defeated! Level %d complete!" % current_level_number)
+	complete_level()
 
 func deliver_piece():
 	"""Called by UFOWorkshop when a piece is delivered"""

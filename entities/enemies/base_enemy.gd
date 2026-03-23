@@ -14,6 +14,7 @@ class_name BaseEnemy
 # Damage dealing
 @export var contact_damage: float = 25.0
 @export var knockback_force: float = 300.0
+@export var contact_damage_cooldown: float = 1.5  # Seconds before this enemy can deal contact damage again
 
 # Visual feedback
 @export var damage_flash_duration: float = 0.3
@@ -24,6 +25,7 @@ var current_health: float
 var sprite: Node2D = null
 var damage_area: Area2D = null
 var _is_playing_damage_animation: bool = false
+var _contact_damage_ready: bool = true
 
 func _ready():
 	current_health = max_health
@@ -142,13 +144,19 @@ func _play_invincible_feedback():
 
 ## Handle player collision in damage area
 func _on_damage_area_entered(body: Node2D):
-	if body.is_in_group("player") and body.has_method("take_damage") and current_health > 0:
+	if body.is_in_group("player") and body.has_method("take_damage") and current_health > 0 and _contact_damage_ready:
 		_deal_damage_to_player(body)
 
 ## Deal damage and knockback to player
 func _deal_damage_to_player(player: Node2D):
 	player.take_damage(contact_damage)
-	
+
+	# Start cooldown so bouncing/re-entry doesn't deal rapid hits
+	_contact_damage_ready = false
+	get_tree().create_timer(contact_damage_cooldown).timeout.connect(
+		func(): _contact_damage_ready = true
+	)
+
 	# Apply knockback
 	var knockback_dir = (player.global_position - global_position).normalized()
 	if player is RigidBody2D:

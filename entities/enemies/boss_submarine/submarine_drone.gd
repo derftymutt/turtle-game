@@ -18,13 +18,13 @@ class_name SubmarineDrone
 
 @export_group("Movement")
 ## Top speed toward the player
-@export var chase_speed: float = 45.0
+@export var chase_speed: float = 150.0
 ## How much random angular noise (degrees) is added to the heading each update
 @export var wander_jitter_deg: float = 30.0
 ## Seconds between recalculating the heading toward the player
 @export var heading_update_interval: float = 1.2
 ## How quickly the drone actually accelerates toward its target heading
-@export var turn_speed: float = 2.0
+@export var turn_speed: float = 5.0
 
 @export_group("Lifetime")
 ## Drone auto-destructs after this many seconds even if alive

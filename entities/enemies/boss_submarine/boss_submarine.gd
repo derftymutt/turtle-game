@@ -32,7 +32,7 @@ class_name BossSubmarine
 ## How fast the sub travels between positions (pixels/sec)
 @export var move_speed: float = 90.0
 ## Pause at destination before starting attack
-@export var arrival_pause: float = 0.5
+@export var arrival_pause: float = 2
 
 # ── Attack: Fan Salvo ────────────────────────────────────────
 @export_group("Pattern 1: Fan Salvo")
@@ -67,9 +67,9 @@ class_name BossSubmarine
 # ── Drones ────────────────────────────────────────────────────
 @export_group("Drones")
 ## How often (seconds) a drone is deployed, regardless of attack phase
-@export var drone_deploy_interval: float = 8.0
+@export var drone_deploy_interval: float = 5.0
 ## Max drones alive at once
-@export var max_active_drones: int = 3
+@export var max_active_drones: int = 6
 
 # ── Invincibility window after a super-speed hit ─────────────
 @export_group("Damage")
@@ -103,7 +103,7 @@ var _player: Node2D = null
 # ─────────────────────────────────────────────────────────────
 
 func _enemy_ready() -> void:
-	max_health = 300.0
+	max_health = 500.0
 	current_health = max_health
 	contact_damage = 20.0
 	knockback_force = 500.0
@@ -428,5 +428,5 @@ func die() -> void:
 	tween.finished.connect(_on_death_sequence_complete)
 
 func _on_death_sequence_complete() -> void:
-	# TODO: trigger boss-defeated signal / level progression here
+	LevelManager.boss_defeated()
 	queue_free()

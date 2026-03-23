@@ -20,6 +20,7 @@
 [ext_resource type="PackedScene" uid="uid://bgrcf873d7ity" path="res://entities/collectibles/health_plant/health_plant_spawner.tscn" id="18_mlk23"]
 [ext_resource type="PackedScene" uid="uid://c55cfm3aeb65a" path="res://systems/trash_cleanup/trash_sequence_spawner.tscn" id="19_b36k0"]
 [ext_resource type="PackedScene" uid="uid://bp6g8v1jmnruo" path="res://entities/environment/walls/circular_bumper/circular_bumper.tscn" id="20_bon8i"]
+[ext_resource type="PackedScene" uid="uid://bu0sjqqm7uvm1" path="res://entities/enemies/crocodile/crocodile.tscn" id="21_av2kh"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1y5xd"]
 size = Vector2(8.000166, 471.00015)
@@ -63,9 +64,8 @@ level_number = 5
 
 [node name="OceanBackground" parent="." index="6" unique_id=593268214 instance=ExtResource("3_1y5xd")]
 
-[node name="Camera2D" type="Camera2D" parent="." index="7" unique_id=567849901 node_paths=PackedStringArray("follow_target")]
+[node name="Camera2D" type="Camera2D" parent="." index="7" unique_id=567849901]
 script = ExtResource("4_g5mgy")
-follow_target = NodePath("")
 horizontal_follow_enabled = false
 
 [node name="TurtlePlayer" parent="." index="8" unique_id=1971009088 instance=ExtResource("5_v5ho1")]
@@ -251,3 +251,8 @@ physics_material_override = SubResource("PhysicsMaterial_bon8i")
 [node name="CircularBumper5" parent="." index="35" unique_id=343186210 instance=ExtResource("20_bon8i")]
 position = Vector2(-205, 90)
 physics_material_override = SubResource("PhysicsMaterial_bon8i")
+
+[node name="Crocodile" parent="." index="36" unique_id=787732993 instance=ExtResource("21_av2kh")]
+position = Vector2(-264, -124)
+patrol_speed = 50.0
+chase_speed = 120.0
