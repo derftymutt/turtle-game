@@ -34,24 +34,35 @@ func _create_level_buttons():
 	#if level_container:
 		#level_container.add_child(spacer1)
 	
-	# === LEVEL SELECT BUTTONS (Smaller, dev tools) ===
+	# === LEVEL SELECT BUTTONS (Smaller, dev tools, 3 per row) ===
 	# Get levels from LevelManager instead of GameManager
-	for level_num in LevelManager.level_scenes.keys():
+	var level_keys = LevelManager.level_scenes.keys()
+	var columns = 3
+	var current_row: HBoxContainer = null
+	for i in range(level_keys.size()):
+		if i % columns == 0:
+			current_row = HBoxContainer.new()
+			current_row.add_theme_constant_override("separation", 4)
+			if level_container:
+				level_container.add_child(current_row)
+
+		var level_num = level_keys[i]
 		var button = Button.new()
-		
+
 		# Format level name and display high score
 		var level_name = "level_%d" % level_num
 		var display_name = "Level %d" % level_num
 		var high_score = GameManager.get_high_score(level_name)
-		button.text = "%s\nHigh Score: %d" % [display_name, high_score]
-		button.custom_minimum_size = Vector2(100, 10)
+		button.text = "%s\nHS: %d" % [display_name, high_score]
+		button.custom_minimum_size = Vector2(80, 10)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.add_theme_font_size_override("font_size", 8)
-		
+
 		# Connect button to load level by number
 		button.pressed.connect(func(): _on_level_selected(level_num))
-		
-		if level_container:
-			level_container.add_child(button)
+
+		if current_row:
+			current_row.add_child(button)
 	
 	# Add spacing
 	var spacer2 = Control.new()

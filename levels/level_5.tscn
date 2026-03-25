@@ -1,0 +1,261 @@
+[gd_scene format=4 uid="uid://drp27w3qhwodb"]
+
+[ext_resource type="PackedScene" uid="uid://dgwg5saty0h76" path="res://levels/shared/level_base.tscn" id="1_erq1u"]
+[ext_resource type="PackedScene" uid="uid://b6mqqn1jgl6of" path="res://levels/environment/sky_background.tscn" id="2_1y5xd"]
+[ext_resource type="PackedScene" uid="uid://qd5yfrw7588i" path="res://entities/environment/ocean/ocean.tscn" id="2_26h77"]
+[ext_resource type="PackedScene" uid="uid://dysmgxrg7t1o4" path="res://entities/environment/ocean_background/ocean_background.tscn" id="3_1y5xd"]
+[ext_resource type="Script" uid="uid://c3i3p77jm22vp" path="res://systems/camera_2d.gd" id="4_g5mgy"]
+[ext_resource type="PackedScene" uid="uid://btbnsn74vk1b" path="res://entities/player/turtle_player.tscn" id="5_v5ho1"]
+[ext_resource type="Texture2D" uid="uid://bm428btwp720u" path="res://entities/environment/ocean_boundaries/ocean_floor.png" id="7_v5ho1"]
+[ext_resource type="TileSet" uid="uid://dyl02kfc4a681" path="res://entities/environment/ocean_boundaries/ocean_wall.tres" id="8_ldpug"]
+[ext_resource type="PackedScene" uid="uid://dovfspgddp3gh" path="res://entities/enemies/boss_submarine/boss_submarine.tscn" id="9_ldpug"]
+[ext_resource type="PackedScene" uid="uid://4het8fdlmvgj" path="res://entities/environment/flippers/flipper_left_down.tscn" id="10_a58qw"]
+[ext_resource type="PackedScene" uid="uid://8edo3etakc1a" path="res://entities/environment/walls/dead_wall/dead_wall.tscn" id="11_ij65d"]
+[ext_resource type="PackedScene" uid="uid://b5olvcks1vnwn" path="res://entities/environment/flippers/flipper_right_down.tscn" id="12_ij65d"]
+[ext_resource type="Script" uid="uid://3jp0yf3qb8pa" path="res://entities/collectibles/air_bubble/air_bubble_spawner.gd" id="14_bon8i"]
+[ext_resource type="PackedScene" uid="uid://cdmr2papqk2ih" path="res://entities/collectibles/air_bubble/air_bubble.tscn" id="15_av2kh"]
+[ext_resource type="PackedScene" uid="uid://cc3k1qa68v0mc" path="res://entities/collectibles/star/star_collectible_spawner.tscn" id="16_mmy2b"]
+[ext_resource type="PackedScene" uid="uid://doh85qcfn8x2w" path="res://entities/collectibles/star/star_collectible.tscn" id="17_cekp2"]
+[ext_resource type="PackedScene" uid="uid://bgrcf873d7ity" path="res://entities/collectibles/health_plant/health_plant_spawner.tscn" id="18_mlk23"]
+[ext_resource type="PackedScene" uid="uid://c55cfm3aeb65a" path="res://systems/trash_cleanup/trash_sequence_spawner.tscn" id="19_b36k0"]
+[ext_resource type="PackedScene" uid="uid://bp6g8v1jmnruo" path="res://entities/environment/walls/circular_bumper/circular_bumper.tscn" id="20_bon8i"]
+[ext_resource type="PackedScene" uid="uid://bu0sjqqm7uvm1" path="res://entities/enemies/crocodile/crocodile.tscn" id="21_av2kh"]
+[ext_resource type="PackedScene" uid="uid://d2kw7hdpyp6d0" path="res://entities/enemies/sea_urchin/sea_urchin.tscn" id="21_mmy2b"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1y5xd"]
+size = Vector2(8.000166, 471.00015)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_g5mgy"]
+size = Vector2(8.000183, 465.00012)
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_8vr3t"]
+texture = ExtResource("7_v5ho1")
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+1:0/0 = 0
+1:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+2:0/0 = 0
+2:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+
+[sub_resource type="TileSet" id="TileSet_a58qw"]
+physics_layer_0/collision_layer = 1
+sources/0 = SubResource("TileSetAtlasSource_8vr3t")
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_gci8k"]
+friction = 0.0
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_gder6"]
+friction = 0.0
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_av2kh"]
+friction = 0.1
+bounce = 1.2
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_bon8i"]
+friction = 0.1
+bounce = 1.2
+
+[node name="Level5" unique_id=1013451131 instance=ExtResource("1_erq1u")]
+level_number = 5
+
+[node name="SkyBackground" parent="." index="4" unique_id=967020750 instance=ExtResource("2_1y5xd")]
+
+[node name="Ocean" parent="." index="5" unique_id=1274260941 instance=ExtResource("2_26h77")]
+
+[node name="OceanBackground" parent="." index="6" unique_id=593268214 instance=ExtResource("3_1y5xd")]
+
+[node name="Camera2D" type="Camera2D" parent="." index="7" unique_id=567849901]
+script = ExtResource("4_g5mgy")
+horizontal_follow_enabled = false
+
+[node name="TurtlePlayer" parent="." index="8" unique_id=1971009088 instance=ExtResource("5_v5ho1")]
+super_speed_color = Color(0.778, 1.504, 0, 1)
+
+[node name="WorldSafetyBoundaries" type="Node2D" parent="." index="9" unique_id=1355678460]
+
+[node name="BoundaryLeft" type="StaticBody2D" parent="WorldSafetyBoundaries" index="0" unique_id=555129547]
+position = Vector2(-9, -376)
+rotation = -3.1415925
+scale = Vector2(0.99999994, 0.99999994)
+metadata/_edit_group_ = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldSafetyBoundaries/BoundaryLeft" index="0" unique_id=75404336]
+position = Vector2(306.99988, -32.50003)
+scale = Vector2(0.9999994, 0.9999994)
+shape = SubResource("RectangleShape2D_1y5xd")
+debug_color = Color(0, 0.6, 0.7, 0.42)
+
+[node name="ColorRect" type="ColorRect" parent="WorldSafetyBoundaries/BoundaryLeft" index="1" unique_id=877630201]
+visible = false
+offset_left = 303.51578
+offset_top = -269.00006
+offset_right = 311.90527
+offset_bottom = 62.268463
+color = Color(0.1764706, 0.12156863, 0.023529412, 1)
+
+[node name="BoundaryRight" type="StaticBody2D" parent="WorldSafetyBoundaries" index="1" unique_id=562831711]
+position = Vector2(-11, -393)
+rotation = -3.1415925
+scale = Vector2(0.99999994, 0.99999994)
+metadata/_edit_group_ = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldSafetyBoundaries/BoundaryRight" index="0" unique_id=1731774770]
+position = Vector2(-326.99988, -36.499878)
+scale = Vector2(0.99999964, 0.99999964)
+shape = SubResource("RectangleShape2D_g5mgy")
+debug_color = Color(0, 0.6, 0.7, 0.42)
+
+[node name="ColorRect" type="ColorRect" parent="WorldSafetyBoundaries/BoundaryRight" index="1" unique_id=156902919]
+visible = false
+offset_left = -333.00003
+offset_top = -269.0
+offset_right = -323.4816
+offset_bottom = 62.268524
+color = Color(0.1764706, 0.12156863, 0.023529412, 1)
+
+[node name="OceanFloor" type="TileMapLayer" parent="." index="10" unique_id=526187788]
+position = Vector2(0, 4)
+tile_map_data = PackedByteArray("AADs/woAAAABAAAAAADt/woAAAAAAAAAAADu/woAAAACAAAAAADv/woAAAABAAAAAADw/woAAAAAAAAAAADx/woAAAAAAAAAAADy/woAAAAAAAAAAADz/woAAAAAAAAAAAD0/woAAAACAAAAAAD1/woAAAAAAAAAAAD2/woAAAAAAAAAAAD3/woAAAAAAAAAAAD4/woAAAAAAAAAAAD5/woAAAACAAAAAAD6/woAAAAAAAAAAAD7/woAAAABAAAAAAD8/woAAAACAAAAAAD9/woAAAABAAAAAAD+/woAAAAAAAAAAAD//woAAAAAAAAAAAAAAAoAAAACAAAAAAABAAoAAAAAAAAAAAACAAoAAAABAAAAAAADAAoAAAAAAAAAAAAEAAoAAAAAAAAAAAAFAAoAAAABAAAAAAAGAAoAAAACAAAAAAAHAAoAAAAAAAAAAAAIAAoAAAABAAAAAAAJAAoAAAABAAAAAAAKAAoAAAAAAAAAAAALAAoAAAABAAAAAAAMAAoAAAAAAAAAAAANAAoAAAAAAAAAAAAOAAoAAAACAAAAAAAPAAoAAAAAAAAAAAAQAAoAAAABAAAAAAARAAoAAAAAAAAAAAASAAoAAAAAAAAAAAATAAoAAAACAAAAAAA=")
+tile_set = SubResource("TileSet_a58qw")
+
+[node name="OceanWallLeft" type="TileMapLayer" parent="." index="11" unique_id=621698791]
+position = Vector2(0, 4)
+tile_map_data = PackedByteArray("AADY/wkAAAAAAAAAAADY/wgAAAACAAAAAADY/wcAAAABAAAAAADY/wYAAAAAAAAAAADY/wUAAAACAAAAAADY/wQAAAAAAAAAAADY/wMAAAABAAAAAADY/wIAAAACAAAAAADY/wEAAAAAAAAAAADY/wAAAAACAAAAAADY////AAAAAAAAAADY//7/AAAAAAAAAADY//3/AAAAAAAAAADY//z/AAACAAAAAADY//v/AAAAAAAAAADY//r/AAABAAAAAADY//n/AAAAAAAAAADY//j/AAACAAAAAAA=")
+tile_set = ExtResource("8_ldpug")
+
+[node name="OceanWallRight" type="TileMapLayer" parent="." index="12" unique_id=1138854193]
+position = Vector2(632, 4)
+tile_map_data = PackedByteArray("AADY/wkAAAAAAAAAAADY/wgAAAACAAAAAADY/wcAAAABAAAAAADY/wYAAAAAAAAAAADY/wUAAAACAAAAAADY/wQAAAAAAAAAAADY/wMAAAABAAAAAADY/wIAAAACAAAAAADY/wEAAAAAAAAAAADY/wAAAAACAAAAAADY////AAAAAAAAAADY//7/AAAAAAAAAADY//3/AAAAAAAAAADY//z/AAACAAAAAADY//v/AAAAAAAAAADY//r/AAABAAAAAADY//n/AAAAAAAAAADY//j/AAACAAAAAAA=")
+tile_set = ExtResource("8_ldpug")
+
+[node name="BossSubmarine" parent="." index="13" unique_id=1228480230 instance=ExtResource("9_ldpug")]
+position = Vector2(-201, 143)
+
+[node name="FlipperCenterLeftTop" type="Node" parent="." index="14" unique_id=224108992]
+
+[node name="FlipperLeftDownPixelPerfect" parent="FlipperCenterLeftTop" index="0" unique_id=1447591536 instance=ExtResource("10_a58qw")]
+position = Vector2(-244, -93)
+
+[node name="DeadWall2" parent="FlipperCenterLeftTop" index="1" unique_id=797132162 instance=ExtResource("11_ij65d")]
+position = Vector2(-270, -65)
+physics_material_override = SubResource("PhysicsMaterial_gci8k")
+angle_preset = 2
+mirrored = true
+
+[node name="FlipperCenterLeftTop2" type="Node" parent="." index="15" unique_id=1499036148]
+
+[node name="FlipperLeftDownPixelPerfect" parent="FlipperCenterLeftTop2" index="0" unique_id=1962845215 instance=ExtResource("10_a58qw")]
+position = Vector2(-44, -93)
+
+[node name="DeadWall2" parent="FlipperCenterLeftTop2" index="1" unique_id=1113742759 instance=ExtResource("11_ij65d")]
+position = Vector2(-70, -65)
+physics_material_override = SubResource("PhysicsMaterial_gci8k")
+angle_preset = 2
+mirrored = true
+
+[node name="FlipperCenterLeftTop3" type="Node" parent="." index="16" unique_id=1406643658]
+
+[node name="FlipperLeftDownPixelPerfect" parent="FlipperCenterLeftTop3" index="0" unique_id=1778070611 instance=ExtResource("10_a58qw")]
+position = Vector2(166, -93)
+
+[node name="DeadWall2" parent="FlipperCenterLeftTop3" index="1" unique_id=1329656790 instance=ExtResource("11_ij65d")]
+position = Vector2(140, -65)
+physics_material_override = SubResource("PhysicsMaterial_gci8k")
+angle_preset = 2
+mirrored = true
+
+[node name="FlipperRightTop" type="Node" parent="." index="17" unique_id=1257349385]
+
+[node name="FlipperRightDownPixelPerfect3" parent="FlipperRightTop" index="0" unique_id=94480237 instance=ExtResource("12_ij65d")]
+position = Vector2(244, -92)
+
+[node name="DeadWall5" parent="FlipperRightTop" index="1" unique_id=1597733836 instance=ExtResource("11_ij65d")]
+position = Vector2(270, -65)
+physics_material_override = SubResource("PhysicsMaterial_gder6")
+angle_preset = 2
+
+[node name="FlipperRightTop2" type="Node" parent="." index="18" unique_id=1781672189]
+
+[node name="FlipperRightDownPixelPerfect3" parent="FlipperRightTop2" index="0" unique_id=1454824812 instance=ExtResource("12_ij65d")]
+position = Vector2(44, -92)
+
+[node name="DeadWall5" parent="FlipperRightTop2" index="1" unique_id=1584636696 instance=ExtResource("11_ij65d")]
+position = Vector2(70, -65)
+physics_material_override = SubResource("PhysicsMaterial_gder6")
+angle_preset = 2
+
+[node name="FlipperRightTop3" type="Node" parent="." index="19" unique_id=930880561]
+
+[node name="FlipperRightDownPixelPerfect3" parent="FlipperRightTop3" index="0" unique_id=1809531636 instance=ExtResource("12_ij65d")]
+position = Vector2(-166, -92)
+
+[node name="DeadWall5" parent="FlipperRightTop3" index="1" unique_id=1189831658 instance=ExtResource("11_ij65d")]
+position = Vector2(-140, -65)
+physics_material_override = SubResource("PhysicsMaterial_gder6")
+angle_preset = 2
+
+[node name="FlipperLeftDownPixelPerfect" parent="." index="20" unique_id=815066450 instance=ExtResource("10_a58qw")]
+position = Vector2(-285, 25)
+
+[node name="FlipperLeftDownPixelPerfect2" parent="." index="21" unique_id=2029634595 instance=ExtResource("10_a58qw")]
+position = Vector2(-75, 25)
+
+[node name="FlipperLeftDownPixelPerfect3" parent="." index="22" unique_id=966627239 instance=ExtResource("10_a58qw")]
+position = Vector2(130, 25)
+
+[node name="FlipperRightDownPixelPerfect3" parent="." index="23" unique_id=1806466733 instance=ExtResource("12_ij65d")]
+position = Vector2(-130, 25)
+
+[node name="FlipperRightDownPixelPerfect4" parent="." index="24" unique_id=978874450 instance=ExtResource("12_ij65d")]
+position = Vector2(75, 25)
+
+[node name="FlipperRightDownPixelPerfect5" parent="." index="25" unique_id=279586289 instance=ExtResource("12_ij65d")]
+position = Vector2(285, 25)
+
+[node name="AirBubbleSpawner" type="Node2D" parent="." index="26" unique_id=1720539643]
+script = ExtResource("14_bon8i")
+bubble_scene = ExtResource("15_av2kh")
+spawn_interval = 10.0
+spawn_count_max = 2
+
+[node name="CollectibleSpawner" parent="." index="27" unique_id=1070458982 instance=ExtResource("16_mmy2b")]
+collectible_scene = ExtResource("17_cekp2")
+
+[node name="HealthPlantSpawner" parent="." index="28" unique_id=1172793188 instance=ExtResource("18_mlk23")]
+
+[node name="TrashSequenceSpawner" parent="." index="29" unique_id=1148827984 instance=ExtResource("19_b36k0")]
+
+[node name="CircularBumper" parent="." index="30" unique_id=2098876600 instance=ExtResource("20_bon8i")]
+position = Vector2(-105, 70)
+physics_material_override = SubResource("PhysicsMaterial_av2kh")
+size_preset = 1
+radius = 16.0
+
+[node name="CircularBumper2" parent="." index="31" unique_id=728038573 instance=ExtResource("20_bon8i")]
+position = Vector2(105, 70)
+physics_material_override = SubResource("PhysicsMaterial_av2kh")
+size_preset = 1
+radius = 16.0
+
+[node name="CircularBumper3" parent="." index="32" unique_id=127415777 instance=ExtResource("20_bon8i")]
+position = Vector2(0, 90)
+physics_material_override = SubResource("PhysicsMaterial_bon8i")
+
+[node name="CircularBumper4" parent="." index="33" unique_id=1239190079 instance=ExtResource("20_bon8i")]
+position = Vector2(205, 90)
+physics_material_override = SubResource("PhysicsMaterial_bon8i")
+
+[node name="CircularBumper5" parent="." index="34" unique_id=343186210 instance=ExtResource("20_bon8i")]
+position = Vector2(-205, 90)
+physics_material_override = SubResource("PhysicsMaterial_bon8i")
+
+[node name="Crocodile" parent="." index="35" unique_id=787732993 instance=ExtResource("21_av2kh")]
+position = Vector2(-264, -124)
+patrol_speed = 50.0
+chase_speed = 120.0
+
+[node name="SeaUrchin" parent="." index="36" unique_id=1964309753 instance=ExtResource("21_mmy2b")]
+position = Vector2(-105, -100)
+
+[node name="SeaUrchin2" parent="." index="37" unique_id=170385460 instance=ExtResource("21_mmy2b")]
+position = Vector2(105, -100)

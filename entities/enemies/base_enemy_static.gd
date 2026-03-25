@@ -28,19 +28,24 @@ var damage_area: Area2D = null
 func _ready():
 	current_health = max_health
 	add_to_group("enemies")
-	
+
 	# Find sprite (AnimatedSprite2D or Sprite2D)
 	sprite = get_node_or_null("AnimatedSprite2D")
 	if not sprite:
 		sprite = get_node_or_null("Sprite2D")
-	
+
 	# Set up damage area if it exists
 	damage_area = get_node_or_null("DamageArea")
 	if damage_area:
 		damage_area.body_entered.connect(_on_damage_area_entered)
-	
-	# Call child class setup
+
+	# Call child class setup (child may override pass_through_player here)
 	_enemy_ready()
+
+	# Apply physical solidity: add World_Player layer (bit 0) so the player
+	# is physically blocked. pass_through enemies stay on Enemies layer only.
+	if not pass_through_player:
+		collision_layer |= 1
 
 ## Override in child classes for custom initialization
 func _enemy_ready():
