@@ -11,12 +11,12 @@ class_name ElectricEel
 
 # Shocking behavior
 @export var shock_telegraph_duration: float = 0.3
-@export var shock_duration: float = 2.5
-@export var shock_cooldown: float = 2.0
+@export var shock_duration: float = 1.0
+@export var shock_cooldown: float = 1.5
 @export var shock_range: float = 25.0
 @export var shock_damage: float = 15.0
 @export var shock_knockback: float = 300.0
-@export var control_suspend_duration: float = 1.0
+@export var control_suspend_duration: float = 0.5
 
 # Visual settings
 @export var telegraph_color: Color = Color(0.0, 1.0, 1.0, 1.0)

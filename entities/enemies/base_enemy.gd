@@ -14,6 +14,7 @@ class_name BaseEnemy
 # Damage dealing
 @export var contact_damage: float = 25.0
 @export var knockback_force: float = 300.0
+@export var contact_damage_cooldown: float = 1.5  # Seconds before this enemy can deal contact damage again
 
 # Visual feedback
 @export var damage_flash_duration: float = 0.3
@@ -24,23 +25,29 @@ var current_health: float
 var sprite: Node2D = null
 var damage_area: Area2D = null
 var _is_playing_damage_animation: bool = false
+var _contact_damage_ready: bool = true
 
 func _ready():
 	current_health = max_health
 	add_to_group("enemies")
-	
+
 	# Find sprite (AnimatedSprite2D or Sprite2D)
 	sprite = get_node_or_null("AnimatedSprite2D")
 	if not sprite:
 		sprite = get_node_or_null("Sprite2D")
-	
+
 	# Set up damage area if it exists
 	damage_area = get_node_or_null("DamageArea")
 	if damage_area:
 		damage_area.body_entered.connect(_on_damage_area_entered)
-	
-	# Call child class setup
+
+	# Call child class setup (child may override pass_through_player here)
 	_enemy_ready()
+
+	# Apply physical solidity: add World_Player layer (bit 0) so the player
+	# is physically blocked. pass_through enemies stay on Enemies layer only.
+	if not pass_through_player:
+		collision_layer |= 1
 
 ## Override in child classes for custom initialization
 func _enemy_ready():
@@ -137,13 +144,19 @@ func _play_invincible_feedback():
 
 ## Handle player collision in damage area
 func _on_damage_area_entered(body: Node2D):
-	if body.is_in_group("player") and body.has_method("take_damage") and current_health > 0:
+	if body.is_in_group("player") and body.has_method("take_damage") and current_health > 0 and _contact_damage_ready:
 		_deal_damage_to_player(body)
 
 ## Deal damage and knockback to player
 func _deal_damage_to_player(player: Node2D):
 	player.take_damage(contact_damage)
-	
+
+	# Start cooldown so bouncing/re-entry doesn't deal rapid hits
+	_contact_damage_ready = false
+	get_tree().create_timer(contact_damage_cooldown).timeout.connect(
+		func(): _contact_damage_ready = true
+	)
+
 	# Apply knockback
 	var knockback_dir = (player.global_position - global_position).normalized()
 	if player is RigidBody2D:

@@ -63,6 +63,9 @@ var touching_walls: Array = []
 # Super speed damage detection
 var super_speed_area: Area2D = null
 
+# Wall-rest energy recharge particles
+var rest_particles: CPUParticles2D = null
+
 var active_shoot_cooldown: float = shoot_cooldown
 
 # Powerup states
@@ -138,6 +141,7 @@ func _ready():
 	add_to_group("player")
 
 	_setup_super_speed_area()
+	_setup_rest_particles()
 
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
@@ -235,6 +239,8 @@ func _physics_process(delta):
 			hud.refill_air(delta)
 
 		hud.recover_energy(delta, touching_walls.size() > 0)
+
+	_update_rest_particles()
 
 	# Control suspension timer — runs even while suspended so it keeps counting down
 	control_suspend_timer -= delta
@@ -556,6 +562,58 @@ func _setup_super_speed_area():
 	add_child(super_speed_area)
 
 	super_speed_area.body_entered.connect(_on_super_speed_area_entered)
+
+func _setup_rest_particles():
+	"""Create orange upward-drifting particles shown while resting on a wall
+	   to telegraph the accelerated energy recovery mechanic."""
+	rest_particles = CPUParticles2D.new()
+	rest_particles.name = "RestParticles"
+
+	rest_particles.emitting = false
+	rest_particles.amount = 14
+	rest_particles.lifetime = 0.9
+	rest_particles.one_shot = false
+	rest_particles.explosiveness = 0.0
+	rest_particles.randomness = 0.5
+
+	# Emit from a small disc around the turtle's centre
+	rest_particles.emission_shape = CPUParticles2D.EMISSION_SHAPE_SPHERE
+	rest_particles.emission_sphere_radius = 8.0
+
+	# Drift upward with some spread
+	rest_particles.direction = Vector2(0.0, -1.0)
+	rest_particles.spread = 50.0
+	rest_particles.gravity = Vector2(0.0, -20.0)
+	rest_particles.initial_velocity_min = 15.0
+	rest_particles.initial_velocity_max = 35.0
+
+	# Size — small sparks that fade out
+	rest_particles.scale_amount_min = 1.5
+	rest_particles.scale_amount_max = 3.0
+
+	# Orange colour, fading to transparent
+	rest_particles.color = Color(1.0, 0.82, 0.1, 0.9)
+	rest_particles.color_ramp = _make_orange_fade_gradient()
+
+	# Render above the turtle sprite (sprite z_index = 15)
+	rest_particles.z_as_relative = false
+	rest_particles.z_index = 20
+
+	add_child(rest_particles)
+
+func _make_orange_fade_gradient() -> Gradient:
+	var g = Gradient.new()
+	g.set_color(0, Color(1.0, 0.9, 0.2, 1.0))    # bright golden yellow at birth
+	g.set_color(1, Color(1.0, 0.65, 0.0, 0.0))   # warm gold, fully transparent at death
+	return g
+
+func _update_rest_particles():
+	if not rest_particles:
+		return
+	var energy_not_full = hud and hud.current_energy < hud.max_energy
+	var should_emit = touching_walls.size() > 0 and energy_not_full
+	if rest_particles.emitting != should_emit:
+		rest_particles.emitting = should_emit
 
 func _on_super_speed_area_entered(body: Node2D):
 	if not is_super_speed and not shield_active:

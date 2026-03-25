@@ -111,6 +111,7 @@ func _ready():
 	if LevelManager:
 		LevelManager.piece_delivered.connect(_on_piece_delivered)
 		LevelManager.level_started.connect(_on_level_started)
+		LevelManager.boss_level_started.connect(_on_boss_level_started)
 
 func _process(delta):
 	# Handle air warning flash - entire HUD layer pulses red
@@ -341,3 +342,9 @@ func _on_level_started(level_number: int):
 	# LevelManager will emit piece_delivered signal with initial 0/x values
 	# so we don't need to do anything here
 	pass
+
+func _on_boss_level_started(level_number: int):
+	"""Called when a boss level starts - replace UFO counter with boss prompt"""
+	if ufo_pieces_label:
+		ufo_pieces_label.text = "⚠ Defeat the Boss!"
+		ufo_pieces_label.add_theme_color_override("font_color", Color.RED)
