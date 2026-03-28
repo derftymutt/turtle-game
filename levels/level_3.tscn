@@ -88,7 +88,7 @@ size = Vector2(8.000183, 465.00012)
 
 [sub_resource type="Curve2D" id="Curve2D_mb3d3"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, -1, 2, 0, 0, 0, 0, -15, 22, 0, 0, 0, 0, -26, 41, 0, 0, 0, 0, -27, 66, 0, 0, 0, 0, -11, 96)
+"points": PackedVector2Array(0, 0, 0, 0, -12, 2, 0, 0, 0, 0, -19, 22, 0, 0, 0, 0, -26, 41, 0, 0, 0, 0, -27, 66, 0, 0, 0, 0, -11, 96)
 }
 point_count = 5
 
@@ -338,5 +338,11 @@ show_debug_arrows = false
 
 [node name="Path2D" parent="OceanCurrent" index="0" unique_id=1461068862]
 curve = SubResource("Curve2D_mb3d3")
+
+[node name="Area2D" parent="OceanCurrent/Path2D" index="0" unique_id=719841149]
+position = Vector2(-9, 1)
+
+[node name="Visuals" parent="OceanCurrent" index="1" unique_id=2005124627]
+position = Vector2(-11, 1)
 
 [editable path="OceanCurrent"]

@@ -212,7 +212,7 @@ func _follow_horizontal(delta: float) -> void:
 
 	if abs(cam_to_turtle) > horizontal_deadzone:
 		target_x = turtle_x - (horizontal_offset * sign(cam_to_turtle))
-		target_x = clamp(target_x, min_camera_x, max_camera_x)
+		#target_x = clamp(target_x, min_camera_x, max_camera_x)
 
 	global_position.x = lerp(global_position.x, target_x, horizontal_smoothing * delta)
 
