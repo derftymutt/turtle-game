@@ -1,0 +1,148 @@
+[gd_scene format=4 uid="uid://b3y8asqj3skx"]
+
+[ext_resource type="PackedScene" uid="uid://dgwg5saty0h76" path="res://levels/shared/level_base.tscn" id="1_rqsg2"]
+[ext_resource type="PackedScene" uid="uid://qd5yfrw7588i" path="res://entities/environment/ocean/ocean.tscn" id="2_fpvgn"]
+[ext_resource type="PackedScene" uid="uid://dysmgxrg7t1o4" path="res://entities/environment/ocean_background/ocean_background.tscn" id="3_xn6mk"]
+[ext_resource type="Script" uid="uid://c3i3p77jm22vp" path="res://systems/camera_2d.gd" id="4_3t5n2"]
+[ext_resource type="PackedScene" uid="uid://btbnsn74vk1b" path="res://entities/player/turtle_player.tscn" id="5_v2dqh"]
+[ext_resource type="Texture2D" uid="uid://bm428btwp720u" path="res://entities/environment/ocean_boundaries/ocean_floor.png" id="6_nu44e"]
+[ext_resource type="TileSet" uid="uid://dyl02kfc4a681" path="res://entities/environment/ocean_boundaries/ocean_wall.tres" id="7_fpvgn"]
+[ext_resource type="PackedScene" uid="uid://8edo3etakc1a" path="res://entities/environment/walls/dead_wall/dead_wall.tscn" id="8_3t5n2"]
+[ext_resource type="PackedScene" uid="uid://4het8fdlmvgj" path="res://entities/environment/flippers/flipper_left_down.tscn" id="9_v2dqh"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_kx1xp"]
+texture = ExtResource("6_nu44e")
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+1:0/0 = 0
+1:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+2:0/0 = 0
+2:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+4:0/0 = 0
+4:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-0.19784546, 0.395689, 8, -8, 8, 8, -8, 8)
+3:0/0 = 0
+3:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, -0.49461174, -0.49461174, 8, 8, -8, 8)
+5:0/0 = 0
+5:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, -0.2967682, 0.49461174, -8, 8)
+6:0/0 = 0
+6:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -0.395689, -0.19784546)
+
+[sub_resource type="TileSet" id="TileSet_m516p"]
+physics_layer_0/collision_layer = 1
+sources/0 = SubResource("TileSetAtlasSource_kx1xp")
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_fpvgn"]
+size = Vector2(8.000166, 471.00015)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xn6mk"]
+size = Vector2(8.000183, 465.00012)
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_nu44e"]
+friction = 0.0
+
+[node name="LevelBase" unique_id=1013451131 instance=ExtResource("1_rqsg2")]
+level_number = 6
+
+[node name="HUD" parent="." index="0" unique_id=1369229575]
+visible = false
+
+[node name="GameOverScreen" parent="." index="1" unique_id=301166293]
+visible = false
+
+[node name="LevelCompleteScreen" parent="." index="2" unique_id=1103608067]
+visible = false
+
+[node name="PauseMenu" parent="." index="3" unique_id=2047821456]
+visible = false
+
+[node name="Ocean" parent="." index="4" unique_id=1274260941 instance=ExtResource("2_fpvgn")]
+
+[node name="OceanBackground" parent="." index="5" unique_id=593268214 instance=ExtResource("3_xn6mk")]
+
+[node name="Camera2D" type="Camera2D" parent="." index="6" unique_id=2085525576 node_paths=PackedStringArray("follow_target")]
+limit_left = -960
+limit_right = 960
+script = ExtResource("4_3t5n2")
+follow_target = NodePath("../TurtlePlayer")
+
+[node name="TurtlePlayer" parent="." index="7" unique_id=1971009088 instance=ExtResource("5_v2dqh")]
+super_speed_color = Color(0.778, 1.504, 0, 1)
+
+[node name="OceanFloor" type="TileMapLayer" parent="." index="8" unique_id=408362771]
+position = Vector2(0, 4)
+tile_map_data = PackedByteArray("AADs/woAAAABAAAAAADt/woAAAAAAAAAAADu/woAAAACAAAAAADv/woAAAABAAAAAADw/woAAAAAAAAAAADx/woAAAAAAAAAAADy/woAAAAAAAAAAADz/woAAAAAAAAAAAD0/woAAAACAAAAAAD1/woAAAAAAAAAAAD2/woAAAAAAAAAAAD3/woAAAAAAAAAAAD4/woAAAAAAAAAAAD5/woAAAACAAAAAAD6/woAAAAAAAAAAAD7/woAAAABAAAAAAD8/woAAAACAAAAAAD9/woAAAABAAAAAAD+/woAAAAAAAAAAAD//woAAAAAAAAAAAAAAAoAAAACAAAAAAABAAoAAAAAAAAAAAACAAoAAAABAAAAAAADAAoAAAAAAAAAAAAEAAoAAAAAAAAAAAAFAAoAAAABAAAAAAAGAAoAAAACAAAAAAAHAAoAAAAAAAAAAAAIAAoAAAABAAAAAAAJAAoAAAABAAAAAAAKAAoAAAAAAAAAAAALAAoAAAABAAAAAAAMAAoAAAAAAAAAAAANAAoAAAAAAAAAAAAOAAoAAAACAAAAAAAPAAoAAAAAAAAAAAAQAAoAAAABAAAAAAARAAoAAAAAAAAAAAASAAoAAAACAAAAAAATAAoAAAACAAAAAADr/woAAAAAAAAAAADq/woAAAAAAAAAAADp/woAAAAAAAAAAADo/woAAAABAAAAAADn/woAAAABAAAAAADm/woAAAABAAAAAADl/woAAAABAAAAAADk/woAAAACAAAAAADj/woAAAABAAAAAADi/woAAAACAAAAAADh/woAAAABAAAAAADg/woAAAACAAAAAADf/woAAAACAAAAAADe/woAAAABAAAAAADd/woAAAABAAAAAADc/woAAAAAAAAAAADb/woAAAABAAAAAADa/woAAAAAAAAAAADZ/woAAAAAAAAAAADY/woAAAABAAAAAADX/woAAAABAAAAAADW/woAAAAAAAAAAADV/woAAAABAAAAAADU/woAAAABAAAAAADT/woAAAABAAAAAADS/woAAAABAAAAAADR/woAAAABAAAAAADQ/woAAAABAAAAAADP/woAAAAAAAAAAADO/woAAAACAAAAAADN/woAAAAAAAAAAADM/woAAAACAAAAAADL/woAAAAAAAAAAADK/woAAAAAAAAAAADJ/woAAAACAAAAAADI/woAAAACAAAAAADH/woAAAAAAAAAAADG/woAAAACAAAAAADF/woAAAAAAAAAAADE/woAAAACAAAAAAAUAAoAAAABAAAAAAAVAAoAAAABAAAAAAAWAAoAAAAAAAAAAAAXAAoAAAACAAAAAAAYAAoAAAABAAAAAAAZAAoAAAAAAAAAAAAaAAoAAAACAAAAAAAbAAoAAAABAAAAAAAcAAoAAAABAAAAAAAdAAoAAAAAAAAAAAAeAAoAAAACAAAAAAAfAAoAAAAAAAAAAAAgAAoAAAABAAAAAAAhAAoAAAAAAAAAAAAiAAoAAAAAAAAAAAAjAAoAAAABAAAAAAAkAAoAAAABAAAAAAAlAAoAAAAAAAAAAAAmAAoAAAABAAAAAAAnAAoAAAAAAAAAAAAoAAoAAAABAAAAAAApAAoAAAAAAAAAAAAqAAoAAAAAAAAAAAArAAoAAAABAAAAAAAsAAoAAAAAAAAAAAAtAAoAAAACAAAAAAAuAAoAAAABAAAAAAAvAAoAAAABAAAAAAAwAAoAAAACAAAAAAAxAAoAAAAAAAAAAAAyAAoAAAAAAAAAAAAzAAoAAAACAAAAAAA0AAoAAAABAAAAAAA1AAoAAAABAAAAAAA2AAoAAAACAAAAAAA3AAoAAAABAAAAAAA4AAoAAAAAAAAAAAA5AAoAAAABAAAAAAA6AAoAAAABAAAAAAA7AAoAAAACAAAAAAA=")
+tile_set = SubResource("TileSet_m516p")
+
+[node name="OceanWallLeft" type="TileMapLayer" parent="." index="9" unique_id=1316001881]
+position = Vector2(0, 4)
+tile_map_data = PackedByteArray("AACI/wkAAAAAAAAAAACI/wgAAAAAAAAAAACI/wcAAAABAAAAAACI/wYAAAABAAAAAACI/wUAAAACAAAAAACI/wQAAAABAAAAAACI/wMAAAABAAAAAACI//7/AAABAAAAAACI////AAACAAAAAACI/wAAAAAAAAAAAACI/wEAAAACAAAAAACI/wIAAAAAAAAAAACI//3/AAACAAAAAACI//z/AAAAAAAAAACI//v/AAACAAAAAACI//r/AAAAAAAAAACI//n/AAACAAAAAACI//j/AAAAAAAAAAA=")
+tile_set = ExtResource("7_fpvgn")
+
+[node name="OceanWallRight" type="TileMapLayer" parent="." index="10" unique_id=160236925]
+position = Vector2(632, 4)
+tile_map_data = PackedByteArray("AAAoAAkAAAACAAAAAAAoAAgAAAACAAAAAAAoAAcAAAAAAAAAAAAoAAYAAAAAAAAAAAAoAAUAAAACAAAAAAAoAAQAAAAAAAAAAAAoAAMAAAAAAAAAAAAoAAIAAAACAAAAAAAoAPj/AAACAAAAAAAoAPn/AAAAAAAAAAAoAPr/AAACAAAAAAAoAPv/AAABAAAAAAAoAPz/AAAAAAAAAAAoAP3/AAABAAAAAAAoAP7/AAACAAAAAAAoAP//AAABAAAAAAAoAAAAAAAAAAAAAAAoAAEAAAAAAAAAAAA=")
+tile_set = ExtResource("7_fpvgn")
+
+[node name="WorldSafetyBoundaries" type="Node2D" parent="." index="11" unique_id=1479579443]
+
+[node name="BoundaryLeft" type="StaticBody2D" parent="WorldSafetyBoundaries" index="0" unique_id=1230030157]
+position = Vector2(-595.99994, -373)
+rotation = -3.1415925
+scale = Vector2(0.99999994, 0.99999994)
+metadata/_edit_group_ = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldSafetyBoundaries/BoundaryLeft" index="0" unique_id=253742661]
+position = Vector2(360, -32.5)
+scale = Vector2(0.99999934, 0.99999934)
+shape = SubResource("RectangleShape2D_fpvgn")
+debug_color = Color(0, 0.6, 0.7, 0.42)
+
+[node name="ColorRect" type="ColorRect" parent="WorldSafetyBoundaries/BoundaryLeft" index="1" unique_id=290726008]
+visible = false
+offset_left = 303.51578
+offset_top = -269.00006
+offset_right = 311.90527
+offset_bottom = 62.268463
+color = Color(0.1764706, 0.12156863, 0.023529412, 1)
+
+[node name="BoundaryRight" type="StaticBody2D" parent="WorldSafetyBoundaries" index="1" unique_id=2004625756]
+position = Vector2(628.99994, -383)
+rotation = -3.1415925
+scale = Vector2(0.99999994, 0.99999994)
+metadata/_edit_group_ = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldSafetyBoundaries/BoundaryRight" index="0" unique_id=677906642]
+position = Vector2(-327, -32.5)
+scale = Vector2(0.99999964, 0.99999964)
+shape = SubResource("RectangleShape2D_xn6mk")
+debug_color = Color(0, 0.6, 0.7, 0.42)
+
+[node name="ColorRect" type="ColorRect" parent="WorldSafetyBoundaries/BoundaryRight" index="1" unique_id=779605912]
+visible = false
+offset_left = -333.00003
+offset_top = -269.0
+offset_right = -323.4816
+offset_bottom = 62.268524
+color = Color(0.1764706, 0.12156863, 0.023529412, 1)
+
+[node name="levelWalls" type="TileMapLayer" parent="." index="12" unique_id=1604126855]
+position = Vector2(0, 4)
+tile_map_data = PackedByteArray("AADs/woAAAABAAAAAADt/woAAAAAAAAAAADu/woAAAACAAAAAADv/woAAAABAAAAAADw/woAAAAAAAAAAADx/woAAAAAAAAAAADy/woAAAAAAAAAAADz/woAAAAAAAAAAAD0/woAAAACAAAAAAD1/woAAAAAAAAAAAD2/woAAAAAAAAAAAD3/woAAAAAAAAAAAD4/woAAAAAAAAAAAD5/woAAAACAAAAAAD6/woAAAAAAAAAAAD7/woAAAABAAAAAAD8/woAAAACAAAAAAD9/woAAAABAAAAAAD+/woAAAAAAAAAAAD//woAAAAAAAAAAAAAAAoAAAACAAAAAAABAAoAAAAAAAAAAAACAAoAAAABAAAAAAADAAoAAAAAAAAAAAAEAAoAAAAAAAAAAAAFAAoAAAABAAAAAAAGAAoAAAACAAAAAAAHAAoAAAAAAAAAAAAIAAoAAAABAAAAAAAJAAoAAAABAAAAAAAKAAoAAAAAAAAAAAALAAoAAAABAAAAAAAMAAoAAAAAAAAAAAANAAoAAAAAAAAAAAAOAAoAAAACAAAAAAAPAAoAAAAAAAAAAAAQAAoAAAABAAAAAAARAAoAAAAAAAAAAAASAAoAAAACAAAAAAATAAoAAAACAAAAAADr/woAAAAAAAAAAADq/woAAAAAAAAAAADp/woAAAAAAAAAAADo/woAAAABAAAAAADn/woAAAABAAAAAADm/woAAAABAAAAAADl/woAAAABAAAAAADk/woAAAACAAAAAADj/woAAAABAAAAAADi/woAAAACAAAAAADh/woAAAABAAAAAADg/woAAAACAAAAAADf/woAAAACAAAAAADe/woAAAABAAAAAADd/woAAAABAAAAAADc/woAAAAAAAAAAADb/woAAAABAAAAAADa/woAAAAAAAAAAADZ/woAAAAAAAAAAADY/woAAAABAAAAAADX/woAAAABAAAAAADW/woAAAAAAAAAAADV/woAAAABAAAAAADU/woAAAABAAAAAADT/woAAAABAAAAAADS/woAAAABAAAAAADR/woAAAABAAAAAADQ/woAAAABAAAAAADP/woAAAAAAAAAAADO/woAAAACAAAAAADN/woAAAAAAAAAAADM/woAAAACAAAAAADL/woAAAAAAAAAAADK/woAAAAAAAAAAADJ/woAAAACAAAAAADI/woAAAACAAAAAADH/woAAAAAAAAAAADG/woAAAACAAAAAADF/woAAAAAAAAAAADE/woAAAACAAAAAAAUAAoAAAABAAAAAAAVAAoAAAABAAAAAAAWAAoAAAAAAAAAAAAXAAoAAAACAAAAAAAYAAoAAAABAAAAAAAZAAoAAAAAAAAAAAAaAAoAAAACAAAAAAAbAAoAAAABAAAAAAAcAAoAAAABAAAAAAAdAAoAAAAAAAAAAAAeAAoAAAACAAAAAAAfAAoAAAAAAAAAAAAgAAoAAAABAAAAAAAhAAoAAAAAAAAAAAAiAAoAAAAAAAAAAAAjAAoAAAABAAAAAAAkAAoAAAABAAAAAAAlAAoAAAAAAAAAAAAmAAoAAAABAAAAAAAnAAoAAAAAAAAAAAAoAAoAAAABAAAAAAApAAoAAAAAAAAAAAAqAAoAAAAAAAAAAAArAAoAAAABAAAAAAAsAAoAAAAAAAAAAAAtAAoAAAACAAAAAAAuAAoAAAABAAAAAAAvAAoAAAABAAAAAAAwAAoAAAACAAAAAAAxAAoAAAAAAAAAAAAyAAoAAAAAAAAAAAAzAAoAAAACAAAAAAA0AAoAAAABAAAAAAA1AAoAAAABAAAAAAA2AAoAAAACAAAAAAA3AAoAAAABAAAAAAA4AAoAAAAAAAAAAAA5AAoAAAABAAAAAAA6AAoAAAABAAAAAAA7AAoAAAACAAAAAAD9//3/AAAAAAAAAAD+//3/AAAAAAAAAAD///3/AAAAAAAAAAAAAP3/AAAAAAAAAAABAP3/AAAAAAAAAAACAP3/AAAAAAAAAAAGAAMAAAAAAAAAAAAHAAMAAAAAAAAAAAAIAAMAAAAAAAAAAAAJAAMAAAAAAAAAAAAKAAMAAAAAAAAAAAALAAMAAAAAAAAAAAD5/wMAAAAAAAAAAAD4/wMAAAAAAAAAAAD3/wMAAAAAAAAAAAD2/wMAAAAAAAAAAAD1/wMAAAAAAAAAAAD0/wMAAAAAAAAAAADu//r/AAAAAAAAAADu//v/AAAAAAAAAADu//z/AAAAAAAAAADu//3/AAAAAAAAAAASAAQAAAAAAAAAAAASAAUAAAAAAAAAAAASAAYAAAAAAAAAAAAUAAQAAAAAAAAAAAAUAAUAAAAAAAAAAAAUAAYAAAAAAAAAAAAUAAMAAAAEAAAAAAASAAMAAAADAAAAAAASAAcAAAAFAAAAAAARAAMAAAAEAAAAAAARAAQAAAABAAAAAAARAAUAAAABAAAAAAARAAYAAAABAAAAAAARAAcAAAAGAAAAAAAVAAMAAAABAAAAAAAWAAMAAAADAAAAAAAWAAQAAAAFAAAAAAALAPr/AAAFAAAAAAALAPn/AAADAAAAAAAKAPr/AAAGAAAAAAAKAPn/AAAEAAAAAAAGAPn/AAABAAAAAAAFAPn/AAABAAAAAAAEAPn/AAABAAAAAAAUAAcAAAACAAAAAAAUAAgAAAAGAAAAAAAVAAgAAAABAAAAAAAWAAcAAAADAAAAAAAWAAgAAAAFAAAAAAAKAP//AAAEAAAAAAALAP7/AAAEAAAAAAAMAP3/AAAEAAAAAAANAPz/AAAEAAAAAAALAP//AAAAAAAAAAAMAP7/AAAAAAAAAAANAP3/AAAAAAAAAAALAAAAAAAFAAAAAAAMAP//AAAFAAAAAAANAP7/AAAFAAAAAAAOAP3/AAAFAAAAAAAKAAAAAAAGAAAAAAAOAPz/AAADAAAAAAA=")
+tile_set = SubResource("TileSet_m516p")
+
+[node name="FlipperLeftTop" type="Node" parent="." index="13" unique_id=1031217924]
+
+[node name="DeadWall4" parent="FlipperLeftTop" index="0" unique_id=797132162 instance=ExtResource("8_3t5n2")]
+position = Vector2(304, -27)
+physics_material_override = SubResource("PhysicsMaterial_nu44e")
+angle_preset = 2
+mirrored = true
+
+[node name="FlipperLeftDown" parent="FlipperLeftTop" index="1" unique_id=1447591536 instance=ExtResource("9_v2dqh")]
+position = Vector2(330, -54)
+
+[node name="DeadWall4" parent="." index="14" unique_id=1111125313 instance=ExtResource("8_3t5n2")]
+position = Vector2(136, -131)
+physics_material_override = SubResource("PhysicsMaterial_nu44e")
+angle_preset = 4
+mirrored = true

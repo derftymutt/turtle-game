@@ -59,7 +59,7 @@ texture_repeat = 2
 position = Vector2(0, 153)
 texture = ExtResource("1_8xcjk")
 region_enabled = true
-region_rect = Rect2(0, 0, 1000, 306)
+region_rect = Rect2(0, 0, 1920, 306)
 
 [node name="WaveSurface" type="AnimatedSprite2D" parent="." unique_id=1487877736]
 sprite_frames = SubResource("SpriteFrames_1n4o0")
