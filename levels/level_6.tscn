@@ -9,6 +9,9 @@
 [ext_resource type="TileSet" uid="uid://dyl02kfc4a681" path="res://entities/environment/ocean_boundaries/ocean_wall.tres" id="7_fpvgn"]
 [ext_resource type="PackedScene" uid="uid://8edo3etakc1a" path="res://entities/environment/walls/dead_wall/dead_wall.tscn" id="8_3t5n2"]
 [ext_resource type="PackedScene" uid="uid://4het8fdlmvgj" path="res://entities/environment/flippers/flipper_left_down.tscn" id="9_v2dqh"]
+[ext_resource type="PackedScene" uid="uid://b8qcufospawn1" path="res://systems/community_ufo_event/community_ufo_spawner.tscn" id="10_kx1xp"]
+[ext_resource type="PackedScene" uid="uid://b8qdolphin001" path="res://entities/npcs/dolphin/dolphin.tscn" id="11_m516p"]
+[ext_resource type="PackedScene" uid="uid://b8qcmvufo0001" path="res://entities/community_ufo/community_ufo.tscn" id="12_l3m5x"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_kx1xp"]
 texture = ExtResource("6_nu44e")
@@ -63,6 +66,7 @@ script = ExtResource("4_3t5n2")
 follow_target = NodePath("../TurtlePlayer")
 
 [node name="TurtlePlayer" parent="." index="7" unique_id=1971009088 instance=ExtResource("5_v2dqh")]
+position = Vector2(0, 11)
 super_speed_color = Color(0.778, 1.504, 0, 1)
 
 [node name="OceanFloor" type="TileMapLayer" parent="." index="8" unique_id=408362771]
@@ -139,7 +143,11 @@ mirrored = true
 position = Vector2(330, -54)
 
 [node name="DeadWall4" parent="." index="14" unique_id=1111125313 instance=ExtResource("8_3t5n2")]
-position = Vector2(136, -131)
+position = Vector2(-3, -8)
 physics_material_override = SubResource("PhysicsMaterial_nu44e")
 angle_preset = 4
 mirrored = true
+
+[node name="CommunityUFOSpawner" parent="." index="15" unique_id=1776540152 instance=ExtResource("10_kx1xp")]
+dolphin_scene = ExtResource("11_m516p")
+community_ufo_scene = ExtResource("12_l3m5x")

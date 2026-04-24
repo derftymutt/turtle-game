@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://b8qcufospawn1"]
+
+[ext_resource type="Script" uid="uid://bxkvystaeympb" path="res://systems/community_ufo_event/community_ufo_spawner.gd" id="1_cufo_spawn"]
+
+[node name="CommunityUFOSpawner" type="Node2D" unique_id=426767083]
+script = ExtResource("1_cufo_spawn")
+min_event_interval = 10.0
+max_event_interval = 15.0
+initial_delay = 2.0
