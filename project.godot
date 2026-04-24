@@ -24,6 +24,7 @@ config/icon="res://icon.svg"
 GameManager="*res://global/game_manager.gd"
 GameSettings="*res://global/game_settings.gd"
 LevelManager="*uid://de6da58bko7nu"
+_mcp_game_helper="*res://addons/godot_ai/runtime/game_helper.gd"
 
 [debug]
 
@@ -42,6 +43,10 @@ window/stretch/scale_mode="integer"
 [dotnet]
 
 project/assembly_name="Turtle"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/godot_ai/plugin.cfg")
 
 [input]
 
