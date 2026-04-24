@@ -43,9 +43,6 @@ friction = 0.0
 [node name="LevelBase" unique_id=1013451131 instance=ExtResource("1_rqsg2")]
 level_number = 6
 
-[node name="HUD" parent="." index="0" unique_id=1369229575]
-visible = false
-
 [node name="GameOverScreen" parent="." index="1" unique_id=301166293]
 visible = false
 
