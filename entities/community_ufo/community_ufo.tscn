@@ -1,0 +1,37 @@
+[gd_scene format=3 uid="uid://b8qcmvufo0001"]
+
+[ext_resource type="Script" uid="uid://b8ejfsptfxhw2" path="res://entities/community_ufo/community_ufo.gd" id="1_cufo1"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_body"]
+radius = 22.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_pickup"]
+radius = 32.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_damage"]
+radius = 26.0
+
+[node name="CommunityUFO" type="RigidBody2D" unique_id=1632136442]
+collision_layer = 2
+script = ExtResource("1_cufo1")
+sink_gravity_scale = 0.06
+windup_rate = 5000.0
+burst_on_wall_contact = true
+enemy_damage = 100.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=791734667]
+shape = SubResource("CircleShape2D_body")
+
+[node name="PickupArea" type="Area2D" parent="." unique_id=100000001]
+collision_layer = 0
+collision_mask = 32
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PickupArea" unique_id=100000002]
+shape = SubResource("CircleShape2D_pickup")
+
+[node name="DamageArea" type="Area2D" parent="." unique_id=100000003]
+collision_layer = 0
+collision_mask = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DamageArea" unique_id=100000004]
+shape = SubResource("CircleShape2D_damage")
