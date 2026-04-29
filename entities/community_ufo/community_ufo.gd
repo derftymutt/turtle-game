@@ -36,6 +36,10 @@ class_name CommunityUFO
 @export var windup_yoyo: bool = true
 ## Seconds the player can hold the button before the UFO auto-launches
 @export var max_windup_hold_time: float = 2.0
+## Seconds of peak charge to remember after the yoyo starts falling.
+## Compensates for Bluetooth controller input latency (typically 20-100 ms).
+## Set to 0 to disable.
+@export var windup_peak_hold_window: float = 0.10
 
 # ============================================================
 # FLIGHT — behavior after launch
@@ -57,6 +61,10 @@ class_name CommunityUFO
 @export var burst_on_wall_contact: bool = false
 ## If true, hitting an enemy immediately bursts the UFO
 @export var burst_on_enemy_contact: bool = false
+## Collision layers that pass-through can NEVER bypass (e.g. WorldSafetyBoundaries).
+## During pass-through the UFO's collision_mask is reduced to only these bits.
+## Default = 0 (pass-through ghosts everything). Set to your safety boundary layer(s).
+@export_flags_2d_physics var safety_collision_mask: int;
 
 # ============================================================
 # COMBAT — enemy interaction during flight
@@ -67,17 +75,13 @@ class_name CommunityUFO
 @export var enemy_knockback: float = 250.0
 
 # ============================================================
-# VISUAL — all procedurally drawn
+# VISUAL
 # ============================================================
 @export_group("Visual")
+## Radius used to position the launch arrow relative to the UFO center
 @export var ufo_radius: float = 22.0
-## Main disc color — values > 1 push into HDR/bloom range
-@export var ufo_color: Color = Color(0.6, 1.0, 2.2)
-@export var ufo_rim_color: Color = Color(0.3, 0.7, 1.0)
-@export var dome_color: Color = Color(0.7, 1.0, 0.7, 0.55)
 @export var arrow_idle_color: Color = Color(1.0, 1.0, 0.0, 1.0)
 @export var arrow_charging_color: Color = Color(1.0, 0.2, 0.0, 1.0)
-@export var glow_color: Color = Color(0.4, 0.8, 2.0, 0.3)
 ## Burst particle colors (picked randomly)
 @export var burst_colors: Array[Color] = [
 	Color(0.5, 1.0, 2.2),
@@ -102,12 +106,22 @@ var ocean: Ocean = null
 var _was_charging: bool = false
 var _windup_direction: int = 1      # 1 = charging up, -1 = yoyo back down
 var _windup_hold_timer: float = 0.0
+var _peak_charge: float = 0.0       # Highest charge seen in the current hold
+var _peak_charge_timer: float = 0.0 # Countdown to forget the peak
 var _pass_through_timer: float = 0.0
 var _normal_collision_mask: int = 0
 var _hit_enemies: Dictionary = {}
 var _pickup_area: Area2D = null
 var _damage_area: Area2D = null
 var _stored_shield: bool = false
+## Set to true by the dolphin BEFORE add_child (dolphin carry state tracking).
+var being_carried: bool = false
+## Reference back to the dolphin that is carrying this UFO (cleared on drop/entry).
+var _carrying_dolphin: Node = null
+## True for one physics frame after the turtle enters a dolphin-carried UFO.
+## Changing freeze during a body_entered signal callback is unreliable — we defer
+## the unfreeze + impulse to the next _physics_process() call where it is safe.
+var _entering_from_carry: bool = false
 
 signal player_entered(ufo: CommunityUFO)
 signal ufo_burst
@@ -132,45 +146,49 @@ func _ready():
 	arrow_angle_deg = initial_arrow_angle_deg
 	bob_offset = randf() * TAU
 
-	_build_pickup_area()
-	_build_damage_area()
+	# Wire up the Area2D nodes that live in the scene tree (community_ufo.tscn).
+	# Do NOT create duplicate nodes in code — Godot would rename them and
+	# get_node("PickupArea") would then find the scene node (no signal) instead.
+	_pickup_area = $PickupArea
+	_pickup_area.monitoring = true   # Always active — turtle can enter even mid-carry
+	_pickup_area.body_entered.connect(_on_pickup_area_entered)
+
+	_damage_area = $DamageArea
+	_damage_area.body_entered.connect(_on_damage_area_entered)
+
 	body_entered.connect(_on_body_entered)
 
 # ──────────────────────────────────────────────────────────────────────────────
-# AREA SETUP
+# PUBLIC — called by the dolphin when it drops the UFO
 # ──────────────────────────────────────────────────────────────────────────────
 
-func _build_pickup_area():
-	_pickup_area = Area2D.new()
-	_pickup_area.name = "PickupArea"
-	_pickup_area.collision_layer = 0
-	_pickup_area.collision_mask = 32  # Layer 6 = Player (turtle's collision_layer)
-	var shape = CollisionShape2D.new()
-	var circle = CircleShape2D.new()
-	circle.radius = ufo_radius + 10.0
-	shape.shape = circle
-	_pickup_area.add_child(shape)
-	add_child(_pickup_area)
-	_pickup_area.body_entered.connect(_on_pickup_area_entered)
+## Called by the dolphin when it reaches the drop point normally.
+func release_from_carry():
+	being_carried = false
+	_carrying_dolphin = null
 
-func _build_damage_area():
-	_damage_area = Area2D.new()
-	_damage_area.name = "DamageArea"
-	_damage_area.collision_layer = 0
-	_damage_area.collision_mask = 4  # Layer 3 = enemies
-	var shape = CollisionShape2D.new()
-	var circle = CircleShape2D.new()
-	circle.radius = ufo_radius + 4.0
-	shape.shape = circle
-	_damage_area.add_child(shape)
-	add_child(_damage_area)
-	_damage_area.body_entered.connect(_on_damage_area_entered)
+## Called by the dolphin so this UFO knows who is carrying it.
+func set_carrying_dolphin(dolphin: Node) -> void:
+	_carrying_dolphin = dolphin
 
 # ──────────────────────────────────────────────────────────────────────────────
 # PHYSICS PROCESS
 # ──────────────────────────────────────────────────────────────────────────────
 
 func _physics_process(delta: float):
+	# Deferred unfreeze for mid-carry entry.
+	# body_entered fires at the end of a physics step, so changing freeze there is
+	# unreliable.  We set a flag and do it here at the START of the next tick,
+	# where Godot can properly re-initialize the dynamic body and accept impulses.
+	if _entering_from_carry:
+		_entering_from_carry = false
+		freeze = false
+		gravity_scale = sink_gravity_scale
+		linear_damp   = sink_linear_damp
+		linear_velocity   = Vector2.ZERO
+		angular_velocity  = 0.0
+		apply_central_impulse(Vector2(0.0, 40.0))   # Match the dolphin's normal drop impulse
+
 	# Tick per-enemy hit cooldowns
 	for enemy in _hit_enemies.keys():
 		_hit_enemies[enemy] -= delta
@@ -224,11 +242,28 @@ func _tick_aiming(delta: float):
 		else:
 			current_charge = clamp(current_charge, min_launch_force, max_launch_force)
 
+		# Track the charge peak; refresh the hold window whenever we hit a new high.
+		if current_charge >= _peak_charge:
+			_peak_charge = current_charge
+			_peak_charge_timer = windup_peak_hold_window
+
 		# Auto-launch if held too long
 		if _windup_hold_timer >= max_windup_hold_time:
 			_launch()
-	elif _was_charging and not Input.is_action_pressed(windup_button):
-		_launch()
+
+	# Decay peak window every tick (so it expires on the down-swing / after release).
+	if _peak_charge_timer > 0.0:
+		_peak_charge_timer -= delta
+		if _peak_charge_timer < 0.0:
+			_peak_charge_timer = 0.0
+
+func _input(event: InputEvent):
+	# Catch button release at the exact OS event moment rather than waiting
+	# for the next physics tick — eliminates up to ~16 ms of charge drift.
+	if phase == Phase.AIMING and _was_charging:
+		if event.is_action_released(windup_button):
+			_launch()
+			get_viewport().set_input_as_handled()
 
 func _tick_flying(delta: float):
 	# Keep turtle glued inside the UFO
@@ -246,6 +281,13 @@ func _tick_flying(delta: float):
 			if _damage_area:
 				_damage_area.monitoring = true
 
+	# Ghost flicker modulate during pass-through window
+	if _pass_through_timer > 0.0:
+		var flicker = sin(Time.get_ticks_msec() * 0.025) * 0.5 + 0.5
+		modulate = Color(1.0, 1.0, 1.0, 0.35 + flicker * 0.35)
+	else:
+		modulate = Color.WHITE
+
 	flight_timer -= delta
 	if flight_timer <= 0.0:
 		_burst()
@@ -257,18 +299,36 @@ func _tick_flying(delta: float):
 func _on_pickup_area_entered(body: Node2D):
 	if phase != Phase.SINKING:
 		return
-	if body.is_in_group("player"):
-		_enter_ufo(body)
+	if not body.is_in_group("player"):
+		return
+	_enter_ufo(body)
 
 func _enter_ufo(player: Node2D):
 	phase = Phase.AIMING
 	turtle_player = player
 
-	# Freeze UFO in place so the player has a stable platform to aim from
-	freeze = true
-	freeze_mode = RigidBody2D.FREEZE_MODE_STATIC
-	linear_velocity = Vector2.ZERO
-	angular_velocity = 0.0
+	# If the dolphin is still carrying us, cleanly detach so it stops
+	# dragging the UFO by CarryPoint and accelerates away.
+	var was_carried := being_carried
+	if being_carried and is_instance_valid(_carrying_dolphin) \
+			and _carrying_dolphin.has_method("on_ufo_entered_by_player"):
+		_carrying_dolphin.on_ufo_entered_by_player()
+	_carrying_dolphin = null
+	being_carried = false
+
+	if was_carried:
+		# The UFO is currently frozen (freeze=true from dolphin carry code).
+		# Changing freeze during a body_entered signal callback is unreliable in Godot 4
+		# (the body isn't re-initialized as dynamic until the next physics step).
+		# Set a flag — _physics_process will do the real unfreeze + impulse next tick.
+		_entering_from_carry = true
+	else:
+		# Already dynamic (dropped normally by dolphin); just normalise physics state.
+		freeze = false
+		gravity_scale = sink_gravity_scale
+		linear_damp   = sink_linear_damp
+		linear_velocity  = Vector2.ZERO
+		angular_velocity = 0.0
 
 	# Suspend player input and hide sprite
 	player.control_suspended = true
@@ -286,6 +346,8 @@ func _enter_ufo(player: Node2D):
 	_was_charging = false
 	_windup_direction = 1
 	_windup_hold_timer = 0.0
+	_peak_charge = min_launch_force
+	_peak_charge_timer = 0.0
 	arrow_angle_deg = initial_arrow_angle_deg
 
 	emit_signal("player_entered", self)
@@ -302,17 +364,27 @@ func _launch():
 	gravity_scale = flight_gravity_scale
 	linear_damp = flight_linear_damp
 
-	var force = max(min_launch_force, current_charge)
+	# Clear the sinking velocity accumulated during AIMING so it doesn't bias the shot.
+	linear_velocity = Vector2.ZERO
+
+	# Use the best charge seen recently so Bluetooth input lag doesn't penalise the player.
+	var effective_charge = max(current_charge, _peak_charge)
+	var force = max(min_launch_force, effective_charge)
+	# arrow_angle_deg is in LOCAL space (so the drawn arrow rotates with the UFO body).
+	# apply_central_impulse() needs a WORLD space direction, so rotate by the node's
+	# current world rotation to convert local → world before applying the force.
 	var angle_rad = deg_to_rad(arrow_angle_deg)
-	apply_central_impulse(Vector2(cos(angle_rad), sin(angle_rad)) * force)
+	var local_dir = Vector2(cos(angle_rad), sin(angle_rad))
+	apply_central_impulse(local_dir.rotated(rotation) * force)
 
 	flight_timer = flight_duration
 
-	# Pass-through window: only activates when charge meets the threshold
-	var charge_fraction = current_charge / max_launch_force
+	# Pass-through window: only activates when charge meets the threshold.
+	# safety_collision_mask layers are ALWAYS kept — the UFO can never clip through them.
+	var charge_fraction = effective_charge / max_launch_force
 	if pass_through_duration > 0.0 and charge_fraction >= pass_through_min_charge_fraction:
 		_normal_collision_mask = collision_mask
-		collision_mask = 0
+		collision_mask = safety_collision_mask  # Keep safety walls; ghost through everything else
 		if _damage_area:
 			_damage_area.monitoring = false
 		_pass_through_timer = pass_through_duration
@@ -349,8 +421,15 @@ func _exit_ufo_and_free():
 func _on_body_entered(body: Node):
 	if phase != Phase.FLYING:
 		return
-	if burst_on_wall_contact and (body.is_in_group("walls") or body is StaticBody2D):
-		_burst()
+	if burst_on_wall_contact:
+		# Match dead walls ("walls" group), level tile walls ("levelwalls" group),
+		# generic StaticBody2D, and TileMapLayer nodes (Godot 4 tile physics).
+		var is_wall = body.is_in_group("walls") \
+			or body.is_in_group("levelwalls") \
+			or body is StaticBody2D \
+			or body is TileMapLayer
+		if is_wall:
+			_burst()
 
 func _on_damage_area_entered(body: Node2D):
 	if phase != Phase.FLYING:
@@ -372,59 +451,12 @@ func _on_damage_area_entered(body: Node2D):
 		_burst()
 
 # ──────────────────────────────────────────────────────────────────────────────
-# PROCEDURAL DRAWING
+# DRAWING — arrow only (UFO body is the AnimatedSprite2D)
 # ──────────────────────────────────────────────────────────────────────────────
 
 func _draw():
-	var bob_y = sin(bob_offset) * 3.0 if phase == Phase.SINKING else 0.0
-	var center = Vector2(0.0, bob_y)
-
-	_draw_ufo_body(center)
-
-	match phase:
-		Phase.AIMING:  _draw_aiming_arrow(center)
-		Phase.FLYING:  _draw_flight_glow(center)
-
-func _draw_ufo_body(center: Vector2):
-	var r = ufo_radius
-
-	# Outer soft glow ring
-	_draw_ellipse(center, Vector2(r + 9.0, (r + 9.0) * 0.38),
-		Color(glow_color.r, glow_color.g, glow_color.b, 0.18))
-
-	# Main disc body
-	_draw_ellipse(center, Vector2(r, r * 0.36), ufo_color)
-
-	# Darker rim band
-	_draw_ellipse(center, Vector2(r * 0.88, r * 0.28), ufo_rim_color)
-
-	# Translucent dome (upper half)
-	var dome_pts: PackedVector2Array = []
-	var dome_rx = r * 0.56
-	var dome_ry = r * 0.52
-	for i in range(14):
-		var a = PI + (i / 13.0) * PI
-		dome_pts.append(center + Vector2(cos(a) * dome_rx, sin(a) * dome_ry))
-	if dome_pts.size() >= 3:
-		draw_colored_polygon(dome_pts, dome_color)
-
-	# Rim running lights (6 colored dots)
-	var light_colors: Array[Color] = [
-		Color.RED, Color(1, 0.8, 0), Color.GREEN,
-		Color.CYAN, Color.RED, Color(1, 0.8, 0)
-	]
-	for i in range(6):
-		var a = (i / 6.0) * TAU
-		var lp = center + Vector2(cos(a) * r * 0.74, sin(a) * r * 0.31)
-		draw_circle(lp, 2.5, light_colors[i])
-
-func _draw_ellipse(center: Vector2, radii: Vector2, color: Color, segs: int = 24):
-	var pts: PackedVector2Array = []
-	for i in range(segs):
-		var a = (i / float(segs)) * TAU
-		pts.append(center + Vector2(cos(a) * radii.x, sin(a) * radii.y))
-	if pts.size() >= 3:
-		draw_colored_polygon(pts, color)
+	if phase == Phase.AIMING:
+		_draw_aiming_arrow(Vector2.ZERO)
 
 func _draw_aiming_arrow(center: Vector2):
 	var charge_t = current_charge / max_launch_force
@@ -461,21 +493,6 @@ func _draw_aiming_arrow(center: Vector2):
 		draw_string(ThemeDB.fallback_font, center + Vector2(-22, -ufo_radius - 18),
 			"Hold A", HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(1, 1, 1, 0.7))
 
-func _draw_flight_glow(center: Vector2):
-	var t = fmod(Time.get_ticks_msec() * 0.003, TAU)
-	var pulse = sin(t) * 0.5 + 0.5
-
-	if _pass_through_timer > 0.0:
-		# Ghost flicker during pass-through window
-		var flicker = sin(Time.get_ticks_msec() * 0.025) * 0.5 + 0.5
-		modulate = Color(1.0, 1.0, 1.0, 0.35 + flicker * 0.35)
-	else:
-		modulate = Color.WHITE
-
-	var glow_r = ufo_radius + 12.0 + pulse * 7.0
-	draw_circle(center, glow_r,
-		Color(ufo_color.r, ufo_color.g, ufo_color.b, 0.18 + pulse * 0.12))
-
 # ──────────────────────────────────────────────────────────────────────────────
 # BURST VISUAL EFFECT
 # ──────────────────────────────────────────────────────────────────────────────
@@ -488,7 +505,7 @@ func _spawn_burst_effect():
 	var origin = global_position
 
 	# Expanding shockwave ring
-	var ring = _make_ring_node(origin, ufo_color)
+	var ring = _make_ring_node(origin, burst_colors[0])
 	parent.add_child(ring)
 
 	# Spark particles

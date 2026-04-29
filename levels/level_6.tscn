@@ -35,10 +35,10 @@ physics_layer_0/collision_layer = 1
 sources/0 = SubResource("TileSetAtlasSource_kx1xp")
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_fpvgn"]
-size = Vector2(8.000166, 471.00015)
+size = Vector2(8.000166, 747.00055)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xn6mk"]
-size = Vector2(8.000183, 465.00012)
+size = Vector2(10.000229, 1916.0011)
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_nu44e"]
 friction = 0.0
@@ -87,14 +87,15 @@ tile_set = ExtResource("7_fpvgn")
 [node name="WorldSafetyBoundaries" type="Node2D" parent="." index="11" unique_id=1479579443]
 
 [node name="BoundaryLeft" type="StaticBody2D" parent="WorldSafetyBoundaries" index="0" unique_id=1230030157]
-position = Vector2(-595.99994, -373)
+position = Vector2(-596, -364)
 rotation = -3.1415925
 scale = Vector2(0.99999994, 0.99999994)
+collision_layer = 257
 metadata/_edit_group_ = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="WorldSafetyBoundaries/BoundaryLeft" index="0" unique_id=253742661]
-position = Vector2(360, -32.5)
-scale = Vector2(0.99999934, 0.99999934)
+position = Vector2(359.99988, -170.5)
+scale = Vector2(0.9999992, 0.9999992)
 shape = SubResource("RectangleShape2D_fpvgn")
 debug_color = Color(0, 0.6, 0.7, 0.42)
 
@@ -110,15 +111,38 @@ color = Color(0.1764706, 0.12156863, 0.023529412, 1)
 position = Vector2(628.99994, -383)
 rotation = -3.1415925
 scale = Vector2(0.99999994, 0.99999994)
+collision_layer = 257
 metadata/_edit_group_ = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="WorldSafetyBoundaries/BoundaryRight" index="0" unique_id=677906642]
-position = Vector2(-327, -32.5)
-scale = Vector2(0.99999964, 0.99999964)
+position = Vector2(-326.99988, -181.5)
+scale = Vector2(0.9999995, 0.9999995)
 shape = SubResource("RectangleShape2D_xn6mk")
 debug_color = Color(0, 0.6, 0.7, 0.42)
 
 [node name="ColorRect" type="ColorRect" parent="WorldSafetyBoundaries/BoundaryRight" index="1" unique_id=779605912]
+visible = false
+offset_left = -333.00003
+offset_top = -269.0
+offset_right = -323.4816
+offset_bottom = 62.268524
+color = Color(0.1764706, 0.12156863, 0.023529412, 1)
+
+[node name="BoundaryBottom" type="StaticBody2D" parent="WorldSafetyBoundaries" index="2" unique_id=333824146]
+position = Vector2(1.0000612, 175.99995)
+rotation = -3.1415925
+scale = Vector2(0.99999994, 0.99999994)
+collision_layer = 257
+metadata/_edit_group_ = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldSafetyBoundaries/BoundaryBottom" index="0" unique_id=167093769]
+position = Vector2(2.000061, 1.0000305)
+rotation = 1.5707964
+scale = Vector2(0.99999934, 0.99999934)
+shape = SubResource("RectangleShape2D_xn6mk")
+debug_color = Color(0, 0.6, 0.7, 0.42)
+
+[node name="ColorRect" type="ColorRect" parent="WorldSafetyBoundaries/BoundaryBottom" index="1" unique_id=1222526168]
 visible = false
 offset_left = -333.00003
 offset_top = -269.0

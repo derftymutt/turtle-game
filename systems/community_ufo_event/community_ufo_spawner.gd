@@ -116,8 +116,10 @@ func _spawn_dolphin(start_x: float, exit_x: float, drop_x: float, swim_y: float,
 	dolphin.exit_x = exit_x
 	dolphin.community_ufo_scene = community_ufo_scene
 
+	# Position BEFORE add_child so dolphin._ready() (which spawns the carried UFO
+	# anchored to CarryPoint) sees the correct world position — not (0, 0).
+	dolphin.position = Vector2(start_x, swim_y)
 	get_parent().add_child(dolphin)
-	dolphin.global_position = Vector2(start_x, swim_y)
 
 	_active_dolphin = dolphin
 
