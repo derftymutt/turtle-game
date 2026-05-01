@@ -12,6 +12,9 @@
 [ext_resource type="PackedScene" uid="uid://b8qcufospawn1" path="res://systems/community_ufo_event/community_ufo_spawner.tscn" id="10_kx1xp"]
 [ext_resource type="PackedScene" uid="uid://b8qdolphin001" path="res://entities/npcs/dolphin/dolphin.tscn" id="11_m516p"]
 [ext_resource type="PackedScene" uid="uid://b8qcmvufo0001" path="res://entities/community_ufo/community_ufo.tscn" id="12_l3m5x"]
+[ext_resource type="PackedScene" uid="uid://dvy8nr3rfhq5u" path="res://entities/environment/ocean_flora/ocean_flora_seeder.tscn" id="13_t207q"]
+[ext_resource type="PackedScene" uid="uid://sqnwntnauwax" path="res://entities/environment/ocean_flora/ocean_flora.tscn" id="14_g7b2g"]
+[ext_resource type="PackedScene" uid="uid://tpiece001" path="res://entities/collectibles/alien_tech_piece/alien_tech_piece.tscn" id="15_6s2qa"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_kx1xp"]
 texture = ExtResource("6_nu44e")
@@ -175,3 +178,34 @@ mirrored = true
 [node name="CommunityUFOSpawner" parent="." index="15" unique_id=1776540152 instance=ExtResource("10_kx1xp")]
 dolphin_scene = ExtResource("11_m516p")
 community_ufo_scene = ExtResource("12_l3m5x")
+
+[node name="OceanFloraSeeder" parent="." index="17" unique_id=200000001 instance=ExtResource("13_t207q")]
+flora_scene = ExtResource("14_g7b2g")
+tech_piece_scene = ExtResource("15_6s2qa")
+pieces_hidden_count = 5
+
+[node name="SpawnPoint1" parent="OceanFloraSeeder" index="0" unique_id=200000002]
+position = Vector2(-158, 47)
+
+[node name="SpawnPoint2" parent="OceanFloraSeeder" index="1" unique_id=200000003]
+position = Vector2(274, 58)
+
+[node name="SpawnPoint3" parent="OceanFloraSeeder" index="2" unique_id=200000004]
+position = Vector2(30, -50)
+
+[node name="SpawnPoint4" parent="OceanFloraSeeder" index="3" unique_id=200000005]
+position = Vector2(119, 46)
+
+[node name="SpawnPoint5" parent="OceanFloraSeeder" index="4" unique_id=200000006]
+position = Vector2(171, -14)
+
+[node name="SpawnPoint6" parent="OceanFloraSeeder" index="5" unique_id=200000007]
+position = Vector2(-95, 155)
+
+[node name="SpawnPoint7" parent="OceanFloraSeeder" index="6" unique_id=200000008]
+position = Vector2(29, 155)
+
+[node name="SpawnPoint8" parent="OceanFloraSeeder" index="7" unique_id=200000009]
+position = Vector2(198, 155)
+
+[editable path="OceanFloraSeeder"]

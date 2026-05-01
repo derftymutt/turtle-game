@@ -1,0 +1,51 @@
+[gd_scene format=3 uid="uid://tpiece001"]
+
+[ext_resource type="Script" uid="uid://tropia3reesq" path="res://entities/collectibles/alien_tech_piece/alien_tech_piece.gd" id="1_atpiece"]
+[ext_resource type="Texture2D" uid="uid://cpqc2e0qlcj8o" path="res://entities/collectibles/alien_tech_piece/sprites/alien_tech_piece.png" id="2_mpnry"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f5fuv"]
+atlas = ExtResource("2_mpnry")
+region = Rect2(0, 0, 8, 8)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gb8is"]
+atlas = ExtResource("2_mpnry")
+region = Rect2(8, 0, 8, 8)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_gk506"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f5fuv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gb8is")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_body"]
+radius = 4.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_area"]
+radius = 6.0
+
+[node name="AlienTechPiece" type="RigidBody2D" unique_id=100000001]
+collision_layer = 2
+script = ExtResource("1_atpiece")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=100000002]
+sprite_frames = SubResource("SpriteFrames_gk506")
+autoplay = "default"
+frame_progress = 0.2766822
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=100000003]
+shape = SubResource("CircleShape2D_body")
+
+[node name="Area2D" type="Area2D" parent="." unique_id=100000004]
+collision_layer = 0
+collision_mask = 32
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=100000005]
+shape = SubResource("CircleShape2D_area")

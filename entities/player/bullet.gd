@@ -3,6 +3,7 @@ extends RigidBody2D
 @export var lifetime: float = .7
 @export var water_drag: float = 0.95
 @export var damage: float = 10.0
+@export var bravado_stamina_restore: float = 20.0
 
 var velocity: Vector2 = Vector2.ZERO
 var hit_targets: Array = []  # Track what we've already hit
@@ -100,37 +101,47 @@ func _on_body_entered(body):
 	# Ignore player
 	if body.is_in_group("player"):
 		return
-		
-	# Hit trash items! (NEW)
+
+	# Hit trash items
 	if body.is_in_group("trash_items"):
-		# Trash handles destruction itself via Area2D
 		queue_free()
 		return
-	
+
 	# Pop air bubbles (before enemies, so they take priority)
 	if body.is_in_group("air_bubbles") and body.has_method("pop_from_bullet"):
 		body.pop_from_bullet()
 		queue_free()
 		return
-	
-	# Damage enemies (including invincible ones - they'll show feedback!)
-	if body.is_in_group("enemies") and body.has_method("take_damage"):
+
+	# Hit ocean flora — damage and reveal any hidden tech piece
+	if body.is_in_group("ocean_flora") and body.has_method("take_damage"):
 		body.take_damage(damage)
 		queue_free()
 		return
-	
+
+	# Hit enemies — with Bravado stamina restore on successful hit
+	if body.is_in_group("enemies") and body.has_method("take_damage"):
+		body.take_damage(damage)
+		if AlienTechManager.is_tech_active(AlienTechRegistry.BRAVADO) and not body.get("is_invincible"):
+			var hud = get_tree().get_first_node_in_group("hud")
+			if hud:
+				hud.current_energy = min(hud.max_energy, hud.current_energy + bravado_stamina_restore)
+				hud.update_energy(hud.current_energy, hud.max_energy)
+		queue_free()
+		return
+
 	# Hit wall/flipper - destroy bullet
 	queue_free()
 
 func _hit_enemy(body):
-	"""Deal damage to an enemy and destroy the bullet"""
-	# Prevent hitting the same enemy twice
 	if body in hit_targets:
 		return
-	
 	hit_targets.append(body)
-	
 	if body.has_method("take_damage"):
 		body.take_damage(damage)
-	
+	if AlienTechManager.is_tech_active(AlienTechRegistry.BRAVADO) and not body.get("is_invincible"):
+		var hud = get_tree().get_first_node_in_group("hud")
+		if hud:
+			hud.current_energy = min(hud.max_energy, hud.current_energy + bravado_stamina_restore)
+			hud.update_energy(hud.current_energy, hud.max_energy)
 	queue_free()

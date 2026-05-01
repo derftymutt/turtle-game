@@ -48,3 +48,4 @@ func reset_game():
 	current_score = 0
 	is_carrying_piece = false
 	carried_piece = null
+	AlienTechManager.reset_run()

@@ -1,0 +1,153 @@
+extends Node
+
+## Autoload: AlienTechManager
+## Manages the player's alien tech run state:
+##   - How many tech pieces have been collected this run
+##   - Which techs occupy slot A and slot B
+##   - Fires signals so HUD, selection screen, and player can react
+##   - Cooldown tracking for active (button-press) techs
+##
+## Add to Project Settings > Autoload as "AlienTechManager" (AFTER AlienTechRegistry)
+
+# ─── Constants ───────────────────────────────────────────────────────────────
+
+const MAX_SLOTS:       int = 2
+const PIECES_PER_TECH: int = 1
+const CHOICES_OFFERED: int = 3
+
+# ─── Signals ─────────────────────────────────────────────────────────────────
+
+signal piece_collected(current: int, needed: int)
+signal selection_ready(choices: Array)
+signal tech_slots_changed(slot_a: Dictionary, slot_b: Dictionary)
+signal tech_activated(slot_index: int, tech_id: String)
+signal tech_cooldown_ready(slot_index: int, tech_id: String)
+
+# ─── Run state ───────────────────────────────────────────────────────────────
+
+var pieces_this_threshold: int = 0
+var total_pieces_collected: int = 0
+
+var slots: Array[Dictionary] = [{}, {}]
+var _cooldowns: Array[float] = [0.0, 0.0]
+
+const _COOLDOWN_DURATIONS: Dictionary = {
+	AlienTechRegistry.JETPACK: 5.0,
+}
+
+# ─── Ready ───────────────────────────────────────────────────────────────────
+
+func _ready():
+	print("👽 AlienTechManager initialized")
+
+# ─── Process (cooldown ticking) ──────────────────────────────────────────────
+
+func _process(delta: float):
+	for i in MAX_SLOTS:
+		if _cooldowns[i] > 0.0:
+			_cooldowns[i] = max(0.0, _cooldowns[i] - delta)
+			if _cooldowns[i] == 0.0:
+				var tech_id = slots[i].get("id", "")
+				if tech_id != "":
+					tech_cooldown_ready.emit(i, tech_id)
+
+# ─── Piece collection ────────────────────────────────────────────────────────
+
+func collect_piece():
+	pieces_this_threshold += 1
+	total_pieces_collected += 1
+	piece_collected.emit(pieces_this_threshold, PIECES_PER_TECH)
+	print("👽 Alien tech piece: %d/%d" % [pieces_this_threshold, PIECES_PER_TECH])
+	if pieces_this_threshold >= PIECES_PER_TECH:
+		_trigger_selection()
+
+func _trigger_selection():
+	pieces_this_threshold = 0
+	var owned_ids: Array[String] = []
+	for slot in slots:
+		if not slot.is_empty():
+			owned_ids.append(slot["id"])
+	var choices = AlienTechRegistry.get_random_choices(CHOICES_OFFERED, owned_ids)
+	if choices.is_empty():
+		print("👽 No new techs available — player owns everything!")
+		return
+	selection_ready.emit(choices)
+
+# ─── Tech selection / slot management ────────────────────────────────────────
+
+func assign_tech(tech_id: String, slot_index: int):
+	var tech = AlienTechRegistry.get_tech(tech_id)
+	if tech.is_empty():
+		return
+	slots[slot_index] = tech
+	_cooldowns[slot_index] = 0.0
+	print("👽 Slot %s assigned: %s" % [_slot_letter(slot_index), tech["name"]])
+	tech_slots_changed.emit(slots[0], slots[1])
+
+func clear_slot(slot_index: int):
+	if slot_index < 0 or slot_index >= MAX_SLOTS:
+		return
+	slots[slot_index] = {}
+	_cooldowns[slot_index] = 0.0
+	tech_slots_changed.emit(slots[0], slots[1])
+
+func has_tech(tech_id: String) -> bool:
+	for slot in slots:
+		if slot.get("id", "") == tech_id:
+			return true
+	return false
+
+func is_tech_active(tech_id: String) -> bool:
+	return has_tech(tech_id)
+
+# ─── Active tech firing ──────────────────────────────────────────────────────
+
+func try_activate_slot(slot_index: int) -> bool:
+	if slot_index < 0 or slot_index >= MAX_SLOTS:
+		return false
+	var tech = slots[slot_index]
+	if tech.is_empty():
+		return false
+	if not tech.get("needs_input", false):
+		return false
+	if _cooldowns[slot_index] > 0.0:
+		print("👽 %s on cooldown: %.1fs remaining" % [tech["name"], _cooldowns[slot_index]])
+		return false
+	_cooldowns[slot_index] = _COOLDOWN_DURATIONS.get(tech["id"], 0.0)
+	tech_activated.emit(slot_index, tech["id"])
+	print("👽 Activated: %s (slot %s)" % [tech["name"], _slot_letter(slot_index)])
+	return true
+
+func get_cooldown_ratio(slot_index: int) -> float:
+	if slot_index < 0 or slot_index >= MAX_SLOTS:
+		return 0.0
+	var tech = slots[slot_index]
+	if tech.is_empty():
+		return 0.0
+	var max_cd = _COOLDOWN_DURATIONS.get(tech.get("id", ""), 0.0)
+	if max_cd <= 0.0:
+		return 0.0
+	return _cooldowns[slot_index] / max_cd
+
+# ─── Run lifecycle ───────────────────────────────────────────────────────────
+
+func reset_run():
+	pieces_this_threshold = 0
+	total_pieces_collected = 0
+	slots = [{}, {}]
+	_cooldowns = [0.0, 0.0]
+	print("👽 AlienTechManager: Run reset")
+
+# ─── Helpers ─────────────────────────────────────────────────────────────────
+
+func find_empty_slot() -> int:
+	for i in MAX_SLOTS:
+		if slots[i].is_empty():
+			return i
+	return -1
+
+func _slot_letter(index: int) -> String:
+	match index:
+		0: return "A"
+		1: return "B"
+		_: return "?"
