@@ -1,0 +1,34 @@
+[gd_scene format=3 uid="uid://dvy8nr3rfhq5u"]
+
+[ext_resource type="Script" path="res://entities/environment/ocean_flora/ocean_flora_seeder.gd" id="1_seeder"]
+[ext_resource type="PackedScene" uid="uid://sqnwntnauwax" path="res://entities/environment/ocean_flora/ocean_flora.tscn" id="2_flora"]
+[ext_resource type="PackedScene" uid="uid://tpiece001" path="res://entities/collectibles/alien_tech_piece/alien_tech_piece.tscn" id="3_techpiece"]
+
+[node name="OceanFloraSeeder" type="Node2D" unique_id=200000001]
+script = ExtResource("1_seeder")
+flora_scene = ExtResource("2_flora")
+tech_piece_scene = ExtResource("3_techpiece")
+
+[node name="SpawnPoint1" type="Marker2D" parent="." unique_id=200000002]
+position = Vector2(-200, 80)
+
+[node name="SpawnPoint2" type="Marker2D" parent="." unique_id=200000003]
+position = Vector2(-100, 100)
+
+[node name="SpawnPoint3" type="Marker2D" parent="." unique_id=200000004]
+position = Vector2(0, 90)
+
+[node name="SpawnPoint4" type="Marker2D" parent="." unique_id=200000005]
+position = Vector2(100, 105)
+
+[node name="SpawnPoint5" type="Marker2D" parent="." unique_id=200000006]
+position = Vector2(200, 85)
+
+[node name="SpawnPoint6" type="Marker2D" parent="." unique_id=200000007]
+position = Vector2(-150, 150)
+
+[node name="SpawnPoint7" type="Marker2D" parent="." unique_id=200000008]
+position = Vector2(50, 140)
+
+[node name="SpawnPoint8" type="Marker2D" parent="." unique_id=200000009]
+position = Vector2(180, 160)

@@ -15,6 +15,13 @@ var energy_bar: ProgressBar
 var super_speed_indicator: Label
 var hud_container: Control  # Container for flash effect
 
+# Alien Tech displays
+var tech_piece_label:  Label       = null
+var slot_a_label:      Label       = null
+var slot_b_label:      Label       = null
+var slot_a_cooldown:   ProgressBar = null
+var slot_b_cooldown:   ProgressBar = null
+
 # Game state
 var current_score: int = 0
 var current_health: float = 100.0
@@ -113,6 +120,17 @@ func _ready():
 		LevelManager.level_started.connect(_on_level_started)
 		LevelManager.boss_level_started.connect(_on_boss_level_started)
 
+	# Alien Tech UI
+	tech_piece_label = find_child("TechPieceLabel")
+	slot_a_label     = find_child("SlotALabel")
+	slot_b_label     = find_child("SlotBLabel")
+	slot_a_cooldown  = find_child("SlotACooldown")
+	slot_b_cooldown  = find_child("SlotBCooldown")
+
+	AlienTechManager.piece_collected.connect(_on_tech_piece_collected)
+	AlienTechManager.tech_slots_changed.connect(_on_tech_slots_changed)
+	_refresh_tech_display()
+
 func _process(delta):
 	# Handle air warning flash - entire HUD layer pulses red
 	if air_warning and air_enabled and hud_container:
@@ -128,6 +146,16 @@ func _process(delta):
 			hud_container.modulate = Color.WHITE
 		air_flash_timer = 0.0
 	
+	# Alien Tech cooldown bars
+	if slot_a_cooldown and slot_a_cooldown.visible:
+		slot_a_cooldown.value = 1.0 - AlienTechManager.get_cooldown_ratio(0)
+	if slot_b_cooldown and slot_b_cooldown.visible:
+		slot_b_cooldown.value = 1.0 - AlienTechManager.get_cooldown_ratio(1)
+	if slot_a_label:
+		slot_a_label.modulate.a = 0.5 if AlienTechManager.get_cooldown_ratio(0) > 0.0 else 1.0
+	if slot_b_label:
+		slot_b_label.modulate.a = 0.5 if AlienTechManager.get_cooldown_ratio(1) > 0.0 else 1.0
+
 	# Handle wall recovery visual feedback
 	if wall_recovery_active and energy_bar:
 		energy_pulse_timer += delta * energy_pulse_speed
@@ -348,3 +376,36 @@ func _on_boss_level_started(level_number: int):
 	if ufo_pieces_label:
 		ufo_pieces_label.text = "⚠ Defeat the Boss!"
 		ufo_pieces_label.add_theme_color_override("font_color", Color.RED)
+
+# ─── Alien Tech display ───────────────────────────────────────────────────────
+
+func _on_tech_piece_collected(current: int, needed: int):
+	if tech_piece_label:
+		tech_piece_label.text = "Tech: %d/%d" % [current, needed]
+
+func _on_tech_slots_changed(slot_a: Dictionary, slot_b: Dictionary):
+	_update_slot_display(slot_a_label, slot_a_cooldown, slot_a, "A")
+	_update_slot_display(slot_b_label, slot_b_cooldown, slot_b, "B")
+
+func _update_slot_display(label: Label, cooldown_bar: ProgressBar,
+		tech: Dictionary, letter: String):
+	if not label:
+		return
+	if tech.is_empty():
+		label.text = "[%s] ---" % letter
+		label.modulate = Color(0.5, 0.5, 0.5, 0.8)
+		if cooldown_bar:
+			cooldown_bar.visible = false
+	else:
+		label.text = "[%s] %s" % [letter, tech.get("slot_label", tech.get("name", "?"))]
+		label.modulate = tech.get("color", Color.WHITE)
+		if cooldown_bar:
+			cooldown_bar.visible = tech.get("needs_input", false)
+
+func _refresh_tech_display():
+	if tech_piece_label:
+		tech_piece_label.text = "Tech: %d/%d" % [
+			AlienTechManager.pieces_this_threshold,
+			AlienTechManager.PIECES_PER_TECH
+		]
+	_on_tech_slots_changed(AlienTechManager.slots[0], AlienTechManager.slots[1])

@@ -90,6 +90,12 @@ var is_player_controlling_rotation: bool = false
 var control_suspended: bool = false
 var control_suspend_timer: float = 0.0
 
+# Alien Tech state
+var jetpack_active: bool = false
+var jetpack_timer: float = 0.0
+const JETPACK_DURATION: float = 0.05
+const JETPACK_FORCE: float = 600.0
+
 # ---------------------------------------------------------------------------
 # 8-DIRECTIONAL SPRITE SYSTEM
 # ---------------------------------------------------------------------------
@@ -145,6 +151,7 @@ func _ready():
 
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
+	AlienTechManager.tech_activated.connect(_on_alien_tech_activated)
 
 	# Show the correct idle frame immediately on spawn
 	_play_animation("idle")
@@ -213,6 +220,11 @@ func _physics_process(delta):
 		if rapid_fire_timer <= 0:
 			deactivate_rapid_fire()
 
+	if jetpack_active:
+		jetpack_timer -= delta
+		if jetpack_timer <= 0:
+			jetpack_active = false
+
 	# Ocean physics
 	if ocean:
 		apply_ocean_effects(delta)
@@ -279,6 +291,12 @@ func _physics_process(delta):
 		if GameManager.is_carrying_piece and GameManager.carried_piece:
 			GameManager.carried_piece.drop_piece()
 
+	# Alien Tech active slot buttons
+	if Input.is_action_just_pressed("tech_slot_a"):
+		AlienTechManager.try_activate_slot(0)
+	if Input.is_action_just_pressed("tech_slot_b"):
+		AlienTechManager.try_activate_slot(1)
+
 	# Clamp velocity
 	if linear_velocity.length() > max_velocity:
 		linear_velocity = linear_velocity.normalized() * max_velocity
@@ -320,7 +338,16 @@ func _update_sprite_modulate():
 
 func apply_ocean_effects(delta: float):
 	"""Apply depth-based buoyancy and water drag"""
+	# Jetpack: suppress all ocean forces during dash window
+	if jetpack_active:
+		return
+
 	var depth = ocean.get_depth(global_position)
+
+	# Inertia Dampener: clamp depth to shallow zone so deep buoyancy never fires
+	if AlienTechManager.is_tech_active(AlienTechRegistry.INERTIA_DAMPENER):
+		depth = min(depth, ocean.shallow_depth - 1.0)
+
 	var buoyancy_force = ocean.calculate_buoyancy_force(depth, mass)
 	apply_central_force(Vector2(0, -buoyancy_force))
 
@@ -779,6 +806,48 @@ func deactivate_rapid_fire():
 	rapid_fire_active = false
 	active_shoot_cooldown = shoot_cooldown
 	print("Rapid Fire expired")
+
+# ---------------------------------------------------------------------------
+# ALIEN TECH
+# ---------------------------------------------------------------------------
+
+func _on_alien_tech_activated(slot_index: int, tech_id: String):
+	match tech_id:
+		AlienTechRegistry.JETPACK:
+			_activate_jetpack()
+
+func _activate_jetpack():
+	jetpack_active = true
+	jetpack_timer = JETPACK_DURATION
+
+	var movement_input = Vector2(
+		Input.get_axis("move_left", "move_right"),
+		Input.get_axis("move_up", "move_down")
+	)
+	var dash_dir: Vector2
+	if movement_input.length() > 0.1:
+		dash_dir = movement_input.normalized()
+		if GameSettings.thrust_inverted:
+			dash_dir = -dash_dir
+	else:
+		dash_dir = _direction_suffix_to_vector(facing_direction)
+
+	linear_velocity = Vector2.ZERO
+	apply_central_impulse(dash_dir * JETPACK_FORCE)
+	_flash(Color.WHITE, 0.2)
+	print("👽 Jetpack dash: %s" % str(dash_dir))
+
+func _direction_suffix_to_vector(suffix: String) -> Vector2:
+	match suffix:
+		"e":  return Vector2.RIGHT
+		"w":  return Vector2.LEFT
+		"n":  return Vector2.UP
+		"s":  return Vector2.DOWN
+		"ne": return Vector2(1, -1).normalized()
+		"nw": return Vector2(-1, -1).normalized()
+		"se": return Vector2(1, 1).normalized()
+		"sw": return Vector2(-1, 1).normalized()
+		_:    return Vector2.DOWN
 
 # ---------------------------------------------------------------------------
 # CONTROL SUSPENSION

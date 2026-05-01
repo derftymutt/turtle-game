@@ -1,0 +1,64 @@
+[gd_scene format=3 uid="uid://atselect001"]
+
+[ext_resource type="Script" path="res://ui/alien_tech/alien_tech_selection_screen.gd" id="1_atselect"]
+
+[node name="AlienTechSelectionScreen" type="CanvasLayer" unique_id=300000001]
+process_mode = 3
+script = ExtResource("1_atselect")
+
+[node name="Control" type="Control" parent="." unique_id=300000002]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="Control" unique_id=300000003]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -310.0
+offset_top = -130.0
+offset_right = 310.0
+offset_bottom = 130.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="Control/PanelContainer" unique_id=300000004]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/PanelContainer/MarginContainer" unique_id=300000005]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="TitleLabel" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer" unique_id=300000006]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Alien Tech Acquired!"
+horizontal_alignment = 1
+
+[node name="SubtitleLabel" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer" unique_id=300000007]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "Choose an upgrade:"
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/PanelContainer/MarginContainer/VBoxContainer" unique_id=300000008]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="SlotLabel" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer" unique_id=300000009]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = ""
+visible = false
+horizontal_alignment = 1
