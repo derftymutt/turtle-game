@@ -88,12 +88,14 @@ var _polygon: Polygon2D
 var _animated_sprite: AnimatedSprite2D
 var _hit_area: Area2D
 var _is_playing_hit: bool = false
+var _is_phased: bool = false
 
 ## --- Lifecycle ---
 
 func _ready() -> void:
 	add_to_group("walls")
 	add_to_group("bumpers")
+	add_to_group("circular_bumpers")
 
 	_find_children()
 	_ensure_unique_shapes()
@@ -213,6 +215,36 @@ func _on_animation_finished() -> void:
 	## Return to idle automatically.
 	_is_playing_hit = false
 	_apply_sprite()
+
+## --- Phase Shift ---
+
+func phase_shift(duration: float) -> void:
+	if _is_phased:
+		return
+	_is_phased = true
+
+	var original_layer := collision_layer
+	modulate.a = 0.2
+	set_deferred("collision_layer", 0)
+	if _hit_area:
+		_hit_area.monitoring = false
+
+	await get_tree().create_timer(duration).timeout
+
+	if not is_instance_valid(self):
+		return
+
+	# Grace period so the turtle has time to swim clear before collision re-enables.
+	await get_tree().create_timer(0.5).timeout
+
+	if not is_instance_valid(self):
+		return
+
+	_is_phased = false
+	modulate.a = 1.0
+	set_deferred("collision_layer", original_layer)
+	if _hit_area:
+		_hit_area.monitoring = true
 
 ## --- Public Helpers ---
 

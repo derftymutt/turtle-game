@@ -13,6 +13,8 @@ var current_level_number: int = 1
 var pieces_collected: int = 0
 var pieces_needed: int = 3
 var attempt_count: int = 1  # How many attempts on the current level
+var alien_tech_pieces_collected: int = 0  # Persists across retries; resets only on new level
+var flora_hidden_budget: int = -1          # Rolled once per level; -1 = not yet rolled
 
 # Level scene registry
 var level_scenes: Dictionary = {
@@ -151,6 +153,8 @@ func load_level(level_number: int):
 	# Reset attempts only when loading a genuinely new level (not a retry)
 	if level_number != current_level_number:
 		attempt_count = 1
+		alien_tech_pieces_collected = 0
+		flora_hidden_budget = -1
 	current_level_number = level_number
 	pieces_collected = 0  # Reset for new level
 	
@@ -167,6 +171,16 @@ func restart_current_level():
 	"""Restart the current level (for game over)"""
 	attempt_count += 1
 	load_level(current_level_number)
+
+func get_or_roll_flora_budget(min_count: int, max_count: int) -> int:
+	if flora_hidden_budget < 0:
+		flora_hidden_budget = randi_range(min_count, max_count)
+		print("🌿 Flora tech budget rolled: %d (range %d–%d)" % [flora_hidden_budget, min_count, max_count])
+	return flora_hidden_budget
+
+func record_alien_tech_collected():
+	alien_tech_pieces_collected += 1
+	print("🌿 Flora tech banked: %d/%d collected this level" % [alien_tech_pieces_collected, alien_tech_pieces_collected])
 
 func get_current_level_name() -> String:
 	"""Get current level identifier for high scores"""

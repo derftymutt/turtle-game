@@ -129,6 +129,7 @@ func _ready():
 
 	AlienTechManager.piece_collected.connect(_on_tech_piece_collected)
 	AlienTechManager.tech_slots_changed.connect(_on_tech_slots_changed)
+	AlienTechManager.phase_shifter_ammo_changed.connect(_on_phase_shifter_ammo_changed)
 	_refresh_tech_display()
 
 func _process(delta):
@@ -148,13 +149,13 @@ func _process(delta):
 	
 	# Alien Tech cooldown bars
 	if slot_a_cooldown and slot_a_cooldown.visible:
-		slot_a_cooldown.value = 1.0 - AlienTechManager.get_cooldown_ratio(0)
+		slot_a_cooldown.value = _get_slot_bar_value(0)
 	if slot_b_cooldown and slot_b_cooldown.visible:
-		slot_b_cooldown.value = 1.0 - AlienTechManager.get_cooldown_ratio(1)
+		slot_b_cooldown.value = _get_slot_bar_value(1)
 	if slot_a_label:
-		slot_a_label.modulate.a = 0.5 if AlienTechManager.get_cooldown_ratio(0) > 0.0 else 1.0
+		slot_a_label.modulate.a = 0.5 if _is_slot_dimmed(0) else 1.0
 	if slot_b_label:
-		slot_b_label.modulate.a = 0.5 if AlienTechManager.get_cooldown_ratio(1) > 0.0 else 1.0
+		slot_b_label.modulate.a = 0.5 if _is_slot_dimmed(1) else 1.0
 
 	# Handle wall recovery visual feedback
 	if wall_recovery_active and energy_bar:
@@ -396,6 +397,17 @@ func _update_slot_display(label: Label, cooldown_bar: ProgressBar,
 		label.modulate = Color(0.5, 0.5, 0.5, 0.8)
 		if cooldown_bar:
 			cooldown_bar.visible = false
+	elif tech.get("id", "") == AlienTechRegistry.PHASE_SHIFTER:
+		var ammo := AlienTechManager.phase_shifter_ammo
+		var max_ammo := AlienTechManager.PHASE_SHIFTER_MAX_AMMO
+		var recharging := AlienTechManager.phase_shifter_recharging
+		if recharging:
+			label.text = "[%s] PHASE --/%d" % [letter, max_ammo]
+		else:
+			label.text = "[%s] PHASE %d/%d" % [letter, ammo, max_ammo]
+		label.modulate = tech.get("color", Color.WHITE)
+		if cooldown_bar:
+			cooldown_bar.visible = true
 	else:
 		label.text = "[%s] %s" % [letter, tech.get("slot_label", tech.get("name", "?"))]
 		label.modulate = tech.get("color", Color.WHITE)
@@ -409,3 +421,20 @@ func _refresh_tech_display():
 			AlienTechManager.PIECES_PER_TECH
 		]
 	_on_tech_slots_changed(AlienTechManager.slots[0], AlienTechManager.slots[1])
+
+func _on_phase_shifter_ammo_changed(_current: int, _max_ammo: int, _recharging: bool):
+	_on_tech_slots_changed(AlienTechManager.slots[0], AlienTechManager.slots[1])
+
+func _get_slot_bar_value(slot_index: int) -> float:
+	var tech := AlienTechManager.slots[slot_index]
+	if tech.get("id", "") == AlienTechRegistry.PHASE_SHIFTER:
+		if AlienTechManager.phase_shifter_recharging:
+			return 1.0 - (AlienTechManager.phase_shifter_recharge_timer / AlienTechManager.PHASE_SHIFTER_RECHARGE_TIME)
+		return float(AlienTechManager.phase_shifter_ammo) / float(AlienTechManager.PHASE_SHIFTER_MAX_AMMO)
+	return 1.0 - AlienTechManager.get_cooldown_ratio(slot_index)
+
+func _is_slot_dimmed(slot_index: int) -> bool:
+	var tech := AlienTechManager.slots[slot_index]
+	if tech.get("id", "") == AlienTechRegistry.PHASE_SHIFTER:
+		return AlienTechManager.phase_shifter_recharging
+	return AlienTechManager.get_cooldown_ratio(slot_index) > 0.0

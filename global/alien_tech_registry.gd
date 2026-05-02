@@ -14,6 +14,7 @@ const SALIVA_NANOBOTS  := "saliva_nanobots"
 const BUBBLE_SHIELD    := "bubble_shield"
 const BUMPER_MAGNET    := "bumper_magnet"
 const DERMAL_REGEN     := "dermal_regen"
+const PHASE_SHIFTER    := "phase_shifter"
 
 # ─── Tech definitions ────────────────────────────────────────────────────────
 
@@ -84,6 +85,14 @@ var _definitions: Array[Dictionary] = [
 		"needs_input":     true,
 		"has_passive_bar": true,
 		"color":           Color(1.0, 0.75, 0.1),
+	},
+	{
+		"id":          PHASE_SHIFTER,
+		"name":        "Phase Shifter",
+		"description": "Hold your slot button while shooting to fire phase bullets.\n10 shots before a 10s recharge. Phased enemies are passthrough and harmless for 4s. Works on invincible enemies.",
+		"slot_label":  "PHASE",
+		"needs_input": false,
+		"color":       Color(0.3, 0.9, 1.0),
 	},
 ]
 

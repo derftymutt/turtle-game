@@ -34,8 +34,11 @@ var _slippery_area: Area2D
 
 ## --- Lifecycle ---
 
+var _is_phased: bool = false
+
 func _ready() -> void:
 	add_to_group("walls")
+	add_to_group("dead_walls")
 	add_to_group("eel_targetable")
 	super._ready()  ## BaseWall: _find_children() → _ensure_unique_shapes() → _update_wall()
 
@@ -114,6 +117,32 @@ func _calculate_net_physics_force(body: RigidBody2D) -> Vector2:
 			net_force.y -= ocean.calculate_buoyancy_force(depth, body.mass)
 
 	return net_force
+
+## --- Phase Shift ---
+
+func phase_shift(duration: float) -> void:
+	if _is_phased:
+		return
+	_is_phased = true
+
+	var original_layer := collision_layer
+	modulate.a = 0.2
+	set_deferred("collision_layer", 0)
+
+	await get_tree().create_timer(duration).timeout
+
+	if not is_instance_valid(self):
+		return
+
+	# Grace period so the turtle has time to swim clear before collision re-enables.
+	await get_tree().create_timer(0.5).timeout
+
+	if not is_instance_valid(self):
+		return
+
+	_is_phased = false
+	modulate.a = 1.0
+	set_deferred("collision_layer", original_layer)
 
 ## --- Visuals ---
 

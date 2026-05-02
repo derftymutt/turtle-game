@@ -6,7 +6,8 @@ class_name OceanFloraSeeder
 
 @export_group("Seeding")
 @export var total_flora_count: int = 5
-@export var pieces_hidden_count: int = 3
+@export var min_pieces_hidden: int = 1
+@export var max_pieces_hidden: int = 3
 
 func _ready():
 	if not flora_scene:
@@ -27,7 +28,9 @@ func _seed_flora():
 		return
 
 	var actual_count = min(total_flora_count, spawn_points.size())
-	var actual_pieces = min(pieces_hidden_count, actual_count)
+	var budget = LevelManager.get_or_roll_flora_budget(min_pieces_hidden, max_pieces_hidden)
+	var remaining_pieces = budget - LevelManager.alien_tech_pieces_collected
+	var actual_pieces = min(max(remaining_pieces, 0), actual_count)
 
 	spawn_points.shuffle()
 	var chosen = spawn_points.slice(0, actual_count)
@@ -40,6 +43,7 @@ func _seed_flora():
 		var flora = flora_scene.instantiate()
 		get_parent().add_child(flora)
 		flora.global_position = chosen[i].global_position
+		flora.rotation = chosen[i].rotation
 		flora.reveals_tech_piece = (i in piece_indices)
 		if flora.reveals_tech_piece and tech_piece_scene:
 			flora.tech_piece_scene = tech_piece_scene

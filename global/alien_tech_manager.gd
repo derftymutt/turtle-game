@@ -22,6 +22,7 @@ signal selection_ready(choices: Array)
 signal tech_slots_changed(slot_a: Dictionary, slot_b: Dictionary)
 signal tech_activated(slot_index: int, tech_id: String)
 signal tech_cooldown_ready(slot_index: int, tech_id: String)
+signal phase_shifter_ammo_changed(current: int, max_ammo: int, recharging: bool)
 
 # ─── Run state ───────────────────────────────────────────────────────────────
 
@@ -39,6 +40,15 @@ const _COOLDOWN_DURATIONS: Dictionary = {
 
 var _passive_bar_ratios: Dictionary = {}
 
+# ─── Phase Shifter ammo ──────────────────────────────────────────────────────
+
+const PHASE_SHIFTER_MAX_AMMO: int = 10
+const PHASE_SHIFTER_RECHARGE_TIME: float = 10.0
+
+var phase_shifter_ammo: int = PHASE_SHIFTER_MAX_AMMO
+var phase_shifter_recharging: bool = false
+var phase_shifter_recharge_timer: float = 0.0
+
 # ─── Ready ───────────────────────────────────────────────────────────────────
 
 func _ready():
@@ -54,6 +64,13 @@ func _process(delta: float):
 				var tech_id = slots[i].get("id", "")
 				if tech_id != "":
 					tech_cooldown_ready.emit(i, tech_id)
+
+	if phase_shifter_recharging:
+		phase_shifter_recharge_timer -= delta
+		if phase_shifter_recharge_timer <= 0.0:
+			phase_shifter_recharging = false
+			phase_shifter_ammo = PHASE_SHIFTER_MAX_AMMO
+			phase_shifter_ammo_changed.emit(phase_shifter_ammo, PHASE_SHIFTER_MAX_AMMO, false)
 
 # ─── Piece collection ────────────────────────────────────────────────────────
 
@@ -150,7 +167,28 @@ func reset_run():
 	slots = [{}, {}]
 	_cooldowns = [0.0, 0.0]
 	_passive_bar_ratios.clear()
+	phase_shifter_ammo = PHASE_SHIFTER_MAX_AMMO
+	phase_shifter_recharging = false
+	phase_shifter_recharge_timer = 0.0
 	print("👽 AlienTechManager: Run reset")
+
+# ─── Phase Shifter ───────────────────────────────────────────────────────────
+
+func consume_phase_bullet() -> bool:
+	if phase_shifter_recharging or phase_shifter_ammo <= 0:
+		return false
+	phase_shifter_ammo -= 1
+	if phase_shifter_ammo <= 0:
+		phase_shifter_recharging = true
+		phase_shifter_recharge_timer = PHASE_SHIFTER_RECHARGE_TIME
+	phase_shifter_ammo_changed.emit(phase_shifter_ammo, PHASE_SHIFTER_MAX_AMMO, phase_shifter_recharging)
+	return true
+
+func get_slot_index_for_tech(tech_id: String) -> int:
+	for i in MAX_SLOTS:
+		if slots[i].get("id", "") == tech_id:
+			return i
+	return -1
 
 # ─── Helpers ─────────────────────────────────────────────────────────────────
 

@@ -24,6 +24,7 @@ class_name BaseEnemyStatic
 var current_health: float
 var sprite: Node2D = null
 var damage_area: Area2D = null
+var _is_phased: bool = false
 
 func _ready():
 	current_health = max_health
@@ -155,6 +156,34 @@ func _deal_damage_to_player(player: Node2D):
 	var knockback_dir = (player.global_position - global_position).normalized()
 	if player is RigidBody2D:
 		player.apply_central_impulse(knockback_dir * knockback_force)
+
+## Temporarily make this enemy passthrough and non-damaging
+func phase_shift(duration: float) -> void:
+	if _is_phased:
+		return
+	_is_phased = true
+
+	if damage_area:
+		damage_area.monitoring = false
+
+	modulate.a = 0.35
+
+	var original_layer := collision_layer
+	var original_mask := collision_mask
+	set_deferred("collision_layer", 0)
+	set_deferred("collision_mask", 0)
+
+	await get_tree().create_timer(duration).timeout
+
+	if not is_instance_valid(self):
+		return
+
+	_is_phased = false
+	modulate.a = 1.0
+	if damage_area:
+		damage_area.monitoring = true
+	set_deferred("collision_layer", original_layer)
+	set_deferred("collision_mask", original_mask)
 
 ## Override in child classes for custom death behavior
 func die():

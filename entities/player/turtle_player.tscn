@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://cge0huw8algp1" path="res://entities/player/turtle_player.gd" id="1_n086i"]
 [ext_resource type="PackedScene" uid="uid://lxxb80yuhgk7" path="res://entities/player/bullet.tscn" id="2_7uinh"]
 [ext_resource type="Texture2D" uid="uid://gp4ww5g2xqt3" path="res://entities/player/sprites/turtle5.png" id="3_7uinh"]
+[ext_resource type="PackedScene" path="res://entities/player/phase_bullet.tscn" id="3_padro"]
 [ext_resource type="Texture2D" uid="uid://b1k0cgwrgpiy6" path="res://entities/player/sprites/turtle_idle.png" id="4_6wpjo"]
 [ext_resource type="Texture2D" uid="uid://djvss84e4sdut" path="res://entities/player/sprites/turtle_kick.png" id="5_85e4a"]
 [ext_resource type="Texture2D" uid="uid://du6lru60n6r1" path="res://entities/player/sprites/turtle_shoot.png" id="6_padro"]
@@ -415,6 +416,7 @@ freeze_mode = 1
 continuous_cd = 1
 script = ExtResource("1_n086i")
 bullet_scene = ExtResource("2_7uinh")
+phase_bullet_scene = ExtResource("3_padro")
 super_speed_color = Color(0.7779172, 1.5036877, 0, 1)
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1828949440]
