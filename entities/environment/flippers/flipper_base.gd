@@ -30,12 +30,15 @@ var base_collision_rotation: float = 0.0  # Store initial collision rotation fro
 var base_collision_position: Vector2 = Vector2.ZERO  # Store initial collision position from scene
 var base_area_collision_position: Vector2 = Vector2.ZERO
 
+var _is_phased: bool = false
+
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 @onready var area: Area2D = $Area2D
 @onready var area_collision_shape: CollisionShape2D = $Area2D/CollisionShape2D
 
 func _ready():
+	add_to_group("flippers")
 	target_rotation = get_rest_angle()
 	current_rotation = target_rotation
 	
@@ -216,6 +219,39 @@ func hit_body(body: RigidBody2D, is_press_action: bool, was_cradle_release: bool
 	
 	body.linear_velocity += tangent * impulse_strength
 
+
+## Phase Shift
+
+func phase_shift(duration: float) -> void:
+	if _is_phased:
+		return
+	_is_phased = true
+
+	var original_layer := collision_layer
+	var original_mask := collision_mask
+	modulate.a = 0.2
+	set_deferred("collision_layer", 0)
+	set_deferred("collision_mask", 0)
+	if area:
+		area.monitoring = false
+
+	await get_tree().create_timer(duration).timeout
+
+	if not is_instance_valid(self):
+		return
+
+	# Grace period so the turtle has time to clear the flipper geometry.
+	await get_tree().create_timer(0.5).timeout
+
+	if not is_instance_valid(self):
+		return
+
+	_is_phased = false
+	modulate.a = 1.0
+	set_deferred("collision_layer", original_layer)
+	set_deferred("collision_mask", original_mask)
+	if area:
+		area.monitoring = true
 
 ## ABSTRACT METHODS
 

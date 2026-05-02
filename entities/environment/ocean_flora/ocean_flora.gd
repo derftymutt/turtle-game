@@ -51,6 +51,7 @@ func _die():
 	if reveals_tech_piece and tech_piece_scene:
 		var piece = tech_piece_scene.instantiate()
 		get_parent().add_child(piece)
+		piece.spawned_from_flora = true
 		piece.global_position = global_position + Vector2(randf_range(-8, 8), -10)
 		piece.apply_central_impulse(Vector2(randf_range(-50, 50), -120))
 

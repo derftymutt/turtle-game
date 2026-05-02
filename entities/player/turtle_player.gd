@@ -11,6 +11,7 @@ extends RigidBody2D
 @export var rapid_fire_shoot_cooldown: float = 0.1
 @export var bullet_speed: float = 500.0
 @export var bullet_scene: PackedScene
+@export var phase_bullet_scene: PackedScene
 
 # Thrust strengths
 @export var horizontal_thrust: float = 175.0
@@ -537,6 +538,15 @@ func shoot(direction: Vector2):
 		animated_sprite.play("shoot_" + facing_direction)
 		return_to_idle_after_delay()
 
+	# Phase Shifter: hold slot button while shooting → fire phase bullet instead
+	var _phase_slot := AlienTechManager.get_slot_index_for_tech(AlienTechRegistry.PHASE_SHIFTER)
+	if _phase_slot != -1 and Input.is_action_pressed(_slot_action(_phase_slot)):
+		if AlienTechManager.consume_phase_bullet():
+			_shoot_phase_bullet(direction)
+		can_shoot = false
+		shoot_timer = active_shoot_cooldown
+		return
+
 	var bullet = bullet_scene.instantiate()
 	get_parent().add_child(bullet)
 	bullet.global_position = _safe_bullet_spawn(direction)
@@ -546,6 +556,18 @@ func shoot(direction: Vector2):
 
 	can_shoot = false
 	shoot_timer = active_shoot_cooldown
+
+func _slot_action(slot_index: int) -> String:
+	return "tech_slot_left" if slot_index == 0 else "tech_slot_right"
+
+func _shoot_phase_bullet(direction: Vector2) -> void:
+	if phase_bullet_scene == null:
+		push_warning("TurtlePlayer: phase_bullet_scene not assigned in Inspector!")
+		return
+	var bullet = phase_bullet_scene.instantiate()
+	get_parent().add_child(bullet)
+	bullet.global_position = _safe_bullet_spawn(direction)
+	bullet.set_velocity(direction * bullet_speed)
 
 func _safe_bullet_spawn(direction: Vector2) -> Vector2:
 	"""Raycast in the shoot direction and spawn the bullet just before any wall,
