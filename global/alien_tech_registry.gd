@@ -12,6 +12,7 @@ const LATERAL_THRUST   := "lateral_thrust"
 const TRANSPORTER      := "transporter"
 const SALIVA_NANOBOTS  := "saliva_nanobots"
 const BUBBLE_SHIELD    := "bubble_shield"
+const BUMPER_MAGNET    := "bumper_magnet"
 
 # ─── Tech definitions ────────────────────────────────────────────────────────
 
@@ -64,6 +65,15 @@ var _definitions: Array[Dictionary] = [
 		"needs_input":   false,
 		"has_passive_bar": true,
 		"color":         Color(0.3, 0.9, 1.0),
+	},
+	{
+		"id":              BUMPER_MAGNET,
+		"name":            "Bumper Magnet",
+		"description":     "Hold to magnetically snap to a nearby bumper.\nOrbit with the stick, then release to launch. 10s cooldown.",
+		"slot_label":      "MAGNET",
+		"needs_input":     true,
+		"has_passive_bar": true,
+		"color":           Color(1.0, 0.75, 0.1),
 	},
 ]
 

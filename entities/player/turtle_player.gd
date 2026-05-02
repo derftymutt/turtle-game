@@ -108,6 +108,21 @@ var bubble_shield_hp: float = 0.0
 var bubble_shield_regen_timer: float = 0.0
 var _bubble_flash_timer: float = 0.0
 
+# Bumper Magnet
+const BUMPER_MAGNET_DURATION: float = 2.0
+const BUMPER_MAGNET_RADIUS: float = 30.0       # seek range beyond bumper surface
+const BUMPER_MAGNET_PULL_SPEED: float = 280.0  # approach speed while seeking
+const BUMPER_MAGNET_ORBIT_SPEED: float = 5.5   # radians/sec while orbiting
+const BUMPER_MAGNET_PLAYER_RADIUS: float = 7.0 # must match CircleShape2D radius
+
+var _bumper_magnet_active: bool = false
+var _bumper_magnet_timer: float = 0.0
+var _bumper_magnet_slot: int = -1
+var _bumper_magnet_attached: bool = false
+var _bumper_magnet_target: Node2D = null
+var _bumper_magnet_angle: float = 0.0
+var _bumper_magnet_attach_speed: float = 0.0
+
 # ---------------------------------------------------------------------------
 # 8-DIRECTIONAL SPRITE SYSTEM
 # ---------------------------------------------------------------------------
@@ -195,9 +210,19 @@ func _physics_process(delta):
 			is_player_controlling_rotation = false
 
 	# Super speed state
+	# While magnetically attached the bumper's bounce impulse (applied by the
+	# physics engine between frames) can exceed the super speed threshold every
+	# frame, causing perpetual invincibility and broken visuals.  Force the entire
+	# super speed system off for the duration of the attachment.
 	var current_speed = linear_velocity.length()
 	var was_super_speed = is_super_speed
-	is_super_speed = current_speed >= super_speed_threshold
+	if _bumper_magnet_attached:
+		was_super_speed = false  # prevents cooldown from triggering on the way out
+		is_super_speed = false
+		is_super_speed_cooldown = false
+		super_speed_cooldown_timer = 0.0
+	else:
+		is_super_speed = current_speed >= super_speed_threshold
 
 	if is_super_speed_cooldown:
 		super_speed_cooldown_timer -= delta
@@ -251,11 +276,15 @@ func _physics_process(delta):
 		var _regen_ratio: float = 1.0 if bubble_shield_hp > 0.0 else clamp(1.0 - bubble_shield_regen_timer / BUBBLE_SHIELD_REGEN_DURATION, 0.0, 1.0)
 		AlienTechManager.set_passive_bar(AlienTechRegistry.BUBBLE_SHIELD, _regen_ratio)
 
-	# Ocean physics
-	if ocean:
-		apply_ocean_effects(delta)
-	else:
-		linear_velocity *= 0.98
+	if _bumper_magnet_active:
+		_update_bumper_magnet(delta)
+
+	# Ocean physics — suppressed while magnetically pinned to a bumper
+	if not _bumper_magnet_attached:
+		if ocean:
+			apply_ocean_effects(delta)
+		else:
+			linear_velocity *= 0.98
 
 	# Counter-rotate the sprite to cancel the physics body's rotation every frame.
 	# The body can spin freely (correct flipper/bumper physics) but the sprite
@@ -323,6 +352,16 @@ func _physics_process(delta):
 	if Input.is_action_just_pressed("tech_slot_right"):
 		AlienTechManager.try_activate_slot(1)
 
+	# Bumper magnet: release button → launch
+	if _bumper_magnet_active:
+		var magnet_action := "tech_slot_left" if _bumper_magnet_slot == 0 else "tech_slot_right"
+		if Input.is_action_just_released(magnet_action):
+			_launch_from_bumper()
+
+	# While attached the orbit function owns position/velocity — skip normal movement
+	if _bumper_magnet_attached:
+		return
+
 	# Clamp velocity
 	if linear_velocity.length() > max_velocity:
 		linear_velocity = linear_velocity.normalized() * max_velocity
@@ -358,6 +397,15 @@ func _update_sprite_modulate():
 		sprite.modulate = Color(0.6, 0.3, 1.0).lerp(Color.WHITE, flash)
 	elif _bubble_flash_timer > 0.0:
 		sprite.modulate = Color(0.3, 0.9, 1.0)
+	elif _bumper_magnet_active:
+		if _bumper_magnet_attached:
+			# Slow amber pulse while orbiting
+			var flash := (sin(Time.get_ticks_msec() * 0.04) + 1.0) * 0.5
+			sprite.modulate = Color(1.0, 0.6, 0.0).lerp(Color(1.0, 1.0, 0.2), flash)
+		else:
+			# Fast golden flicker while seeking
+			var flash := (sin(Time.get_ticks_msec() * 0.12) + 1.0) * 0.5
+			sprite.modulate = Color(1.0, 0.85, 0.0).lerp(Color(1.0, 1.0, 0.5), flash)
 	elif shield_active or energy_freeze_active or rapid_fire_active:
 		sprite.modulate = _get_powerup_flash_color()
 	elif is_super_speed:
@@ -512,9 +560,11 @@ func take_damage(amount: float):
 		_bubble_flash_timer = 0.4
 		return  # Shield absorbed — transporter windup NOT canceled
 
-	# Real damage lands — cancel transporter windup if in progress
+	# Real damage lands — cancel active techs that need aborting
 	if _transporter_windup:
 		_transporter_canceled = true
+	if _bumper_magnet_active:
+		_cancel_bumper_magnet()
 
 	current_health -= amount
 
@@ -859,12 +909,14 @@ func deactivate_rapid_fire():
 # ALIEN TECH
 # ---------------------------------------------------------------------------
 
-func _on_alien_tech_activated(_slot_index: int, tech_id: String):
+func _on_alien_tech_activated(slot_index: int, tech_id: String):
 	match tech_id:
 		AlienTechRegistry.LATERAL_THRUST:
 			_activate_lateral_thrust()
 		AlienTechRegistry.TRANSPORTER:
 			_activate_transporter()
+		AlienTechRegistry.BUMPER_MAGNET:
+			_start_bumper_magnet(slot_index)
 
 func _activate_lateral_thrust():
 	lateral_thrust_active = true
@@ -1013,3 +1065,94 @@ func suspend_control(duration: float):
 	control_suspended = true
 	control_suspend_timer = duration
 	print("Player: Control suspended for ", duration, "s!")
+
+# ---------------------------------------------------------------------------
+# BUMPER MAGNET
+# ---------------------------------------------------------------------------
+
+func _start_bumper_magnet(slot: int) -> void:
+	_bumper_magnet_active = true
+	_bumper_magnet_timer = BUMPER_MAGNET_DURATION
+	_bumper_magnet_slot = slot
+	_bumper_magnet_attached = false
+	_bumper_magnet_target = null
+	_bumper_magnet_attach_speed = linear_velocity.length()
+
+func _update_bumper_magnet(delta: float) -> void:
+	_bumper_magnet_timer -= delta
+	AlienTechManager.set_passive_bar(
+		AlienTechRegistry.BUMPER_MAGNET,
+		_bumper_magnet_timer / BUMPER_MAGNET_DURATION
+	)
+	if _bumper_magnet_timer <= 0.0:
+		_launch_from_bumper()
+		return
+	if _bumper_magnet_attached:
+		_update_magnet_orbit(delta)
+	else:
+		_update_magnet_seek()
+
+func _update_magnet_seek() -> void:
+	var nearest: CircularBumper = null
+	var nearest_dist: float = INF
+	for node in get_tree().get_nodes_in_group("bumpers"):
+		if not node is CircularBumper:
+			continue
+		var bumper := node as CircularBumper
+		# Distance from player surface to bumper surface
+		var dist_to_surface := global_position.distance_to(bumper.global_position) - bumper.radius - BUMPER_MAGNET_PLAYER_RADIUS
+		if dist_to_surface < BUMPER_MAGNET_RADIUS and dist_to_surface < nearest_dist:
+			nearest = bumper
+			nearest_dist = dist_to_surface
+
+	if nearest == null:
+		return
+
+	var dir_outward := (global_position - nearest.global_position)
+	if dir_outward == Vector2.ZERO:
+		dir_outward = Vector2.RIGHT
+	else:
+		dir_outward = dir_outward.normalized()
+	var contact_point := nearest.global_position + dir_outward * (nearest.radius + BUMPER_MAGNET_PLAYER_RADIUS)
+
+	if nearest_dist <= 2.0:
+		_attach_to_bumper(nearest)
+	else:
+		linear_velocity = (contact_point - global_position).normalized() * BUMPER_MAGNET_PULL_SPEED
+
+func _attach_to_bumper(bumper: CircularBumper) -> void:
+	_bumper_magnet_target = bumper
+	_bumper_magnet_attached = true
+	_bumper_magnet_angle = (global_position - bumper.global_position).angle()
+	linear_velocity = Vector2.ZERO
+	global_position = bumper.global_position + Vector2(cos(_bumper_magnet_angle), sin(_bumper_magnet_angle)) * (bumper.radius + BUMPER_MAGNET_PLAYER_RADIUS)
+
+func _update_magnet_orbit(delta: float) -> void:
+	if not is_instance_valid(_bumper_magnet_target):
+		_cancel_bumper_magnet()
+		return
+	var bumper := _bumper_magnet_target as CircularBumper
+	var stick := Vector2(
+		Input.get_axis("move_left", "move_right"),
+		Input.get_axis("move_up", "move_down")
+	)
+	if GameSettings.thrust_inverted:
+		stick = -stick
+	# Clockwise tangent at current angle: project stick onto it so "right stick"
+	# always feels like moving right on screen regardless of attachment position.
+	var tangent_cw := Vector2(-sin(_bumper_magnet_angle), cos(_bumper_magnet_angle))
+	_bumper_magnet_angle += stick.dot(tangent_cw) * BUMPER_MAGNET_ORBIT_SPEED * delta
+	global_position = bumper.global_position + Vector2(cos(_bumper_magnet_angle), sin(_bumper_magnet_angle)) * (bumper.radius + BUMPER_MAGNET_PLAYER_RADIUS)
+	linear_velocity = Vector2.ZERO
+
+func _launch_from_bumper() -> void:
+	if _bumper_magnet_attached and is_instance_valid(_bumper_magnet_target) and _bumper_magnet_target is CircularBumper:
+		(_bumper_magnet_target as CircularBumper).apply_launch_force(self, _bumper_magnet_attach_speed)
+	_cancel_bumper_magnet()
+
+func _cancel_bumper_magnet() -> void:
+	_bumper_magnet_active = false
+	_bumper_magnet_attached = false
+	_bumper_magnet_target = null
+	_bumper_magnet_slot = -1
+	AlienTechManager.clear_passive_bar(AlienTechRegistry.BUMPER_MAGNET)
