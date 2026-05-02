@@ -13,8 +13,6 @@
 [ext_resource type="PackedScene" uid="uid://b8qdolphin001" path="res://entities/npcs/dolphin/dolphin.tscn" id="11_m516p"]
 [ext_resource type="PackedScene" uid="uid://b8qcmvufo0001" path="res://entities/community_ufo/community_ufo.tscn" id="12_l3m5x"]
 [ext_resource type="PackedScene" uid="uid://dvy8nr3rfhq5u" path="res://entities/environment/ocean_flora/ocean_flora_seeder.tscn" id="13_t207q"]
-[ext_resource type="PackedScene" uid="uid://sqnwntnauwax" path="res://entities/environment/ocean_flora/ocean_flora.tscn" id="14_g7b2g"]
-[ext_resource type="PackedScene" uid="uid://tpiece001" path="res://entities/collectibles/alien_tech_piece/alien_tech_piece.tscn" id="15_6s2qa"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_kx1xp"]
 texture = ExtResource("6_nu44e")
@@ -41,7 +39,7 @@ sources/0 = SubResource("TileSetAtlasSource_kx1xp")
 size = Vector2(8.000166, 747.00055)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xn6mk"]
-size = Vector2(10.000229, 1916.0011)
+size = Vector2(16.000038, 1916.0011)
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_nu44e"]
 friction = 0.0
@@ -180,8 +178,6 @@ dolphin_scene = ExtResource("11_m516p")
 community_ufo_scene = ExtResource("12_l3m5x")
 
 [node name="OceanFloraSeeder" parent="." index="17" unique_id=200000001 instance=ExtResource("13_t207q")]
-flora_scene = ExtResource("14_g7b2g")
-tech_piece_scene = ExtResource("15_6s2qa")
 pieces_hidden_count = 5
 
 [node name="SpawnPoint1" parent="OceanFloraSeeder" index="0" unique_id=200000002]

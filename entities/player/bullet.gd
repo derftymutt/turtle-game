@@ -3,6 +3,7 @@ extends RigidBody2D
 @export var lifetime: float = .7
 @export var water_drag: float = 0.95
 @export var damage: float = 10.0
+@export var is_homing: bool = false
 @export var bravado_stamina_restore: float = 20.0
 
 var velocity: Vector2 = Vector2.ZERO
@@ -42,18 +43,48 @@ func set_velocity(vel: Vector2):
 	velocity = vel
 	linear_velocity = vel
 
-func _physics_process(_delta):
-	# Check for point-blank hits on first physics frame
+func _physics_process(delta):
 	if first_physics_frame:
 		first_physics_frame = false
 		check_initial_overlaps()
-	
-	# Apply water drag
+
 	linear_velocity *= water_drag
-	
-	# Rotate to face direction of travel
+
+	if is_homing:
+		_apply_homing(delta)
+
 	if linear_velocity.length() > 10:
 		rotation = linear_velocity.angle()
+
+func _apply_homing(delta: float):
+	const HOMING_RANGE: float = 200.0
+	const HOMING_DEGREES_PER_SECOND: float = 150.0
+
+	var nearest: Node2D = null
+	var nearest_dist: float = HOMING_RANGE
+	for enemy in get_tree().get_nodes_in_group("enemies"):
+		if not enemy is Node2D:
+			continue
+		var d = global_position.distance_to(enemy.global_position)
+		if d < nearest_dist:
+			nearest_dist = d
+			nearest = enemy
+
+	if not nearest:
+		return
+
+	var space_state = get_world_2d().direct_space_state
+	if _wall_between(space_state, nearest):
+		return
+
+	var speed = linear_velocity.length()
+	if speed < 1.0:
+		return
+
+	var to_enemy = (nearest.global_position - global_position).normalized()
+	var angle_to = linear_velocity.normalized().angle_to(to_enemy)
+	var max_rot = deg_to_rad(HOMING_DEGREES_PER_SECOND) * delta
+	linear_velocity = linear_velocity.rotated(clamp(angle_to, -max_rot, max_rot))
 
 func check_initial_overlaps():
 	"""Check if we spawned inside/very close to an enemy (point-blank shot)"""

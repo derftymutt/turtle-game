@@ -72,7 +72,6 @@ var active_shoot_cooldown: float = shoot_cooldown
 var shield_active: bool = false
 var shield_duration: float = 10.0
 var shield_timer: float = 0.0
-var _shield_tween: Tween = null
 
 var air_reserve_bonus: float = 20.0
 
@@ -91,10 +90,23 @@ var control_suspended: bool = false
 var control_suspend_timer: float = 0.0
 
 # Alien Tech state
-var jetpack_active: bool = false
-var jetpack_timer: float = 0.0
-const JETPACK_DURATION: float = 0.05
-const JETPACK_FORCE: float = 600.0
+var lateral_thrust_active: bool = false
+var lateral_thrust_timer: float = 0.0
+const LATERAL_THRUST_DURATION: float = 0.05
+const LATERAL_THRUST_FORCE: float = 600.0
+
+const TRANSPORTER_DISTANCE: float = 150.0
+const TRANSPORTER_INVINCIBLE_DURATION: float = 0.75
+const TRANSPORTER_WINDUP: float = 0.18
+var transporter_invincible: bool = false
+var transporter_invincible_timer: float = 0.0
+var _transporter_windup: bool = false
+var _transporter_canceled: bool = false
+
+const BUBBLE_SHIELD_REGEN_DURATION: float = 15.0
+var bubble_shield_hp: float = 0.0
+var bubble_shield_regen_timer: float = 0.0
+var _bubble_flash_timer: float = 0.0
 
 # ---------------------------------------------------------------------------
 # 8-DIRECTIONAL SPRITE SYSTEM
@@ -152,6 +164,7 @@ func _ready():
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
 	AlienTechManager.tech_activated.connect(_on_alien_tech_activated)
+	AlienTechManager.tech_slots_changed.connect(_on_alien_tech_slots_changed_player)
 
 	# Show the correct idle frame immediately on spawn
 	_play_animation("idle")
@@ -220,10 +233,23 @@ func _physics_process(delta):
 		if rapid_fire_timer <= 0:
 			deactivate_rapid_fire()
 
-	if jetpack_active:
-		jetpack_timer -= delta
-		if jetpack_timer <= 0:
-			jetpack_active = false
+	if lateral_thrust_active:
+		lateral_thrust_timer -= delta
+		if lateral_thrust_timer <= 0:
+			lateral_thrust_active = false
+
+	if transporter_invincible:
+		transporter_invincible_timer -= delta
+		if transporter_invincible_timer <= 0.0:
+			transporter_invincible = false
+
+	if AlienTechManager.is_tech_active(AlienTechRegistry.BUBBLE_SHIELD):
+		if bubble_shield_hp == 0.0 and bubble_shield_regen_timer > 0.0:
+			bubble_shield_regen_timer -= delta
+			if bubble_shield_regen_timer <= 0.0:
+				bubble_shield_hp = 1.0
+		var _regen_ratio: float = 1.0 if bubble_shield_hp > 0.0 else clamp(1.0 - bubble_shield_regen_timer / BUBBLE_SHIELD_REGEN_DURATION, 0.0, 1.0)
+		AlienTechManager.set_passive_bar(AlienTechRegistry.BUBBLE_SHIELD, _regen_ratio)
 
 	# Ocean physics
 	if ocean:
@@ -292,9 +318,9 @@ func _physics_process(delta):
 			GameManager.carried_piece.drop_piece()
 
 	# Alien Tech active slot buttons
-	if Input.is_action_just_pressed("tech_slot_a"):
+	if Input.is_action_just_pressed("tech_slot_left"):
 		AlienTechManager.try_activate_slot(0)
-	if Input.is_action_just_pressed("tech_slot_b"):
+	if Input.is_action_just_pressed("tech_slot_right"):
 		AlienTechManager.try_activate_slot(1)
 
 	# Clamp velocity
@@ -314,6 +340,8 @@ func _physics_process(delta):
 func _process(delta: float):
 	if _health_restore_flash_timer > 0.0:
 		_health_restore_flash_timer -= delta
+	if _bubble_flash_timer > 0.0:
+		_bubble_flash_timer -= delta
 	_update_sprite_modulate()
 
 func _update_sprite_modulate():
@@ -322,6 +350,14 @@ func _update_sprite_modulate():
 		return
 	if _health_restore_flash_timer > 0.0:
 		sprite.modulate = Color.GREEN
+	elif _transporter_windup:
+		var flash = (sin(Time.get_ticks_msec() * 0.25) + 1.0) * 0.5
+		sprite.modulate = Color(0.6, 0.3, 1.0).lerp(Color.WHITE, flash * 0.6)
+	elif transporter_invincible:
+		var flash = (sin(Time.get_ticks_msec() * 0.06) + 1.0) * 0.5
+		sprite.modulate = Color(0.6, 0.3, 1.0).lerp(Color.WHITE, flash)
+	elif _bubble_flash_timer > 0.0:
+		sprite.modulate = Color(0.3, 0.9, 1.0)
 	elif shield_active or energy_freeze_active or rapid_fire_active:
 		sprite.modulate = _get_powerup_flash_color()
 	elif is_super_speed:
@@ -336,10 +372,10 @@ func _update_sprite_modulate():
 # OCEAN
 # ---------------------------------------------------------------------------
 
-func apply_ocean_effects(delta: float):
+func apply_ocean_effects(_delta: float):
 	"""Apply depth-based buoyancy and water drag"""
-	# Jetpack: suppress all ocean forces during dash window
-	if jetpack_active:
+	# Lateral Thrust: suppress all ocean forces during dash window
+	if lateral_thrust_active:
 		return
 
 	var depth = ocean.get_depth(global_position)
@@ -427,6 +463,8 @@ func shoot(direction: Vector2):
 	get_parent().add_child(bullet)
 	bullet.global_position = _safe_bullet_spawn(direction)
 	bullet.set_velocity(direction * bullet_speed)
+	if AlienTechManager.is_tech_active(AlienTechRegistry.SALIVA_NANOBOTS):
+		bullet.is_homing = true
 
 	can_shoot = false
 	shoot_timer = active_shoot_cooldown
@@ -465,8 +503,18 @@ func apply_flipper_force(direction: Vector2, force_multiplier: float = 5.0):
 # ---------------------------------------------------------------------------
 
 func take_damage(amount: float):
-	if is_super_speed or is_super_speed_cooldown or shield_active:
+	if is_super_speed or is_super_speed_cooldown or shield_active or transporter_invincible:
 		return
+
+	if AlienTechManager.is_tech_active(AlienTechRegistry.BUBBLE_SHIELD) and bubble_shield_hp > 0.0:
+		bubble_shield_hp = 0.0
+		bubble_shield_regen_timer = BUBBLE_SHIELD_REGEN_DURATION
+		_bubble_flash_timer = 0.4
+		return  # Shield absorbed — transporter windup NOT canceled
+
+	# Real damage lands — cancel transporter windup if in progress
+	if _transporter_windup:
+		_transporter_canceled = true
 
 	current_health -= amount
 
@@ -784,7 +832,7 @@ func deactivate_energy_freeze():
 	energy_freeze_active = false
 	print("Energy freeze expired")
 			
-func _flash(color: Color, duration: float):
+func _flash(_color: Color, duration: float):
 	if _is_flashing:
 		return
 	_is_flashing = true
@@ -811,31 +859,138 @@ func deactivate_rapid_fire():
 # ALIEN TECH
 # ---------------------------------------------------------------------------
 
-func _on_alien_tech_activated(slot_index: int, tech_id: String):
+func _on_alien_tech_activated(_slot_index: int, tech_id: String):
 	match tech_id:
-		AlienTechRegistry.JETPACK:
-			_activate_jetpack()
+		AlienTechRegistry.LATERAL_THRUST:
+			_activate_lateral_thrust()
+		AlienTechRegistry.TRANSPORTER:
+			_activate_transporter()
 
-func _activate_jetpack():
-	jetpack_active = true
-	jetpack_timer = JETPACK_DURATION
+func _activate_lateral_thrust():
+	lateral_thrust_active = true
+	lateral_thrust_timer = LATERAL_THRUST_DURATION
 
+	# Determine left or right purely from horizontal input, then facing, then velocity.
+	var h_input := Input.get_axis("move_left", "move_right")
+	var thrust_sign: float
+
+	if abs(h_input) > 0.1:
+		thrust_sign = sign(h_input)
+		if GameSettings.thrust_inverted:
+			thrust_sign = -thrust_sign
+	else:
+		# Derive from facing direction suffix ("e"/"ne"/"se" → right, rest → left)
+		var facing_vec = _direction_suffix_to_vector(facing_direction)
+		if facing_vec.x != 0.0:
+			thrust_sign = sign(facing_vec.x)
+		elif linear_velocity.x != 0.0:
+			thrust_sign = sign(linear_velocity.x)
+		else:
+			thrust_sign = 1.0  # default right if no signal
+
+	linear_velocity = Vector2.ZERO
+	apply_central_impulse(Vector2(thrust_sign * LATERAL_THRUST_FORCE, 0.0))
+	_flash(Color.WHITE, 0.2)
+
+func _activate_transporter():
+	# Direction priority: active input > current velocity > facing direction
 	var movement_input = Vector2(
 		Input.get_axis("move_left", "move_right"),
 		Input.get_axis("move_up", "move_down")
 	)
-	var dash_dir: Vector2
+	var dir: Vector2
 	if movement_input.length() > 0.1:
-		dash_dir = movement_input.normalized()
+		dir = movement_input.normalized()
 		if GameSettings.thrust_inverted:
-			dash_dir = -dash_dir
+			dir = -dir
+	elif linear_velocity.length() > 30.0:
+		dir = linear_velocity.normalized()
 	else:
-		dash_dir = _direction_suffix_to_vector(facing_direction)
+		dir = _direction_suffix_to_vector(facing_direction)
 
-	linear_velocity = Vector2.ZERO
-	apply_central_impulse(dash_dir * JETPACK_FORCE)
-	_flash(Color.WHITE, 0.2)
-	print("👽 Jetpack dash: %s" % str(dash_dir))
+	# Windup: brief visual telegraph — player is vulnerable during this window
+	_transporter_windup = true
+	_transporter_canceled = false
+	await get_tree().create_timer(TRANSPORTER_WINDUP).timeout
+	_transporter_windup = false
+
+	if _transporter_canceled:
+		_transporter_canceled = false
+		return
+
+	# Teleport: ignore all regular geometry, clamp to world boundaries.
+	# If there's no room (already at the edge), the clamp lands us at the wall — player's problem.
+	var raw_target = global_position + dir * TRANSPORTER_DISTANCE
+	global_position = _clamp_to_boundaries(raw_target)
+	linear_velocity *= 0.3
+	transporter_invincible = true
+	transporter_invincible_timer = TRANSPORTER_INVINCIBLE_DURATION
+
+	# Scale pop on arrival
+	var sprite = $AnimatedSprite2D
+	if sprite:
+		var tween = create_tween()
+		tween.tween_property(sprite, "scale", Vector2(1.35, 1.35), 0.07)
+		tween.tween_property(sprite, "scale", Vector2.ONE, 0.12)
+
+func _get_boundary_limits() -> Dictionary:
+	# MARGIN must exceed player collision radius (7px).
+	const MARGIN := 20.0
+	var limits = {min_x = -INF, max_x = INF, max_y = INF}
+	var root = get_tree().current_scene
+	if not root:
+		return limits
+	var wb = root.get_node_or_null("WorldSafetyBoundaries")
+	if not wb:
+		return limits
+	for bname in ["BoundaryLeft", "BoundaryRight", "BoundaryBottom"]:
+		var node = wb.get_node_or_null(bname)
+		if not node:
+			continue
+		var col: CollisionShape2D = null
+		for child in node.get_children():
+			if child is CollisionShape2D:
+				col = child
+				break
+		if not col:
+			continue
+		var cx := col.global_position.x
+		var cy := col.global_position.y
+		var hw := 0.0
+		var hh := 0.0
+		if col.shape is RectangleShape2D:
+			var sz = col.shape.size
+			# If the CollisionShape2D is rotated ~90°/270°, world-space extents are swapped
+			# relative to the local shape dimensions (e.g. BoundaryBottom uses a rotated wall shape).
+			if abs(sin(col.global_rotation)) > 0.7:
+				hw = sz.y * 0.5
+				hh = sz.x * 0.5
+			else:
+				hw = sz.x * 0.5
+				hh = sz.y * 0.5
+		match bname:
+			"BoundaryLeft":   limits.min_x = cx + hw + MARGIN
+			"BoundaryRight":  limits.max_x = cx - hw - MARGIN
+			"BoundaryBottom": limits.max_y = cy - hh - MARGIN
+	return limits
+
+func _is_outside_playfield(pos: Vector2) -> bool:
+	var lim = _get_boundary_limits()
+	return (lim.min_x > -INF and pos.x < lim.min_x) or \
+		   (lim.max_x < INF  and pos.x > lim.max_x) or \
+		   (lim.max_y < INF  and pos.y > lim.max_y)
+
+func _clamp_to_boundaries(target_pos: Vector2) -> Vector2:
+	var lim = _get_boundary_limits()
+	return Vector2(
+		clamp(target_pos.x, lim.min_x, lim.max_x),
+		min(target_pos.y, lim.max_y)
+	)
+
+func _on_alien_tech_slots_changed_player(_slot_a: Dictionary, _slot_b: Dictionary):
+	if AlienTechManager.is_tech_active(AlienTechRegistry.BUBBLE_SHIELD):
+		if bubble_shield_hp == 0.0 and bubble_shield_regen_timer <= 0.0:
+			bubble_shield_hp = 1.0
 
 func _direction_suffix_to_vector(suffix: String) -> Vector2:
 	match suffix:

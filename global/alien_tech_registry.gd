@@ -8,7 +8,10 @@ extends Node
 
 const INERTIA_DAMPENER := "inertia_dampener"
 const BRAVADO          := "bravado"
-const JETPACK          := "jetpack"
+const LATERAL_THRUST   := "lateral_thrust"
+const TRANSPORTER      := "transporter"
+const SALIVA_NANOBOTS  := "saliva_nanobots"
+const BUBBLE_SHIELD    := "bubble_shield"
 
 # ─── Tech definitions ────────────────────────────────────────────────────────
 
@@ -30,12 +33,37 @@ var _definitions: Array[Dictionary] = [
 		"color":       Color(1.0, 0.4, 0.2),
 	},
 	{
-		"id":          JETPACK,
-		"name":        "Jetpack",
-		"description": "Dash in your facing direction, ignoring ocean physics.\n5 second cooldown.",
-		"slot_label":  "JETPACK",
+		"id":          LATERAL_THRUST,
+		"name":        "Lateral Thrust",
+		"description": "Blast left or right, ignoring ocean drag.\nDirection from input or facing. 5s cooldown.",
+		"slot_label":  "L-THRUST",
 		"needs_input": true,
 		"color":       Color(0.4, 0.7, 1.0),
+	},
+	{
+		"id":          TRANSPORTER,
+		"name":        "Transporter",
+		"description": "Teleport ~200px in your momentum direction. Ignores walls. Brief invincibility on landing.",
+		"slot_label":  "TPORT",
+		"needs_input": true,
+		"color":       Color(0.6, 0.3, 1.0),
+	},
+	{
+		"id":          SALIVA_NANOBOTS,
+		"name":        "Saliva Nanobots",
+		"description": "Bullets gently home toward nearby enemies.",
+		"slot_label":  "NANOBOTS",
+		"needs_input": false,
+		"color":       Color(0.3, 1.0, 0.5),
+	},
+	{
+		"id":            BUBBLE_SHIELD,
+		"name":          "Bubble Shield",
+		"description":   "Absorbs one hit completely. Recharges over 15 seconds.",
+		"slot_label":    "SHIELD",
+		"needs_input":   false,
+		"has_passive_bar": true,
+		"color":         Color(0.3, 0.9, 1.0),
 	},
 ]
 
