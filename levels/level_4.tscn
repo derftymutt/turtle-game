@@ -55,52 +55,55 @@ texture = ExtResource("7_4h4lk")
 physics_layer_0/collision_layer = 1
 sources/0 = SubResource("TileSetAtlasSource_gvi3i")
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_mp3bh"]
-size = Vector2(8.000166, 471.00015)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pb5nj"]
+size = Vector2(16.000038, 1916.0011)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_ncbyy"]
-size = Vector2(8.000183, 465.00012)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_egtcm"]
+size = Vector2(8.000166, 759.0005)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_x44s7"]
+size = Vector2(8.000183, 768.00024)
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ncbyy"]
 friction = 0.0
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_pb5nj"]
-size = Vector2(64, 8)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_egtcm"]
-size = Vector2(64, 8)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_x44s7"]
-size = Vector2(32, 8)
-
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_e7hc3"]
-size = Vector2(32, 8)
-
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ixhsu"]
-friction = 0.0
+size = Vector2(64, 8)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_4h4lk"]
 size = Vector2(64, 8)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_yp04h"]
-size = Vector2(64, 8)
+size = Vector2(32, 8)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_vc6ux"]
 size = Vector2(32, 8)
 
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ixhsu"]
+friction = 0.0
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1gtbd"]
-size = Vector2(32, 8)
+size = Vector2(64, 8)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_0quxv"]
 size = Vector2(64, 8)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_g22rd"]
-size = Vector2(64, 8)
+size = Vector2(32, 8)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_m0qt0"]
-size = Vector2(64, 8)
+size = Vector2(32, 8)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wred1"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_65scv"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xtn87"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_uxflf"]
 size = Vector2(64, 8)
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_w8olu"]
@@ -168,21 +171,43 @@ position = Vector2(632, 4)
 tile_map_data = PackedByteArray("AADY/wkAAAAAAAAAAADY/wgAAAACAAAAAADY/wcAAAABAAAAAADY/wYAAAAAAAAAAADY/wUAAAACAAAAAADY/wQAAAAAAAAAAADY/wMAAAABAAAAAADY/wIAAAACAAAAAADY/wEAAAAAAAAAAADY/wAAAAACAAAAAADY////AAAAAAAAAADY//7/AAAAAAAAAADY//3/AAAAAAAAAADY//z/AAACAAAAAADY//v/AAAAAAAAAADY//r/AAABAAAAAADY//n/AAAAAAAAAADY//j/AAACAAAAAAA=")
 tile_set = ExtResource("8_yp04h")
 
-[node name="WorldSafetyBoundaries" type="Node2D" parent="." index="12" unique_id=236047606]
+[node name="WorldSafetyBoundaries" type="Node2D" parent="." index="12" unique_id=1372495381]
 
-[node name="BoundaryLeft" type="StaticBody2D" parent="WorldSafetyBoundaries" index="0" unique_id=1487572053]
+[node name="BoundaryBottom" type="StaticBody2D" parent="WorldSafetyBoundaries" index="0" unique_id=685574836]
+position = Vector2(1.0000612, 175.99995)
+rotation = -3.1415925
+scale = Vector2(0.99999994, 0.99999994)
+collision_layer = 257
+metadata/_edit_group_ = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldSafetyBoundaries/BoundaryBottom" index="0" unique_id=799006752]
+position = Vector2(2.00006, 3.999939)
+rotation = -1.5707964
+scale = Vector2(0.9999993, 0.9999993)
+shape = SubResource("RectangleShape2D_pb5nj")
+debug_color = Color(0, 0.6, 0.7, 0.42)
+
+[node name="ColorRect" type="ColorRect" parent="WorldSafetyBoundaries/BoundaryBottom" index="1" unique_id=1597502478]
+visible = false
+offset_left = -333.00003
+offset_top = -269.0
+offset_right = -323.4816
+offset_bottom = 62.268524
+color = Color(0.1764706, 0.12156863, 0.023529412, 1)
+
+[node name="BoundaryLeft" type="StaticBody2D" parent="WorldSafetyBoundaries" index="1" unique_id=1132683049]
 position = Vector2(-9, -376)
 rotation = -3.1415925
 scale = Vector2(0.99999994, 0.99999994)
 metadata/_edit_group_ = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldSafetyBoundaries/BoundaryLeft" index="0" unique_id=135310538]
-position = Vector2(306.99988, -32.50003)
-scale = Vector2(0.9999994, 0.9999994)
-shape = SubResource("RectangleShape2D_mp3bh")
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldSafetyBoundaries/BoundaryLeft" index="0" unique_id=1419103602]
+position = Vector2(306.99982, -176.50006)
+scale = Vector2(0.99999934, 0.99999934)
+shape = SubResource("RectangleShape2D_egtcm")
 debug_color = Color(0, 0.6, 0.7, 0.42)
 
-[node name="ColorRect" type="ColorRect" parent="WorldSafetyBoundaries/BoundaryLeft" index="1" unique_id=2082053759]
+[node name="ColorRect" type="ColorRect" parent="WorldSafetyBoundaries/BoundaryLeft" index="1" unique_id=831379179]
 visible = false
 offset_left = 303.51578
 offset_top = -269.00006
@@ -190,19 +215,19 @@ offset_right = 311.90527
 offset_bottom = 62.268463
 color = Color(0.1764706, 0.12156863, 0.023529412, 1)
 
-[node name="BoundaryRight" type="StaticBody2D" parent="WorldSafetyBoundaries" index="1" unique_id=120697988]
+[node name="BoundaryRight" type="StaticBody2D" parent="WorldSafetyBoundaries" index="2" unique_id=255346004]
 position = Vector2(-11, -393)
 rotation = -3.1415925
 scale = Vector2(0.99999994, 0.99999994)
 metadata/_edit_group_ = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldSafetyBoundaries/BoundaryRight" index="0" unique_id=1783719707]
-position = Vector2(-326.99988, -36.499878)
-scale = Vector2(0.99999964, 0.99999964)
-shape = SubResource("RectangleShape2D_ncbyy")
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldSafetyBoundaries/BoundaryRight" index="0" unique_id=1221441377]
+position = Vector2(-326.99982, -188.49991)
+scale = Vector2(0.9999996, 0.9999996)
+shape = SubResource("RectangleShape2D_x44s7")
 debug_color = Color(0, 0.6, 0.7, 0.42)
 
-[node name="ColorRect" type="ColorRect" parent="WorldSafetyBoundaries/BoundaryRight" index="1" unique_id=2050303630]
+[node name="ColorRect" type="ColorRect" parent="WorldSafetyBoundaries/BoundaryRight" index="1" unique_id=732317112]
 visible = false
 offset_left = -333.00003
 offset_top = -269.0
@@ -224,7 +249,7 @@ angle_preset = 2
 
 [node name="CollisionShape2D" parent="FlipperSkyCenterLeft/DeadWall10" index="0" unique_id=1644951480]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_pb5nj")
+shape = SubResource("RectangleShape2D_e7hc3")
 one_way_collision = true
 
 [node name="Sprite2D" parent="FlipperSkyCenterLeft/DeadWall10" index="1" unique_id=804434373]
@@ -235,7 +260,7 @@ rotation = 0.7853982
 
 [node name="CollisionShape2D" parent="FlipperSkyCenterLeft/DeadWall10/SlipperyArea" parent_id_path=PackedInt32Array(797132162, 773978709) index="0" unique_id=2040614053]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_egtcm")
+shape = SubResource("RectangleShape2D_4h4lk")
 
 [node name="FlipperLeftUp4" parent="FlipperSkyCenterLeft" index="1" unique_id=1447591536 instance=ExtResource("12_g22rd")]
 position = Vector2(-45, -185)
@@ -250,7 +275,7 @@ length_units = 1
 
 [node name="CollisionShape2D" parent="FlipperSkyCenterLeft2/DeadWall10" index="0" unique_id=1644951480]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_x44s7")
+shape = SubResource("RectangleShape2D_yp04h")
 one_way_collision = true
 
 [node name="Sprite2D" parent="FlipperSkyCenterLeft2/DeadWall10" index="1" unique_id=804434373]
@@ -262,7 +287,7 @@ polygon = PackedVector2Array(-16, -4, 16, -4, 16, 4, -16, 4)
 
 [node name="CollisionShape2D" parent="FlipperSkyCenterLeft2/DeadWall10/SlipperyArea" parent_id_path=PackedInt32Array(1589161516, 773978709) index="0" unique_id=2040614053]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_e7hc3")
+shape = SubResource("RectangleShape2D_vc6ux")
 
 [node name="FlipperLeftUp4" parent="FlipperSkyCenterLeft2" index="1" unique_id=1104846566 instance=ExtResource("12_g22rd")]
 position = Vector2(-130, -285)
@@ -277,7 +302,7 @@ mirrored = true
 
 [node name="CollisionShape2D" parent="CloudFlipperCenterRight/DeadWall11" index="0" unique_id=1644951480]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_4h4lk")
+shape = SubResource("RectangleShape2D_1gtbd")
 one_way_collision = true
 
 [node name="Sprite2D" parent="CloudFlipperCenterRight/DeadWall11" index="1" unique_id=804434373]
@@ -289,7 +314,7 @@ rotation = -0.7853982
 
 [node name="CollisionShape2D" parent="CloudFlipperCenterRight/DeadWall11/SlipperyArea" parent_id_path=PackedInt32Array(243008370, 773978709) index="0" unique_id=2040614053]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_yp04h")
+shape = SubResource("RectangleShape2D_0quxv")
 
 [node name="CloudFlipperRightUp2" parent="CloudFlipperCenterRight" index="1" unique_id=33507880 instance=ExtResource("14_wred1")]
 position = Vector2(45, -185)
@@ -305,7 +330,7 @@ mirrored = true
 
 [node name="CollisionShape2D" parent="CloudFlipperCenterRight2/DeadWall11" index="0" unique_id=1644951480]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_vc6ux")
+shape = SubResource("RectangleShape2D_g22rd")
 one_way_collision = true
 
 [node name="Sprite2D" parent="CloudFlipperCenterRight2/DeadWall11" index="1" unique_id=804434373]
@@ -318,7 +343,7 @@ polygon = PackedVector2Array(-16, -4, 16, -4, 16, 4, -16, 4)
 
 [node name="CollisionShape2D" parent="CloudFlipperCenterRight2/DeadWall11/SlipperyArea" parent_id_path=PackedInt32Array(215607130, 773978709) index="0" unique_id=2040614053]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_1gtbd")
+shape = SubResource("RectangleShape2D_m0qt0")
 
 [node name="CloudFlipperRightUp2" parent="CloudFlipperCenterRight2" index="1" unique_id=1172357705 instance=ExtResource("14_wred1")]
 position = Vector2(130, -285)
@@ -332,7 +357,7 @@ angle_preset = 2
 
 [node name="CollisionShape2D" parent="CloudFlipperRightLower/DeadWall11" index="0" unique_id=1644951480]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_0quxv")
+shape = SubResource("RectangleShape2D_wred1")
 one_way_collision = true
 
 [node name="Sprite2D" parent="CloudFlipperRightLower/DeadWall11" index="1" unique_id=804434373]
@@ -343,7 +368,7 @@ rotation = 0.7853982
 
 [node name="CollisionShape2D" parent="CloudFlipperRightLower/DeadWall11/SlipperyArea" parent_id_path=PackedInt32Array(203471, 773978709) index="0" unique_id=2040614053]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_g22rd")
+shape = SubResource("RectangleShape2D_65scv")
 
 [node name="FlipperLeftUp5" parent="CloudFlipperRightLower" index="1" unique_id=1197315435 instance=ExtResource("12_g22rd")]
 position = Vector2(190, -185)
@@ -361,7 +386,7 @@ mirrored = true
 
 [node name="CollisionShape2D" parent="CloudFlipperLeftLower/DeadWall12" index="0" unique_id=1644951480]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_m0qt0")
+shape = SubResource("RectangleShape2D_xtn87")
 one_way_collision = true
 
 [node name="Sprite2D" parent="CloudFlipperLeftLower/DeadWall12" index="1" unique_id=804434373]
@@ -373,7 +398,7 @@ rotation = -0.7853982
 
 [node name="CollisionShape2D" parent="CloudFlipperLeftLower/DeadWall12/SlipperyArea" parent_id_path=PackedInt32Array(1268673111, 773978709) index="0" unique_id=2040614053]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_wred1")
+shape = SubResource("RectangleShape2D_uxflf")
 
 [node name="FlipperLeftDown" parent="." index="20" unique_id=598735619 instance=ExtResource("15_65scv")]
 position = Vector2(-40, -90)

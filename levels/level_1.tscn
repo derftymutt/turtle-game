@@ -91,11 +91,14 @@ texture = ExtResource("25_0fu15")
 physics_layer_0/collision_layer = 1
 sources/0 = SubResource("TileSetAtlasSource_ntdhj")
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_4knja"]
-size = Vector2(8.000166, 471.00015)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ntdhj"]
+size = Vector2(16.000038, 1916.0011)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_voubc"]
-size = Vector2(8.000183, 465.00012)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_0fu15"]
+size = Vector2(8.000166, 759.0005)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_4knja"]
+size = Vector2(8.000183, 768.00024)
 
 [node name="LevelBase" unique_id=519430445 instance=ExtResource("1_lrvbd")]
 
@@ -294,19 +297,41 @@ tile_set = ExtResource("26_4knja")
 
 [node name="WorldSafetyBoundaries" type="Node2D" parent="." index="31" unique_id=1310245755]
 
-[node name="BoundaryLeft" type="StaticBody2D" parent="WorldSafetyBoundaries" index="0" unique_id=1729579633]
+[node name="BoundaryBottom" type="StaticBody2D" parent="WorldSafetyBoundaries" index="0" unique_id=457102919]
+position = Vector2(1.0000612, 175.99995)
+rotation = -3.1415925
+scale = Vector2(0.99999994, 0.99999994)
+collision_layer = 257
+metadata/_edit_group_ = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldSafetyBoundaries/BoundaryBottom" index="0" unique_id=1028218329]
+position = Vector2(2.00006, 3.999939)
+rotation = -1.5707964
+scale = Vector2(0.9999993, 0.9999993)
+shape = SubResource("RectangleShape2D_ntdhj")
+debug_color = Color(0, 0.6, 0.7, 0.42)
+
+[node name="ColorRect" type="ColorRect" parent="WorldSafetyBoundaries/BoundaryBottom" index="1" unique_id=2061805660]
+visible = false
+offset_left = -333.00003
+offset_top = -269.0
+offset_right = -323.4816
+offset_bottom = 62.268524
+color = Color(0.1764706, 0.12156863, 0.023529412, 1)
+
+[node name="BoundaryLeft" type="StaticBody2D" parent="WorldSafetyBoundaries" index="1" unique_id=1234105269]
 position = Vector2(-9, -376)
 rotation = -3.1415925
 scale = Vector2(0.99999994, 0.99999994)
 metadata/_edit_group_ = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldSafetyBoundaries/BoundaryLeft" index="0" unique_id=75909132]
-position = Vector2(306.99988, -32.50003)
-scale = Vector2(0.9999994, 0.9999994)
-shape = SubResource("RectangleShape2D_4knja")
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldSafetyBoundaries/BoundaryLeft" index="0" unique_id=1605719679]
+position = Vector2(306.99982, -176.50006)
+scale = Vector2(0.99999934, 0.99999934)
+shape = SubResource("RectangleShape2D_0fu15")
 debug_color = Color(0, 0.6, 0.7, 0.42)
 
-[node name="ColorRect" type="ColorRect" parent="WorldSafetyBoundaries/BoundaryLeft" index="1" unique_id=63317114]
+[node name="ColorRect" type="ColorRect" parent="WorldSafetyBoundaries/BoundaryLeft" index="1" unique_id=701337930]
 visible = false
 offset_left = 303.51578
 offset_top = -269.00006
@@ -314,19 +339,19 @@ offset_right = 311.90527
 offset_bottom = 62.268463
 color = Color(0.1764706, 0.12156863, 0.023529412, 1)
 
-[node name="BoundaryRight" type="StaticBody2D" parent="WorldSafetyBoundaries" index="1" unique_id=492877316]
+[node name="BoundaryRight" type="StaticBody2D" parent="WorldSafetyBoundaries" index="2" unique_id=1512121065]
 position = Vector2(-11, -393)
 rotation = -3.1415925
 scale = Vector2(0.99999994, 0.99999994)
 metadata/_edit_group_ = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldSafetyBoundaries/BoundaryRight" index="0" unique_id=61054322]
-position = Vector2(-326.99988, -36.499878)
-scale = Vector2(0.99999964, 0.99999964)
-shape = SubResource("RectangleShape2D_voubc")
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldSafetyBoundaries/BoundaryRight" index="0" unique_id=2069955867]
+position = Vector2(-326.99982, -188.49991)
+scale = Vector2(0.9999996, 0.9999996)
+shape = SubResource("RectangleShape2D_4knja")
 debug_color = Color(0, 0.6, 0.7, 0.42)
 
-[node name="ColorRect" type="ColorRect" parent="WorldSafetyBoundaries/BoundaryRight" index="1" unique_id=142020140]
+[node name="ColorRect" type="ColorRect" parent="WorldSafetyBoundaries/BoundaryRight" index="1" unique_id=1660705105]
 visible = false
 offset_left = -333.00003
 offset_top = -269.0

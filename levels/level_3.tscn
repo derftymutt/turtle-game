@@ -80,17 +80,20 @@ texture = ExtResource("27_8nkwk")
 physics_layer_0/collision_layer = 1
 sources/0 = SubResource("TileSetAtlasSource_4gw27")
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_tv8m3"]
-size = Vector2(8.000166, 471.00015)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_8nkwk"]
-size = Vector2(8.000183, 465.00012)
-
 [sub_resource type="Curve2D" id="Curve2D_mb3d3"]
 _data = {
 "points": PackedVector2Array(0, 0, 0, 0, -12, 2, 0, 0, 0, 0, -19, 22, 0, 0, 0, 0, -26, 41, 0, 0, 0, 0, -27, 66, 0, 0, 0, 0, -11, 96)
 }
 point_count = 5
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_4gw27"]
+size = Vector2(16.000038, 1916.0011)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_mb3d3"]
+size = Vector2(8.000166, 759.0005)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_q26s8"]
+size = Vector2(8.000183, 768.00024)
 
 [node name="LevelBase" unique_id=158370714 instance=ExtResource("1_vkd0v")]
 level_number = 3
@@ -290,49 +293,7 @@ position = Vector2(632, 4)
 tile_map_data = PackedByteArray("AADY/wkAAAAAAAAAAADY/wgAAAACAAAAAADY/wcAAAABAAAAAADY/wYAAAAAAAAAAADY/wUAAAACAAAAAADY/wQAAAAAAAAAAADY/wMAAAABAAAAAADY/wIAAAACAAAAAADY/wEAAAAAAAAAAADY/wAAAAACAAAAAADY////AAAAAAAAAADY//7/AAAAAAAAAADY//3/AAAAAAAAAADY//z/AAACAAAAAADY//v/AAAAAAAAAADY//r/AAABAAAAAADY//n/AAAAAAAAAADY//j/AAACAAAAAAA=")
 tile_set = ExtResource("28_kyq6o")
 
-[node name="WorldSafetyBoundaries" type="Node2D" parent="." index="51" unique_id=1777011321]
-
-[node name="BoundaryLeft" type="StaticBody2D" parent="WorldSafetyBoundaries" index="0" unique_id=986179514]
-position = Vector2(-9, -376)
-rotation = -3.1415925
-scale = Vector2(0.99999994, 0.99999994)
-metadata/_edit_group_ = true
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldSafetyBoundaries/BoundaryLeft" index="0" unique_id=1486863607]
-position = Vector2(306.99988, -32.50003)
-scale = Vector2(0.9999994, 0.9999994)
-shape = SubResource("RectangleShape2D_tv8m3")
-debug_color = Color(0, 0.6, 0.7, 0.42)
-
-[node name="ColorRect" type="ColorRect" parent="WorldSafetyBoundaries/BoundaryLeft" index="1" unique_id=1306010719]
-visible = false
-offset_left = 303.51578
-offset_top = -269.00006
-offset_right = 311.90527
-offset_bottom = 62.268463
-color = Color(0.1764706, 0.12156863, 0.023529412, 1)
-
-[node name="BoundaryRight" type="StaticBody2D" parent="WorldSafetyBoundaries" index="1" unique_id=34923229]
-position = Vector2(-11, -393)
-rotation = -3.1415925
-scale = Vector2(0.99999994, 0.99999994)
-metadata/_edit_group_ = true
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldSafetyBoundaries/BoundaryRight" index="0" unique_id=181543129]
-position = Vector2(-326.99988, -36.499878)
-scale = Vector2(0.99999964, 0.99999964)
-shape = SubResource("RectangleShape2D_8nkwk")
-debug_color = Color(0, 0.6, 0.7, 0.42)
-
-[node name="ColorRect" type="ColorRect" parent="WorldSafetyBoundaries/BoundaryRight" index="1" unique_id=106036577]
-visible = false
-offset_left = -333.00003
-offset_top = -269.0
-offset_right = -323.4816
-offset_bottom = 62.268524
-color = Color(0.1764706, 0.12156863, 0.023529412, 1)
-
-[node name="OceanCurrent" parent="." index="52" unique_id=1683655070 instance=ExtResource("31_4gw27")]
+[node name="OceanCurrent" parent="." index="51" unique_id=1683655070 instance=ExtResource("31_4gw27")]
 position = Vector2(-119, -88)
 show_debug_arrows = false
 
@@ -344,5 +305,69 @@ position = Vector2(-9, 1)
 
 [node name="Visuals" parent="OceanCurrent" index="1" unique_id=2005124627]
 position = Vector2(-11, 1)
+
+[node name="WorldSafetyBoundaries" type="Node2D" parent="." index="54" unique_id=1838928534]
+
+[node name="BoundaryBottom" type="StaticBody2D" parent="WorldSafetyBoundaries" index="0" unique_id=907992518]
+position = Vector2(1.0000612, 175.99995)
+rotation = -3.1415925
+scale = Vector2(0.99999994, 0.99999994)
+collision_layer = 257
+metadata/_edit_group_ = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldSafetyBoundaries/BoundaryBottom" index="0" unique_id=396479166]
+position = Vector2(2.00006, 3.999939)
+rotation = -1.5707964
+scale = Vector2(0.9999993, 0.9999993)
+shape = SubResource("RectangleShape2D_4gw27")
+debug_color = Color(0, 0.6, 0.7, 0.42)
+
+[node name="ColorRect" type="ColorRect" parent="WorldSafetyBoundaries/BoundaryBottom" index="1" unique_id=73998410]
+visible = false
+offset_left = -333.00003
+offset_top = -269.0
+offset_right = -323.4816
+offset_bottom = 62.268524
+color = Color(0.1764706, 0.12156863, 0.023529412, 1)
+
+[node name="BoundaryLeft" type="StaticBody2D" parent="WorldSafetyBoundaries" index="1" unique_id=1661152339]
+position = Vector2(-9, -376)
+rotation = -3.1415925
+scale = Vector2(0.99999994, 0.99999994)
+metadata/_edit_group_ = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldSafetyBoundaries/BoundaryLeft" index="0" unique_id=2033781049]
+position = Vector2(306.99982, -176.50006)
+scale = Vector2(0.99999934, 0.99999934)
+shape = SubResource("RectangleShape2D_mb3d3")
+debug_color = Color(0, 0.6, 0.7, 0.42)
+
+[node name="ColorRect" type="ColorRect" parent="WorldSafetyBoundaries/BoundaryLeft" index="1" unique_id=1801061507]
+visible = false
+offset_left = 303.51578
+offset_top = -269.00006
+offset_right = 311.90527
+offset_bottom = 62.268463
+color = Color(0.1764706, 0.12156863, 0.023529412, 1)
+
+[node name="BoundaryRight" type="StaticBody2D" parent="WorldSafetyBoundaries" index="2" unique_id=2021408619]
+position = Vector2(-11, -393)
+rotation = -3.1415925
+scale = Vector2(0.99999994, 0.99999994)
+metadata/_edit_group_ = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldSafetyBoundaries/BoundaryRight" index="0" unique_id=1110014216]
+position = Vector2(-326.99982, -188.49991)
+scale = Vector2(0.9999996, 0.9999996)
+shape = SubResource("RectangleShape2D_q26s8")
+debug_color = Color(0, 0.6, 0.7, 0.42)
+
+[node name="ColorRect" type="ColorRect" parent="WorldSafetyBoundaries/BoundaryRight" index="1" unique_id=1471733862]
+visible = false
+offset_left = -333.00003
+offset_top = -269.0
+offset_right = -323.4816
+offset_bottom = 62.268524
+color = Color(0.1764706, 0.12156863, 0.023529412, 1)
 
 [editable path="OceanCurrent"]
