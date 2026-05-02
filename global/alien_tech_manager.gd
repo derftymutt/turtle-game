@@ -33,7 +33,8 @@ var _cooldowns: Array[float] = [0.0, 0.0]
 
 const _COOLDOWN_DURATIONS: Dictionary = {
 	AlienTechRegistry.LATERAL_THRUST: 5.0,
-	AlienTechRegistry.TRANSPORTER:  8.0,
+	AlienTechRegistry.TRANSPORTER:    8.0,
+	AlienTechRegistry.BUMPER_MAGNET:  5.0,
 }
 
 var _passive_bar_ratios: Dictionary = {}
@@ -137,6 +138,9 @@ func get_cooldown_ratio(slot_index: int) -> float:
 
 func set_passive_bar(tech_id: String, ratio: float):
 	_passive_bar_ratios[tech_id] = clamp(ratio, 0.0, 1.0)
+
+func clear_passive_bar(tech_id: String):
+	_passive_bar_ratios.erase(tech_id)
 
 # ─── Run lifecycle ───────────────────────────────────────────────────────────
 

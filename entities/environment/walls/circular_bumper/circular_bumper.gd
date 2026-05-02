@@ -221,3 +221,14 @@ func get_suggested_radius() -> float:
 
 func get_pixel_diameter() -> float:
 	return radius * 2.0
+
+## Called by the Bumper Magnet tech on release to launch the player as if they
+## hit the bumper naturally. speed_override replaces the body's current velocity
+## (which is zero while magnetically attached) with the speed captured at activation.
+func apply_launch_force(body: RigidBody2D, speed_override: float = -1.0) -> void:
+	var collision_normal := (body.global_position - global_position).normalized()
+	var effective_speed := speed_override if speed_override > 0.0 else min_bounce_force / bounce_multiplier
+	var bounce_force: float = clamp(effective_speed * bounce_multiplier, min_bounce_force, max_bounce_force)
+	body.linear_velocity = collision_normal * (bounce_force + 100.0)
+	body.linear_velocity = body.linear_velocity.rotated(randf_range(-0.1, 0.1))
+	_play_hit_animation()
