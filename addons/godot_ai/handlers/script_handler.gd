@@ -1,14 +1,22 @@
 @tool
-class_name ScriptHandler
 extends RefCounted
 
 ## Handles script creation, reading, attaching, detaching, and symbol inspection.
 
 var _undo_redo: EditorUndoRedoManager
+var _connection: McpConnection
+
+# Bounded settle window for `ResourceLoader.exists(path)` after `scan()` so
+# that an agent calling create_script -> attach_script back-to-back doesn't
+# race the editor's import pipeline (#261). Polled once per frame, with an
+# elapsed-time cap below the Python client's default 5s command timeout.
+const _IMPORT_SETTLE_MAX_FRAMES := 300
+const _IMPORT_SETTLE_MAX_MSEC := 4500
 
 
-func _init(undo_redo: EditorUndoRedoManager) -> void:
+func _init(undo_redo: EditorUndoRedoManager, connection: McpConnection = null) -> void:
 	_undo_redo = undo_redo
+	_connection = connection
 
 
 func create_script(params: Dictionary) -> Dictionary:
@@ -51,8 +59,42 @@ func create_script(params: Dictionary) -> Dictionary:
 	}
 	# `.gd.uid` is the sidecar Godot generates on scan; list both so the caller
 	# can rm the full set in one go.
-	ResourceIO.attach_cleanup_hint(data, existed_before, [path, path + ".uid"])
+	McpResourceIO.attach_cleanup_hint(data, existed_before, [path, path + ".uid"])
+
+	# scan() is async — ResourceLoader.exists(path) returns false until Godot's
+	# filesystem pipeline finishes. If we reply now, an immediate attach_script
+	# races and 404s (#261). Defer the response until the resource is visible
+	# (or a bounded timeout elapses). For freshly-created files we wait; on
+	# overwrite the resource was already known to ResourceLoader, so reply now.
+	var request_id: String = params.get("_request_id", "")
+	if not existed_before and _connection != null and not request_id.is_empty():
+		_finish_create_script_deferred(request_id, path, data)
+		return McpDispatcher.DEFERRED_RESPONSE
+
+	# Synchronous fallback: batch_execute (no request_id) and unit-test contexts
+	# (no connection) get the immediate reply that the previous behaviour gave.
 	return {"data": data}
+
+
+func _finish_create_script_deferred(request_id: String, path: String, data: Dictionary) -> void:
+	var tree := _connection.get_tree()
+	var frames := 0
+	var deadline_ms := Time.get_ticks_msec() + _IMPORT_SETTLE_MAX_MSEC
+	while (
+		frames < _IMPORT_SETTLE_MAX_FRAMES
+		and Time.get_ticks_msec() < deadline_ms
+		and not ResourceLoader.exists(path)
+	):
+		await tree.process_frame
+		frames += 1
+	# If the plugin tears down (_exit_tree frees _connection) during the await,
+	# is_instance_valid() goes false and we drop the response silently — the
+	# server's request timeout will surface the failure to the caller.
+	if not is_instance_valid(_connection):
+		return
+	var payload := data.duplicate()
+	payload["import_settled"] = ResourceLoader.exists(path)
+	_connection.send_deferred_response(request_id, {"data": payload})
 
 
 func read_script(params: Dictionary) -> Dictionary:
@@ -162,9 +204,9 @@ func attach_script(params: Dictionary) -> Dictionary:
 	if scene_root == null:
 		return McpErrorCodes.make(McpErrorCodes.EDITOR_NOT_READY, "No scene open")
 
-	var node := ScenePath.resolve(node_path, scene_root)
+	var node := McpScenePath.resolve(node_path, scene_root)
 	if node == null:
-		return McpErrorCodes.make(McpErrorCodes.INVALID_PARAMS, "Node not found: %s" % node_path)
+		return McpErrorCodes.make(McpErrorCodes.INVALID_PARAMS, McpScenePath.format_node_error(node_path, scene_root))
 
 	if not ResourceLoader.exists(script_path):
 		return McpErrorCodes.make(McpErrorCodes.INVALID_PARAMS, "Script not found: %s" % script_path)
@@ -200,9 +242,9 @@ func detach_script(params: Dictionary) -> Dictionary:
 	if scene_root == null:
 		return McpErrorCodes.make(McpErrorCodes.EDITOR_NOT_READY, "No scene open")
 
-	var node := ScenePath.resolve(node_path, scene_root)
+	var node := McpScenePath.resolve(node_path, scene_root)
 	if node == null:
-		return McpErrorCodes.make(McpErrorCodes.INVALID_PARAMS, "Node not found: %s" % node_path)
+		return McpErrorCodes.make(McpErrorCodes.INVALID_PARAMS, McpScenePath.format_node_error(node_path, scene_root))
 
 	var old_script: Script = node.get_script()
 	if old_script == null:

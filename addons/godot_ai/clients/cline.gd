@@ -16,8 +16,14 @@ func _init() -> void:
 		"linux": "$XDG_CONFIG_HOME/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json",
 	}
 	server_key_path = PackedStringArray(["mcpServers"])
-	entry_builder = func(_name: String, url: String) -> Dictionary:
-		return {"url": url, "disabled": false, "autoApprove": []}
+	## Cline (like Roo) defaults a typeless entry to SSE transport, which
+	## returns HTTP 400 against our streamable-http endpoint on `/mcp`. Pin
+	## the type explicitly. Cline's schema uses "streamableHttp" (camelCase,
+	## see src/services/mcp/schemas.ts in the cline repo) — distinct from
+	## Roo's "streamable-http" string. Parallel to the Roo fix in #190.
+	entry_extra_fields = {"type": "streamableHttp"}
+	## `disabled` and `autoApprove` are user-state (they may have flipped the
+	## entry off, or auto-approved specific tools). Seed on first Configure
+	## but preserve across reconfigure — see `entry_initial_fields` in `_base.gd`.
+	entry_initial_fields = {"disabled": false, "autoApprove": []}
 	detect_paths = PackedStringArray(path_template.values())
-	manual_command_builder = func(name: String, url: String, path: String) -> String:
-		return "Edit %s and add under \"mcpServers\":\n  \"%s\": { \"url\": \"%s\", \"disabled\": false, \"autoApprove\": [] }" % [path, name, url]

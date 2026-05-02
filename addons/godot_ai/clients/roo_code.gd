@@ -13,8 +13,17 @@ func _init() -> void:
 		"linux": "$XDG_CONFIG_HOME/Code/User/globalStorage/rooveterinaryinc.roo-cline/settings/mcp_settings.json",
 	}
 	server_key_path = PackedStringArray(["mcpServers"])
-	entry_builder = func(_name: String, url: String) -> Dictionary:
-		return {"url": url, "disabled": false, "alwaysAllow": []}
+	## Roo defaults an entry with no "type" to SSE transport — which returns
+	## HTTP 400 against our streamable-http endpoint on `/mcp`. Pin the type
+	## explicitly so Roo negotiates streamable-http (the current MCP spec's
+	## recommended remote transport). See issue #189. The default verifier
+	## requires every entry_extra_fields key to match, so a pre-#189 typeless
+	## entry surfaces as drift instead of silently passing as configured.
+	entry_extra_fields = {"type": "streamable-http"}
+	## `disabled` and `alwaysAllow` are user-state (they may have flipped the
+	## entry off, or auto-approved specific tools like `session_manage`).
+	## Seed on first Configure but preserve across reconfigure — without this
+	## split, the Configure-All-Mismatched sweep silently wipes the user's
+	## auto-approval list every time the type pin or URL drifts.
+	entry_initial_fields = {"disabled": false, "alwaysAllow": []}
 	detect_paths = PackedStringArray(path_template.values())
-	manual_command_builder = func(name: String, url: String, path: String) -> String:
-		return "Edit %s and add under \"mcpServers\":\n  \"%s\": { \"url\": \"%s\", \"disabled\": false, \"alwaysAllow\": [] }" % [path, name, url]

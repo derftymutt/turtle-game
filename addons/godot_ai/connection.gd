@@ -1,18 +1,20 @@
 @tool
-class_name Connection
+class_name McpConnection
 extends Node
 
 ## WebSocket transport to the Godot AI Python server.
 ## Only handles connect, reconnect, send, and receive.
 ## Command dispatch is owned by McpDispatcher.
 
-const RECONNECT_DELAYS: Array[float] = [1.0, 2.0, 4.0, 8.0, 10.0]
+const RECONNECT_DELAYS: Array[float] = [1.0, 2.0, 4.0, 8.0, 16.0, 30.0, 60.0]
+const RECONNECT_VERBOSE_ATTEMPTS := 5
+const RECONNECT_LOG_EVERY_N_ATTEMPTS := 10
 
 var _peer := WebSocketPeer.new()
-## Resolved from `McpClientConfigurator.ws_port()` in `_ready` so EditorSettings
-## overrides land before the first connect. Previously a file-scope const, which
-## baked the port at script compile time — meaning a reconfigured ws_port only
-## took effect on the next editor restart.
+## Set by plugin.gd after resolving the configured WebSocket port once for the
+## server spawn. Reconnects reuse this cached value so they keep dialing the
+## same port the Python server was asked to bind.
+var ws_port := McpClientConfigurator.DEFAULT_WS_PORT
 var _url := ""
 var _connected := false
 var _reconnect_attempt := 0
@@ -26,6 +28,12 @@ var server_version := ""
 
 var dispatcher: McpDispatcher
 var log_buffer: McpLogBuffer
+## Set by plugin.gd when the HTTP port is occupied by an incompatible or
+## unverified server. Keeping the Connection node alive lets handlers and the
+## dock share one object, but no WebSocket is opened to the wrong server.
+var connect_blocked := false
+var connect_block_reason := ""
+var _blocked_notice_logged := false
 ## Set to true to skip _process() during operations like save_scene
 ## that may trigger re-entrant frame processing.
 var pause_processing := false
@@ -33,10 +41,13 @@ var pause_processing := false
 
 func _ready() -> void:
 	_session_id = _make_session_id(ProjectSettings.globalize_path("res://"))
-	_url = "ws://127.0.0.1:%d" % McpClientConfigurator.ws_port()
 	## Increase outbound buffer for large messages (e.g. screenshot base64).
 	## Default is 64 KB; screenshots can be several MB.
 	_peer.outbound_buffer_size = 4 * 1024 * 1024  # 4 MB
+	if connect_blocked:
+		_log_blocked_notice_once()
+		set_process(false)
+		return
 	_connect_to_server()
 	_hook_editor_signals()
 
@@ -111,20 +122,53 @@ func teardown() -> void:
 
 
 func _connect_to_server() -> void:
+	_url = "ws://127.0.0.1:%d" % ws_port
 	var err := _peer.connect_to_url(_url)
 	if err != OK:
 		log_buffer.log("failed to initiate connection (error %d)" % err)
 
 
 func _attempt_reconnect() -> void:
-	var delay_idx := mini(_reconnect_attempt, RECONNECT_DELAYS.size() - 1)
-	var delay := RECONNECT_DELAYS[delay_idx]
+	if connect_blocked:
+		_log_blocked_notice_once()
+		set_process(false)
+		return
+	var delay := _reconnect_delay_for_attempt(_reconnect_attempt)
 	_reconnect_attempt += 1
 	_reconnect_timer = delay
-	log_buffer.log("reconnecting in %.0fs (attempt %d)" % [delay, _reconnect_attempt])
+	if _should_log_reconnect_attempt(_reconnect_attempt):
+		log_buffer.log(
+			"reconnecting (attempt %d; next retry in %.0fs if needed)"
+			% [_reconnect_attempt, delay]
+		)
+	## Always create a fresh WebSocketPeer before reconnecting. A peer that has
+	## reached STATE_CLOSED is terminal; reusing it can leave the editor stuck in
+	## a quiet reconnect loop after the Python server restarts.
 	_peer = WebSocketPeer.new()
 	_peer.outbound_buffer_size = 4 * 1024 * 1024  # 4 MB
 	_connect_to_server()
+
+
+static func _reconnect_delay_for_attempt(attempt_index: int) -> float:
+	var delay_idx := mini(attempt_index, RECONNECT_DELAYS.size() - 1)
+	return RECONNECT_DELAYS[delay_idx]
+
+
+static func _should_log_reconnect_attempt(attempt_number: int) -> bool:
+	## Log the first few failures for immediate diagnostics, then only periodic
+	## progress markers. Reconnect continues indefinitely; the log should not.
+	return (
+		attempt_number <= RECONNECT_VERBOSE_ATTEMPTS
+		or attempt_number % RECONNECT_LOG_EVERY_N_ATTEMPTS == 0
+	)
+
+
+func _log_blocked_notice_once() -> void:
+	if _blocked_notice_logged:
+		return
+	_blocked_notice_logged = true
+	if log_buffer and not connect_block_reason.is_empty():
+		log_buffer.log(connect_block_reason)
 
 
 func _send_handshake() -> void:

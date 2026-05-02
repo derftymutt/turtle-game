@@ -11,7 +11,7 @@ extends RefCounted
 ##
 ## State is authored by `plugin.gd::_start_server` (once per plugin
 ## session) and `plugin.gd::_check_server_health` (on late spawn death).
-## It does NOT track runtime connection health — that's `Connection`'s
+## It does NOT track runtime connection health — that's `McpConnection`'s
 ## job and is reflected by the green/red status dot.
 
 ## Happy path: we spawned or adopted a managed server. The dock hides
@@ -29,6 +29,11 @@ const PORT_EXCLUDED := "port_excluded"
 ## doesn't speak MCP. Dock shows the port picker — same escape as
 ## PORT_EXCLUDED, just a different root cause.
 const FOREIGN_PORT := "foreign_port"
+
+## HTTP port is held by a godot-ai server or MCP-looking process whose
+## live version could not be verified as compatible with this plugin.
+## The plugin must not silently adopt it or mark client setup healthy.
+const INCOMPATIBLE_SERVER := "incompatible_server"
 
 ## Our spawned process exited inside the startup grace window. Python
 ## stdout/stderr went to Godot's output log (no pipe capture), so the

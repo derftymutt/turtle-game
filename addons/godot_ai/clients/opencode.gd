@@ -15,8 +15,7 @@ func _init() -> void:
 		"windows": "$HOME/.config/opencode/opencode.json",
 	}
 	server_key_path = PackedStringArray(["mcp"])
-	entry_builder = func(_name: String, url: String) -> Dictionary:
-		return {"type": "remote", "url": url, "enabled": true}
+	entry_extra_fields = {"type": "remote"}
+	## `enabled` is user-state (they may have toggled the server off).
+	entry_initial_fields = {"enabled": true}
 	detect_paths = PackedStringArray(path_template.values())
-	manual_command_builder = func(name: String, url: String, path: String) -> String:
-		return "Edit %s and add under \"mcp\":\n  \"%s\": { \"type\": \"remote\", \"url\": \"%s\", \"enabled\": true }" % [path, name, url]
