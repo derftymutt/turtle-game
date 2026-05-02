@@ -13,6 +13,7 @@ const TRANSPORTER      := "transporter"
 const SALIVA_NANOBOTS  := "saliva_nanobots"
 const BUBBLE_SHIELD    := "bubble_shield"
 const BUMPER_MAGNET    := "bumper_magnet"
+const DERMAL_REGEN     := "dermal_regen"
 
 # ─── Tech definitions ────────────────────────────────────────────────────────
 
@@ -65,6 +66,15 @@ var _definitions: Array[Dictionary] = [
 		"needs_input":   false,
 		"has_passive_bar": true,
 		"color":         Color(0.3, 0.9, 1.0),
+	},
+	{
+		"id":              DERMAL_REGEN,
+		"name":            "Dermal Regenerator",
+		"description":     "Hold to channel a 60 HP heal. One use per level.\nTaking damage during channeling cancels it.",
+		"slot_label":      "REGEN",
+		"needs_input":     true,
+		"has_passive_bar": true,
+		"color":           Color(0.2, 1.0, 0.4),
 	},
 	{
 		"id":              BUMPER_MAGNET,
