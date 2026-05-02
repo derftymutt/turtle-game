@@ -63,6 +63,7 @@ func _enemy_ready():
 	max_health = 10.0
 	current_health = max_health
 	contact_damage = 15.0
+	knockback_force = 0.0
 	
 	# Find references
 	ocean = get_tree().get_first_node_in_group("ocean")

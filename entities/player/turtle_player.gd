@@ -103,6 +103,10 @@ var transporter_invincible_timer: float = 0.0
 var _transporter_windup: bool = false
 var _transporter_canceled: bool = false
 
+const CONTACT_IFRAME_DURATION: float = 0.75
+var _contact_iframes_active: bool = false
+var _contact_iframes_timer: float = 0.0
+
 const BUBBLE_SHIELD_REGEN_DURATION: float = 15.0
 var bubble_shield_hp: float = 0.0
 var bubble_shield_regen_timer: float = 0.0
@@ -277,6 +281,11 @@ func _physics_process(delta):
 		if transporter_invincible_timer <= 0.0:
 			transporter_invincible = false
 
+	if _contact_iframes_active:
+		_contact_iframes_timer -= delta
+		if _contact_iframes_timer <= 0.0:
+			_contact_iframes_active = false
+
 	if AlienTechManager.is_tech_active(AlienTechRegistry.BUBBLE_SHIELD):
 		if bubble_shield_hp == 0.0 and bubble_shield_regen_timer > 0.0:
 			bubble_shield_regen_timer -= delta
@@ -432,6 +441,11 @@ func _update_sprite_modulate():
 	else:
 		sprite.modulate = Color.WHITE
 
+	# Iframe blink: flicker alpha on top of whatever color was set above.
+	# FlashOverlay and sprite modulate are separate nodes so they can coexist.
+	if _contact_iframes_active:
+		sprite.modulate.a = 1.0 if (int(Time.get_ticks_msec() / 80) % 2 == 0) else 0.25
+
 # ---------------------------------------------------------------------------
 # OCEAN
 # ---------------------------------------------------------------------------
@@ -566,7 +580,9 @@ func apply_flipper_force(direction: Vector2, force_multiplier: float = 5.0):
 # HEALTH
 # ---------------------------------------------------------------------------
 
-func take_damage(amount: float):
+func take_damage(amount: float, use_iframes: bool = false):
+	if use_iframes and _contact_iframes_active:
+		return
 	if is_super_speed or is_super_speed_cooldown or shield_active or transporter_invincible:
 		return
 
@@ -598,19 +614,10 @@ func take_damage(amount: float):
 		die()
 		return  # die() handles everything from here
 
-	# Flash red — guarded so drowning damage (called every frame via delta)
-	# doesn't spawn hundreds of competing awaits that fight over modulate.
-	#if not _is_flashing:
-		#_is_flashing = true
-		#var sprite = $AnimatedSprite2D
-		#if sprite:
-			#sprite.modulate = Color.RED
-			#await get_tree().create_timer(0.15).timeout
-			#if sprite and is_instance_valid(sprite):
-				#sprite.modulate = Color.WHITE
-		#_is_flashing = false
-		
-		# take_damage — replace the entire if not _is_flashing block with:
+	if use_iframes:
+		_contact_iframes_active = true
+		_contact_iframes_timer = CONTACT_IFRAME_DURATION
+
 	_flash(Color.RED, 0.3)
 
 func restore_health(amount: float):
