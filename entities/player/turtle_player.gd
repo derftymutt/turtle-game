@@ -123,6 +123,15 @@ var _bumper_magnet_target: Node2D = null
 var _bumper_magnet_angle: float = 0.0
 var _bumper_magnet_attach_speed: float = 0.0
 
+# Dermal Regenerator
+const DERMAL_REGEN_HEAL: float = 60.0
+const DERMAL_REGEN_CHANNEL_DURATION: float = 1.0
+
+var _dermal_regen_active: bool = false
+var _dermal_regen_timer: float = 0.0
+var _dermal_regen_slot: int = -1
+var _dermal_regen_used: bool = false   # true after one successful heal per level
+
 # ---------------------------------------------------------------------------
 # 8-DIRECTIONAL SPRITE SYSTEM
 # ---------------------------------------------------------------------------
@@ -279,6 +288,9 @@ func _physics_process(delta):
 	if _bumper_magnet_active:
 		_update_bumper_magnet(delta)
 
+	if _dermal_regen_active:
+		_update_dermal_regen(delta)
+
 	# Ocean physics — suppressed while magnetically pinned to a bumper
 	if not _bumper_magnet_attached:
 		if ocean:
@@ -397,6 +409,10 @@ func _update_sprite_modulate():
 		sprite.modulate = Color(0.6, 0.3, 1.0).lerp(Color.WHITE, flash)
 	elif _bubble_flash_timer > 0.0:
 		sprite.modulate = Color(0.3, 0.9, 1.0)
+	elif _dermal_regen_active:
+		var progress := _dermal_regen_timer / DERMAL_REGEN_CHANNEL_DURATION
+		var flash := (sin(Time.get_ticks_msec() * (0.06 + progress * 0.18)) + 1.0) * 0.5
+		sprite.modulate = Color(0.1, 0.9, 0.3).lerp(Color(0.7, 1.0, 0.7), flash)
 	elif _bumper_magnet_active:
 		if _bumper_magnet_attached:
 			# Slow amber pulse while orbiting
@@ -565,6 +581,8 @@ func take_damage(amount: float):
 		_transporter_canceled = true
 	if _bumper_magnet_active:
 		_cancel_bumper_magnet()
+	if _dermal_regen_active:
+		_cancel_dermal_regen()
 
 	current_health -= amount
 
@@ -917,6 +935,8 @@ func _on_alien_tech_activated(slot_index: int, tech_id: String):
 			_activate_transporter()
 		AlienTechRegistry.BUMPER_MAGNET:
 			_start_bumper_magnet(slot_index)
+		AlienTechRegistry.DERMAL_REGEN:
+			_start_dermal_regen(slot_index)
 
 func _activate_lateral_thrust():
 	lateral_thrust_active = true
@@ -1156,3 +1176,43 @@ func _cancel_bumper_magnet() -> void:
 	_bumper_magnet_target = null
 	_bumper_magnet_slot = -1
 	AlienTechManager.clear_passive_bar(AlienTechRegistry.BUMPER_MAGNET)
+
+# ---------------------------------------------------------------------------
+# DERMAL REGENERATOR
+# ---------------------------------------------------------------------------
+
+func _start_dermal_regen(slot: int) -> void:
+	if _dermal_regen_used:
+		return
+	_dermal_regen_active = true
+	_dermal_regen_timer = 0.0
+	_dermal_regen_slot = slot
+
+func _update_dermal_regen(delta: float) -> void:
+	var action := "tech_slot_left" if _dermal_regen_slot == 0 else "tech_slot_right"
+	if not Input.is_action_pressed(action):
+		_cancel_dermal_regen()
+		return
+	_dermal_regen_timer += delta
+	AlienTechManager.set_passive_bar(
+		AlienTechRegistry.DERMAL_REGEN,
+		_dermal_regen_timer / DERMAL_REGEN_CHANNEL_DURATION
+	)
+	if _dermal_regen_timer >= DERMAL_REGEN_CHANNEL_DURATION:
+		_complete_dermal_regen()
+
+func _complete_dermal_regen() -> void:
+	restore_health(DERMAL_REGEN_HEAL)
+	_dermal_regen_used = true
+	# Leave passive bar at 0.0 (spent) so HUD shows bar-empty + dimmed label
+	# until the player re-spawns or the level resets.
+	AlienTechManager.set_passive_bar(AlienTechRegistry.DERMAL_REGEN, 0.0)
+	_dermal_regen_active = false
+	_dermal_regen_timer = 0.0
+	_dermal_regen_slot = -1
+
+func _cancel_dermal_regen() -> void:
+	AlienTechManager.clear_passive_bar(AlienTechRegistry.DERMAL_REGEN)
+	_dermal_regen_active = false
+	_dermal_regen_timer = 0.0
+	_dermal_regen_slot = -1
