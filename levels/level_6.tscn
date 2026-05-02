@@ -39,7 +39,7 @@ sources/0 = SubResource("TileSetAtlasSource_kx1xp")
 size = Vector2(8.000166, 747.00055)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xn6mk"]
-size = Vector2(16.000038, 1916.0011)
+size = Vector2(15.000002, 1916.0011)
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_nu44e"]
 friction = 0.0
@@ -137,9 +137,9 @@ collision_layer = 257
 metadata/_edit_group_ = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="WorldSafetyBoundaries/BoundaryBottom" index="0" unique_id=167093769]
-position = Vector2(2.000061, 1.0000305)
+position = Vector2(2.0000594, 3.4999542)
 rotation = 1.5707964
-scale = Vector2(0.99999934, 0.99999934)
+scale = Vector2(0.9999992, 0.9999992)
 shape = SubResource("RectangleShape2D_xn6mk")
 debug_color = Color(0, 0.6, 0.7, 0.42)
 
