@@ -384,8 +384,8 @@ func _on_tech_piece_collected(current: int, needed: int):
 		tech_piece_label.text = "Tech: %d/%d" % [current, needed]
 
 func _on_tech_slots_changed(slot_a: Dictionary, slot_b: Dictionary):
-	_update_slot_display(slot_a_label, slot_a_cooldown, slot_a, "A")
-	_update_slot_display(slot_b_label, slot_b_cooldown, slot_b, "B")
+	_update_slot_display(slot_a_label, slot_a_cooldown, slot_a, "L")
+	_update_slot_display(slot_b_label, slot_b_cooldown, slot_b, "R")
 
 func _update_slot_display(label: Label, cooldown_bar: ProgressBar,
 		tech: Dictionary, letter: String):
@@ -400,7 +400,7 @@ func _update_slot_display(label: Label, cooldown_bar: ProgressBar,
 		label.text = "[%s] %s" % [letter, tech.get("slot_label", tech.get("name", "?"))]
 		label.modulate = tech.get("color", Color.WHITE)
 		if cooldown_bar:
-			cooldown_bar.visible = tech.get("needs_input", false)
+			cooldown_bar.visible = tech.get("needs_input", false) or tech.get("has_passive_bar", false)
 
 func _refresh_tech_display():
 	if tech_piece_label:

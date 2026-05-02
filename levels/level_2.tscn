@@ -71,13 +71,13 @@ bounce = 1.2
 
 [sub_resource type="Curve2D" id="Curve2D_00pa0"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, -16, 7, 0, 0, 0, 0, -29, 47, 0, 0, 0, 0, -42, 83, 0, 0, 0, 0, -52, 111, 0, 0, 0, 0, -62, 147, 0, 0, 0, 0, -63, 192)
+"points": PackedVector2Array(0, 0, 0, 0, -16, 7, 0, 0, 0, 0, -29, 47, 0, 0, 0, 0, -42, 83, 0, 0, 0, 0, -50, 103, 0, 0, 0, 0, -55, 127, 0, 0, 0, 0, -58, 142, 0, 0, 0, 0, -62, 158)
 }
-point_count = 6
+point_count = 7
 
 [sub_resource type="Curve2D" id="Curve2D_jqt73"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, 13, 4, 0, 0, 0, 0, 22, 32, 0, 0, 0, 0, 35, 58, 0, 0, 0, 0, 44, 88, 0, 0, 0, 0, 54, 116, 0, 0, 0, 0, 60, 147, 0, 0, 0, 0, 64, 191)
+"points": PackedVector2Array(0, 0, 0, 0, 13, 4, 0, 0, 0, 0, 22, 32, 0, 0, 0, 0, 35, 58, 0, 0, 0, 0, 44, 88, 0, 0, 0, 0, 51, 108, 0, 0, 0, 0, 56, 131, 0, 0, 0, 0, 62, 160)
 }
 point_count = 7
 
@@ -98,10 +98,13 @@ physics_layer_0/collision_layer = 1
 sources/0 = SubResource("TileSetAtlasSource_m4706")
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_cp3aq"]
-size = Vector2(8.000166, 471.00015)
+size = Vector2(8.000166, 759.0005)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wgvos"]
-size = Vector2(8.000183, 465.00012)
+size = Vector2(8.000183, 768.00024)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xn6mk"]
+size = Vector2(16.000038, 1916.0011)
 
 [node name="LevelBase" unique_id=202497572 instance=ExtResource("1_mi4ay")]
 level_number = 2
@@ -373,8 +376,8 @@ scale = Vector2(0.99999994, 0.99999994)
 metadata/_edit_group_ = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="WorldSafetyBoundaries/BoundaryLeft" index="0" unique_id=614819264]
-position = Vector2(306.99988, -32.50003)
-scale = Vector2(0.9999994, 0.9999994)
+position = Vector2(306.99982, -176.50006)
+scale = Vector2(0.99999934, 0.99999934)
 shape = SubResource("RectangleShape2D_cp3aq")
 debug_color = Color(0, 0.6, 0.7, 0.42)
 
@@ -393,12 +396,34 @@ scale = Vector2(0.99999994, 0.99999994)
 metadata/_edit_group_ = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="WorldSafetyBoundaries/BoundaryRight" index="0" unique_id=1161468701]
-position = Vector2(-326.99988, -36.499878)
-scale = Vector2(0.99999964, 0.99999964)
+position = Vector2(-326.99982, -188.49991)
+scale = Vector2(0.9999996, 0.9999996)
 shape = SubResource("RectangleShape2D_wgvos")
 debug_color = Color(0, 0.6, 0.7, 0.42)
 
 [node name="ColorRect" type="ColorRect" parent="WorldSafetyBoundaries/BoundaryRight" index="1" unique_id=2028487504]
+visible = false
+offset_left = -333.00003
+offset_top = -269.0
+offset_right = -323.4816
+offset_bottom = 62.268524
+color = Color(0.1764706, 0.12156863, 0.023529412, 1)
+
+[node name="BoundaryBottom" type="StaticBody2D" parent="WorldSafetyBoundaries" index="2" unique_id=1637117816]
+position = Vector2(1.0000612, 175.99995)
+rotation = -3.1415925
+scale = Vector2(0.99999994, 0.99999994)
+collision_layer = 257
+metadata/_edit_group_ = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldSafetyBoundaries/BoundaryBottom" index="0" unique_id=1146322908]
+position = Vector2(2.00006, 3.999939)
+rotation = -1.5707964
+scale = Vector2(0.9999993, 0.9999993)
+shape = SubResource("RectangleShape2D_xn6mk")
+debug_color = Color(0, 0.6, 0.7, 0.42)
+
+[node name="ColorRect" type="ColorRect" parent="WorldSafetyBoundaries/BoundaryBottom" index="1" unique_id=83519749]
 visible = false
 offset_left = -333.00003
 offset_top = -269.0

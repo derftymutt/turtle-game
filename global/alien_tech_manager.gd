@@ -32,8 +32,11 @@ var slots: Array[Dictionary] = [{}, {}]
 var _cooldowns: Array[float] = [0.0, 0.0]
 
 const _COOLDOWN_DURATIONS: Dictionary = {
-	AlienTechRegistry.JETPACK: 5.0,
+	AlienTechRegistry.LATERAL_THRUST: 5.0,
+	AlienTechRegistry.TRANSPORTER:  8.0,
 }
+
+var _passive_bar_ratios: Dictionary = {}
 
 # ─── Ready ───────────────────────────────────────────────────────────────────
 
@@ -124,10 +127,16 @@ func get_cooldown_ratio(slot_index: int) -> float:
 	var tech = slots[slot_index]
 	if tech.is_empty():
 		return 0.0
-	var max_cd = _COOLDOWN_DURATIONS.get(tech.get("id", ""), 0.0)
+	var tech_id = tech.get("id", "")
+	if _passive_bar_ratios.has(tech_id):
+		return 1.0 - _passive_bar_ratios[tech_id]
+	var max_cd = _COOLDOWN_DURATIONS.get(tech_id, 0.0)
 	if max_cd <= 0.0:
 		return 0.0
 	return _cooldowns[slot_index] / max_cd
+
+func set_passive_bar(tech_id: String, ratio: float):
+	_passive_bar_ratios[tech_id] = clamp(ratio, 0.0, 1.0)
 
 # ─── Run lifecycle ───────────────────────────────────────────────────────────
 
@@ -136,6 +145,7 @@ func reset_run():
 	total_pieces_collected = 0
 	slots = [{}, {}]
 	_cooldowns = [0.0, 0.0]
+	_passive_bar_ratios.clear()
 	print("👽 AlienTechManager: Run reset")
 
 # ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -148,6 +158,6 @@ func find_empty_slot() -> int:
 
 func _slot_letter(index: int) -> String:
 	match index:
-		0: return "A"
-		1: return "B"
+		0: return "L"
+		1: return "R"
 		_: return "?"

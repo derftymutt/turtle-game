@@ -98,9 +98,9 @@ func _show_slot_choice_ui(incoming_id: String):
 		btn.custom_minimum_size = Vector2(160, 60)
 		btn.focus_mode = Control.FOCUS_ALL
 		btn.add_theme_font_size_override("font_size", 9)
-		var letter = "A" if i == 0 else "B"
+		var slot_side = "Left (LB)" if i == 0 else "Right (RB)"
 		var existing_name = existing.get("name", "Empty") if not existing.is_empty() else "Empty"
-		btn.text = "Slot %s — replace: %s" % [letter, existing_name]
+		btn.text = "Tech %s — replace: %s" % [slot_side, existing_name]
 		btn.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		var captured: int = i
 		btn.pressed.connect(func(): _on_replace_pressed(captured))
