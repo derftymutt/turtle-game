@@ -12,8 +12,6 @@
 [ext_resource type="PackedScene" uid="uid://bgu8t3jworeir" path="res://entities/enemies/piranha/piranha_spawner.tscn" id="11_4knja"]
 [ext_resource type="Script" uid="uid://3jp0yf3qb8pa" path="res://entities/collectibles/air_bubble/air_bubble_spawner.gd" id="13_0x1rk"]
 [ext_resource type="PackedScene" uid="uid://cdmr2papqk2ih" path="res://entities/collectibles/air_bubble/air_bubble.tscn" id="14_pnpm1"]
-[ext_resource type="PackedScene" uid="uid://cc3k1qa68v0mc" path="res://entities/collectibles/star/star_collectible_spawner.tscn" id="15_06ecp"]
-[ext_resource type="PackedScene" uid="uid://doh85qcfn8x2w" path="res://entities/collectibles/star/star_collectible.tscn" id="16_ohjdc"]
 [ext_resource type="PackedScene" uid="uid://bwyt5nkmne05h" path="res://entities/collectibles/ufo_piece/ufo_piece_seeder.tscn" id="17_e5brb"]
 [ext_resource type="PackedScene" uid="uid://bp6g8v1jmnruo" path="res://entities/environment/walls/circular_bumper/circular_bumper.tscn" id="18_oqlok"]
 [ext_resource type="PackedScene" uid="uid://c55cfm3aeb65a" path="res://systems/trash_cleanup/trash_sequence_spawner.tscn" id="19_7nvrk"]
@@ -92,7 +90,7 @@ physics_layer_0/collision_layer = 1
 sources/0 = SubResource("TileSetAtlasSource_ntdhj")
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ntdhj"]
-size = Vector2(16.000038, 1916.0011)
+size = Vector2(10.000034, 1916.0011)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_0fu15"]
 size = Vector2(8.000166, 759.0005)
@@ -104,24 +102,24 @@ size = Vector2(8.000183, 768.00024)
 
 [node name="SkyBackground" parent="." index="3" unique_id=967020750 instance=ExtResource("2_ntdhj")]
 
-[node name="Ocean" parent="." index="5" unique_id=2062759388 instance=ExtResource("2_oqlok")]
+[node name="Ocean" parent="." index="6" unique_id=2062759388 instance=ExtResource("2_oqlok")]
 
-[node name="OceanBackground" parent="." index="6" unique_id=593268214 instance=ExtResource("4_4knja")]
+[node name="OceanBackground" parent="." index="7" unique_id=593268214 instance=ExtResource("4_4knja")]
 
-[node name="Camera2D" type="Camera2D" parent="." index="7" unique_id=380561311 node_paths=PackedStringArray("follow_target")]
+[node name="Camera2D" type="Camera2D" parent="." index="8" unique_id=380561311 node_paths=PackedStringArray("follow_target")]
 script = ExtResource("3_7nvrk")
 follow_target = NodePath("../TurtlePlayer")
 horizontal_follow_enabled = false
 
-[node name="TurtlePlayer" parent="." index="8" unique_id=1163425295 instance=ExtResource("4_jkxa6")]
+[node name="TurtlePlayer" parent="." index="9" unique_id=1163425295 instance=ExtResource("4_jkxa6")]
 super_speed_color = Color(0.778, 1.504, 0, 1)
 
-[node name="Crocodile" parent="." index="9" unique_id=781536171 instance=ExtResource("6_udfhf")]
+[node name="Crocodile" parent="." index="10" unique_id=781536171 instance=ExtResource("6_udfhf")]
 position = Vector2(-264, -124)
 patrol_speed = 50.0
 chase_speed = 120.0
 
-[node name="SeaUrchins" type="Node2D" parent="." index="10" unique_id=673576481]
+[node name="SeaUrchins" type="Node2D" parent="." index="11" unique_id=673576481]
 
 [node name="SeaUrchin5" parent="SeaUrchins" index="0" unique_id=1974948612 instance=ExtResource("7_i6od7")]
 position = Vector2(-110, -80)
@@ -129,17 +127,14 @@ position = Vector2(-110, -80)
 [node name="SeaUrchin6" parent="SeaUrchins" index="1" unique_id=876129622 instance=ExtResource("7_i6od7")]
 position = Vector2(110, -80)
 
-[node name="PiranhaSpawner" parent="." index="11" unique_id=664138342 instance=ExtResource("11_4knja")]
+[node name="PiranhaSpawner" parent="." index="12" unique_id=664138342 instance=ExtResource("11_4knja")]
 position = Vector2(-175, 40)
 
-[node name="AirBubbleSpawner" type="Node2D" parent="." index="12" unique_id=799194845]
+[node name="AirBubbleSpawner" type="Node2D" parent="." index="13" unique_id=799194845]
 script = ExtResource("13_0x1rk")
 bubble_scene = ExtResource("14_pnpm1")
 spawn_interval = 10.0
 spawn_count_max = 2
-
-[node name="CollectibleSpawner" parent="." index="13" unique_id=77619061 instance=ExtResource("15_06ecp")]
-collectible_scene = ExtResource("16_ohjdc")
 
 [node name="HealthPlantSpawner" parent="." index="14" unique_id=1172793188 instance=ExtResource("22_i6od7")]
 
@@ -305,9 +300,9 @@ collision_layer = 257
 metadata/_edit_group_ = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="WorldSafetyBoundaries/BoundaryBottom" index="0" unique_id=1028218329]
-position = Vector2(2.00006, 3.999939)
+position = Vector2(2.0000594, 0.99993896)
 rotation = -1.5707964
-scale = Vector2(0.9999993, 0.9999993)
+scale = Vector2(0.9999992, 0.9999992)
 shape = SubResource("RectangleShape2D_ntdhj")
 debug_color = Color(0, 0.6, 0.7, 0.42)
 
