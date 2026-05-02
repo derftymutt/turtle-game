@@ -1,20 +1,21 @@
 @tool
-class_name EditorHandler
 extends RefCounted
 
 ## Handles editor state, selection, log, screenshot, and performance commands.
 
 var _log_buffer: McpLogBuffer
-var _connection: Connection
+var _connection: McpConnection
 var _debugger_plugin: McpDebuggerPlugin
-var _game_log_buffer: GameLogBuffer
+var _game_log_buffer: McpGameLogBuffer
+var _editor_log_buffer: McpEditorLogBuffer
 
 
-func _init(log_buffer: McpLogBuffer, connection: Connection = null, debugger_plugin: McpDebuggerPlugin = null, game_log_buffer: GameLogBuffer = null) -> void:
+func _init(log_buffer: McpLogBuffer, connection: McpConnection = null, debugger_plugin: McpDebuggerPlugin = null, game_log_buffer: McpGameLogBuffer = null, editor_log_buffer: McpEditorLogBuffer = null) -> void:
 	_log_buffer = log_buffer
 	_connection = connection
 	_debugger_plugin = debugger_plugin
 	_game_log_buffer = game_log_buffer
+	_editor_log_buffer = editor_log_buffer
 
 
 func get_editor_state(_params: Dictionary) -> Dictionary:
@@ -25,7 +26,7 @@ func get_editor_state(_params: Dictionary) -> Dictionary:
 			"project_name": ProjectSettings.get_setting("application/config/name", ""),
 			"current_scene": scene_root.scene_file_path if scene_root else "",
 			"is_playing": EditorInterface.is_playing_scene(),
-			"readiness": Connection.get_readiness(),
+			"readiness": McpConnection.get_readiness(),
 			## True once the game subprocess autoload has beaconed mcp:hello;
 			## false between Play→Stop cycles. Lets capture-source=game callers
 			## poll for a real ready signal instead of guessing with sleep().
@@ -39,11 +40,11 @@ func get_selection(_params: Dictionary) -> Dictionary:
 	var selected := EditorInterface.get_selection().get_selected_nodes()
 	var paths: Array[String] = []
 	for node in selected:
-		paths.append(ScenePath.from_node(node, scene_root))
+		paths.append(McpScenePath.from_node(node, scene_root))
 	return {"data": {"selected_paths": paths, "count": paths.size()}}
 
 
-const VALID_LOG_SOURCES := ["plugin", "game", "all"]
+const VALID_LOG_SOURCES := ["plugin", "game", "editor", "all"]
 
 
 func get_logs(params: Dictionary) -> Dictionary:
@@ -56,7 +57,7 @@ func get_logs(params: Dictionary) -> Dictionary:
 	if not source in VALID_LOG_SOURCES:
 		return McpErrorCodes.make(
 			McpErrorCodes.INVALID_PARAMS,
-			"Invalid source '%s' — use 'plugin', 'game', or 'all'" % source,
+			"Invalid source '%s' — use 'plugin', 'game', 'editor', or 'all'" % source,
 		)
 
 	match source:
@@ -64,6 +65,8 @@ func get_logs(params: Dictionary) -> Dictionary:
 			return _get_plugin_logs(count, offset)
 		"game":
 			return _get_game_logs(count, offset)
+		"editor":
+			return _get_editor_logs(count, offset)
 		"all":
 			return _get_all_logs(count, offset)
 	return McpErrorCodes.make(McpErrorCodes.INTERNAL_ERROR, "Unreachable")
@@ -115,14 +118,49 @@ func _get_game_logs(count: int, offset: int) -> Dictionary:
 	}
 
 
+func _get_editor_logs(count: int, offset: int) -> Dictionary:
+	## Editor-process script errors (parse errors, @tool runtime errors,
+	## EditorPlugin errors, push_error/push_warning). Captured by
+	## editor_logger.gd via OS.add_logger and gated on Godot 4.5+; on older
+	## engines or before plugin enable the buffer is null/empty and we
+	## return an empty page so callers can poll unconditionally.
+	if _editor_log_buffer == null:
+		return {
+			"data": {
+				"source": "editor",
+				"lines": [],
+				"total_count": 0,
+				"returned_count": 0,
+				"offset": offset,
+				"dropped_count": 0,
+			}
+		}
+	var page := _editor_log_buffer.get_range(offset, count)
+	return {
+		"data": {
+			"source": "editor",
+			"lines": page,
+			"total_count": _editor_log_buffer.total_count(),
+			"returned_count": page.size(),
+			"offset": offset,
+			"dropped_count": _editor_log_buffer.dropped_count(),
+		}
+	}
+
+
 func _get_all_logs(count: int, offset: int) -> Dictionary:
 	## Plugin lines have no timestamp, so we can't merge chronologically.
-	## Concatenate plugin then game and apply the offset/count window over
-	## the combined list. The per-line `source` field tells callers where
-	## each entry came from.
+	## Concatenate plugin → editor → game and apply the offset/count window
+	## over the combined list. The per-line `source` field tells callers
+	## where each entry came from. Editor goes between plugin and game so
+	## script errors stay grouped near the plugin recv/send traffic that
+	## triggered them, with game runtime logs at the end.
 	var combined: Array[Dictionary] = []
 	for line in _log_buffer.get_recent(_log_buffer.total_count()):
 		combined.append({"source": "plugin", "level": "info", "text": line})
+	if _editor_log_buffer != null:
+		for entry in _editor_log_buffer.get_range(0, _editor_log_buffer.total_count()):
+			combined.append(entry)
 	if _game_log_buffer != null:
 		for entry in _game_log_buffer.get_range(0, _game_log_buffer.total_count()):
 			combined.append(entry)
@@ -135,6 +173,8 @@ func _get_all_logs(count: int, offset: int) -> Dictionary:
 	if _game_log_buffer != null:
 		run_id = _game_log_buffer.run_id()
 		dropped = _game_log_buffer.dropped_count()
+	if _editor_log_buffer != null:
+		dropped += _editor_log_buffer.dropped_count()
 	return {
 		"data": {
 			"source": "all",
@@ -235,7 +275,7 @@ func take_screenshot(params: Dictionary) -> Dictionary:
 			## via the debugger channel: the `_mcp_game_helper` autoload
 			## inside the game process replies with a PNG, and
 			## McpDebuggerPlugin pushes the response back through our
-			## WebSocket with the same request_id via Connection.send_deferred_response.
+			## WebSocket with the same request_id via McpConnection.send_deferred_response.
 			if _debugger_plugin == null or _connection == null:
 				return McpErrorCodes.make(McpErrorCodes.INTERNAL_ERROR, "Debugger bridge unavailable — plugin may not be fully initialised")
 			var request_id: String = params.get("_request_id", "")
@@ -269,7 +309,7 @@ func take_screenshot(params: Dictionary) -> Dictionary:
 		var targets: Array[Node3D] = []
 		var not_found: Array[String] = []
 		for p in unique_paths:
-			var node := ScenePath.resolve(p, scene_root)
+			var node := McpScenePath.resolve(p, scene_root)
 			if node == null:
 				not_found.append(p)
 			elif not node is Node3D:
@@ -456,7 +496,7 @@ func _take_cinematic_screenshot(max_resolution: int) -> Dictionary:
 		return McpErrorCodes.make(McpErrorCodes.INTERNAL_ERROR, "Cinematic render produced an empty image")
 
 	var result := _finalize_image(image, "cinematic", max_resolution)
-	result.data["camera_path"] = ScenePath.from_node(scene_camera, scene_root)
+	result.data["camera_path"] = McpScenePath.from_node(scene_camera, scene_root)
 	return result
 
 

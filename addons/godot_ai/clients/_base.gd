@@ -3,8 +3,15 @@ class_name McpClient
 extends RefCounted
 
 ## Descriptor for one MCP client (Cursor, Claude Desktop, Codex, ...).
-## Subclasses set fields in _init(); they should not contain control flow.
-## Strategies (json/toml/cli) consume these fields.
+##
+## Subclasses set fields in `_init()` and MUST NOT carry Callables — strategies
+## (json/toml/cli) interpret the data. Enforced by
+## `test_clients.gd::test_descriptors_are_data_only`.
+##
+## Why no Callables: per-client `.gd` files get hot-reloaded on disk-mtime
+## change. A worker thread mid-call into a descriptor lambda races the
+## bytecode swap and SEGVs (issue #229). Bonus: also obsoletes the stale-
+## Callable workaround from #192.
 
 ## CONFIGURED_MISMATCH = an entry with our `SERVER_NAME` exists in the user's
 ## client config, but its URL doesn't match `http_url()` — typical after the
@@ -12,6 +19,22 @@ extends RefCounted
 ## `NOT_CONFIGURED` lets the dock surface a "your saved client URLs are stale"
 ## banner instead of conflating it with "you never configured this client".
 enum Status { NOT_CONFIGURED, CONFIGURED, CONFIGURED_MISMATCH, ERROR }
+
+
+## Lowercase string label for a `Status` value. Single source of truth so the
+## MCP `client_status` tool, the dock, and the verify-after-write diagnostic
+## in `McpClientConfigurator` all emit the same names — agents pattern-match
+## against this set, so a fifth value being silently introduced would break
+## them.
+static func status_label(status: Status) -> String:
+	match status:
+		Status.CONFIGURED:
+			return "configured"
+		Status.NOT_CONFIGURED:
+			return "not_configured"
+		Status.CONFIGURED_MISMATCH:
+			return "configured_mismatch"
+	return "error"
 
 var id: String = ""                              ## stable key, e.g. "cursor"
 var display_name: String = ""                    ## "Cursor"
@@ -29,14 +52,44 @@ var path_template: Dictionary = {}
 ## OpenCode:                               ["mcp"]
 var server_key_path: PackedStringArray = PackedStringArray()
 
-## func(server_name: String, server_url: String) -> Dictionary
-## Returns the JSON object stored under server_key_path[server_name].
-var entry_builder: Callable = Callable()
-
-## Optional: custom verifier. func(entry: Dictionary, server_url: String) -> bool
-## Defaults: a JSON entry passes if entry[entry_url_field] == server_url.
+## Field inside the entry dict that holds our server URL.
+## "url" by default; some clients use "serverUrl" or "httpUrl".
 var entry_url_field: String = "url"
-var verify_entry: Callable = Callable()
+
+## Required entry fields — written on every Configure AND verified by the
+## default verifier. Use this for transport pins (e.g. `type:
+## "streamable-http"`) where a missing/wrong value breaks negotiation: a
+## legacy entry without the pin fails verification and surfaces as drift.
+##
+## DO NOT put user-mutable state here (auto-approval lists, `disabled`
+## flags, opt-in toggles). Verifying those treats every user customisation
+## as drift, and Configure-All-Mismatched then silently overwrites them
+## back to defaults — see the `entry_initial_fields` doc below.
+var entry_extra_fields: Dictionary = {}
+
+## Default fields written ONLY when the entry doesn't yet exist. Reconfigure
+## preserves whatever the user (or the client itself) has set; the verifier
+## ignores these keys entirely. Use for opt-in flags and user-state arrays —
+## e.g. Roo / Cline / Kilo `alwaysAllow` / `autoApprove` lists, `disabled:
+## false`, `isActive: true`. The pre-#229 behaviour was equivalent: per-
+## client `entry_builder` lambdas seeded these as defaults but the
+## per-client `verify_entry` lambdas only checked transport pins, so a
+## user-customised array was `CONFIGURED`, not drift. Splitting the field
+## restores that contract under the data-only descriptor model.
+var entry_initial_fields: Dictionary = {}
+
+## stdio→HTTP bridge mode for clients that don't speak HTTP natively.
+##   NONE    — entry is `{[entry_url_field]: url, **entry_extra_fields,
+##             ...entry_initial_fields (only for new entries)}`
+##   FLAT    — Claude Desktop shape: `{"command": <uvx>, "args": [...bridge...]}`
+##             Verifier ALSO accepts a future url-style entry.
+##   NESTED  — Zed shape: `{"command": {"path": <uvx>, "args": [...]}, "settings": {}}`
+##             Verifier requires the bridge form (no url-style fallback).
+##
+## Enum (vs. String) so a typo in a descriptor fails at parse time instead of
+## silently falling through `match` to the non-bridge path.
+enum UvxBridge { NONE, FLAT, NESTED }
+var entry_uvx_bridge: UvxBridge = UvxBridge.NONE
 
 ## Paths whose existence implies the user has this client installed.
 ## Used purely for the dock's "installed" badge.
@@ -44,22 +97,24 @@ var detect_paths: PackedStringArray = PackedStringArray()
 
 # CLI clients --------------------------------------------------------------
 var cli_names: PackedStringArray = PackedStringArray()
-var cli_register_args: Callable = Callable()
-var cli_unregister_args: Callable = Callable()
-var cli_status_check: Callable = Callable()  ## func(cli_path, name, url) -> Status
+## Argument templates with `{name}` and `{url}` tokens; the strategy
+## substitutes them at call time. Tokens are matched verbatim — no escaping
+## semantics, no shell expansion. Today only `claude_code` populates these.
+var cli_register_template: PackedStringArray = PackedStringArray()
+var cli_unregister_template: PackedStringArray = PackedStringArray()
+## Args run to read current state; stdout is scanned for the server name and
+## URL. Presence of `name` AND `url` → CONFIGURED, name only → MISMATCH,
+## neither → NOT_CONFIGURED.
+var cli_status_args: PackedStringArray = PackedStringArray()
 
 # Codex / TOML clients -----------------------------------------------------
 ## Dotted TOML path under which our entry lives, e.g. ["mcp_servers", "godot-ai"].
 ## Strategies build the [section."name"] header from this.
 var toml_section_path: PackedStringArray = PackedStringArray()
 var toml_legacy_section_aliases: PackedStringArray = PackedStringArray()
-## Lines (without the [header]) emitted under the section.
-## func(server_url) -> PackedStringArray
-var toml_body_builder: Callable = Callable()
-
-# Manual fallback ----------------------------------------------------------
-## func(server_name, server_url, resolved_path) -> String
-var manual_command_builder: Callable = Callable()
+## Lines (without the [header]) emitted under the section, with `{url}`
+## tokens. Substituted at call time.
+var toml_body_template: PackedStringArray = PackedStringArray()
 
 
 ## Resolved absolute config path for this client on the current OS.
@@ -84,6 +139,16 @@ static func _array_from_packed(packed: PackedStringArray) -> Array[String]:
 	var out: Array[String] = []
 	for s in packed:
 		out.append(s)
+	return out
+
+
+## Slice a PackedStringArray into a new PackedStringArray over [from, to).
+## Used by `_toml_strategy` and `_manual_command` to peel the section path
+## apart for `[a.b."c"]` header rendering.
+static func _packed_slice(packed: PackedStringArray, from: int, to: int) -> PackedStringArray:
+	var out := PackedStringArray()
+	for i in range(from, to):
+		out.append(packed[i])
 	return out
 
 

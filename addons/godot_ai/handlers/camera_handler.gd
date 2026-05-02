@@ -1,5 +1,4 @@
 @tool
-class_name CameraHandler
 extends RefCounted
 
 ## Handles Camera2D / Camera3D authoring — create, configure, bounds, damping,
@@ -9,6 +8,8 @@ extends RefCounted
 ## Setting current=true auto-unmarks previously-current cameras of the same
 ## class in the same action so one Ctrl-Z reverts the switch.
 
+const CameraValues := preload("res://addons/godot_ai/handlers/camera_values.gd")
+const CameraPresets := preload("res://addons/godot_ai/handlers/camera_presets.gd")
 
 const _VALID_TYPES := {
 	"2d": "Camera2D",
@@ -56,7 +57,17 @@ const _KEYS_3D := [
 	"current",
 ]
 
+# Transform-shaped keys live on Node2D / Node3D, not in the camera-specific
+# schema — rejecting them without a hint sends agents searching for the wrong
+# tool.
+const _NODE_TRANSFORM_KEYS := [
+	"position", "rotation", "scale", "transform",
+	"global_position", "global_rotation", "global_scale", "global_transform",
+]
+
 const _DAMPING_MARGIN_KEYS := ["left", "top", "right", "bottom"]
+const _CURRENT_SETTLE_ATTEMPTS := 3
+const _CURRENT_SETTLE_DELAY_MSEC := 2
 
 
 var _undo_redo: EditorUndoRedoManager
@@ -81,14 +92,12 @@ static func _is_current(cam: Node) -> bool:
 #
 # Both DO and UNDO route through `_apply_make_current` / `_apply_clear_current`
 # on the handler itself rather than calling Camera.make_current() directly.
-# The helpers do the make_current (or clear_current) call plus a one-shot
-# sync retry when the viewport hasn't yet reflected the change — macOS
-# headless occasionally reports `is_current() == false` immediately after
-# a committed make_current (observed CI run 24682342469) and symmetrically
-# still reports the displaced camera as current immediately after an undo
-# (observed CI runs 24682342469, 24692250322, 24696571517 — tracked in #140).
-# Registering the retry inside the undo action makes the undo path
-# race-proof without a separate post-commit hook.
+# The helpers do the make_current (or clear_current) call plus bounded sync
+# settling when the viewport hasn't yet reflected the change — macOS headless
+# occasionally reports `is_current() == false` immediately after a committed
+# make_current (observed CI run 24682342469) and symmetrically still reports
+# the displaced camera as current immediately after an undo (observed CI runs
+# 24682342469, 24692250322, 24696571517, 25079965242 — tracked in #140).
 #
 # Because those callables bind to `self` (a RefCounted handler, not a scene
 # node), every action that calls this helper must pin its history via
@@ -119,17 +128,54 @@ func _add_make_current_to_action(node: Node, type_str: String, scene_root: Node)
 		_undo_redo.add_undo_method(self, "_apply_clear_current", node)
 
 
-# Apply make_current on `cam` with a one-shot retry. Registered as the
+# Apply make_current on `cam` with bounded synchronous settling. Registered as the
 # do/undo callable by `_add_make_current_to_action`. See that function's
-# comment for why retry-in-action replaces the old post-commit-only hook.
+# comment for why the undo path needs the retry inside the action itself.
 # Safe against a freed camera node — short-circuits if the node is gone
 # or not in the tree.
 func _apply_make_current(cam: Node) -> void:
 	if cam == null or not is_instance_valid(cam) or not cam.is_inside_tree():
 		return
-	cam.make_current()
-	if not _is_current(cam):
+	for attempt in range(_CURRENT_SETTLE_ATTEMPTS):
 		cam.make_current()
+		_force_camera_refresh(cam)
+		if _is_current(cam):
+			return
+		_displace_stale_camera_2d(cam)
+		if _is_current(cam):
+			return
+		if attempt < _CURRENT_SETTLE_ATTEMPTS - 1:
+			OS.delay_msec(_CURRENT_SETTLE_DELAY_MSEC)
+
+
+# Call after commit_action() whenever the action registered a make_current DO.
+# The undo path cannot use a post-undo hook, so it relies on `_apply_make_current`
+# directly; create/configure/apply_preset get this extra post-commit verifier.
+func _verify_current_after_commit(node: Node) -> void:
+	_apply_make_current(node)
+
+
+func _force_camera_refresh(cam: Node) -> void:
+	if cam is Camera2D:
+		(cam as Camera2D).force_update_scroll()
+
+
+func _displace_stale_camera_2d(target: Node) -> void:
+	if not (target is Camera2D):
+		return
+	var viewport := target.get_viewport()
+	if viewport == null:
+		return
+	var stale := viewport.get_camera_2d()
+	if stale == null or stale == target or not is_instance_valid(stale):
+		return
+	var was_enabled := stale.enabled
+	if was_enabled:
+		stale.enabled = false
+	target.make_current()
+	_force_camera_refresh(target)
+	if was_enabled:
+		stale.enabled = true
 
 
 # Symmetric counterpart to `_apply_make_current` for the "no previous
@@ -165,9 +211,9 @@ func create_camera(params: Dictionary) -> Dictionary:
 
 	var parent: Node = scene_root
 	if not parent_path.is_empty():
-		parent = ScenePath.resolve(parent_path, scene_root)
+		parent = McpScenePath.resolve(parent_path, scene_root)
 		if parent == null:
-			return McpErrorCodes.make(McpErrorCodes.INVALID_PARAMS, ScenePath.format_parent_error(parent_path, scene_root))
+			return McpErrorCodes.make(McpErrorCodes.INVALID_PARAMS, McpScenePath.format_parent_error(parent_path, scene_root))
 
 	var node := _instantiate_camera(type_str)
 	if node == null:
@@ -188,11 +234,13 @@ func create_camera(params: Dictionary) -> Dictionary:
 		_add_make_current_to_action(node, type_str, scene_root)
 	_undo_redo.add_undo_method(parent, "remove_child", node)
 	_undo_redo.commit_action()
+	if make_current:
+		_verify_current_after_commit(node)
 
 	return {
 		"data": {
-			"path": ScenePath.from_node(node, scene_root),
-			"parent_path": ScenePath.from_node(parent, scene_root),
+			"path": McpScenePath.from_node(node, scene_root),
+			"parent_path": McpScenePath.from_node(parent, scene_root),
 			"name": String(node.name),
 			"type": type_str,
 			"class": _VALID_TYPES[type_str],
@@ -229,12 +277,15 @@ func configure(params: Dictionary) -> Dictionary:
 	for property in properties:
 		var prop_name: String = String(property)
 		if not (prop_name in valid_keys):
-			return McpErrorCodes.make(
-				McpErrorCodes.INVALID_PARAMS,
-				"Property '%s' not valid for %s. Valid: %s" % [
-					prop_name, _VALID_TYPES[type_str], ", ".join(valid_keys)
-				]
-			)
+			var msg := "Property '%s' not valid for %s. Valid: %s" % [
+				prop_name, _VALID_TYPES[type_str], ", ".join(valid_keys)
+			]
+			if prop_name in _NODE_TRANSFORM_KEYS:
+				msg += (
+					". Transforms live on the Node, not on the camera config — "
+					+ "use node_set_property(path=%s, property=\"%s\", value=...)" % [node_path, prop_name]
+				)
+			return McpErrorCodes.make(McpErrorCodes.INVALID_PARAMS, msg)
 		if prop_name == "current":
 			current_request = bool(properties[prop_name])
 			continue
@@ -257,15 +308,19 @@ func configure(params: Dictionary) -> Dictionary:
 	for prop_name in coerced:
 		_undo_redo.add_do_property(node, prop_name, coerced[prop_name])
 		_undo_redo.add_undo_property(node, prop_name, old_values[prop_name])
+	var verify_current_after := false
 	if current_request != null:
 		var want_on: bool = bool(current_request)
 		var was_on: bool = _is_current(node)
 		if want_on and not was_on:
 			_add_make_current_to_action(node, type_str, scene_root)
+			verify_current_after = true
 		elif not want_on and was_on:
 			_undo_redo.add_do_method(self, "_apply_clear_current", node)
 			_undo_redo.add_undo_method(self, "_apply_make_current", node)
 	_undo_redo.commit_action()
+	if verify_current_after:
+		_verify_current_after_commit(node)
 
 	var applied: Array[String] = []
 	var serialized: Dictionary = {}
@@ -468,7 +523,7 @@ func follow_2d(params: Dictionary) -> Dictionary:
 	var target_path: String = params.get("target_path", "")
 	if target_path.is_empty():
 		return McpErrorCodes.make(McpErrorCodes.INVALID_PARAMS, "Missing required param: target_path")
-	var target := ScenePath.resolve(target_path, scene_root)
+	var target := McpScenePath.resolve(target_path, scene_root)
 	if target == null:
 		return McpErrorCodes.make(McpErrorCodes.INVALID_PARAMS, "Target not found: %s" % target_path)
 	if not (target is Node2D) and target != scene_root:
@@ -527,8 +582,8 @@ func follow_2d(params: Dictionary) -> Dictionary:
 
 	return {
 		"data": {
-			"path": ScenePath.from_node(node, scene_root),
-			"target_path": ScenePath.from_node(target, scene_root),
+			"path": McpScenePath.from_node(node, scene_root),
+			"target_path": McpScenePath.from_node(target, scene_root),
 			"reparented": reparented,
 			"smoothing_speed": smoothing_speed,
 			"zero_transform": zero_transform and (target is Node2D),
@@ -561,9 +616,9 @@ func get_camera(params: Dictionary) -> Dictionary:
 			node = all_cams[0]
 			resolved_via = "first"
 	else:
-		node = ScenePath.resolve(camera_path, scene_root)
+		node = McpScenePath.resolve(camera_path, scene_root)
 		if node == null:
-			return McpErrorCodes.make(McpErrorCodes.INVALID_PARAMS, "Node not found: %s" % camera_path)
+			return McpErrorCodes.make(McpErrorCodes.INVALID_PARAMS, McpScenePath.format_node_error(camera_path, scene_root))
 		if not _is_camera(node):
 			return McpErrorCodes.make(
 				McpErrorCodes.INVALID_PARAMS,
@@ -596,7 +651,7 @@ func get_camera(params: Dictionary) -> Dictionary:
 
 	return {
 		"data": {
-			"path": ScenePath.from_node(node, scene_root),
+			"path": McpScenePath.from_node(node, scene_root),
 			"type": type_str,
 			"class": node.get_class(),
 			"current": _is_current(node),
@@ -619,7 +674,7 @@ func list_cameras(_params: Dictionary) -> Dictionary:
 	var out: Array[Dictionary] = []
 	for cam in cams:
 		out.append({
-			"path": ScenePath.from_node(cam, scene_root),
+			"path": McpScenePath.from_node(cam, scene_root),
 			"class": cam.get_class(),
 			"type": _camera_type_str(cam),
 			"current": _is_current(cam),
@@ -662,9 +717,9 @@ func apply_preset(params: Dictionary) -> Dictionary:
 
 	var parent: Node = scene_root
 	if not parent_path.is_empty():
-		parent = ScenePath.resolve(parent_path, scene_root)
+		parent = McpScenePath.resolve(parent_path, scene_root)
 		if parent == null:
-			return McpErrorCodes.make(McpErrorCodes.INVALID_PARAMS, ScenePath.format_parent_error(parent_path, scene_root))
+			return McpErrorCodes.make(McpErrorCodes.INVALID_PARAMS, McpScenePath.format_parent_error(parent_path, scene_root))
 
 	var node := _instantiate_camera(type_str)
 	node.name = node_name
@@ -701,11 +756,13 @@ func apply_preset(params: Dictionary) -> Dictionary:
 		_add_make_current_to_action(node, type_str, scene_root)
 	_undo_redo.add_undo_method(parent, "remove_child", node)
 	_undo_redo.commit_action()
+	if make_current:
+		_verify_current_after_commit(node)
 
 	return {
 		"data": {
-			"path": ScenePath.from_node(node, scene_root),
-			"parent_path": ScenePath.from_node(parent, scene_root),
+			"path": McpScenePath.from_node(node, scene_root),
+			"parent_path": McpScenePath.from_node(parent, scene_root),
 			"name": node_name,
 			"preset": preset_name,
 			"type": type_str,
@@ -749,9 +806,9 @@ func _resolve_camera(params: Dictionary) -> Dictionary:
 	var scene_root := EditorInterface.get_edited_scene_root()
 	if scene_root == null:
 		return McpErrorCodes.make(McpErrorCodes.EDITOR_NOT_READY, "No scene open")
-	var node := ScenePath.resolve(node_path, scene_root)
+	var node := McpScenePath.resolve(node_path, scene_root)
 	if node == null:
-		return McpErrorCodes.make(McpErrorCodes.INVALID_PARAMS, "Node not found: %s" % node_path)
+		return McpErrorCodes.make(McpErrorCodes.INVALID_PARAMS, McpScenePath.format_node_error(node_path, scene_root))
 	if not _is_camera(node):
 		return McpErrorCodes.make(
 			McpErrorCodes.INVALID_PARAMS,

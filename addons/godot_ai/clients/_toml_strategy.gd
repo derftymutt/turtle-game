@@ -2,8 +2,9 @@
 class_name McpTomlStrategy
 extends RefCounted
 
-## Minimal TOML upsert: replace or insert one [section."name"] block produced by
-## `client.toml_body_builder`. Generalized from the original Codex-only logic.
+## Minimal TOML upsert: replace or insert one [section."name"] block whose body
+## comes from substituting `{url}` in `client.toml_body_template`. No
+## descriptor-supplied Callables — see `_base.gd`.
 
 
 static func configure(client: McpClient, _server_name: String, server_url: String) -> Dictionary:
@@ -14,8 +15,10 @@ static func configure(client: McpClient, _server_name: String, server_url: Strin
 	var read := _read_or_init(path)
 	if not read["ok"]:
 		return {"status": "error", "message": "Refusing to overwrite %s: %s. Fix or move the file, then re-run Configure." % [path, read["error"]]}
+	if client.toml_body_template.is_empty():
+		return {"status": "error", "message": "%s descriptor missing toml_body_template" % client.display_name}
 	var lines: Array[String] = _split_lines(String(read["data"]))
-	var body: PackedStringArray = client.toml_body_builder.call(server_url)
+	var body: PackedStringArray = format_body(client.toml_body_template, server_url)
 
 	var section := _find_section(lines, _all_headers(client))
 	var header := _primary_header(client)
@@ -98,6 +101,14 @@ static func remove(client: McpClient, _server_name: String) -> Dictionary:
 	return {"status": "ok", "message": "%s configuration removed" % client.display_name}
 
 
+## Substitute `{url}` in every body-template line.
+static func format_body(template: PackedStringArray, server_url: String) -> PackedStringArray:
+	var out := PackedStringArray()
+	for line in template:
+		out.append(String(line).replace("{url}", server_url))
+	return out
+
+
 # --- helpers --------------------------------------------------------------
 
 ## Returns {"ok": true, "data": String} when the file is absent or readable,
@@ -135,7 +146,7 @@ static func _primary_header(client: McpClient) -> String:
 	var parts := client.toml_section_path
 	if parts.size() < 2:
 		return "[%s]" % ".".join(parts)
-	var section := ".".join(_packed_slice(parts, 0, parts.size() - 1))
+	var section := ".".join(McpClient._packed_slice(parts, 0, parts.size() - 1))
 	var name := parts[parts.size() - 1]
 	return "[%s.\"%s\"]" % [section, name]
 
@@ -172,10 +183,3 @@ static func _find_section(lines: Array[String], headers: Array[String]) -> Dicti
 					break
 			return {"start": i, "end": end}
 	return {}
-
-
-static func _packed_slice(packed: PackedStringArray, from: int, to: int) -> PackedStringArray:
-	var out := PackedStringArray()
-	for i in range(from, to):
-		out.append(packed[i])
-	return out

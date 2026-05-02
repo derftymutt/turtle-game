@@ -10,6 +10,8 @@ const DEV_MODE_SETTING := "godot_ai/dev_mode"
 ## EditorSetting and read by `McpClientConfigurator.mode_override()`.
 const MODE_OVERRIDE_VALUES := ["", "user", "dev"]
 const MODE_OVERRIDE_LABELS := ["Auto", "Force user", "Force dev"]
+const CLIENT_STATUS_REFRESH_COOLDOWN_MSEC := 15 * 1000
+const CLIENT_STATUS_REFRESH_TIMEOUT_MSEC := 30 * 1000
 static var COLOR_MUTED := Color(0.7, 0.7, 0.7)
 static var COLOR_HEADER := Color(0.95, 0.95, 0.95)
 ## Used for "in-progress" / "stale, action needed" UI: the startup-grace
@@ -18,7 +20,7 @@ static var COLOR_HEADER := Color(0.95, 0.95, 0.95)
 ## doesn't have to find every literal.
 static var COLOR_AMBER := Color(1.0, 0.75, 0.25)
 
-var _connection: Connection
+var _connection: McpConnection
 var _log_buffer: McpLogBuffer
 var _plugin: EditorPlugin
 
@@ -53,13 +55,15 @@ var _client_rows: Dictionary = {}
 
 # Drift banner — surfaced near the Clients section when one or more clients
 # have a stored entry whose URL no longer matches `http_url()` (typical after
-# the user changes `godot_ai/http_port`). Event-driven: refreshed on
-# plugin enter, after Apply+Reload, when the Clients window opens, and on
-# editor focus-in. See #166.
+# the user changes `godot_ai/http_port`). Refreshes are stale-while-refreshing:
+# cached row dots/banner remain visible while a background worker performs the
+# potentially blocking config/CLI probes, then the main thread applies results.
+# Automatic focus-in refreshes use a short cooldown to avoid repeated sweeps
+# during tab-away/tab-back churn. See #166 and #226.
 var _drift_banner: VBoxContainer
 var _drift_label: Label
 ## Handles for the Setup section's "Server" row. `_update_status` keeps
-## the label text/color in sync with `Connection.server_version` so the
+## the label text/color in sync with `McpConnection.server_version` so the
 ## dock reports the TRUE running server version, not the plugin's
 ## expected version. See #174 follow-up — a plugin upgrade via self-
 ## update can leave the plugin connected to an older adopted server
@@ -72,27 +76,60 @@ var _setup_server_label: Label
 ## user-mode Server line).
 var _last_rendered_server_text: String = ""
 ## Restart-server button shown next to the Setup container when
-## `Connection.server_version` drifts from the plugin version. Hidden
+## `McpConnection.server_version` drifts from the plugin version. Hidden
 ## in the match case so the UI stays calm.
 var _version_restart_btn: Button
+var _server_restart_in_progress := false
 ## Sorted snapshot of the most recent mismatched-client set. Powers two things:
 ## (a) the Reconfigure button reuses this list instead of re-running
 ## `check_status` per row (saves ~18 filesystem reads per click), and
 ## (b) `_refresh_drift_banner` early-returns when the set is unchanged so
-## focus-in sweeps don't repaint identical text. Mirrors the
+## repeated explicit refreshes don't repaint identical text. Mirrors the
 ## `_last_server_status` pattern used by the crash panel.
 var _last_mismatched_ids: Array[String] = []
-## Debounce for `NOTIFICATION_APPLICATION_FOCUS_IN`. Each focus-in costs
-## ~18 filesystem reads on the main thread; a 2s window collapses
-## fast alt-tab cycles into a single sweep without making the banner
-## feel stale.
-var _last_focus_sweep_msec: int = 0
-const FOCUS_SWEEP_MIN_MSEC := 2000
+var _client_status_refresh_thread: Thread
+var _client_status_refresh_in_flight := false
+var _client_status_refresh_pending := false
+var _client_status_refresh_pending_force := false
+var _last_client_status_refresh_completed_msec: int = 0
+var _client_status_refresh_started_msec: int = 0
+var _client_status_refresh_generation: int = 0
+var _client_status_refresh_shutdown_requested := false
+var _client_status_refresh_timed_out := false
+var _client_status_refresh_deferred_until_filesystem_ready := false
+var _client_status_refresh_deferred_force := false
+var _client_status_refresh_deferred_initial := false
+## Set for the duration of `_install_update` — extract-overwrite of plugin
+## scripts on disk would crash any worker mid-`GDScriptFunction::call`
+## (confirmed via SIGABRT in `VBoxContainer(McpDock)::_run_client_status_refresh_worker`).
+## Gates every spawn path (focus-in, manual button, deferred initial refresh)
+## while `true`; the in-flight worker is drained at start of install.
+var _self_update_in_progress := false
+static var _orphaned_client_status_refresh_threads: Array[Thread] = []
+
+## Per-row worker state for Configure / Remove. Issue #239: shelling out
+## to a hung CLI on main hangs the editor. We dispatch each click to its
+## own thread (one slot per client) and apply the result via call_deferred
+## once the subprocess returns or the wall-clock budget in McpCliExec
+## kicks in. The buttons stay disabled while the slot is busy so the user
+## can't queue a re-click on the same row.
+##
+## Per-client (not single-slot) so Configure-all can fan out — the
+## workers are independent, only the row UI is shared, and McpCliExec
+## bounds the wall-clock for each.
+##
+## No orphan-thread list (unlike the refresh worker): action threads
+## never get abandoned mid-flight. McpCliExec's wall-clock budget caps
+## the worst case at ~10s, so the `_exit_tree` / `_install_update` drain
+## blocks briefly and finishes — there's no path that "gives up" on an
+## action thread the way `_abandon_client_status_refresh_thread` does
+## for the refresh worker.
+var _client_action_threads: Dictionary = {}
+var _client_action_generations: Dictionary = {}
 
 # Dev-mode only
 var _dev_section: VBoxContainer
 var _server_label: Label
-var _reconnect_btn: Button
 var _reload_btn: Button
 var _mode_override_btn: OptionButton
 var _setup_section: VBoxContainer
@@ -112,6 +149,8 @@ var _startup_grace_until_msec: int = 0
 # booleans. See `_crash_body_for_state`.
 var _crash_panel: VBoxContainer
 var _crash_output: RichTextLabel
+var _crash_restart_btn: Button
+var _crash_reload_btn: Button
 ## Port-picker escape hatch — visible inside the panel when the root
 ## cause is port contention (PORT_EXCLUDED or FOREIGN_PORT). Applies a
 ## new `godot_ai/http_port` value and reloads the plugin so the spawn
@@ -142,7 +181,7 @@ const UPDATE_TEMP_DIR := "user://godot_ai_update/"
 const UPDATE_TEMP_ZIP := "user://godot_ai_update/update.zip"
 
 
-func setup(connection: Connection, log_buffer: McpLogBuffer, plugin: EditorPlugin) -> void:
+func setup(connection: McpConnection, log_buffer: McpLogBuffer, plugin: EditorPlugin) -> void:
 	_connection = connection
 	_log_buffer = log_buffer
 	_plugin = plugin
@@ -156,9 +195,87 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	if _connection == null:
 		return
+	_prune_orphaned_client_status_refresh_threads()
+	_check_client_status_refresh_timeout()
+	_retry_deferred_client_status_refresh()
 	_update_status()
 	if _log_section.visible:
 		_update_log()
+
+
+func _exit_tree() -> void:
+	## Block on any in-flight refresh worker before letting the dock leave the
+	## tree. The plugin disable path (editor_reload_plugin, Project Settings
+	## toggle) reloads the McpDock script class — which wipes the static
+	## `_orphaned_client_status_refresh_threads`, GCs the Thread objects mid-
+	## execution, and triggers `~Thread … destroyed without its completion
+	## having been realized` plus GDScript VM corruption (Opcode: 0, IP-bounds
+	## errors, intermittent SIGSEGV). Probes finish in well under a second
+	## under normal conditions; if a CLI probe genuinely hung, the runtime
+	## timeout path (`_abandon_client_status_refresh_thread`) has already
+	## moved that thread into the orphan list, so we drain it here too.
+	##
+	## `wait_to_finish` is unbounded by design: GDScript's Thread API has no
+	## timeout, and a polling/abandon fallback would just re-introduce the
+	## GC-mid-execution crash this fix exists to prevent. Blocking the editor
+	## briefly on plugin-reload is strictly better than the SIGSEGV.
+	_client_status_refresh_shutdown_requested = true
+	_drain_client_status_refresh_workers()
+	_drain_client_action_workers()
+
+
+func _drain_client_status_refresh_workers() -> void:
+	## Block until any in-flight refresh worker (and any orphaned workers from
+	## a prior timeout) finish, then clear refresh state. Same blocking
+	## semantics as the `_exit_tree` drain — see #232. Used by `_exit_tree`
+	## (dock teardown) and `_install_update` (before extract overwrites
+	## plugin scripts on disk).
+	_client_status_refresh_generation += 1
+	if _client_status_refresh_thread != null:
+		_client_status_refresh_thread.wait_to_finish()
+		_client_status_refresh_thread = null
+	for thread in _orphaned_client_status_refresh_threads:
+		if thread != null:
+			thread.wait_to_finish()
+	_orphaned_client_status_refresh_threads.clear()
+	_client_status_refresh_in_flight = false
+	_client_status_refresh_pending = false
+	_client_status_refresh_pending_force = false
+
+
+func _drain_client_action_workers() -> void:
+	## Same drain semantics as the refresh worker (see comment above): the
+	## plugin disable / install-update path reloads our script class, so any
+	## live Thread must finish before its slot is GC'd or we hit
+	## `~Thread … destroyed without its completion having been realized` →
+	## VM corruption. Bounded by `McpCliExec` wall-clock budgets, so the
+	## worst case is a ~10s blocking drain, vs. an unbounded SIGSEGV.
+	##
+	## Generation-bumped per-row so any pending `call_deferred(
+	## "_apply_client_action_result")` from a worker that finished after we
+	## started draining detects the generation mismatch and short-circuits
+	## without touching freed UI state.
+	##
+	## After draining, restore the row UI for any in-flight rows: bare
+	## `_client_action_threads.clear()` would leave the dock stuck showing
+	## "Configuring…" / "Removing…" with disabled buttons forever — a
+	## user-visible failure mode for the install-update bail-out branch
+	## (zip extract failure clears `_self_update_in_progress` and the dock
+	## stays alive).
+	for client_id in _client_action_threads.keys():
+		var t: Thread = _client_action_threads[client_id]
+		if t != null:
+			t.wait_to_finish()
+		_client_action_generations[client_id] = int(_client_action_generations.get(client_id, 0)) + 1
+		_finalize_action_buttons(String(client_id))
+		var row: Dictionary = _client_rows.get(String(client_id), {})
+		if not row.is_empty():
+			_apply_row_status(
+				String(client_id),
+				row.get("status", McpClient.Status.NOT_CONFIGURED),
+				""
+			)
+	_client_action_threads.clear()
 
 
 func _notification(what: int) -> void:
@@ -166,17 +283,15 @@ func _notification(what: int) -> void:
 	if what == NOTIFICATION_PARENTED or what == NOTIFICATION_UNPARENTED:
 		_update_redock_visibility.call_deferred()
 	elif what == NOTIFICATION_APPLICATION_FOCUS_IN:
-		## Catches the case where the user edits an MCP client config in
-		## another app (or runs `claude mcp add` in a terminal) while Godot
-		## was unfocused. Debounced so a fast alt-tab cycle doesn't fire
-		## one sweep per focus-in. See #166.
-		if _client_rows.is_empty():
-			return
-		var now := Time.get_ticks_msec()
-		if now - _last_focus_sweep_msec < FOCUS_SWEEP_MIN_MSEC:
-			return
-		_last_focus_sweep_msec = now
-		_refresh_all_client_statuses.call_deferred()
+		if _should_refresh_client_statuses_on_focus_in():
+			_request_client_status_refresh(false)
+
+
+func _should_refresh_client_statuses_on_focus_in() -> bool:
+	## Focus-in is part of Godot/editor window activation. Keep automatic refresh,
+	## but only through the async/cooldown-protected path; never run a blocking
+	## client-status sweep directly from this notification.
+	return true
 
 
 func _is_floating() -> bool:
@@ -268,11 +383,22 @@ func _build_ui() -> void:
 
 	_build_port_picker_section()
 
-	var crash_retry := Button.new()
-	crash_retry.text = "Reload Plugin"
-	crash_retry.tooltip_text = "Re-run the spawn after fixing the underlying issue"
-	crash_retry.pressed.connect(_on_reload_plugin)
-	_crash_panel.add_child(crash_retry)
+	_crash_restart_btn = Button.new()
+	_crash_restart_btn.text = "Restart Server"
+	_crash_restart_btn.tooltip_text = "Stop the old server on this port and start the bundled godot-ai server"
+	_crash_restart_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_crash_restart_btn.add_theme_color_override("font_color", Color.WHITE)
+	_crash_restart_btn.add_theme_color_override("font_hover_color", Color.WHITE)
+	_crash_restart_btn.add_theme_color_override("font_pressed_color", Color.WHITE)
+	_crash_restart_btn.pressed.connect(_on_restart_stale_server)
+	_crash_restart_btn.visible = false
+	_crash_panel.add_child(_crash_restart_btn)
+
+	_crash_reload_btn = Button.new()
+	_crash_reload_btn.text = "Reload Plugin"
+	_crash_reload_btn.tooltip_text = "Re-run the spawn after fixing the underlying issue"
+	_crash_reload_btn.pressed.connect(_on_reload_plugin)
+	_crash_panel.add_child(_crash_reload_btn)
 
 	_crash_panel.add_child(HSeparator.new())
 	add_child(_crash_panel)
@@ -311,7 +437,7 @@ func _build_ui() -> void:
 	add_child(_http_request)
 	_check_for_updates.call_deferred()
 
-	# --- Dev-only connection extras (server label + reconnect/reload buttons) ---
+	# --- Dev-only connection extras (server label + reload button) ---
 	_dev_section = VBoxContainer.new()
 	_dev_section.add_theme_constant_override("separation", 6)
 	add_child(_dev_section)
@@ -324,14 +450,9 @@ func _build_ui() -> void:
 	var btn_row := HBoxContainer.new()
 	btn_row.add_theme_constant_override("separation", 6)
 
-	_reconnect_btn = Button.new()
-	_reconnect_btn.text = "Reconnect"
-	_reconnect_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_reconnect_btn.pressed.connect(_on_reconnect)
-	btn_row.add_child(_reconnect_btn)
-
 	_reload_btn = Button.new()
-	_reload_btn.text = "Reload Plugin"
+	_reload_btn.text = "Dev: Reload Plugin"
+	_reload_btn.tooltip_text = "Developer utility: reload the GDScript plugin. This does not restart or replace the server."
 	_reload_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_reload_btn.pressed.connect(_on_reload_plugin)
 	btn_row.add_child(_reload_btn)
@@ -379,6 +500,12 @@ func _build_ui() -> void:
 	_clients_summary_label.add_theme_color_override("font_color", COLOR_MUTED)
 	_clients_summary_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	clients_row.add_child(_clients_summary_label)
+
+	var clients_refresh_btn := Button.new()
+	clients_refresh_btn.text = "Refresh"
+	clients_refresh_btn.tooltip_text = "Refresh client status in the background. Cached status stays visible while checks run."
+	clients_refresh_btn.pressed.connect(_on_refresh_clients_pressed)
+	clients_row.add_child(clients_refresh_btn)
 
 	var clients_open_btn := Button.new()
 	clients_open_btn.text = "Clients & Tools"
@@ -503,7 +630,7 @@ func _build_ui() -> void:
 	# Apply initial dev-mode visibility
 	_apply_dev_mode_visibility()
 	_refresh_setup_status.call_deferred()
-	_refresh_all_client_statuses.call_deferred()
+	_perform_initial_client_status_refresh()
 
 
 func _make_header(text: String) -> Label:
@@ -529,6 +656,15 @@ func _build_client_row(client_id: String) -> void:
 	var name_label := Label.new()
 	name_label.text = McpClientConfigurator.client_display_name(client_id)
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	## Long error messages from `_verify_post_state` (e.g. "reported remove ok
+	## but verification still reads configured…") used to push the Retry /
+	## Configure button off-screen — the row's Label wanted its full text
+	## width as minimum size, so the buttons got squeezed out. Wrap onto
+	## multiple lines instead so the row keeps its right edge stable and
+	## the buttons remain visible; the user can also read the whole message
+	## without resizing the window.
+	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	row.add_child(name_label)
 
 	var configure_btn := Button.new()
@@ -568,6 +704,7 @@ func _build_client_row(client_id: String) -> void:
 
 	_client_rows[client_id] = {
 		"dot": dot,
+		"status": McpClient.Status.NOT_CONFIGURED,
 		"name_label": name_label,
 		"configure_btn": configure_btn,
 		"remove_btn": remove_btn,
@@ -594,21 +731,34 @@ func _update_status() -> void:
 		else {}
 	)
 	var state: String = server_status.get("state", McpSpawnState.OK)
+	if state == McpSpawnState.INCOMPATIBLE_SERVER:
+		connected = false
 
 	## One `match`/`elif` chain, one source of truth. Adding a new
 	## spawn outcome = one `McpSpawnState` constant + one arm here +
 	## one body string in `_crash_body_for_state`.
 	var status_text: String
 	var status_color: Color
-	if connected:
-		status_text = "Connected"
-		status_color = Color.GREEN
+	if _server_restart_in_progress:
+		status_text = "Restarting server..."
+		status_color = COLOR_AMBER
+	elif connected:
+		if bool(server_status.get("dev_version_mismatch_allowed", false)):
+			var actual := str(server_status.get("actual_version", ""))
+			status_text = "Connected (dev server v%s)" % actual if not actual.is_empty() else "Connected (dev server)"
+			status_color = COLOR_AMBER
+		else:
+			status_text = "Connected"
+			status_color = Color.GREEN
 	elif state == McpSpawnState.CRASHED:
 		var exit_ms: int = server_status.get("exit_ms", 0)
 		status_text = "Server exited after %.1fs" % (exit_ms / 1000.0)
 		status_color = Color.RED
 	elif state == McpSpawnState.PORT_EXCLUDED:
 		status_text = "Port %d reserved by Windows" % McpClientConfigurator.http_port()
+		status_color = Color.RED
+	elif state == McpSpawnState.INCOMPATIBLE_SERVER:
+		status_text = "Incompatible server on port %d" % McpClientConfigurator.http_port()
 		status_color = Color.RED
 	elif state == McpSpawnState.FOREIGN_PORT:
 		status_text = "Port %d held by another process" % McpClientConfigurator.http_port()
@@ -641,8 +791,10 @@ func _update_status() -> void:
 
 ## Render the diagnostic panel body for a given spawn state. The top
 ## status label already names the problem; this answers "what do I do?".
-## Panel shows for any non-OK state; picker shows when the root cause
-## is port contention (same escape applies to PORT_EXCLUDED + FOREIGN_PORT).
+## Panel shows for any non-OK state; picker shows only when moving the HTTP
+## port alone is a valid recovery. Incompatible godot-ai servers commonly
+## hold both HTTP and WS ports, so their message points to Editor Settings
+## instead of offering the HTTP-only quick picker.
 func _update_crash_panel(server_status: Dictionary) -> void:
 	var state: String = server_status.get("state", McpSpawnState.OK)
 	if state == McpSpawnState.OK:
@@ -655,9 +807,25 @@ func _update_crash_panel(server_status: Dictionary) -> void:
 	_last_server_status = server_status.duplicate()
 	_crash_panel.visible = true
 	_crash_output.clear()
-	_crash_output.add_text(_crash_body_for_state(state))
+	_crash_output.add_text(_crash_body_for_state(state, server_status))
+	var show_recovery_restart := (
+		state == McpSpawnState.INCOMPATIBLE_SERVER
+		and bool(server_status.get("can_recover_incompatible", false))
+	)
+	if _crash_restart_btn != null:
+		_crash_restart_btn.visible = show_recovery_restart
+		_crash_restart_btn.disabled = _server_restart_in_progress
+		_crash_restart_btn.text = "Restarting..." if _server_restart_in_progress else "Restart Server"
+	if _crash_reload_btn != null:
+		_crash_reload_btn.visible = (
+			not show_recovery_restart
+			and state != McpSpawnState.INCOMPATIBLE_SERVER
+		)
 
-	var port_picker_visible := state == McpSpawnState.PORT_EXCLUDED or state == McpSpawnState.FOREIGN_PORT
+	var port_picker_visible := (
+		state == McpSpawnState.PORT_EXCLUDED
+		or state == McpSpawnState.FOREIGN_PORT
+	)
 	_port_picker_section.visible = port_picker_visible
 	if port_picker_visible:
 		## Seed the SpinBox with a suggested non-reserved port each time
@@ -668,13 +836,25 @@ func _update_crash_panel(server_status: Dictionary) -> void:
 		)
 
 
-static func _crash_body_for_state(state: String) -> String:
+static func _crash_body_for_state(state: String, server_status: Dictionary = {}) -> String:
 	## Single sentence per state. The top status label already names the
 	## problem; don't repeat it here. This copy answers "what do I do?".
 	var port := McpClientConfigurator.http_port()
 	match state:
 		McpSpawnState.PORT_EXCLUDED:
 			return "Windows (Hyper-V / WSL2 / Docker) reserved port %d. Pick a free port or try `net stop winnat; net start winnat` in an admin shell." % port
+		McpSpawnState.INCOMPATIBLE_SERVER:
+			var message := str(server_status.get("message", ""))
+			if bool(server_status.get("can_recover_incompatible", false)):
+				var expected := str(server_status.get("expected_version", ""))
+				if expected.is_empty():
+					expected = McpClientConfigurator.get_plugin_version()
+				if not message.is_empty():
+					return "%s Click Restart Server below to replace it with godot-ai v%s." % [message, expected]
+				return "Port %d is occupied by an older godot-ai server. Click Restart Server below to replace it with godot-ai v%s." % [port, expected]
+			if not message.is_empty():
+				return message
+			return "Port %d is occupied by an incompatible server. Stop it or change both HTTP and WS ports." % port
 		McpSpawnState.FOREIGN_PORT:
 			return "Another process is already bound to port %d. Pick a free port or stop the other process." % port
 		McpSpawnState.CRASHED:
@@ -742,7 +922,10 @@ func _on_apply_new_port() -> void:
 func _refresh_server_label() -> void:
 	if _server_label == null:
 		return
-	_server_label.text = "WS: %d  HTTP: %d" % [McpClientConfigurator.ws_port(), McpClientConfigurator.http_port()]
+	var ws_port := McpClientConfigurator.ws_port()
+	if _plugin != null and _plugin.has_method("get_resolved_ws_port"):
+		ws_port = int(_plugin.get_resolved_ws_port())
+	_server_label.text = "WS: %d  HTTP: %d" % [ws_port, McpClientConfigurator.http_port()]
 
 
 func _update_log() -> void:
@@ -763,7 +946,7 @@ func _update_log() -> void:
 
 func _load_dev_mode() -> bool:
 	# Default OFF for every install (including dev checkouts). Contributors
-	# who want the extra diagnostic UI (Reload Plugin, Reconnect, MCP log
+	# who want the extra diagnostic UI (Reload Plugin, MCP log
 	# panel, Start/Stop Dev Server) can flip the toggle once — editor
 	# settings persist across sessions.
 	var es := EditorInterface.get_editor_settings()
@@ -846,56 +1029,131 @@ func _on_reload_plugin() -> void:
 	EditorInterface.set_plugin_enabled("res://addons/godot_ai/plugin.cfg", true)
 
 
-func _on_reconnect() -> void:
-	if _connection:
-		_connection.disconnect_from_server()
-		_connection._attempt_reconnect()
-
-
 ## Setup-section "Server" row: always report the TRUE running server
 ## version (from the handshake_ack) rather than the plugin's expected
 ## version, and highlight the mismatch so self-update drift is visible
 ## at a glance instead of silently masked by a green label.
 ##
-## Three render states, keyed off `Connection.server_version`:
-## - empty (pre-ack or older server): show plugin's expected version,
-##   muted, no Restart button
+## Render states, keyed off live version metadata:
+## - empty (pre-ack): show the expected version only as an unverified target
 ## - matches plugin: show it green, no Restart button
-## - diverges from plugin: show it amber, append "(plugin X)", show
-##   Restart button so the user can kill the stale occupant and respawn
-##   without restarting the editor
+## - dev mismatch: show amber with an explicit dev marker
+## - release mismatch: show actual vs expected; only surface Restart when the
+##   plugin has ownership proof for the process
 func _refresh_server_version_label() -> void:
 	if _setup_server_label == null:
 		return
 	var plugin_ver := McpClientConfigurator.get_plugin_version()
+	var server_status: Dictionary = (
+		_plugin.get_server_status()
+		if _plugin != null and _plugin.has_method("get_server_status")
+		else {}
+	)
 	var server_ver := _connection.server_version if _connection != null else ""
+	if server_ver.is_empty():
+		server_ver = str(server_status.get("actual_version", ""))
+	var expected_ver := str(server_status.get("expected_version", ""))
+	if expected_ver.is_empty():
+		expected_ver = plugin_ver
+	var state: String = str(server_status.get("state", McpSpawnState.OK))
+	if _server_restart_in_progress and (
+		server_ver == expected_ver
+		or (state != McpSpawnState.OK and state != McpSpawnState.INCOMPATIBLE_SERVER)
+	):
+		_server_restart_in_progress = false
 	var text: String
 	var color: Color
 	var show_restart := false
-	if server_ver.is_empty():
-		text = "godot-ai == %s" % plugin_ver
+	if _server_restart_in_progress:
+		text = "restarting server..."
+		color = COLOR_AMBER
+		show_restart = true
+	elif server_ver.is_empty():
+		text = "checking live version (expected godot-ai == %s)" % expected_ver
 		color = COLOR_MUTED
-	elif server_ver == plugin_ver:
+	elif server_ver == expected_ver:
 		text = "godot-ai == %s" % server_ver
 		color = Color.GREEN
 	else:
-		text = "godot-ai == %s  (plugin %s)" % [server_ver, plugin_ver]
-		color = COLOR_AMBER
-		show_restart = true
+		var dev_allowed := bool(server_status.get("dev_version_mismatch_allowed", false))
+		if dev_allowed:
+			text = "godot-ai == %s  (plugin %s, dev)" % [server_ver, expected_ver]
+			color = COLOR_AMBER
+		else:
+			text = "godot-ai == %s  (expected %s)" % [server_ver, expected_ver]
+			var is_incompatible: bool = state == McpSpawnState.INCOMPATIBLE_SERVER
+			color = Color.RED if is_incompatible else COLOR_AMBER
+			var has_managed_proof: bool = (
+				_plugin != null
+				and _plugin.has_method("can_restart_managed_server")
+				and _plugin.can_restart_managed_server()
+			)
+			var can_recover: bool = bool(server_status.get("can_recover_incompatible", false))
+			show_restart = (
+				(not is_incompatible and has_managed_proof)
+				## Recoverable incompatible servers get the primary action in
+				## the top error panel. Duplicating it in Setup made the UI
+				## look like it had multiple restart paths.
+				or (is_incompatible and can_recover and _crash_restart_btn == null)
+			)
 	if text == _last_rendered_server_text:
-		if _version_restart_btn != null and _version_restart_btn.visible != show_restart:
-			_version_restart_btn.visible = show_restart
+		_setup_server_label.add_theme_color_override("font_color", color)
+		_update_restart_button(show_restart)
 		return
 	_last_rendered_server_text = text
 	_setup_server_label.text = text
 	_setup_server_label.add_theme_color_override("font_color", color)
+	_update_restart_button(show_restart)
+
+
+func _update_restart_button(visible: bool) -> void:
 	if _version_restart_btn != null:
-		_version_restart_btn.visible = show_restart
+		_version_restart_btn.visible = visible
+		_version_restart_btn.disabled = _server_restart_in_progress
+		_version_restart_btn.text = "Restarting..." if _server_restart_in_progress else "Restart"
+	if _crash_restart_btn != null:
+		_crash_restart_btn.disabled = _server_restart_in_progress
+		_crash_restart_btn.text = "Restarting..." if _server_restart_in_progress else "Restart Server"
 
 
 func _on_restart_stale_server() -> void:
-	if _plugin != null and _plugin.has_method("force_restart_server"):
+	if _plugin == null or _server_restart_in_progress:
+		return
+	_server_restart_in_progress = true
+	_last_rendered_server_text = ""
+	_refresh_server_version_label()
+	if not is_inside_tree():
+		_dispatch_stale_server_restart()
+		_server_restart_in_progress = false
+		_last_rendered_server_text = ""
+		_refresh_server_version_label()
+		return
+	call_deferred("_restart_stale_server_after_feedback")
+
+
+func _restart_stale_server_after_feedback() -> void:
+	await get_tree().create_timer(0.15).timeout
+	if not _dispatch_stale_server_restart():
+		_server_restart_in_progress = false
+		_last_rendered_server_text = ""
+		_refresh_server_version_label()
+
+
+func _dispatch_stale_server_restart() -> bool:
+	if _plugin == null:
+		return false
+	var status: Dictionary = (
+		_plugin.get_server_status()
+		if _plugin.has_method("get_server_status")
+		else {}
+	)
+	if str(status.get("state", "")) == McpSpawnState.INCOMPATIBLE_SERVER:
+		if _plugin.has_method("recover_incompatible_server"):
+			return bool(_plugin.recover_incompatible_server())
+	elif _plugin.has_method("force_restart_server"):
 		_plugin.force_restart_server()
+		return true
+	return false
 
 
 func _on_log_toggled(enabled: bool) -> void:
@@ -929,7 +1187,7 @@ func _refresh_setup_status() -> void:
 		_setup_container.add_child(_make_status_row("uv", uv_version, Color.GREEN))
 		## Build the Server row with a placeholder label we can update every
 		## frame. `_refresh_server_version_label` replaces the text + color
-		## once `Connection.server_version` lands via `handshake_ack`, and
+		## once `McpConnection.server_version` lands via `handshake_ack`, and
 		## flips to amber + "(plugin X)" on drift. Pre-ack we show the
 		## plugin's expected version so the row isn't blank.
 		var server_row := HBoxContainer.new()
@@ -1066,42 +1324,168 @@ func _on_install_uv() -> void:
 # --- Client section ---
 
 func _on_configure_client(client_id: String) -> void:
-	var result := McpClientConfigurator.configure(client_id)
-	if result.get("status") == "ok":
-		_apply_row_status(client_id, McpClient.Status.CONFIGURED)
-		_client_rows[client_id]["manual_panel"].visible = false
-	else:
-		_apply_row_status(client_id, McpClient.Status.ERROR, str(result.get("message", "failed")))
-		_show_manual_command_for(client_id)
-	_refresh_clients_summary()
+	if _server_blocks_client_health():
+		_apply_row_status(client_id, McpClient.Status.ERROR, _server_blocked_client_message())
+		_refresh_clients_summary()
+		return
+	_dispatch_client_action(client_id, "configure")
 
 
 func _on_remove_client(client_id: String) -> void:
-	var result := McpClientConfigurator.remove(client_id)
+	_dispatch_client_action(client_id, "remove")
+
+
+## Spawn a worker thread for Configure / Remove so a hung CLI can't lock
+## the editor (issue #239). The action verbs are: "configure" → calls
+## `McpClientConfigurator.configure`; "remove" → calls
+## `McpClientConfigurator.remove`. Both routes shell out to the per-client
+## CLI via `McpCliExec.run`, which is wall-clock-bounded.
+##
+## Per-row in-flight rules:
+##   - One worker at a time per client (the row's slot).
+##   - Both buttons disabled while the slot is busy — prevents a
+##     double-click queueing a stale Configure on top of a still-running
+##     Remove.
+##   - The dot turns amber and the row label gets a "Configuring…" /
+##     "Removing…" suffix so the user can see the click was registered.
+func _dispatch_client_action(client_id: String, action: String) -> void:
+	if _self_update_in_progress:
+		## Same gate as the refresh worker — the install window overwrites
+		## plugin scripts on disk, and a worker mid-call into them would
+		## SIGABRT in `GDScriptFunction::call`. See `_install_update`.
+		return
+	if _client_action_threads.has(client_id):
+		return
+	var row: Dictionary = _client_rows.get(client_id, {})
+	if row.is_empty():
+		return
+
+	_set_row_action_in_flight(client_id, action)
+	## Snapshot `server_url` on main: `http_url()` reads
+	## `EditorInterface.get_editor_settings()`, which is main-thread-only.
+	## The status-refresh worker uses the same pattern — see
+	## `_perform_initial_client_status_refresh` and
+	## `_request_client_status_refresh`.
+	var server_url := McpClientConfigurator.http_url()
+	var generation := int(_client_action_generations.get(client_id, 0)) + 1
+	_client_action_generations[client_id] = generation
+	var thread := Thread.new()
+	_client_action_threads[client_id] = thread
+	var err := thread.start(
+		Callable(self, "_run_client_action_worker").bind(client_id, action, server_url, generation)
+	)
+	if err != OK:
+		_client_action_threads.erase(client_id)
+		_finalize_action_buttons(client_id)
+		_apply_row_status(client_id, McpClient.Status.ERROR, "couldn't start worker thread")
+		_refresh_clients_summary()
+
+
+func _run_client_action_worker(client_id: String, action: String, server_url: String, generation: int) -> void:
+	var result: Dictionary
+	if action == "remove":
+		result = McpClientConfigurator.remove(client_id, server_url)
+	else:
+		result = McpClientConfigurator.configure(client_id, server_url)
+	if not _client_status_refresh_shutdown_requested:
+		call_deferred("_apply_client_action_result", client_id, action, result, generation)
+
+
+func _apply_client_action_result(client_id: String, action: String, result: Dictionary, generation: int) -> void:
+	if int(_client_action_generations.get(client_id, 0)) != generation:
+		return
+	if _client_status_refresh_shutdown_requested:
+		return
+	if _client_action_threads.has(client_id):
+		var t: Thread = _client_action_threads[client_id]
+		if t != null:
+			t.wait_to_finish()
+		_client_action_threads.erase(client_id)
+	_finalize_action_buttons(client_id)
+	if _server_blocks_client_health():
+		_apply_row_status(client_id, McpClient.Status.ERROR, _server_blocked_client_message())
+		_refresh_clients_summary()
+		return
+
+	var success_status := McpClient.Status.NOT_CONFIGURED if action == "remove" else McpClient.Status.CONFIGURED
 	if result.get("status") == "ok":
-		_apply_row_status(client_id, McpClient.Status.NOT_CONFIGURED)
-		_client_rows[client_id]["manual_panel"].visible = false
+		_apply_row_status(client_id, success_status)
+		var row: Dictionary = _client_rows.get(client_id, {})
+		if not row.is_empty():
+			(row["manual_panel"] as VBoxContainer).visible = false
 	else:
 		_apply_row_status(client_id, McpClient.Status.ERROR, str(result.get("message", "failed")))
+		if action == "configure":
+			_show_manual_command_for(client_id)
 	_refresh_clients_summary()
 
 
+## In-flight visual: rewrite the verb onto the button the user just
+## clicked ("Configuring…" / "Removing…") so the feedback lands where
+## their attention already is. Don't pollute the row label — that'd
+## clobber any drift hint ("URL out of date") still relevant to the row.
+## The dot turns amber so the row reads as "busy" at a glance, not as
+## green (premature success) or red (premature failure). Both buttons
+## go disabled so a double-click or second action can't queue stale
+## work behind the in-flight worker.
+func _set_row_action_in_flight(client_id: String, action: String) -> void:
+	var row: Dictionary = _client_rows.get(client_id, {})
+	if row.is_empty():
+		return
+	var configure_btn: Button = row["configure_btn"]
+	var remove_btn: Button = row["remove_btn"]
+	configure_btn.disabled = true
+	remove_btn.disabled = true
+	if action == "remove":
+		remove_btn.text = "Removing…"
+	else:
+		configure_btn.text = "Configuring…"
+	(row["dot"] as ColorRect).color = COLOR_AMBER
+
+
+## Re-enable both buttons and reset their text back to canonical labels.
+## `_apply_row_status` sets `configure_btn.text` per the resulting
+## Status (Configure / Reconfigure / Retry), so we only need to reset
+## `remove_btn.text` here — its sibling visibility toggle already
+## handles whether to show it at all.
+func _finalize_action_buttons(client_id: String) -> void:
+	var row: Dictionary = _client_rows.get(client_id, {})
+	if row.is_empty():
+		return
+	(row["configure_btn"] as Button).disabled = false
+	var remove_btn: Button = row["remove_btn"]
+	remove_btn.disabled = false
+	remove_btn.text = "Remove"
+
+
+func _on_refresh_clients_pressed() -> void:
+	_request_client_status_refresh(true)
+
+
 func _on_configure_all_clients() -> void:
-	for client_id in McpClientConfigurator.client_ids():
-		if McpClientConfigurator.check_status(client_id) == McpClient.Status.CONFIGURED:
+	if _server_blocks_client_health():
+		for client_id in _client_rows:
+			_apply_row_status(String(client_id), McpClient.Status.ERROR, _server_blocked_client_message())
+		_refresh_clients_summary()
+		return
+	if _client_status_refresh_in_flight:
+		return
+	for client_id in _client_rows:
+		var status: McpClient.Status = _client_rows[client_id].get("status", McpClient.Status.NOT_CONFIGURED)
+		if status == McpClient.Status.CONFIGURED:
 			continue
-		_on_configure_client(client_id)
+		_on_configure_client(String(client_id))
 	_refresh_clients_summary()
 
 
 func _on_open_clients_window() -> void:
 	if _clients_window == null:
 		return
-	## Re-sweep before the user has time to act on stale dot colors. Deferred
-	## so the popup paints immediately with last-known state — the fresh
-	## colors land on the next frame. Synchronous would block the popup paint
-	## for ~18 filesystem reads (~100-300ms with AV scanning). See #166.
-	_refresh_all_client_statuses.call_deferred()
+	## Re-sweep before the user has time to act on stale dot colors. The request
+	## is async/stale-while-refreshing so the popup paints immediately with
+	## last-known state; the fresh colors land when the background worker returns.
+	## This is an explicit user action, so it bypasses the focus-in cooldown.
+	_request_client_status_refresh(true)
 	## Also re-sync the Tools tab from the persisted setting — another
 	## editor instance (or a hand-edit of editor_settings-4.tres) may have
 	## changed the excluded list while the window was closed.
@@ -1359,23 +1743,31 @@ func _on_tools_discard_confirmed() -> void:
 
 
 func _refresh_clients_summary() -> void:
-	# Count from row dot colors — `_apply_row_status` is the single source of
-	# truth, and reading colors avoids re-running filesystem-hitting status
-	# checks on every refresh.
+	# Count from cached row status values — `_apply_row_status` is the single
+	# source of truth, and reading cached status avoids re-running
+	# filesystem/CLI-hitting checks on every refresh. The same cache re-derives
+	# the drift banner so per-row mutations (Configure/Reconfigure/Remove on a
+	# row in the Clients & Tools window) keep the dock-level banner in sync
+	# without an extra sweep. See #166 and #226.
 	if _clients_summary_label == null:
 		return
 	var configured := 0
-	var mismatched := 0
-	for row in _client_rows.values():
-		var c := (row["dot"] as ColorRect).color
-		if c == Color.GREEN:
+	var mismatched_ids: Array[String] = []
+	for client_id in _client_rows:
+		var status: McpClient.Status = _client_rows[client_id].get("status", McpClient.Status.NOT_CONFIGURED)
+		if status == McpClient.Status.CONFIGURED:
 			configured += 1
-		elif c == COLOR_AMBER:
-			mismatched += 1
+		elif status == McpClient.Status.CONFIGURED_MISMATCH:
+			mismatched_ids.append(client_id)
 	var text := "%d / %d configured" % [configured, _client_rows.size()]
-	if mismatched > 0:
-		text += " (%d stale)" % mismatched
+	if mismatched_ids.size() > 0:
+		text += " (%d stale)" % mismatched_ids.size()
+	if _client_status_refresh_in_flight:
+		text += " (checking...)" if not _client_status_refresh_timed_out else " (client probe still running)"
 	_clients_summary_label.text = text
+	if _client_configure_all_btn != null:
+		_client_configure_all_btn.disabled = _client_status_refresh_in_flight
+	_refresh_drift_banner(mismatched_ids)
 
 
 func _show_manual_command_for(client_id: String) -> void:
@@ -1398,18 +1790,335 @@ func _on_copy_manual_command(client_id: String) -> void:
 
 
 func _refresh_all_client_statuses() -> void:
-	## Single sweep: pass the per-client status through `_apply_row_status` for
-	## the row UI, then count mismatches for the drift banner. Each client's
-	## `check_status` is one filesystem read — fine to do all of them on the
-	## handful of trigger events documented in #166.
-	var mismatched_ids: Array[String] = []
-	for client_id in _client_rows:
-		var status := McpClientConfigurator.check_status(client_id)
-		_apply_row_status(client_id, status)
-		if status == McpClient.Status.CONFIGURED_MISMATCH:
-			mismatched_ids.append(client_id)
+	## Compatibility wrapper for older explicit call sites. Treat this as a manual
+	## refresh: it bypasses focus-in cooldown but still runs probes off the editor
+	## main thread.
+	if _server_blocks_client_health():
+		for client_id in _client_rows:
+			_apply_row_status(String(client_id), McpClient.Status.ERROR, _server_blocked_client_message())
+		_refresh_clients_summary()
+		return
+	_request_client_status_refresh(true)
+
+
+func _is_client_status_refresh_in_cooldown() -> bool:
+	if _last_client_status_refresh_completed_msec <= 0:
+		return false
+	return Time.get_ticks_msec() - _last_client_status_refresh_completed_msec < CLIENT_STATUS_REFRESH_COOLDOWN_MSEC
+
+
+func _has_client_status_refresh_timed_out() -> bool:
+	if not _client_status_refresh_in_flight:
+		return false
+	if _client_status_refresh_started_msec <= 0:
+		return false
+	return Time.get_ticks_msec() - _client_status_refresh_started_msec >= CLIENT_STATUS_REFRESH_TIMEOUT_MSEC
+
+
+func _check_client_status_refresh_timeout() -> void:
+	if not _has_client_status_refresh_timed_out():
+		return
+	if _client_status_refresh_timed_out:
+		return
+	_client_status_refresh_timed_out = true
 	_refresh_clients_summary()
-	_refresh_drift_banner(mismatched_ids)
+
+
+func _abandon_client_status_refresh_thread() -> void:
+	## GDScript cannot interrupt a blocking `OS.execute(..., true)` call in a
+	## worker. If a CLI probe hangs, orphan this run, bump the generation so any
+	## late result becomes a no-op, and let a forced/manual refresh start a fresh
+	## probe slot. Completed orphan threads are pruned from `_process`.
+	_client_status_refresh_generation += 1
+	if _client_status_refresh_thread != null:
+		_orphaned_client_status_refresh_threads.append(_client_status_refresh_thread)
+		_client_status_refresh_thread = null
+	_client_status_refresh_in_flight = false
+	_client_status_refresh_pending = false
+	_client_status_refresh_pending_force = false
+	_client_status_refresh_timed_out = false
+	_client_status_refresh_started_msec = 0
+	_refresh_clients_summary()
+
+
+func _prune_orphaned_client_status_refresh_threads() -> void:
+	for i in range(_orphaned_client_status_refresh_threads.size() - 1, -1, -1):
+		var thread := _orphaned_client_status_refresh_threads[i]
+		if thread == null:
+			_orphaned_client_status_refresh_threads.remove_at(i)
+		elif not thread.is_alive():
+			thread.wait_to_finish()
+			_orphaned_client_status_refresh_threads.remove_at(i)
+
+
+func _perform_initial_client_status_refresh() -> void:
+	## Pre-warm strategy bytecode on main, defer CLI probes to the worker.
+	##
+	## Godot's GDScript hot-reload of overwritten plugin files is lazy: the
+	## bytecode swap happens on first dereference, not at `set_plugin_enabled`
+	## time. A worker thread spawned from a fresh `_build_ui` walks into
+	## `_json_strategy.*` / `_cli_strategy.*` / `client_configurator.*` while
+	## bytecode pages are mid-swap → SIGABRT. Dereferencing those scripts on
+	## main first forces the swap to complete here; the worker then finds
+	## stable bytecode. Filesystem signals don't bracket the swap window
+	## (they fire before bytecode replacement), and FOCUS_IN doesn't fire on
+	## in-place plugin reload because the editor stays focused — so neither
+	## works as a gate. See #233 / #235.
+	##
+	## Phase 1 (sync, on main): for each client, snapshot warms the CLI call
+	## graph via `resolve_cli_path`; for non-CLI clients, sync `check_status`
+	## warms `_json_strategy.gd` / `_toml_strategy.gd`. Phase 2 (worker): CLI
+	## probes only, race-safe because Phase 1 dereferenced their call graph.
+	##
+	## No-op outside the tree — GDScript tests instantiate via `new()`.
+	if not is_inside_tree():
+		return
+	if _client_rows.is_empty():
+		return
+	if _client_status_refresh_shutdown_requested:
+		return
+	if _self_update_in_progress:
+		return
+	if _is_editor_filesystem_busy():
+		_defer_initial_client_status_refresh_until_filesystem_ready()
+		return
+	if _client_status_refresh_in_flight:
+		return
+
+	if _server_blocks_client_health():
+		for client_id in _client_rows:
+			_apply_row_status(String(client_id), McpClient.Status.ERROR, _server_blocked_client_message())
+		_refresh_clients_summary()
+		return
+
+	var generation := _begin_client_status_refresh_run()
+	var server_url := McpClientConfigurator.http_url()
+	var deferred_cli_probes: Array[Dictionary] = []
+
+	for client_id in _client_rows:
+		var client := McpClientRegistry.get_by_id(String(client_id))
+		if client == null:
+			continue
+		var probe := McpClientConfigurator.client_status_probe_snapshot(String(client_id))
+		if probe.is_empty():
+			continue
+		if client.config_type == "cli":
+			deferred_cli_probes.append(probe)
+			continue
+		var status := McpClientConfigurator.check_status_for_url_with_cli_path(
+			String(client_id), server_url, ""
+		)
+		_apply_row_status(
+			String(client_id), status, "", bool(probe.get("installed", false))
+		)
+	_refresh_clients_summary()
+
+	if deferred_cli_probes.is_empty():
+		_finalize_completed_refresh()
+		return
+
+	_client_status_refresh_thread = Thread.new()
+	var err := _client_status_refresh_thread.start(
+		Callable(self, "_run_client_status_refresh_worker").bind(
+			deferred_cli_probes, server_url, generation
+		)
+	)
+	if err != OK:
+		_client_status_refresh_in_flight = false
+		_client_status_refresh_timed_out = false
+		_client_status_refresh_thread = null
+		_refresh_clients_summary()
+
+
+func _begin_client_status_refresh_run() -> int:
+	## Marks a refresh as starting and returns the new generation token.
+	## Generation is bumped here (not at completion) so that a worker callback
+	## arriving after `_abandon_client_status_refresh_thread` or `_exit_tree`
+	## fires can be detected as stale via generation mismatch.
+	_client_status_refresh_in_flight = true
+	_client_status_refresh_pending = false
+	_client_status_refresh_pending_force = false
+	_client_status_refresh_timed_out = false
+	_client_status_refresh_started_msec = Time.get_ticks_msec()
+	_client_status_refresh_generation += 1
+	_refresh_clients_summary()
+	return _client_status_refresh_generation
+
+
+func _finalize_completed_refresh() -> void:
+	## Stamps cooldown and clears in-flight state. Called at the end of every
+	## refresh that successfully applied results — the worker callback path
+	## and the no-CLI fast path in `_perform_initial_client_status_refresh`.
+	_last_client_status_refresh_completed_msec = Time.get_ticks_msec()
+	_client_status_refresh_in_flight = false
+	_client_status_refresh_timed_out = false
+	_refresh_clients_summary()
+
+
+func _request_client_status_refresh(force: bool = false) -> bool:
+	## Stale-while-refreshing: do not clear dots, summary, or the drift banner
+	## when a refresh is requested. The existing UI remains visible until the
+	## background worker's result is applied on the main thread.
+	if _server_blocks_client_health():
+		for client_id in _client_rows:
+			_apply_row_status(String(client_id), McpClient.Status.ERROR, _server_blocked_client_message())
+		_refresh_clients_summary()
+		return false
+	if _self_update_in_progress:
+		## Self-update is overwriting plugin scripts on disk; spawning a worker
+		## now would crash it inside `GDScriptFunction::call` once the bytecode
+		## swap reaches a script the worker is mid-call into. Focus-in /
+		## manual button / cooldown timer all funnel through here, so one
+		## gate covers every spawn path during the install window. The flag
+		## dies with the dock instance during `set_plugin_enabled(false)`.
+		return false
+	if _client_status_refresh_in_flight:
+		if force and _has_client_status_refresh_timed_out():
+			_abandon_client_status_refresh_thread()
+		else:
+			_client_status_refresh_pending = true
+			_client_status_refresh_pending_force = _client_status_refresh_pending_force or force
+			_refresh_clients_summary()
+			return false
+	if _client_status_refresh_shutdown_requested:
+		return false
+	if not force and _is_client_status_refresh_in_cooldown():
+		return false
+	if _client_rows.is_empty():
+		return false
+	if _is_editor_filesystem_busy():
+		if force:
+			_defer_client_status_refresh_until_filesystem_ready(force)
+		return false
+
+	var client_probes: Array[Dictionary] = []
+	for client_id in _client_rows:
+		client_probes.append(McpClientConfigurator.client_status_probe_snapshot(String(client_id)))
+	var server_url := McpClientConfigurator.http_url()
+
+	var generation := _begin_client_status_refresh_run()
+	_client_status_refresh_thread = Thread.new()
+	var err := _client_status_refresh_thread.start(
+		Callable(self, "_run_client_status_refresh_worker").bind(client_probes, server_url, generation)
+	)
+	if err != OK:
+		_client_status_refresh_in_flight = false
+		_client_status_refresh_timed_out = false
+		_client_status_refresh_thread = null
+		_refresh_clients_summary()
+		return false
+	return true
+
+
+func _is_editor_filesystem_busy() -> bool:
+	var fs := EditorInterface.get_resource_filesystem()
+	return fs != null and fs.is_scanning()
+
+
+func _defer_initial_client_status_refresh_until_filesystem_ready() -> void:
+	_client_status_refresh_deferred_until_filesystem_ready = true
+	_client_status_refresh_deferred_initial = true
+
+
+func _defer_client_status_refresh_until_filesystem_ready(force: bool) -> void:
+	## Godot can still be reparsing/reloading plugin scripts while the editor
+	## filesystem is busy. Do not spawn a worker into that window: the worker
+	## can call plugin GDScript while the main thread is reloading it, which
+	## crashes in `GDScriptFunction::call`.
+	_client_status_refresh_deferred_until_filesystem_ready = true
+	_client_status_refresh_deferred_force = _client_status_refresh_deferred_force or force
+
+
+func _retry_deferred_client_status_refresh() -> void:
+	if not _client_status_refresh_deferred_until_filesystem_ready:
+		return
+	if _self_update_in_progress or _client_status_refresh_shutdown_requested:
+		return
+	if _client_status_refresh_in_flight:
+		return
+	if _is_editor_filesystem_busy():
+		return
+
+	var initial := _client_status_refresh_deferred_initial
+	var force := _client_status_refresh_deferred_force
+	_client_status_refresh_deferred_until_filesystem_ready = false
+	_client_status_refresh_deferred_force = false
+	_client_status_refresh_deferred_initial = false
+	if initial:
+		_perform_initial_client_status_refresh()
+	else:
+		_request_client_status_refresh(force)
+
+
+func _run_client_status_refresh_worker(client_probes: Array[Dictionary], server_url: String, generation: int) -> void:
+	var results: Dictionary = {}
+	for probe in client_probes:
+		var client_id := String(probe.get("id", ""))
+		if client_id.is_empty():
+			continue
+		var details := McpClientConfigurator.check_status_details_for_url_with_cli_path(
+			client_id,
+			server_url,
+			String(probe.get("cli_path", ""))
+		)
+		var installed := bool(probe.get("installed", false))
+		results[client_id] = {
+			"status": details.get("status", McpClient.Status.NOT_CONFIGURED),
+			"installed": installed,
+			"error_msg": details.get("error_msg", ""),
+		}
+	if not _client_status_refresh_shutdown_requested:
+		call_deferred("_apply_client_status_refresh_results", results, generation)
+
+
+func _apply_client_status_refresh_results(results: Dictionary, generation: int) -> void:
+	if generation != _client_status_refresh_generation or _client_status_refresh_shutdown_requested:
+		return
+	if _client_status_refresh_thread != null:
+		_client_status_refresh_thread.wait_to_finish()
+		_client_status_refresh_thread = null
+	if _server_blocks_client_health():
+		for client_id in _client_rows:
+			_apply_row_status(String(client_id), McpClient.Status.ERROR, _server_blocked_client_message())
+		_finalize_completed_refresh()
+		return
+
+	for client_id in results:
+		## Skip rows whose Configure / Remove worker is still running so the
+		## status refresh doesn't overwrite the "Configuring…" / "Removing…"
+		## badge with a stale dot color. The action's own completion handler
+		## will repaint the row when it lands.
+		if _client_action_threads.has(String(client_id)):
+			continue
+		var result: Dictionary = results[client_id]
+		_apply_row_status(
+			String(client_id),
+			result.get("status", McpClient.Status.NOT_CONFIGURED),
+			str(result.get("error_msg", "")),
+			result.get("installed", false)
+		)
+	_finalize_completed_refresh()
+
+	if _client_status_refresh_pending:
+		var pending_force := _client_status_refresh_pending_force
+		_client_status_refresh_pending = false
+		_client_status_refresh_pending_force = false
+		_request_client_status_refresh(pending_force)
+
+
+func _server_blocks_client_health() -> bool:
+	if _plugin == null or not _plugin.has_method("get_server_status"):
+		return false
+	var status: Dictionary = _plugin.get_server_status()
+	return status.get("state", McpSpawnState.OK) == McpSpawnState.INCOMPATIBLE_SERVER
+
+
+func _server_blocked_client_message() -> String:
+	if _plugin == null or not _plugin.has_method("get_server_status"):
+		return "server incompatible"
+	var status: Dictionary = _plugin.get_server_status()
+	var message := str(status.get("message", ""))
+	return message if not message.is_empty() else "server incompatible"
 
 
 func _refresh_drift_banner(mismatched_ids: Array[String]) -> void:
@@ -1450,10 +2159,16 @@ func _on_reconfigure_mismatched() -> void:
 	_refresh_all_client_statuses()
 
 
-func _apply_row_status(client_id: String, status: McpClient.Status, error_msg: String = "") -> void:
+func _apply_row_status(
+	client_id: String,
+	status: McpClient.Status,
+	error_msg: String = "",
+	installed_override: Variant = null,
+) -> void:
 	var row: Dictionary = _client_rows.get(client_id, {})
 	if row.is_empty():
 		return
+	row["status"] = status
 	var dot: ColorRect = row["dot"]
 	var configure_btn: Button = row["configure_btn"]
 	var remove_btn: Button = row["remove_btn"]
@@ -1469,7 +2184,7 @@ func _apply_row_status(client_id: String, status: McpClient.Status, error_msg: S
 			dot.color = COLOR_MUTED
 			configure_btn.text = "Configure"
 			remove_btn.visible = false
-			var installed := McpClientConfigurator.is_installed(client_id)
+			var installed: bool = installed_override if installed_override != null else McpClientConfigurator.is_installed(client_id)
 			name_label.text = base_name if installed else "%s  (not detected)" % base_name
 		McpClient.Status.CONFIGURED_MISMATCH:
 			## Amber matches the dock-level drift banner so a glance at the
@@ -1594,11 +2309,29 @@ func _install_update() -> void:
 		_update_banner.visible = false
 		return
 
+	## Block worker spawning + drain in-flight worker BEFORE we start
+	## overwriting plugin scripts on disk. Without this, focus-in landing
+	## anywhere in the extract→reload window spawns a worker that walks
+	## into a partially-overwritten script and SIGABRTs inside
+	## `GDScriptFunction::call`. The flag is also checked by
+	## `_request_client_status_refresh` and `_perform_initial_client_status_refresh`,
+	## so every spawn path is gated.
+	_self_update_in_progress = true
+	_drain_client_status_refresh_workers()
+	_drain_client_action_workers()
+
+	var version := Engine.get_version_info()
+	if version.get("minor", 0) >= 4 and _plugin != null and _plugin.has_method("install_downloaded_update"):
+		_update_btn.text = "Reloading..."
+		_plugin.install_downloaded_update(UPDATE_TEMP_ZIP, UPDATE_TEMP_DIR, self)
+		return
+
 	var zip_path := ProjectSettings.globalize_path(UPDATE_TEMP_ZIP)
 	var install_base := ProjectSettings.globalize_path("res://")
 
 	var reader := ZIPReader.new()
 	if reader.open(zip_path) != OK:
+		_self_update_in_progress = false
 		_update_btn.text = "Extract failed"
 		_update_btn.disabled = false
 		return
@@ -1641,12 +2374,11 @@ func _install_update() -> void:
 	# Godot 4.4+ handles plugin reload safely. On 4.3 and older, toggling
 	# the plugin off/on can cause re-entrant server spawns, so we ask the
 	# user to restart the editor instead.
-	var version := Engine.get_version_info()
 	if version.get("minor", 0) >= 4:
 		_update_btn.text = "Scanning..."
 		## Before reloading the plugin we MUST wait for Godot's filesystem
 		## scanner to see the newly-extracted files. Otherwise plugin.gd
-		## re-parses and its `class_name` references (GameLogBuffer,
+		## re-parses and its `class_name` references (McpGameLogBuffer,
 		## McpDebuggerPlugin, …) resolve against a ClassDB that hasn't
 		## picked up the new files yet — parse errors, dock tears down,
 		## plugin reports "enabled" with no UI. See issue #127.
@@ -1659,6 +2391,10 @@ func _install_update() -> void:
 			## the pre-#127 behaviour).
 			_reload_after_update.call_deferred()
 	else:
+		## Pre-4.4 Godot: no plugin reload, dock stays alive on the new files.
+		## Clear the install flag so refreshes resume on the OLD dock instance
+		## until the user restarts the editor.
+		_self_update_in_progress = false
 		_update_btn.text = "Restart editor to apply"
 		_update_btn.disabled = true
 		_update_label.text = "Updated! Restart the editor."
