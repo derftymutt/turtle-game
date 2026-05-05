@@ -59,7 +59,7 @@ var _definitions: Array[Dictionary] = [
 	{
 		"id":          SALIVA_NANOBOTS,
 		"name":        "Saliva Nanobots",
-		"description": "Bullets gently home toward nearby enemies.",
+		"description": "Bullets gently home toward nearby enemies\nand deal double damage.",
 		"slot_label":  "NANOBOTS",
 		"needs_input": false,
 		"color":       Color(0.3, 1.0, 0.5),
@@ -158,7 +158,7 @@ func get_random_choices(count: int, exclude: Array[String] = []) -> Array[Dictio
 	pool.shuffle()
 	# always return time freeze for now for testing
 	for i in range(pool.size()):
-		if pool[i]["id"] == FLIPPER_VELCRO:
+		if pool[i]["id"] == SALIVA_NANOBOTS:
 			var temp = pool[i]
 			pool[i] = pool[0]
 			pool[0] = temp

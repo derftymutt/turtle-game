@@ -638,6 +638,7 @@ func shoot(direction: Vector2):
 	bullet.set_velocity(direction * bullet_speed)
 	if AlienTechManager.is_tech_active(AlienTechRegistry.SALIVA_NANOBOTS):
 		bullet.is_homing = true
+		bullet.damage = 20.0
 
 	can_shoot = false
 	shoot_timer = active_shoot_cooldown

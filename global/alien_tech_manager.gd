@@ -32,6 +32,8 @@ var total_pieces_collected: int = 0
 
 var slots: Array[Dictionary] = [{}, {}]
 var _cooldowns: Array[float] = [0.0, 0.0]
+var _slot_assigned_order: Array[int] = [-1, -1]  # lower = older
+var _assignment_counter: int = 0
 
 const INERTIA_DAMPENER_ACTIVE_DURATION:   float = 3.0
 const INERTIA_DAMPENER_COOLDOWN_DURATION: float = 8.0
@@ -121,6 +123,8 @@ func assign_tech(tech_id: String, slot_index: int):
 		return
 	slots[slot_index] = tech
 	_cooldowns[slot_index] = 0.0
+	_slot_assigned_order[slot_index] = _assignment_counter
+	_assignment_counter += 1
 	print("👽 Slot %s assigned: %s" % [_slot_letter(slot_index), tech["name"]])
 	tech_slots_changed.emit(slots[0], slots[1])
 
@@ -129,6 +133,7 @@ func clear_slot(slot_index: int):
 		return
 	slots[slot_index] = {}
 	_cooldowns[slot_index] = 0.0
+	_slot_assigned_order[slot_index] = -1
 	tech_slots_changed.emit(slots[0], slots[1])
 
 func has_tech(tech_id: String) -> bool:
@@ -185,6 +190,8 @@ func reset_run():
 	total_pieces_collected = 0
 	slots = [{}, {}]
 	_cooldowns = [0.0, 0.0]
+	_slot_assigned_order = [-1, -1]
+	_assignment_counter = 0
 	_passive_bar_ratios.clear()
 	phase_shifter_ammo = PHASE_SHIFTER_MAX_AMMO
 	phase_shifter_recharging = false
@@ -209,6 +216,26 @@ func get_slot_index_for_tech(tech_id: String) -> int:
 		if slots[i].get("id", "") == tech_id:
 			return i
 	return -1
+
+# ─── Death penalty ───────────────────────────────────────────────────────────
+
+## If the player dies with both slots filled, removes the oldest tech and returns
+## its display name. Returns "" if fewer than 2 slots are occupied.
+func remove_oldest_tech() -> String:
+	var filled: Array[int] = []
+	for i in MAX_SLOTS:
+		if not slots[i].is_empty():
+			filled.append(i)
+	if filled.size() < 2:
+		return ""
+	var oldest := filled[0]
+	for i in filled.slice(1):
+		if _slot_assigned_order[i] < _slot_assigned_order[oldest]:
+			oldest = i
+	var tech_name: String = slots[oldest].get("name", "")
+	clear_slot(oldest)
+	print("👽 AlienTechManager: Lost oldest tech on death: %s" % tech_name)
+	return tech_name
 
 # ─── Helpers ─────────────────────────────────────────────────────────────────
 
