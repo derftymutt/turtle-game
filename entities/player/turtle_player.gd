@@ -169,6 +169,10 @@ var _using_replicator: bool = false  # guard to prevent recursive storage on rep
 
 # Time Freeze
 var time_freeze_active: bool = false
+
+# Thing Bringer
+const THING_BRINGER_RADIUS: float = 30.0
+const THING_BRINGER_PULL_SPEED: float = 220.0
 var time_freeze_timer: float = 0.0
 var _time_frozen_bodies: Array = []
 
@@ -336,6 +340,9 @@ func _physics_process(delta):
 		var _regen_ratio: float = 1.0 if bubble_shield_hp > 0.0 else clamp(1.0 - bubble_shield_regen_timer / BUBBLE_SHIELD_REGEN_DURATION, 0.0, 1.0)
 		AlienTechManager.set_passive_bar(AlienTechRegistry.BUBBLE_SHIELD, _regen_ratio)
 
+	if AlienTechManager.is_tech_active(AlienTechRegistry.THING_BRINGER):
+		_update_thing_bringer()
+
 	if _bumper_magnet_active:
 		_update_bumper_magnet(delta)
 
@@ -434,10 +441,10 @@ func _physics_process(delta):
 	if shoot_input.length() > 0.1 and can_shoot:
 		shoot(shoot_input.normalized())
 		
-	# Drop carried UFO piece on button press
+	# Drop carried UFO piece on button press (intentional = grace period before re-pickup)
 	if Input.is_action_just_pressed("drop_piece"):
 		if GameManager.is_carrying_piece and GameManager.carried_piece:
-			GameManager.carried_piece.drop_piece()
+			GameManager.carried_piece.drop_piece(true)
 
 	# Alien Tech active slot buttons
 	if Input.is_action_just_pressed("tech_slot_left"):
@@ -544,7 +551,15 @@ func apply_ocean_effects(_delta: float):
 
 	var depth = ocean.get_depth(global_position)
 
-	# Inertia Dampener: clamp depth to shallow zone so deep buoyancy never fires
+	# Inertia Dampener in air: skip gravity calculation entirely and treat air
+	# as shallow ocean so the turtle can swim freely above the surface.
+	if inertia_dampener_active and depth <= 0:
+		apply_central_force(Vector2(0, -ocean.shallow_buoyancy * mass))
+		linear_velocity *= ocean.water_drag
+		linear_damp = 1.0
+		return
+
+	# Inertia Dampener underwater: clamp depth to shallow zone so deep buoyancy never fires
 	if inertia_dampener_active:
 		depth = min(depth, ocean.shallow_depth - 1.0)
 
@@ -565,6 +580,8 @@ func apply_ocean_effects(_delta: float):
 
 func return_to_idle_after_delay():
 	await get_tree().create_timer(current_kick_animation_duration).timeout
+	if not is_inside_tree():
+		return
 	var animated_sprite = $AnimatedSprite2D
 	if animated_sprite and is_instance_valid(animated_sprite):
 		animated_sprite.play("idle_" + facing_direction)
@@ -572,8 +589,8 @@ func return_to_idle_after_delay():
 func apply_thrust(direction: Vector2):
 	var kick_direction = -direction if GameSettings.thrust_inverted else direction
 
-	# No upward thrust in air
-	if ocean and ocean.get_depth(global_position) <= 0 and kick_direction.y < 0:
+	# No upward thrust in air (dampener converts air to shallow ocean, so allow all directions)
+	if ocean and ocean.get_depth(global_position) <= 0 and kick_direction.y < 0 and not inertia_dampener_active:
 		return
 
 	if hud and not energy_freeze_active and not hud.try_thrust():
@@ -1029,6 +1046,8 @@ func _flash(_color: Color, duration: float):
 		var tween = create_tween()
 		tween.tween_property(overlay, "modulate:a", 0.0, duration)
 		await get_tree().create_timer(duration).timeout
+	if not is_inside_tree():
+		return
 	_is_flashing = false
 	
 func activate_rapid_fire():
@@ -1064,6 +1083,8 @@ func _on_alien_tech_activated(slot_index: int, tech_id: String):
 			_use_powerup_replicator()
 		AlienTechRegistry.TIME_FREEZE:
 			_activate_time_freeze()
+		AlienTechRegistry.SHOCKWAVE:
+			_activate_shockwave()
 
 func _activate_inertia_dampener():
 	inertia_dampener_active = true
@@ -1115,6 +1136,8 @@ func _activate_transporter():
 	_transporter_windup = true
 	_transporter_canceled = false
 	await get_tree().create_timer(TRANSPORTER_WINDUP).timeout
+	if not is_inside_tree():
+		return
 	_transporter_windup = false
 
 	if _transporter_canceled:
@@ -1609,3 +1632,60 @@ func _cancel_flipper_velcro() -> void:
 	_flipper_velcro_latched = false
 	_flipper_velcro_target = null
 	_flipper_velcro_t = 12.0
+
+# ---------------------------------------------------------------------------
+# SHOCKWAVE
+# ---------------------------------------------------------------------------
+
+func _activate_shockwave() -> void:
+	for enemy in get_tree().get_nodes_in_group("enemies"):
+		if is_instance_valid(enemy) and not enemy.is_queued_for_deletion() and enemy.has_method("take_damage"):
+			enemy.take_damage(10.0)
+	if hud:
+		hud.current_energy = 0.0
+		hud.update_energy(0.0, hud.max_energy)
+	suspend_control(1.0)
+	_spawn_shockwave_visual()
+	_flash(Color(1.0, 0.55, 0.1), 0.2)
+
+func _spawn_shockwave_visual() -> void:
+	var ring := Line2D.new()
+	var segs := 32
+	var pts: PackedVector2Array = []
+	for i in range(segs + 1):
+		var a := i * TAU / segs
+		pts.append(Vector2(cos(a), sin(a)))
+	ring.points = pts
+	ring.default_color = Color(1.0, 0.55, 0.1, 0.85)
+	ring.width = 2.5
+	ring.z_as_relative = false
+	ring.z_index = 18
+	get_parent().add_child(ring)
+	ring.global_position = global_position
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(ring, "scale", Vector2.ONE * 400.0, 0.5)
+	tween.tween_property(ring, "modulate:a", 0.0, 0.5)
+	tween.finished.connect(ring.queue_free)
+
+# ---------------------------------------------------------------------------
+# THING BRINGER
+# ---------------------------------------------------------------------------
+
+func _update_thing_bringer() -> void:
+	for node in get_tree().get_nodes_in_group("collectibles"):
+		if not is_instance_valid(node) or node.is_queued_for_deletion():
+			continue
+		if not node is RigidBody2D:
+			continue
+		# Don't pull a UFO piece the player just intentionally dropped
+		if node is UFOPiece and (node as UFOPiece)._drop_grace_timer > 0.0:
+			continue
+		var rb := node as RigidBody2D
+		if rb.freeze:
+			continue
+		var to_player := global_position - rb.global_position
+		var dist := to_player.length()
+		if dist > THING_BRINGER_RADIUS or dist < 1.0:
+			continue
+		rb.linear_velocity = to_player.normalized() * THING_BRINGER_PULL_SPEED

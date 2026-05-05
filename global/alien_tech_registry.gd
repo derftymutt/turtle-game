@@ -19,6 +19,8 @@ const POWERUP_REPLICATOR  := "powerup_replicator"
 const DEFLECTOR_SHIELD    := "deflector_shield"
 const TIME_FREEZE         := "time_freeze"
 const FLIPPER_VELCRO      := "flipper_velcro"
+const SHOCKWAVE           := "shockwave"
+const THING_BRINGER       := "thing_bringer"
 
 # ─── Tech definitions ────────────────────────────────────────────────────────
 
@@ -26,7 +28,7 @@ var _definitions: Array[Dictionary] = [
 	{
 		"id":             INERTIA_DAMPENER,
 		"name":           "Inertia Dampener",
-		"description":    "Activate to neutralize ocean buoyancy for 3s.\nThen recovers for 8s.",
+		"description":    "Activate for 3s: air becomes swimmable shallow ocean,\ndeep-water buoyancy normalized. Then recovers for 8s.",
 		"slot_label":     "DAMPENER",
 		"needs_input":    true,
 		"has_passive_bar": true,
@@ -133,6 +135,23 @@ var _definitions: Array[Dictionary] = [
 		"needs_input": true,
 		"color":       Color(0.2, 1.0, 0.6),
 	},
+	{
+		"id":              SHOCKWAVE,
+		"name":            "Shockwave",
+		"description":     "Blast 10 damage to all enemies on screen.\nDepletes all energy. 15s cooldown.",
+		"slot_label":      "SHOCK",
+		"needs_input":     true,
+		"has_passive_bar": true,
+		"color":           Color(1.0, 0.55, 0.1),
+	},
+	{
+		"id":          THING_BRINGER,
+		"name":        "Thing Bringer",
+		"description": "Nearby collectibles are pulled toward you\nand auto-collected.",
+		"slot_label":  "T-BRING",
+		"needs_input": false,
+		"color":       Color(1.0, 0.85, 0.2),
+	},
 ]
 
 # ─── API ─────────────────────────────────────────────────────────────────────
@@ -158,7 +177,7 @@ func get_random_choices(count: int, exclude: Array[String] = []) -> Array[Dictio
 	pool.shuffle()
 	# always return time freeze for now for testing
 	for i in range(pool.size()):
-		if pool[i]["id"] == SALIVA_NANOBOTS:
+		if pool[i]["id"] == THING_BRINGER:
 			var temp = pool[i]
 			pool[i] = pool[0]
 			pool[0] = temp

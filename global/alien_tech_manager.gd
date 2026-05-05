@@ -51,6 +51,7 @@ const _COOLDOWN_DURATIONS: Dictionary = {
 	AlienTechRegistry.BUMPER_MAGNET:    5.0,
 	AlienTechRegistry.DEFLECTOR_SHIELD: DEFLECTOR_SHIELD_ACTIVE_DURATION + DEFLECTOR_SHIELD_COOLDOWN_DURATION,
 	AlienTechRegistry.TIME_FREEZE:      TIME_FREEZE_ACTIVE_DURATION + TIME_FREEZE_COOLDOWN_DURATION,
+	AlienTechRegistry.SHOCKWAVE:        30.0,
 }
 
 var _passive_bar_ratios: Dictionary = {}

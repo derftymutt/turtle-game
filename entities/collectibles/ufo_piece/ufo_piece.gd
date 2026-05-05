@@ -7,6 +7,7 @@ class_name UFOPiece
 
 var is_carried: bool = false
 var carrier: Node2D = null
+var _drop_grace_timer: float = 0.0
 
 func _collectible_ready():
 	# UFO pieces don't sink/sway like stars
@@ -33,7 +34,10 @@ func _collectible_physics_process(delta):
 	"""Custom physics - only run when NOT carried"""
 	if is_carried:
 		return
-	
+
+	if _drop_grace_timer > 0.0:
+		_drop_grace_timer -= delta
+
 	# UFO pieces don't sink/sway - they're heavy mechanical parts
 	# Just apply slight gravity to settle on floor
 	if ocean:
@@ -43,6 +47,11 @@ func _collectible_physics_process(delta):
 
 func _on_collected(collector):
 	"""Override base class - pickup behavior (NO points!)"""
+	# Intentional-drop grace period: ignore pickup for 2 seconds after player dropped it
+	if _drop_grace_timer > 0.0:
+		collected = false
+		return
+
 	# Check if player is already carrying something
 	if GameManager.is_carrying_piece:
 		# Don't collect - player already has one
@@ -68,28 +77,32 @@ func _on_collected(collector):
 	# Enable _process() for following carrier
 	set_process(true)
 
-func drop_piece():
-	"""Drop the piece (e.g., when taking damage)"""
+func drop_piece(intentional: bool = false):
+	"""Drop the piece. Pass intentional=true when the player chooses to drop it
+	   so a 2-second grace period prevents immediately picking it up again."""
 	if not is_carried:
 		return
-	
+
 	is_carried = false
 	collected = false  # Allow re-collection
 	GameManager.carried_piece = null
 	GameManager.is_carrying_piece = false
 	carrier = null
-	
+
+	if intentional:
+		_drop_grace_timer = 2.0
+
 	# Restore physics
 	freeze = false
 	collision_layer = 2
 	collision_mask = 1
-	
+
 	# Disable manual _process() following
 	set_process(false)
-	
+
 	# Give it a little bounce
 	apply_impulse(Vector2(randf_range(-100, 100), -200))
-	
+
 	print("🔧 Dropped UFO piece")
 
 func award_delivery_points():
