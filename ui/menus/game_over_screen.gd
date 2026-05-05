@@ -5,6 +5,7 @@ class_name GameOverScreen
 ## Game Over screen with restart, main menu, and quit options
 
 @onready var game_over_panel = $Control/CenterContainer/PanelContainer
+@onready var vbox_container = $Control/CenterContainer/PanelContainer/VBoxContainer
 @onready var final_score_label = $Control/CenterContainer/PanelContainer/VBoxContainer/FinalScoreLabel
 @onready var high_score_label = $Control/CenterContainer/PanelContainer/VBoxContainer/HighScoreLabel
 @onready var attempts_label = $Control/CenterContainer/PanelContainer/VBoxContainer/AttemptsLabel
@@ -52,7 +53,17 @@ func show_game_over(score: int):
 		else:
 			high_score_label.text = "High Score: %d" % high_score
 			high_score_label.modulate = Color.WHITE
-	
+
+	# Remove oldest alien tech if the player had both slots filled
+	var lost_tech := AlienTechManager.remove_oldest_tech()
+	if not lost_tech.is_empty() and vbox_container and retry_button:
+		var tech_lost_label := Label.new()
+		tech_lost_label.text = "%s alien tech lost" % lost_tech
+		tech_lost_label.modulate = Color(1.0, 0.45, 0.2)
+		tech_lost_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		vbox_container.add_child(tech_lost_label)
+		vbox_container.move_child(tech_lost_label, retry_button.get_index())
+
 	visible = true
 	
 	# Pause the game
