@@ -243,6 +243,7 @@ func _spawn_trash_cluster():
 	var inv = get_viewport().get_canvas_transform().affine_inverse()
 	var screen_size = get_viewport().get_visible_rect().size
 	var spawn_y = screen_size.y * randf_range(0.3, 0.78)
+	cluster.max_y = (inv * Vector2(0.0, screen_size.y * 0.82)).y
 	if randf() > 0.5:
 		# Spawn from right, drift left
 		cluster.drift_speed = -38.0

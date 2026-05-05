@@ -12,6 +12,7 @@ const _TECH_PIECE_SCENE  = preload("res://entities/collectibles/alien_tech_piece
 @export var drift_speed: float = -38.0   # Negative = left, positive = right
 @export var rotation_speed: float = 0.25
 @export var max_lifetime: float = 30.0
+@export var max_y: float = 10000.0       # World-space y ceiling; set by spawner
 
 var current_hits: int = 0
 var is_destroyed: bool = false
@@ -67,6 +68,11 @@ func _physics_process(delta: float):
 
 	linear_velocity = Vector2(drift_speed + wave_x, wave_y)
 	angular_velocity = rotation_speed
+
+	if global_position.y > max_y:
+		global_position.y = max_y
+		if linear_velocity.y > 0.0:
+			linear_velocity.y = 0.0
 
 	if _is_flashing:
 		_flash_timer -= delta
