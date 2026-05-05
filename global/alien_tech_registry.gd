@@ -18,6 +18,7 @@ const PHASE_SHIFTER       := "phase_shifter"
 const POWERUP_REPLICATOR  := "powerup_replicator"
 const DEFLECTOR_SHIELD    := "deflector_shield"
 const TIME_FREEZE         := "time_freeze"
+const FLIPPER_VELCRO      := "flipper_velcro"
 
 # ─── Tech definitions ────────────────────────────────────────────────────────
 
@@ -124,6 +125,14 @@ var _definitions: Array[Dictionary] = [
 		"has_passive_bar": true,
 		"color":           Color(0.5, 0.85, 1.0),
 	},
+	{
+		"id":          FLIPPER_VELCRO,
+		"name":        "Flipper Velcro",
+		"description": "Hold slot button while touching a flipper to grip its surface.\nSlide along it with the stick, then release to trigger the flipper and launch. No cooldown.",
+		"slot_label":  "VELCRO",
+		"needs_input": true,
+		"color":       Color(0.2, 1.0, 0.6),
+	},
 ]
 
 # ─── API ─────────────────────────────────────────────────────────────────────
@@ -149,7 +158,7 @@ func get_random_choices(count: int, exclude: Array[String] = []) -> Array[Dictio
 	pool.shuffle()
 	# always return time freeze for now for testing
 	for i in range(pool.size()):
-		if pool[i]["id"] == TIME_FREEZE:
+		if pool[i]["id"] == FLIPPER_VELCRO:
 			var temp = pool[i]
 			pool[i] = pool[0]
 			pool[0] = temp
