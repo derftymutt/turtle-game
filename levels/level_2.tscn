@@ -427,8 +427,6 @@ offset_bottom = 62.268524
 color = Color(0.1764706, 0.12156863, 0.023529412, 1)
 
 [node name="OceanFloraSeeder" parent="." index="39" unique_id=200000001 instance=ExtResource("32_4xp61")]
-min_pieces_hidden = 5
-max_pieces_hidden = 5
 
 [node name="SpawnPoint1" parent="OceanFloraSeeder" index="0" unique_id=200000002]
 position = Vector2(-305, 45)
@@ -444,7 +442,7 @@ position = Vector2(-186, 73)
 position = Vector2(254, 156)
 
 [node name="SpawnPoint5" parent="OceanFloraSeeder" index="4" unique_id=200000006]
-position = Vector2(282, -55)
+position = Vector2(205, -96)
 rotation = -1.5707964
 
 [node name="SpawnPoint6" parent="OceanFloraSeeder" index="5" unique_id=200000007]
@@ -454,7 +452,7 @@ position = Vector2(-260, 157)
 position = Vector2(125, 156)
 
 [node name="SpawnPoint8" parent="OceanFloraSeeder" index="7" unique_id=200000009]
-position = Vector2(304, 56)
+position = Vector2(303, 85)
 rotation = -1.5707964
 
 [editable path="OceanCurrentLeft"]

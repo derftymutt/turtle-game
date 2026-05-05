@@ -5,6 +5,8 @@ class_name BaseEnemyStatic
 ## Provides health, damage dealing, and visual feedback like BaseEnemy
 ## Child classes control movement manually via position/velocity
 
+const _ALIEN_TECH_PIECE_SCENE = preload("res://entities/collectibles/alien_tech_piece/alien_tech_piece.tscn")
+
 # Collision behavior
 @export var pass_through_player: bool = false
 
@@ -187,7 +189,16 @@ func phase_shift(duration: float) -> void:
 
 ## Override in child classes for custom death behavior
 func die():
+	if randf() < 0.02:
+		_drop_alien_tech_piece()
 	# Default death: simple fade out and remove
 	var tween = create_tween()
 	tween.tween_property(self, "modulate:a", 0.0, 0.3)
 	tween.tween_callback(queue_free)
+
+func _drop_alien_tech_piece():
+	var piece = _ALIEN_TECH_PIECE_SCENE.instantiate()
+	get_parent().add_child(piece)
+	piece.global_position = global_position
+	piece.apply_central_impulse(Vector2(randf_range(-60, 60), randf_range(-120, -60)))
+	print("👽 Rare tech drop from enemy!")

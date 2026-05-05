@@ -4,8 +4,6 @@ class_name OceanFlora
 signal flora_destroyed(position: Vector2, reveals_piece: bool)
 
 @export var max_health: float = 30.0
-@export var reveals_tech_piece: bool = false
-@export var tech_piece_scene: PackedScene = null
 @export var flash_duration: float = 0.15
 @export var death_rise: float = 40.0
 
@@ -46,14 +44,7 @@ func _die():
 		return
 	_is_dead = true
 	set_deferred("collision_layer", 0)
-	flora_destroyed.emit(global_position, reveals_tech_piece)
-
-	if reveals_tech_piece and tech_piece_scene:
-		var piece = tech_piece_scene.instantiate()
-		get_parent().add_child(piece)
-		piece.spawned_from_flora = true
-		piece.global_position = global_position + Vector2(randf_range(-8, 8), -10)
-		piece.apply_central_impulse(Vector2(randf_range(-50, 50), -120))
+	flora_destroyed.emit(global_position, false)
 
 	var tween = create_tween()
 	tween.set_parallel(true)

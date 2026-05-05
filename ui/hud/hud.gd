@@ -55,6 +55,11 @@ var current_energy: float = 100.0
 var is_touching_wall: bool = false
 var wall_recovery_active: bool = false  # NEW: Track if we're actively recovering from wall
 
+# Trash cluster score spawning
+const TRASH_CLUSTER_SCENE = preload("res://entities/collectibles/trash_cluster/trash_cluster.tscn")
+const CLUSTER_SCORE_INTERVAL: int = 200
+var _next_cluster_score: int = CLUSTER_SCORE_INTERVAL
+
 # Visual feedback
 var air_flash_timer: float = 0.0
 var air_flash_interval: float = 0.5
@@ -130,6 +135,7 @@ func _ready():
 	AlienTechManager.piece_collected.connect(_on_tech_piece_collected)
 	AlienTechManager.tech_slots_changed.connect(_on_tech_slots_changed)
 	AlienTechManager.phase_shifter_ammo_changed.connect(_on_phase_shifter_ammo_changed)
+	AlienTechManager.powerup_replicator_changed.connect(_on_powerup_replicator_changed)
 	_refresh_tech_display()
 
 func _process(delta):
@@ -216,13 +222,38 @@ func _apply_bar_borders() -> void:
 
 ## Update score display
 func update_score(new_score: int):
+	var previous_score := current_score
 	current_score = new_score
-	GameManager.current_score = new_score 
+	GameManager.current_score = new_score
 	if score_label:
 		score_label.text = "Score: %d" % current_score
+	# Only spawn a cluster when score is actually increasing past a milestone
+	if new_score > previous_score and current_score >= _next_cluster_score:
+		_next_cluster_score += CLUSTER_SCORE_INTERVAL
+		_spawn_trash_cluster()
 
 func add_score(points: int):
 	update_score(current_score + points)
+
+func _spawn_trash_cluster():
+	var scene = get_tree().current_scene
+	if not scene:
+		return
+	var cluster = TRASH_CLUSTER_SCENE.instantiate()
+	var inv = get_viewport().get_canvas_transform().affine_inverse()
+	var screen_size = get_viewport().get_visible_rect().size
+	var spawn_y = screen_size.y * randf_range(0.3, 0.78)
+	if randf() > 0.5:
+		# Spawn from right, drift left
+		cluster.drift_speed = -38.0
+		scene.add_child(cluster)
+		cluster.global_position = inv * Vector2(screen_size.x + 55, spawn_y)
+	else:
+		# Spawn from left, drift right
+		cluster.drift_speed = 38.0
+		scene.add_child(cluster)
+		cluster.global_position = inv * Vector2(-55, spawn_y)
+	print("👾 Trash cluster spawned at score %d" % current_score)
 
 ## Update health display
 func update_health(health: float, max_hp: float):
@@ -408,6 +439,16 @@ func _update_slot_display(label: Label, cooldown_bar: ProgressBar,
 		label.modulate = tech.get("color", Color.WHITE)
 		if cooldown_bar:
 			cooldown_bar.visible = true
+	elif tech.get("id", "") == AlienTechRegistry.POWERUP_REPLICATOR:
+		var powerup_labels: Array = ["SHIELD", "AIR+", "ENERGY", "RAPFIRE"]
+		var stored := AlienTechManager.powerup_replicator_stored
+		if stored >= 0 and stored < powerup_labels.size():
+			label.text = "[%s] RPL:%s" % [letter, powerup_labels[stored]]
+		else:
+			label.text = "[%s] REPLICA" % letter
+		label.modulate = tech.get("color", Color.WHITE)
+		if cooldown_bar:
+			cooldown_bar.visible = false
 	else:
 		label.text = "[%s] %s" % [letter, tech.get("slot_label", tech.get("name", "?"))]
 		label.modulate = tech.get("color", Color.WHITE)
@@ -425,6 +466,9 @@ func _refresh_tech_display():
 func _on_phase_shifter_ammo_changed(_current: int, _max_ammo: int, _recharging: bool):
 	_on_tech_slots_changed(AlienTechManager.slots[0], AlienTechManager.slots[1])
 
+func _on_powerup_replicator_changed(_stored_type: int):
+	_on_tech_slots_changed(AlienTechManager.slots[0], AlienTechManager.slots[1])
+
 func _get_slot_bar_value(slot_index: int) -> float:
 	var tech := AlienTechManager.slots[slot_index]
 	if tech.get("id", "") == AlienTechRegistry.PHASE_SHIFTER:
@@ -437,4 +481,6 @@ func _is_slot_dimmed(slot_index: int) -> bool:
 	var tech := AlienTechManager.slots[slot_index]
 	if tech.get("id", "") == AlienTechRegistry.PHASE_SHIFTER:
 		return AlienTechManager.phase_shifter_recharging
+	if tech.get("id", "") == AlienTechRegistry.POWERUP_REPLICATOR:
+		return AlienTechManager.powerup_replicator_stored < 0
 	return AlienTechManager.get_cooldown_ratio(slot_index) > 0.0

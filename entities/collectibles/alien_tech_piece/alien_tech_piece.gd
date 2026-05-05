@@ -5,7 +5,6 @@ class_name AlienTechPiece
 @export var glow_amount: float = 0.4
 @export var spin_speed: float = 1.2
 
-var spawned_from_flora: bool = false
 var _glow_offset: float = 0.0
 
 func _collectible_ready():
@@ -35,8 +34,6 @@ func _collectible_physics_process(_delta: float):
 
 func _on_collected(collector):
 	AlienTechManager.collect_piece()
-	if spawned_from_flora:
-		LevelManager.record_alien_tech_collected()
 	var hud = get_tree().get_first_node_in_group("hud")
 	if hud:
 		hud.add_score(point_value)

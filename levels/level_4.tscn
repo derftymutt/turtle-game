@@ -41,6 +41,7 @@
 [ext_resource type="PackedScene" uid="uid://cdmr2papqk2ih" path="res://entities/collectibles/air_bubble/air_bubble.tscn" id="39_p3k1n"]
 [ext_resource type="PackedScene" uid="uid://bu0sjqqm7uvm1" path="res://entities/enemies/crocodile/crocodile.tscn" id="40_kqeme"]
 [ext_resource type="PackedScene" uid="uid://b8df8qps2nshf" path="res://entities/collectibles/star/sky_star_seeder.tscn" id="41_pb5nj"]
+[ext_resource type="PackedScene" uid="uid://dvy8nr3rfhq5u" path="res://entities/environment/ocean_flora/ocean_flora_seeder.tscn" id="42_egtcm"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_gvi3i"]
 texture = ExtResource("7_4h4lk")
@@ -722,6 +723,26 @@ position = Vector2(20, 6)
 
 [node name="SkyStarSeeder" parent="." index="78" unique_id=712381982 instance=ExtResource("41_pb5nj")]
 
+[node name="OceanFloraSeeder" parent="." index="79" unique_id=200000001 instance=ExtResource("42_egtcm")]
+
+[node name="SpawnPoint1" parent="OceanFloraSeeder" index="0" unique_id=200000002]
+position = Vector2(-285, 159)
+
+[node name="SpawnPoint2" parent="OceanFloraSeeder" index="1" unique_id=200000003]
+position = Vector2(-57, 158)
+
+[node name="SpawnPoint4" parent="OceanFloraSeeder" index="3" unique_id=200000005]
+position = Vector2(91, -80)
+
+[node name="SpawnPoint5" parent="OceanFloraSeeder" index="4" unique_id=200000006]
+position = Vector2(303, 116)
+
+[node name="SpawnPoint6" parent="OceanFloraSeeder" index="5" unique_id=200000007]
+position = Vector2(-182, -61)
+
+[node name="SpawnPoint7" parent="OceanFloraSeeder" index="6" unique_id=200000008]
+position = Vector2(-1, -17)
+
 [editable path="FlipperSkyCenterLeft/DeadWall10"]
 [editable path="FlipperSkyCenterLeft2/DeadWall10"]
 [editable path="CloudFlipperCenterRight/DeadWall11"]
@@ -731,3 +752,4 @@ position = Vector2(20, 6)
 [editable path="OceanCurrent"]
 [editable path="OceanCurrent2"]
 [editable path="OceanCurrent3"]
+[editable path="OceanFloraSeeder"]
