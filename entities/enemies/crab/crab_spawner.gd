@@ -12,6 +12,7 @@ class_name CrabSpawner
 @export var initial_crab_count: int = 1
 
 func _ready() -> void:
+	add_to_group("spawners")
 	# Validation check
 	if not crab_scene:
 		push_error("CrabSpawner: crab_scene not assigned!")

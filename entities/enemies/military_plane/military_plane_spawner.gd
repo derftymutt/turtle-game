@@ -34,6 +34,7 @@ var _player: Node2D = null
 
 
 func _ready() -> void:
+	add_to_group("spawners")
 	if not plane:
 		push_warning("MilitaryPlaneSpawner: No MilitaryPlane assigned!")
 		return

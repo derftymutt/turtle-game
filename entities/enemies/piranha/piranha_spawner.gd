@@ -13,6 +13,7 @@ extends Node2D
 @export var super_piranha_warning_color: Color = Color(1.0, 0.5, 0.0)  # Orange warning
 
 func _ready():
+	add_to_group("spawners")
 	# Validation check
 	if not piranha_scene:
 		push_error("PiranhaSpawner: piranha_scene not assigned!")
@@ -103,6 +104,11 @@ func spawn_with_animation():
 	pop_tween.tween_property(approach_sprite, "scale", Vector2(1.3, 1.3), 0.1)
 	await pop_tween.finished
 	
+	# Abort if time is frozen — the coroutine outlived the freeze window
+	if AlienTechManager.time_freeze_active:
+		approach_sprite.queue_free()
+		return
+
 	# Spawn real piranha (normal or super)
 	var piranha = scene_to_spawn.instantiate()
 	get_parent().add_child(piranha)

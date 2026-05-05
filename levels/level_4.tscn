@@ -27,8 +27,6 @@
 [ext_resource type="PackedScene" uid="uid://d2kw7hdpyp6d0" path="res://entities/enemies/sea_urchin/sea_urchin.tscn" id="25_xuk4p"]
 [ext_resource type="PackedScene" uid="uid://bgu8t3jworeir" path="res://entities/enemies/piranha/piranha_spawner.tscn" id="26_cejmp"]
 [ext_resource type="PackedScene" uid="uid://c55cfm3aeb65a" path="res://systems/trash_cleanup/trash_sequence_spawner.tscn" id="27_7olrn"]
-[ext_resource type="PackedScene" uid="uid://cc3k1qa68v0mc" path="res://entities/collectibles/star/star_collectible_spawner.tscn" id="28_oh83j"]
-[ext_resource type="PackedScene" uid="uid://doh85qcfn8x2w" path="res://entities/collectibles/star/star_collectible.tscn" id="29_plkec"]
 [ext_resource type="PackedScene" uid="uid://bgrcf873d7ity" path="res://entities/collectibles/health_plant/health_plant_spawner.tscn" id="30_4t21q"]
 [ext_resource type="PackedScene" uid="uid://j42vb8rqa1ng" path="res://entities/enemies/military_plane/military_plane_spawner.tscn" id="31_crjft"]
 [ext_resource type="PackedScene" uid="uid://8vp5bo4724mv" path="res://entities/enemies/military_plane/military_plane.tscn" id="32_5ro6q"]
@@ -41,7 +39,6 @@
 [ext_resource type="PackedScene" uid="uid://cdmr2papqk2ih" path="res://entities/collectibles/air_bubble/air_bubble.tscn" id="39_p3k1n"]
 [ext_resource type="PackedScene" uid="uid://bu0sjqqm7uvm1" path="res://entities/enemies/crocodile/crocodile.tscn" id="40_kqeme"]
 [ext_resource type="PackedScene" uid="uid://b8df8qps2nshf" path="res://entities/collectibles/star/sky_star_seeder.tscn" id="41_pb5nj"]
-[ext_resource type="PackedScene" uid="uid://dvy8nr3rfhq5u" path="res://entities/environment/ocean_flora/ocean_flora_seeder.tscn" id="42_egtcm"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_gvi3i"]
 texture = ExtResource("7_4h4lk")
@@ -68,43 +65,43 @@ size = Vector2(8.000183, 768.00024)
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ncbyy"]
 friction = 0.0
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_vov61"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_kqeme"]
+size = Vector2(64, 8)
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_e7hc3"]
-size = Vector2(64, 8)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_4h4lk"]
-size = Vector2(64, 8)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_yp04h"]
 size = Vector2(32, 8)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_vc6ux"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_4h4lk"]
 size = Vector2(32, 8)
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ixhsu"]
 friction = 0.0
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_1gtbd"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_yp04h"]
 size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_vc6ux"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1gtbd"]
+size = Vector2(32, 8)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_0quxv"]
-size = Vector2(64, 8)
+size = Vector2(32, 8)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_g22rd"]
-size = Vector2(32, 8)
+size = Vector2(64, 8)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_m0qt0"]
-size = Vector2(32, 8)
+size = Vector2(64, 8)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wred1"]
 size = Vector2(64, 8)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_65scv"]
-size = Vector2(64, 8)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_xtn87"]
-size = Vector2(64, 8)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_uxflf"]
 size = Vector2(64, 8)
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_w8olu"]
@@ -250,7 +247,7 @@ angle_preset = 2
 
 [node name="CollisionShape2D" parent="FlipperSkyCenterLeft/DeadWall10" index="0" unique_id=1644951480]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_e7hc3")
+shape = SubResource("RectangleShape2D_vov61")
 one_way_collision = true
 
 [node name="Sprite2D" parent="FlipperSkyCenterLeft/DeadWall10" index="1" unique_id=804434373]
@@ -261,7 +258,7 @@ rotation = 0.7853982
 
 [node name="CollisionShape2D" parent="FlipperSkyCenterLeft/DeadWall10/SlipperyArea" parent_id_path=PackedInt32Array(797132162, 773978709) index="0" unique_id=2040614053]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_4h4lk")
+shape = SubResource("RectangleShape2D_kqeme")
 
 [node name="FlipperLeftUp4" parent="FlipperSkyCenterLeft" index="1" unique_id=1447591536 instance=ExtResource("12_g22rd")]
 position = Vector2(-45, -185)
@@ -276,7 +273,7 @@ length_units = 1
 
 [node name="CollisionShape2D" parent="FlipperSkyCenterLeft2/DeadWall10" index="0" unique_id=1644951480]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_yp04h")
+shape = SubResource("RectangleShape2D_e7hc3")
 one_way_collision = true
 
 [node name="Sprite2D" parent="FlipperSkyCenterLeft2/DeadWall10" index="1" unique_id=804434373]
@@ -288,7 +285,7 @@ polygon = PackedVector2Array(-16, -4, 16, -4, 16, 4, -16, 4)
 
 [node name="CollisionShape2D" parent="FlipperSkyCenterLeft2/DeadWall10/SlipperyArea" parent_id_path=PackedInt32Array(1589161516, 773978709) index="0" unique_id=2040614053]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_vc6ux")
+shape = SubResource("RectangleShape2D_4h4lk")
 
 [node name="FlipperLeftUp4" parent="FlipperSkyCenterLeft2" index="1" unique_id=1104846566 instance=ExtResource("12_g22rd")]
 position = Vector2(-130, -285)
@@ -303,7 +300,7 @@ mirrored = true
 
 [node name="CollisionShape2D" parent="CloudFlipperCenterRight/DeadWall11" index="0" unique_id=1644951480]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_1gtbd")
+shape = SubResource("RectangleShape2D_yp04h")
 one_way_collision = true
 
 [node name="Sprite2D" parent="CloudFlipperCenterRight/DeadWall11" index="1" unique_id=804434373]
@@ -315,7 +312,7 @@ rotation = -0.7853982
 
 [node name="CollisionShape2D" parent="CloudFlipperCenterRight/DeadWall11/SlipperyArea" parent_id_path=PackedInt32Array(243008370, 773978709) index="0" unique_id=2040614053]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_0quxv")
+shape = SubResource("RectangleShape2D_vc6ux")
 
 [node name="CloudFlipperRightUp2" parent="CloudFlipperCenterRight" index="1" unique_id=33507880 instance=ExtResource("14_wred1")]
 position = Vector2(45, -185)
@@ -331,7 +328,7 @@ mirrored = true
 
 [node name="CollisionShape2D" parent="CloudFlipperCenterRight2/DeadWall11" index="0" unique_id=1644951480]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_g22rd")
+shape = SubResource("RectangleShape2D_1gtbd")
 one_way_collision = true
 
 [node name="Sprite2D" parent="CloudFlipperCenterRight2/DeadWall11" index="1" unique_id=804434373]
@@ -344,7 +341,7 @@ polygon = PackedVector2Array(-16, -4, 16, -4, 16, 4, -16, 4)
 
 [node name="CollisionShape2D" parent="CloudFlipperCenterRight2/DeadWall11/SlipperyArea" parent_id_path=PackedInt32Array(215607130, 773978709) index="0" unique_id=2040614053]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_m0qt0")
+shape = SubResource("RectangleShape2D_0quxv")
 
 [node name="CloudFlipperRightUp2" parent="CloudFlipperCenterRight2" index="1" unique_id=1172357705 instance=ExtResource("14_wred1")]
 position = Vector2(130, -285)
@@ -358,7 +355,7 @@ angle_preset = 2
 
 [node name="CollisionShape2D" parent="CloudFlipperRightLower/DeadWall11" index="0" unique_id=1644951480]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_wred1")
+shape = SubResource("RectangleShape2D_g22rd")
 one_way_collision = true
 
 [node name="Sprite2D" parent="CloudFlipperRightLower/DeadWall11" index="1" unique_id=804434373]
@@ -369,7 +366,7 @@ rotation = 0.7853982
 
 [node name="CollisionShape2D" parent="CloudFlipperRightLower/DeadWall11/SlipperyArea" parent_id_path=PackedInt32Array(203471, 773978709) index="0" unique_id=2040614053]
 rotation = 0.7853982
-shape = SubResource("RectangleShape2D_65scv")
+shape = SubResource("RectangleShape2D_m0qt0")
 
 [node name="FlipperLeftUp5" parent="CloudFlipperRightLower" index="1" unique_id=1197315435 instance=ExtResource("12_g22rd")]
 position = Vector2(190, -185)
@@ -387,7 +384,7 @@ mirrored = true
 
 [node name="CollisionShape2D" parent="CloudFlipperLeftLower/DeadWall12" index="0" unique_id=1644951480]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_xtn87")
+shape = SubResource("RectangleShape2D_wred1")
 one_way_collision = true
 
 [node name="Sprite2D" parent="CloudFlipperLeftLower/DeadWall12" index="1" unique_id=804434373]
@@ -399,7 +396,7 @@ rotation = -0.7853982
 
 [node name="CollisionShape2D" parent="CloudFlipperLeftLower/DeadWall12/SlipperyArea" parent_id_path=PackedInt32Array(1268673111, 773978709) index="0" unique_id=2040614053]
 rotation = -0.7853982
-shape = SubResource("RectangleShape2D_uxflf")
+shape = SubResource("RectangleShape2D_65scv")
 
 [node name="FlipperLeftDown" parent="." index="21" unique_id=598735619 instance=ExtResource("15_65scv")]
 position = Vector2(-40, -90)
@@ -620,22 +617,19 @@ position = Vector2(270, 0)
 
 [node name="TrashSequenceSpawner" parent="." index="63" unique_id=992951588 instance=ExtResource("27_7olrn")]
 
-[node name="StarCollectibleSpawner" parent="." index="64" unique_id=1070458982 instance=ExtResource("28_oh83j")]
-collectible_scene = ExtResource("29_plkec")
+[node name="HealthPlantSpawner" parent="." index="64" unique_id=1172793188 instance=ExtResource("30_4t21q")]
 
-[node name="HealthPlantSpawner" parent="." index="65" unique_id=1172793188 instance=ExtResource("30_4t21q")]
-
-[node name="MilitaryPlaneSpawner" parent="." index="66" unique_id=640021632 node_paths=PackedStringArray("plane") instance=ExtResource("31_crjft")]
+[node name="MilitaryPlaneSpawner" parent="." index="65" unique_id=640021632 node_paths=PackedStringArray("plane") instance=ExtResource("31_crjft")]
 plane = NodePath("../MilitaryPlane")
 
-[node name="MilitaryPlane" parent="." index="67" unique_id=597526725 instance=ExtResource("32_5ro6q")]
+[node name="MilitaryPlane" parent="." index="66" unique_id=597526725 instance=ExtResource("32_5ro6q")]
 position = Vector2(-3, -335)
 
-[node name="ElectricEelSpawner" parent="." index="68" unique_id=1752833975 instance=ExtResource("33_xqsl0")]
+[node name="ElectricEelSpawner" parent="." index="67" unique_id=1752833975 instance=ExtResource("33_xqsl0")]
 
-[node name="CrabSpawner" parent="." index="69" unique_id=1296574206 instance=ExtResource("34_pka35")]
+[node name="CrabSpawner" parent="." index="68" unique_id=1296574206 instance=ExtResource("34_pka35")]
 
-[node name="SpaceDebrisGroup" parent="." index="70" unique_id=511816800 instance=ExtResource("35_oqno5")]
+[node name="SpaceDebrisGroup" parent="." index="69" unique_id=511816800 instance=ExtResource("35_oqno5")]
 powerup_scene = ExtResource("36_uh3nw")
 
 [node name="SpaceDebris" parent="SpaceDebrisGroup" index="0" unique_id=661989100 instance=ExtResource("37_jvkrj")]
@@ -646,7 +640,7 @@ debris_animation = &"shield"
 position = Vector2(-33, -361)
 debris_animation = &"shield"
 
-[node name="SpaceDebrisGroup2" parent="." index="71" unique_id=1874176726 instance=ExtResource("35_oqno5")]
+[node name="SpaceDebrisGroup2" parent="." index="70" unique_id=1874176726 instance=ExtResource("35_oqno5")]
 group_label = "Group B"
 powerup_type = 1
 powerup_scene = ExtResource("36_uh3nw")
@@ -659,7 +653,7 @@ debris_animation = &"air"
 position = Vector2(-94, -313)
 debris_animation = &"air"
 
-[node name="SpaceDebrisGroup3" parent="." index="72" unique_id=711772414 instance=ExtResource("35_oqno5")]
+[node name="SpaceDebrisGroup3" parent="." index="71" unique_id=711772414 instance=ExtResource("35_oqno5")]
 group_label = "Group C"
 powerup_type = 2
 powerup_scene = ExtResource("36_uh3nw")
@@ -672,7 +666,7 @@ debris_animation = &"energy"
 position = Vector2(-1, -275)
 debris_animation = &"energy"
 
-[node name="SpaceDebrisGroup4" parent="." index="73" unique_id=1603659271 instance=ExtResource("35_oqno5")]
+[node name="SpaceDebrisGroup4" parent="." index="72" unique_id=1603659271 instance=ExtResource("35_oqno5")]
 group_label = "Group D"
 powerup_type = 3
 powerup_scene = ExtResource("36_uh3nw")
@@ -685,7 +679,7 @@ debris_animation = &"bullet"
 position = Vector2(106, -366)
 debris_animation = &"bullet"
 
-[node name="SpaceDebrisGroup5" parent="." index="74" unique_id=356934872 instance=ExtResource("35_oqno5")]
+[node name="SpaceDebrisGroup5" parent="." index="73" unique_id=356934872 instance=ExtResource("35_oqno5")]
 group_label = "Group E"
 powerup_type = 4
 powerup_scene = ExtResource("36_uh3nw")
@@ -698,14 +692,14 @@ debris_animation = &"random"
 position = Vector2(139, -342)
 debris_animation = &"random"
 
-[node name="AirBubbleSpawner" parent="." index="75" unique_id=1547445684 instance=ExtResource("38_hg54l")]
+[node name="AirBubbleSpawner" parent="." index="74" unique_id=1547445684 instance=ExtResource("38_hg54l")]
 bubble_scene = ExtResource("39_p3k1n")
 
-[node name="Crocodile" parent="." index="76" unique_id=787732993 instance=ExtResource("40_kqeme")]
+[node name="Crocodile" parent="." index="75" unique_id=787732993 instance=ExtResource("40_kqeme")]
 position = Vector2(-289, -130)
 patrol_speed = 60.0
 
-[node name="OceanCurrent3" parent="." index="77" unique_id=1000274685 instance=ExtResource("20_436cy")]
+[node name="OceanCurrent3" parent="." index="76" unique_id=1000274685 instance=ExtResource("20_436cy")]
 position = Vector2(-293, -304)
 propulsion_force = 3000.0
 centering_force = 1000.0
@@ -721,27 +715,7 @@ position = Vector2(20, 6)
 [node name="Visuals" parent="OceanCurrent3" index="1" unique_id=2005124627]
 position = Vector2(20, 6)
 
-[node name="SkyStarSeeder" parent="." index="78" unique_id=712381982 instance=ExtResource("41_pb5nj")]
-
-[node name="OceanFloraSeeder" parent="." index="79" unique_id=200000001 instance=ExtResource("42_egtcm")]
-
-[node name="SpawnPoint1" parent="OceanFloraSeeder" index="0" unique_id=200000002]
-position = Vector2(-285, 159)
-
-[node name="SpawnPoint2" parent="OceanFloraSeeder" index="1" unique_id=200000003]
-position = Vector2(-57, 158)
-
-[node name="SpawnPoint4" parent="OceanFloraSeeder" index="3" unique_id=200000005]
-position = Vector2(91, -80)
-
-[node name="SpawnPoint5" parent="OceanFloraSeeder" index="4" unique_id=200000006]
-position = Vector2(303, 116)
-
-[node name="SpawnPoint6" parent="OceanFloraSeeder" index="5" unique_id=200000007]
-position = Vector2(-182, -61)
-
-[node name="SpawnPoint7" parent="OceanFloraSeeder" index="6" unique_id=200000008]
-position = Vector2(-1, -17)
+[node name="SkyStarSeeder" parent="." index="77" unique_id=712381982 instance=ExtResource("41_pb5nj")]
 
 [editable path="FlipperSkyCenterLeft/DeadWall10"]
 [editable path="FlipperSkyCenterLeft2/DeadWall10"]
@@ -752,4 +726,3 @@ position = Vector2(-1, -17)
 [editable path="OceanCurrent"]
 [editable path="OceanCurrent2"]
 [editable path="OceanCurrent3"]
-[editable path="OceanFloraSeeder"]

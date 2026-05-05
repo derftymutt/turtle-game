@@ -14,8 +14,6 @@
 [ext_resource type="PackedScene" uid="uid://b5olvcks1vnwn" path="res://entities/environment/flippers/flipper_right_down.tscn" id="12_ij65d"]
 [ext_resource type="Script" uid="uid://3jp0yf3qb8pa" path="res://entities/collectibles/air_bubble/air_bubble_spawner.gd" id="14_bon8i"]
 [ext_resource type="PackedScene" uid="uid://cdmr2papqk2ih" path="res://entities/collectibles/air_bubble/air_bubble.tscn" id="15_av2kh"]
-[ext_resource type="PackedScene" uid="uid://cc3k1qa68v0mc" path="res://entities/collectibles/star/star_collectible_spawner.tscn" id="16_mmy2b"]
-[ext_resource type="PackedScene" uid="uid://doh85qcfn8x2w" path="res://entities/collectibles/star/star_collectible.tscn" id="17_cekp2"]
 [ext_resource type="PackedScene" uid="uid://bgrcf873d7ity" path="res://entities/collectibles/health_plant/health_plant_spawner.tscn" id="18_mlk23"]
 [ext_resource type="PackedScene" uid="uid://c55cfm3aeb65a" path="res://systems/trash_cleanup/trash_sequence_spawner.tscn" id="19_b36k0"]
 [ext_resource type="PackedScene" uid="uid://bp6g8v1jmnruo" path="res://entities/environment/walls/circular_bumper/circular_bumper.tscn" id="20_bon8i"]
@@ -220,22 +218,22 @@ physics_material_override = SubResource("PhysicsMaterial_gder6")
 angle_preset = 2
 
 [node name="FlipperLeftDownPixelPerfect" parent="." index="21" unique_id=815066450 instance=ExtResource("10_a58qw")]
-position = Vector2(-285, 25)
+position = Vector2(-270, 20)
 
 [node name="FlipperLeftDownPixelPerfect2" parent="." index="22" unique_id=2029634595 instance=ExtResource("10_a58qw")]
-position = Vector2(-75, 25)
+position = Vector2(-75, 22)
 
 [node name="FlipperLeftDownPixelPerfect3" parent="." index="23" unique_id=966627239 instance=ExtResource("10_a58qw")]
-position = Vector2(130, 25)
+position = Vector2(130, 22)
 
 [node name="FlipperRightDownPixelPerfect3" parent="." index="24" unique_id=1806466733 instance=ExtResource("12_ij65d")]
-position = Vector2(-130, 25)
+position = Vector2(-130, 22)
 
 [node name="FlipperRightDownPixelPerfect4" parent="." index="25" unique_id=978874450 instance=ExtResource("12_ij65d")]
-position = Vector2(75, 25)
+position = Vector2(75, 22)
 
 [node name="FlipperRightDownPixelPerfect5" parent="." index="26" unique_id=279586289 instance=ExtResource("12_ij65d")]
-position = Vector2(285, 25)
+position = Vector2(270, 20)
 
 [node name="AirBubbleSpawner" type="Node2D" parent="." index="27" unique_id=1720539643]
 script = ExtResource("14_bon8i")
@@ -243,44 +241,62 @@ bubble_scene = ExtResource("15_av2kh")
 spawn_interval = 10.0
 spawn_count_max = 2
 
-[node name="CollectibleSpawner" parent="." index="28" unique_id=1070458982 instance=ExtResource("16_mmy2b")]
-collectible_scene = ExtResource("17_cekp2")
+[node name="HealthPlantSpawner" parent="." index="28" unique_id=1172793188 instance=ExtResource("18_mlk23")]
 
-[node name="HealthPlantSpawner" parent="." index="29" unique_id=1172793188 instance=ExtResource("18_mlk23")]
+[node name="TrashSequenceSpawner" parent="." index="29" unique_id=1148827984 instance=ExtResource("19_b36k0")]
 
-[node name="TrashSequenceSpawner" parent="." index="30" unique_id=1148827984 instance=ExtResource("19_b36k0")]
-
-[node name="CircularBumper" parent="." index="31" unique_id=2098876600 instance=ExtResource("20_bon8i")]
+[node name="CircularBumper" parent="." index="30" unique_id=2098876600 instance=ExtResource("20_bon8i")]
 position = Vector2(-105, 70)
 physics_material_override = SubResource("PhysicsMaterial_av2kh")
 size_preset = 1
 radius = 16.0
 
-[node name="CircularBumper2" parent="." index="32" unique_id=728038573 instance=ExtResource("20_bon8i")]
+[node name="CircularBumper2" parent="." index="31" unique_id=728038573 instance=ExtResource("20_bon8i")]
 position = Vector2(105, 70)
 physics_material_override = SubResource("PhysicsMaterial_av2kh")
 size_preset = 1
 radius = 16.0
 
-[node name="CircularBumper3" parent="." index="33" unique_id=127415777 instance=ExtResource("20_bon8i")]
+[node name="CircularBumper3" parent="." index="32" unique_id=127415777 instance=ExtResource("20_bon8i")]
 position = Vector2(0, 90)
 physics_material_override = SubResource("PhysicsMaterial_bon8i")
 
-[node name="CircularBumper4" parent="." index="34" unique_id=1239190079 instance=ExtResource("20_bon8i")]
+[node name="CircularBumper4" parent="." index="33" unique_id=1239190079 instance=ExtResource("20_bon8i")]
 position = Vector2(205, 90)
 physics_material_override = SubResource("PhysicsMaterial_bon8i")
 
-[node name="CircularBumper5" parent="." index="35" unique_id=343186210 instance=ExtResource("20_bon8i")]
+[node name="CircularBumper5" parent="." index="34" unique_id=343186210 instance=ExtResource("20_bon8i")]
 position = Vector2(-205, 90)
 physics_material_override = SubResource("PhysicsMaterial_bon8i")
 
-[node name="Crocodile" parent="." index="36" unique_id=787732993 instance=ExtResource("21_av2kh")]
+[node name="Crocodile" parent="." index="35" unique_id=787732993 instance=ExtResource("21_av2kh")]
 position = Vector2(-264, -124)
 patrol_speed = 50.0
 chase_speed = 120.0
 
-[node name="SeaUrchin" parent="." index="37" unique_id=1964309753 instance=ExtResource("21_mmy2b")]
+[node name="SeaUrchin" parent="." index="36" unique_id=1964309753 instance=ExtResource("21_mmy2b")]
 position = Vector2(-105, -100)
 
-[node name="SeaUrchin2" parent="." index="38" unique_id=170385460 instance=ExtResource("21_mmy2b")]
+[node name="SeaUrchin2" parent="." index="37" unique_id=170385460 instance=ExtResource("21_mmy2b")]
 position = Vector2(105, -100)
+
+[node name="DeadWall" parent="." index="38" unique_id=1331592369 instance=ExtResource("11_ij65d")]
+position = Vector2(-102, -5)
+angle_preset = 4
+length_units = 1
+
+[node name="DeadWall3" parent="." index="39" unique_id=666677836 instance=ExtResource("11_ij65d")]
+position = Vector2(-290, 35)
+angle_preset = 3
+length_units = 1
+mirrored = true
+
+[node name="DeadWall4" parent="." index="40" unique_id=1124294837 instance=ExtResource("11_ij65d")]
+position = Vector2(290, 35)
+angle_preset = 3
+length_units = 1
+
+[node name="DeadWall2" parent="." index="41" unique_id=353728516 instance=ExtResource("11_ij65d")]
+position = Vector2(102, -5)
+angle_preset = 4
+length_units = 1

@@ -153,6 +153,11 @@ var _deflector_visual: Line2D = null
 # Powerup Replicator
 var _using_replicator: bool = false  # guard to prevent recursive storage on replicator-use
 
+# Time Freeze
+var time_freeze_active: bool = false
+var time_freeze_timer: float = 0.0
+var _time_frozen_bodies: Array = []
+
 # ---------------------------------------------------------------------------
 # 8-DIRECTIONAL SPRITE SYSTEM
 # ---------------------------------------------------------------------------
@@ -334,6 +339,12 @@ func _physics_process(delta):
 			if _deflector_visual:
 				_deflector_visual.visible = false
 
+	if time_freeze_active:
+		time_freeze_timer -= delta
+		AlienTechManager.set_passive_bar(AlienTechRegistry.TIME_FREEZE, max(0.0, time_freeze_timer / AlienTechManager.TIME_FREEZE_ACTIVE_DURATION))
+		if time_freeze_timer <= 0.0:
+			_unfreeze_world_bodies()
+
 	# Ocean physics — suppressed while magnetically pinned to a bumper
 	if not _bumper_magnet_attached:
 		if ocean:
@@ -471,6 +482,9 @@ func _update_sprite_modulate():
 	elif deflector_shield_active:
 		var flash := (sin(Time.get_ticks_msec() * 0.04) + 1.0) * 0.5
 		sprite.modulate = Color(0.3, 0.7, 1.0).lerp(Color.WHITE, flash * 0.5)
+	elif time_freeze_active:
+		var flash := (sin(Time.get_ticks_msec() * 0.05) + 1.0) * 0.5
+		sprite.modulate = Color(0.5, 0.85, 1.0).lerp(Color.WHITE, flash * 0.4)
 	elif shield_active or energy_freeze_active or rapid_fire_active:
 		sprite.modulate = _get_powerup_flash_color()
 	elif is_super_speed:
@@ -1013,6 +1027,8 @@ func _on_alien_tech_activated(slot_index: int, tech_id: String):
 			_activate_deflector_shield()
 		AlienTechRegistry.POWERUP_REPLICATOR:
 			_use_powerup_replicator()
+		AlienTechRegistry.TIME_FREEZE:
+			_activate_time_freeze()
 
 func _activate_inertia_dampener():
 	inertia_dampener_active = true
@@ -1236,6 +1252,80 @@ func _use_powerup_replicator() -> void:
 		_using_replicator = true
 		apply_powerup(stored)
 		_using_replicator = false
+
+# ---------------------------------------------------------------------------
+# TIME FREEZE
+# ---------------------------------------------------------------------------
+
+func _activate_time_freeze() -> void:
+	time_freeze_active = true
+	AlienTechManager.time_freeze_active = true
+	time_freeze_timer = AlienTechManager.TIME_FREEZE_ACTIVE_DURATION
+	_freeze_world_bodies()
+	AlienTechManager.set_passive_bar(AlienTechRegistry.TIME_FREEZE, 1.0)
+	_flash(Color(0.5, 0.9, 1.0), 0.3)
+
+func _freeze_world_bodies() -> void:
+	_time_frozen_bodies.clear()
+	var groups := ["enemies", "bullets", "plane_projectiles", "enemy_projectiles",
+				   "trash_clusters", "trash_cluster_pieces", "trash_items",
+				   "powerups", "air_bubbles"]
+	for group in groups:
+		for node in get_tree().get_nodes_in_group(group):
+			if not is_instance_valid(node) or node.is_queued_for_deletion():
+				continue
+			if node is RigidBody2D:
+				var rb := node as RigidBody2D
+				_time_frozen_bodies.append({
+					"body":       rb,
+					"lin_vel":    rb.linear_velocity,
+					"ang_vel":    rb.angular_velocity,
+					"was_frozen": rb.freeze,
+					"type":       "rigid",
+				})
+				rb.freeze = true
+				rb.set_physics_process(false)
+				rb.set_process(false)
+			elif node is AnimatableBody2D:
+				_time_frozen_bodies.append({
+					"body": node,
+					"type": "animatable",
+				})
+				node.set_physics_process(false)
+				node.set_process(false)
+	# Pause all spawners so nothing new appears during the freeze.
+	# Must use process_mode (not set_process) so child Timer nodes also stop.
+	var spawner_groups := ["spawners", "trash_spawners"]
+	for group in spawner_groups:
+		for node in get_tree().get_nodes_in_group(group):
+			if not is_instance_valid(node) or node.is_queued_for_deletion():
+				continue
+			_time_frozen_bodies.append({"body": node, "type": "spawner", "process_mode": node.process_mode})
+			node.process_mode = Node.PROCESS_MODE_DISABLED
+
+func _unfreeze_world_bodies() -> void:
+	for entry in _time_frozen_bodies:
+		var body = entry["body"]
+		if not is_instance_valid(body) or body.is_queued_for_deletion():
+			continue
+		match entry["type"]:
+			"rigid":
+				var rb := body as RigidBody2D
+				rb.freeze = entry["was_frozen"]
+				if not entry["was_frozen"]:
+					rb.linear_velocity = entry["lin_vel"]
+					rb.angular_velocity = entry["ang_vel"]
+				rb.set_physics_process(true)
+				rb.set_process(true)
+			"animatable":
+				body.set_physics_process(true)
+				body.set_process(true)
+			"spawner":
+				body.process_mode = entry["process_mode"]
+	_time_frozen_bodies.clear()
+	time_freeze_active = false
+	AlienTechManager.time_freeze_active = false
+	AlienTechManager.clear_passive_bar(AlienTechRegistry.TIME_FREEZE)
 
 func _direction_suffix_to_vector(suffix: String) -> Vector2:
 	match suffix:

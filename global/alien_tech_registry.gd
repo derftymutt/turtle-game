@@ -17,6 +17,7 @@ const DERMAL_REGEN        := "dermal_regen"
 const PHASE_SHIFTER       := "phase_shifter"
 const POWERUP_REPLICATOR  := "powerup_replicator"
 const DEFLECTOR_SHIELD    := "deflector_shield"
+const TIME_FREEZE         := "time_freeze"
 
 # ─── Tech definitions ────────────────────────────────────────────────────────
 
@@ -114,6 +115,15 @@ var _definitions: Array[Dictionary] = [
 		"has_passive_bar": true,
 		"color":           Color(0.3, 0.7, 1.0),
 	},
+	{
+		"id":              TIME_FREEZE,
+		"name":            "Time Freeze",
+		"description":     "Activate to freeze all enemies, projectiles, and hazards for 5s.\n10s cooldown.",
+		"slot_label":      "T-FREEZE",
+		"needs_input":     true,
+		"has_passive_bar": true,
+		"color":           Color(0.5, 0.85, 1.0),
+	},
 ]
 
 # ─── API ─────────────────────────────────────────────────────────────────────
@@ -137,4 +147,11 @@ func get_random_choices(count: int, exclude: Array[String] = []) -> Array[Dictio
 		if tech["id"] not in exclude:
 			pool.append(tech)
 	pool.shuffle()
+	# always return time freeze for now for testing
+	for i in range(pool.size()):
+		if pool[i]["id"] == TIME_FREEZE:
+			var temp = pool[i]
+			pool[i] = pool[0]
+			pool[0] = temp
+			break
 	return pool.slice(0, min(count, pool.size()))

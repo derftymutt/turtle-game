@@ -29,7 +29,6 @@
 [ext_resource type="PackedScene" uid="uid://ko8xdpxfr5ej" path="res://entities/environment/current/current.tscn" id="26_jqt73"]
 [ext_resource type="Texture2D" uid="uid://bm428btwp720u" path="res://entities/environment/ocean_boundaries/ocean_floor.png" id="28_cp3aq"]
 [ext_resource type="TileSet" uid="uid://dyl02kfc4a681" path="res://entities/environment/ocean_boundaries/ocean_wall.tres" id="29_wgvos"]
-[ext_resource type="PackedScene" uid="uid://dvy8nr3rfhq5u" path="res://entities/environment/ocean_flora/ocean_flora_seeder.tscn" id="32_4xp61"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_jqt73"]
 friction = 0.1
@@ -426,35 +425,5 @@ offset_right = -323.4816
 offset_bottom = 62.268524
 color = Color(0.1764706, 0.12156863, 0.023529412, 1)
 
-[node name="OceanFloraSeeder" parent="." index="39" unique_id=200000001 instance=ExtResource("32_4xp61")]
-
-[node name="SpawnPoint1" parent="OceanFloraSeeder" index="0" unique_id=200000002]
-position = Vector2(-305, 45)
-rotation = 1.5707964
-
-[node name="SpawnPoint2" parent="OceanFloraSeeder" index="1" unique_id=200000003]
-position = Vector2(-125, 157)
-
-[node name="SpawnPoint3" parent="OceanFloraSeeder" index="2" unique_id=200000004]
-position = Vector2(-186, 73)
-
-[node name="SpawnPoint4" parent="OceanFloraSeeder" index="3" unique_id=200000005]
-position = Vector2(254, 156)
-
-[node name="SpawnPoint5" parent="OceanFloraSeeder" index="4" unique_id=200000006]
-position = Vector2(205, -96)
-rotation = -1.5707964
-
-[node name="SpawnPoint6" parent="OceanFloraSeeder" index="5" unique_id=200000007]
-position = Vector2(-260, 157)
-
-[node name="SpawnPoint7" parent="OceanFloraSeeder" index="6" unique_id=200000008]
-position = Vector2(125, 156)
-
-[node name="SpawnPoint8" parent="OceanFloraSeeder" index="7" unique_id=200000009]
-position = Vector2(303, 85)
-rotation = -1.5707964
-
 [editable path="OceanCurrentLeft"]
 [editable path="OceanCurrentRight"]
-[editable path="OceanFloraSeeder"]
