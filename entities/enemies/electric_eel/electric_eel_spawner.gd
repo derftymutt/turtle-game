@@ -17,6 +17,7 @@ class_name EelSpawner
 @export var warning_duration: float = 0.6
 
 func _ready():
+	add_to_group("spawners")
 	# Validation
 	if not eel_scene:
 		push_error("EelSpawner: eel_scene not assigned!")
@@ -74,6 +75,13 @@ func spawn_with_animation():
 	pop_tween.tween_property(approach_sprite, "scale", Vector2(1.4, 1.4), 0.1)
 	await pop_tween.finished
 	
+	# Abort if time is frozen — the coroutine outlived the freeze window
+	if AlienTechManager.time_freeze_active:
+		approach_sprite.queue_free()
+		if flash:
+			flash.queue_free()
+		return
+
 	# Spawn real eel
 	var eel = eel_scene.instantiate()
 	get_parent().add_child(eel)

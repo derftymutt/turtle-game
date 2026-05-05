@@ -9,7 +9,7 @@ var all_destroyed_callback: Callable = Callable()
 
 @export var sink_force: float = 22.0
 @export var sway_amplitude: float = 20.0
-@export var max_lifetime: float = 18.0
+@export var max_lifetime: float = 45.0
 
 var is_destroyed: bool = false
 var visual_node: AnimatedSprite2D = null

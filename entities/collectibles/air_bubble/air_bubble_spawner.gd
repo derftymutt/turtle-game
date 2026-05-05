@@ -28,6 +28,7 @@ var spawn_timer: float = 0.0
 var spawn_points: Array[Node2D] = []
 
 func _ready():
+	add_to_group("spawners")
 	# Collect spawn point references
 	if use_fixed_points:
 		for path in spawn_point_paths:

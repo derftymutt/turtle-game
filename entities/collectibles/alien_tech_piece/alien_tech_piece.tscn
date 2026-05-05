@@ -3,22 +3,22 @@
 [ext_resource type="Script" uid="uid://tropia3reesq" path="res://entities/collectibles/alien_tech_piece/alien_tech_piece.gd" id="1_atpiece"]
 [ext_resource type="Texture2D" uid="uid://cpqc2e0qlcj8o" path="res://entities/collectibles/alien_tech_piece/sprites/alien_tech_piece.png" id="2_mpnry"]
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_mpnry"]
+atlas = ExtResource("2_mpnry")
+region = Rect2(0, 0, 12, 12)
+
 [sub_resource type="AtlasTexture" id="AtlasTexture_f5fuv"]
 atlas = ExtResource("2_mpnry")
-region = Rect2(0, 0, 8, 8)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_gb8is"]
-atlas = ExtResource("2_mpnry")
-region = Rect2(8, 0, 8, 8)
+region = Rect2(12, 0, 12, 12)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_gk506"]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_f5fuv")
+"texture": SubResource("AtlasTexture_mpnry")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_gb8is")
+"texture": SubResource("AtlasTexture_f5fuv")
 }],
 "loop": true,
 "name": &"default",
@@ -26,10 +26,10 @@ animations = [{
 }]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_body"]
-radius = 4.0
+radius = 5.0
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_area"]
-radius = 6.0
+radius = 9.0
 
 [node name="AlienTechPiece" type="RigidBody2D" unique_id=100000001]
 collision_layer = 2

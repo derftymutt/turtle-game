@@ -39,15 +39,21 @@ const INERTIA_DAMPENER_COOLDOWN_DURATION: float = 8.0
 const DEFLECTOR_SHIELD_ACTIVE_DURATION:   float = 5.0
 const DEFLECTOR_SHIELD_COOLDOWN_DURATION: float = 10.0
 
+const TIME_FREEZE_ACTIVE_DURATION:   float = 5.0
+const TIME_FREEZE_COOLDOWN_DURATION: float = 10.0
+
 const _COOLDOWN_DURATIONS: Dictionary = {
 	AlienTechRegistry.INERTIA_DAMPENER: INERTIA_DAMPENER_ACTIVE_DURATION + INERTIA_DAMPENER_COOLDOWN_DURATION,
 	AlienTechRegistry.LATERAL_THRUST:   5.0,
 	AlienTechRegistry.TRANSPORTER:      8.0,
 	AlienTechRegistry.BUMPER_MAGNET:    5.0,
 	AlienTechRegistry.DEFLECTOR_SHIELD: DEFLECTOR_SHIELD_ACTIVE_DURATION + DEFLECTOR_SHIELD_COOLDOWN_DURATION,
+	AlienTechRegistry.TIME_FREEZE:      TIME_FREEZE_ACTIVE_DURATION + TIME_FREEZE_COOLDOWN_DURATION,
 }
 
 var _passive_bar_ratios: Dictionary = {}
+
+var time_freeze_active: bool = false
 
 # ─── Powerup Replicator state ────────────────────────────────────────────────
 
