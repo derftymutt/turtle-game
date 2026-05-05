@@ -13,7 +13,7 @@ extends Node
 
 const MAX_SLOTS:       int = 2
 const PIECES_PER_TECH: int = 1
-const CHOICES_OFFERED: int = 3
+const CHOICES_OFFERED: int = 1
 
 # ─── Signals ─────────────────────────────────────────────────────────────────
 
@@ -23,6 +23,7 @@ signal tech_slots_changed(slot_a: Dictionary, slot_b: Dictionary)
 signal tech_activated(slot_index: int, tech_id: String)
 signal tech_cooldown_ready(slot_index: int, tech_id: String)
 signal phase_shifter_ammo_changed(current: int, max_ammo: int, recharging: bool)
+signal powerup_replicator_changed(stored_type: int)  # -1 = empty
 
 # ─── Run state ───────────────────────────────────────────────────────────────
 
@@ -32,13 +33,25 @@ var total_pieces_collected: int = 0
 var slots: Array[Dictionary] = [{}, {}]
 var _cooldowns: Array[float] = [0.0, 0.0]
 
+const INERTIA_DAMPENER_ACTIVE_DURATION:   float = 3.0
+const INERTIA_DAMPENER_COOLDOWN_DURATION: float = 8.0
+
+const DEFLECTOR_SHIELD_ACTIVE_DURATION:   float = 5.0
+const DEFLECTOR_SHIELD_COOLDOWN_DURATION: float = 10.0
+
 const _COOLDOWN_DURATIONS: Dictionary = {
-	AlienTechRegistry.LATERAL_THRUST: 5.0,
-	AlienTechRegistry.TRANSPORTER:    8.0,
-	AlienTechRegistry.BUMPER_MAGNET:  5.0,
+	AlienTechRegistry.INERTIA_DAMPENER: INERTIA_DAMPENER_ACTIVE_DURATION + INERTIA_DAMPENER_COOLDOWN_DURATION,
+	AlienTechRegistry.LATERAL_THRUST:   5.0,
+	AlienTechRegistry.TRANSPORTER:      8.0,
+	AlienTechRegistry.BUMPER_MAGNET:    5.0,
+	AlienTechRegistry.DEFLECTOR_SHIELD: DEFLECTOR_SHIELD_ACTIVE_DURATION + DEFLECTOR_SHIELD_COOLDOWN_DURATION,
 }
 
 var _passive_bar_ratios: Dictionary = {}
+
+# ─── Powerup Replicator state ────────────────────────────────────────────────
+
+var powerup_replicator_stored: int = -1  # -1 = empty
 
 # ─── Phase Shifter ammo ──────────────────────────────────────────────────────
 
@@ -170,6 +183,7 @@ func reset_run():
 	phase_shifter_ammo = PHASE_SHIFTER_MAX_AMMO
 	phase_shifter_recharging = false
 	phase_shifter_recharge_timer = 0.0
+	powerup_replicator_stored = -1
 	print("👽 AlienTechManager: Run reset")
 
 # ─── Phase Shifter ───────────────────────────────────────────────────────────
@@ -203,3 +217,15 @@ func _slot_letter(index: int) -> String:
 		0: return "L"
 		1: return "R"
 		_: return "?"
+
+# ─── Powerup Replicator ──────────────────────────────────────────────────────
+
+func store_replicated_powerup(powerup_type: int):
+	powerup_replicator_stored = powerup_type
+	powerup_replicator_changed.emit(powerup_type)
+
+func consume_replicated_powerup() -> int:
+	var stored := powerup_replicator_stored
+	powerup_replicator_stored = -1
+	powerup_replicator_changed.emit(-1)
+	return stored

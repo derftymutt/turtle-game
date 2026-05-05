@@ -91,6 +91,9 @@ var control_suspended: bool = false
 var control_suspend_timer: float = 0.0
 
 # Alien Tech state
+var inertia_dampener_active: bool = false
+var inertia_dampener_timer: float = 0.0
+
 var lateral_thrust_active: bool = false
 var lateral_thrust_timer: float = 0.0
 const LATERAL_THRUST_DURATION: float = 0.05
@@ -136,6 +139,19 @@ var _dermal_regen_active: bool = false
 var _dermal_regen_timer: float = 0.0
 var _dermal_regen_slot: int = -1
 var _dermal_regen_used: bool = false   # true after one successful heal per level
+
+# Deflector Shield
+const DEFLECTOR_SHIELD_DURATION: float = 5.0    # seconds active — tweak for feel
+const DEFLECTOR_SHIELD_RADIUS:   float = 35.0   # px repulsion radius — tweak for feel
+const DEFLECTOR_SHIELD_FORCE:    float = 1000.0 # repulsion force — tweak for feel
+
+var deflector_shield_active: bool = false
+var deflector_shield_timer:  float = 0.0
+var _deflector_area: Area2D = null
+var _deflector_visual: Line2D = null
+
+# Powerup Replicator
+var _using_replicator: bool = false  # guard to prevent recursive storage on replicator-use
 
 # ---------------------------------------------------------------------------
 # 8-DIRECTIONAL SPRITE SYSTEM
@@ -189,6 +205,7 @@ func _ready():
 
 	_setup_super_speed_area()
 	_setup_rest_particles()
+	_setup_deflector_area()
 
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
@@ -272,6 +289,11 @@ func _physics_process(delta):
 		if rapid_fire_timer <= 0:
 			deactivate_rapid_fire()
 
+	if inertia_dampener_active:
+		inertia_dampener_timer -= delta
+		if inertia_dampener_timer <= 0.0:
+			inertia_dampener_active = false
+
 	if lateral_thrust_active:
 		lateral_thrust_timer -= delta
 		if lateral_thrust_timer <= 0:
@@ -300,6 +322,17 @@ func _physics_process(delta):
 
 	if _dermal_regen_active:
 		_update_dermal_regen(delta)
+
+	if deflector_shield_active:
+		deflector_shield_timer -= delta
+		var _ratio := deflector_shield_timer / DEFLECTOR_SHIELD_DURATION
+		AlienTechManager.set_passive_bar(AlienTechRegistry.DEFLECTOR_SHIELD, max(0.0, _ratio))
+		_repel_deflected_bodies(delta)
+		if deflector_shield_timer <= 0.0:
+			deflector_shield_active = false
+			AlienTechManager.clear_passive_bar(AlienTechRegistry.DEFLECTOR_SHIELD)
+			if _deflector_visual:
+				_deflector_visual.visible = false
 
 	# Ocean physics — suppressed while magnetically pinned to a bumper
 	if not _bumper_magnet_attached:
@@ -404,6 +437,9 @@ func _process(delta: float):
 	if _bubble_flash_timer > 0.0:
 		_bubble_flash_timer -= delta
 	_update_sprite_modulate()
+	if deflector_shield_active and _deflector_visual:
+		var pulse := (sin(Time.get_ticks_msec() * 0.008) + 1.0) * 0.5
+		_deflector_visual.default_color = Color(0.3, 0.7, 1.0, 0.4 + pulse * 0.45)
 
 func _update_sprite_modulate():
 	var sprite = $AnimatedSprite2D
@@ -432,6 +468,9 @@ func _update_sprite_modulate():
 			# Fast golden flicker while seeking
 			var flash := (sin(Time.get_ticks_msec() * 0.12) + 1.0) * 0.5
 			sprite.modulate = Color(1.0, 0.85, 0.0).lerp(Color(1.0, 1.0, 0.5), flash)
+	elif deflector_shield_active:
+		var flash := (sin(Time.get_ticks_msec() * 0.04) + 1.0) * 0.5
+		sprite.modulate = Color(0.3, 0.7, 1.0).lerp(Color.WHITE, flash * 0.5)
 	elif shield_active or energy_freeze_active or rapid_fire_active:
 		sprite.modulate = _get_powerup_flash_color()
 	elif is_super_speed:
@@ -460,7 +499,7 @@ func apply_ocean_effects(_delta: float):
 	var depth = ocean.get_depth(global_position)
 
 	# Inertia Dampener: clamp depth to shallow zone so deep buoyancy never fires
-	if AlienTechManager.is_tech_active(AlienTechRegistry.INERTIA_DAMPENER):
+	if inertia_dampener_active:
 		depth = min(depth, ocean.shallow_depth - 1.0)
 
 	var buoyancy_force = ocean.calculate_buoyancy_force(depth, mass)
@@ -605,7 +644,7 @@ func apply_flipper_force(direction: Vector2, force_multiplier: float = 5.0):
 func take_damage(amount: float, use_iframes: bool = false):
 	if use_iframes and _contact_iframes_active:
 		return
-	if is_super_speed or is_super_speed_cooldown or shield_active or transporter_invincible:
+	if is_super_speed or is_super_speed_cooldown or shield_active or transporter_invincible or deflector_shield_active:
 		return
 
 	if AlienTechManager.is_tech_active(AlienTechRegistry.BUBBLE_SHIELD) and bubble_shield_hp > 0.0:
@@ -895,6 +934,8 @@ func _create_super_speed_burst():
 
 func apply_powerup(powerup_type: int):
 	print("APPLYING POWERUP TYPE: ", powerup_type)
+	if AlienTechManager.has_tech(AlienTechRegistry.POWERUP_REPLICATOR) and not _using_replicator:
+		AlienTechManager.store_replicated_powerup(powerup_type)
 	match powerup_type:
 		0:  activate_shield()
 		1:  activate_air_reserve()
@@ -958,6 +999,8 @@ func deactivate_rapid_fire():
 
 func _on_alien_tech_activated(slot_index: int, tech_id: String):
 	match tech_id:
+		AlienTechRegistry.INERTIA_DAMPENER:
+			_activate_inertia_dampener()
 		AlienTechRegistry.LATERAL_THRUST:
 			_activate_lateral_thrust()
 		AlienTechRegistry.TRANSPORTER:
@@ -966,6 +1009,14 @@ func _on_alien_tech_activated(slot_index: int, tech_id: String):
 			_start_bumper_magnet(slot_index)
 		AlienTechRegistry.DERMAL_REGEN:
 			_start_dermal_regen(slot_index)
+		AlienTechRegistry.DEFLECTOR_SHIELD:
+			_activate_deflector_shield()
+		AlienTechRegistry.POWERUP_REPLICATOR:
+			_use_powerup_replicator()
+
+func _activate_inertia_dampener():
+	inertia_dampener_active = true
+	inertia_dampener_timer = AlienTechManager.INERTIA_DAMPENER_ACTIVE_DURATION
 
 func _activate_lateral_thrust():
 	lateral_thrust_active = true
@@ -1092,6 +1143,99 @@ func _on_alien_tech_slots_changed_player(_slot_a: Dictionary, _slot_b: Dictionar
 	if AlienTechManager.is_tech_active(AlienTechRegistry.BUBBLE_SHIELD):
 		if bubble_shield_hp == 0.0 and bubble_shield_regen_timer <= 0.0:
 			bubble_shield_hp = 1.0
+
+# ---------------------------------------------------------------------------
+# DEFLECTOR SHIELD
+# ---------------------------------------------------------------------------
+
+func _setup_deflector_area() -> void:
+	_deflector_area = Area2D.new()
+	_deflector_area.name = "DeflectorArea"
+	_deflector_area.collision_layer = 0
+	_deflector_area.collision_mask = 4 | 8  # Layer 3 (enemies) + Layer 4 (projectiles)
+	_deflector_area.monitoring = true
+	_deflector_area.monitorable = false
+
+	var _col := CollisionShape2D.new()
+	var _circle := CircleShape2D.new()
+	_circle.radius = DEFLECTOR_SHIELD_RADIUS
+	_col.shape = _circle
+	_deflector_area.add_child(_col)
+	add_child(_deflector_area)
+
+	_deflector_area.body_entered.connect(_on_deflector_body_entered)
+
+	# Visual ring — a closed Line2D circle
+	_deflector_visual = Line2D.new()
+	_deflector_visual.name = "DeflectorVisual"
+	var _pts: PackedVector2Array = []
+	var _segs := 36
+	for i in range(_segs + 1):
+		var a := i * TAU / _segs
+		_pts.append(Vector2(cos(a), sin(a)) * DEFLECTOR_SHIELD_RADIUS)
+	_deflector_visual.points = _pts
+	_deflector_visual.default_color = Color(0.3, 0.7, 1.0, 0.7)
+	_deflector_visual.width = 1.5
+	_deflector_visual.z_as_relative = false
+	_deflector_visual.z_index = 12
+	_deflector_visual.visible = false
+	add_child(_deflector_visual)
+
+func _activate_deflector_shield() -> void:
+	deflector_shield_active = true
+	deflector_shield_timer = DEFLECTOR_SHIELD_DURATION
+	if _deflector_visual:
+		_deflector_visual.visible = true
+
+func _on_deflector_body_entered(body: Node2D) -> void:
+	if not deflector_shield_active:
+		return
+	if body == self or body.is_in_group("player"):
+		return
+	var dir := (body.global_position - global_position)
+	if dir == Vector2.ZERO:
+		dir = Vector2.RIGHT
+	else:
+		dir = dir.normalized()
+	if body is RigidBody2D:
+		(body as RigidBody2D).apply_central_impulse(dir * 500.0)
+	elif body is CharacterBody2D:
+		var cb := body as CharacterBody2D
+		cb.velocity = dir * max(cb.velocity.length(), 250.0)
+	elif body is AnimatableBody2D:
+		# Immediate positional kick on entry — no physics forces on AnimatableBody2D
+		body.global_position += dir * 12.0
+
+func _repel_deflected_bodies(delta: float) -> void:
+	if not _deflector_area:
+		return
+	for body in _deflector_area.get_overlapping_bodies():
+		if body == self or body.is_in_group("player"):
+			continue
+		var dir := (body.global_position - global_position)
+		if dir == Vector2.ZERO:
+			dir = Vector2.RIGHT
+		else:
+			dir = dir.normalized()
+		if body is RigidBody2D:
+			(body as RigidBody2D).apply_central_force(dir * DEFLECTOR_SHIELD_FORCE)
+		elif body is CharacterBody2D:
+			var cb := body as CharacterBody2D
+			cb.velocity = dir * max(cb.velocity.length(), DEFLECTOR_SHIELD_FORCE * 0.4)
+		elif body is AnimatableBody2D:
+			# AnimatableBody2D (e.g. Crocodile) has no physics forces — push via position
+			body.global_position += dir * DEFLECTOR_SHIELD_FORCE * 0.3 * delta
+
+# ---------------------------------------------------------------------------
+# POWERUP REPLICATOR
+# ---------------------------------------------------------------------------
+
+func _use_powerup_replicator() -> void:
+	var stored := AlienTechManager.consume_replicated_powerup()
+	if stored >= 0:
+		_using_replicator = true
+		apply_powerup(stored)
+		_using_replicator = false
 
 func _direction_suffix_to_vector(suffix: String) -> Vector2:
 	match suffix:

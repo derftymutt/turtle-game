@@ -6,26 +6,29 @@ extends Node
 
 # ─── Tech ID constants ───────────────────────────────────────────────────────
 
-const INERTIA_DAMPENER := "inertia_dampener"
-const BRAVADO          := "bravado"
-const LATERAL_THRUST   := "lateral_thrust"
-const TRANSPORTER      := "transporter"
-const SALIVA_NANOBOTS  := "saliva_nanobots"
-const BUBBLE_SHIELD    := "bubble_shield"
-const BUMPER_MAGNET    := "bumper_magnet"
-const DERMAL_REGEN     := "dermal_regen"
-const PHASE_SHIFTER    := "phase_shifter"
+const INERTIA_DAMPENER    := "inertia_dampener"
+const BRAVADO             := "bravado"
+const LATERAL_THRUST      := "lateral_thrust"
+const TRANSPORTER         := "transporter"
+const SALIVA_NANOBOTS     := "saliva_nanobots"
+const BUBBLE_SHIELD       := "bubble_shield"
+const BUMPER_MAGNET       := "bumper_magnet"
+const DERMAL_REGEN        := "dermal_regen"
+const PHASE_SHIFTER       := "phase_shifter"
+const POWERUP_REPLICATOR  := "powerup_replicator"
+const DEFLECTOR_SHIELD    := "deflector_shield"
 
 # ─── Tech definitions ────────────────────────────────────────────────────────
 
 var _definitions: Array[Dictionary] = [
 	{
-		"id":          INERTIA_DAMPENER,
-		"name":        "Inertia Dampener",
-		"description": "Deep water feels like shallow water everywhere.\nEasier movement at depth.",
-		"slot_label":  "DAMPENER",
-		"needs_input": false,
-		"color":       Color(0.5, 1.0, 0.5),
+		"id":             INERTIA_DAMPENER,
+		"name":           "Inertia Dampener",
+		"description":    "Activate to neutralize ocean buoyancy for 3s.\nThen recovers for 8s.",
+		"slot_label":     "DAMPENER",
+		"needs_input":    true,
+		"has_passive_bar": true,
+		"color":          Color(0.5, 1.0, 0.5),
 	},
 	{
 		"id":          BRAVADO,
@@ -93,6 +96,23 @@ var _definitions: Array[Dictionary] = [
 		"slot_label":  "PHASE",
 		"needs_input": false,
 		"color":       Color(0.3, 0.9, 1.0),
+	},
+	{
+		"id":          POWERUP_REPLICATOR,
+		"name":        "Powerup Replicator",
+		"description": "Automatically copies the next powerup you collect into this slot.\nPress to use the stored copy. A new pickup replaces the stored one.",
+		"slot_label":  "REPLICA",
+		"needs_input": true,
+		"color":       Color(1.0, 0.5, 0.9),
+	},
+	{
+		"id":              DEFLECTOR_SHIELD,
+		"name":            "Deflector Shield",
+		"description":     "Activate to project a repulsion field for 5s.\nEnemies and projectiles are pushed away. 10s cooldown.",
+		"slot_label":      "DEFLECT",
+		"needs_input":     true,
+		"has_passive_bar": true,
+		"color":           Color(0.3, 0.7, 1.0),
 	},
 ]
 

@@ -1,13 +1,11 @@
 [gd_scene format=3 uid="uid://dvy8nr3rfhq5u"]
 
-[ext_resource type="Script" path="res://entities/environment/ocean_flora/ocean_flora_seeder.gd" id="1_seeder"]
+[ext_resource type="Script" uid="uid://ix3gb3nk8iwo" path="res://entities/environment/ocean_flora/ocean_flora_seeder.gd" id="1_seeder"]
 [ext_resource type="PackedScene" uid="uid://sqnwntnauwax" path="res://entities/environment/ocean_flora/ocean_flora.tscn" id="2_flora"]
-[ext_resource type="PackedScene" uid="uid://tpiece001" path="res://entities/collectibles/alien_tech_piece/alien_tech_piece.tscn" id="3_techpiece"]
 
 [node name="OceanFloraSeeder" type="Node2D" unique_id=200000001]
 script = ExtResource("1_seeder")
 flora_scene = ExtResource("2_flora")
-tech_piece_scene = ExtResource("3_techpiece")
 
 [node name="SpawnPoint1" type="Marker2D" parent="." unique_id=200000002]
 position = Vector2(-200, 80)
