@@ -131,6 +131,20 @@ var _bumper_magnet_target: Node2D = null
 var _bumper_magnet_angle: float = 0.0
 var _bumper_magnet_attach_speed: float = 0.0
 
+# Flipper Velcro
+const FLIPPER_VELCRO_SLIDE_SPEED: float = 50.0
+const FLIPPER_VELCRO_PLAYER_OFFSET: float = 13.0  # capsule_radius(6) + player_radius(7)
+# Arm travel range (px from flipper pivot along arm_dir).
+# MIN: pivot-side end of capsule cylinder (center 12 - half_height 10.5 = 1.5)
+# MAX: extended past the capsule tip cap so the turtle can reach the very end
+const FLIPPER_VELCRO_ARM_MIN_T: float = 1.5
+const FLIPPER_VELCRO_ARM_MAX_T: float = 30.0   # capsule tip (22.5) + cap radius (6) ≈ 28
+
+var _flipper_velcro_latched: bool = false
+var _flipper_velcro_target: Node2D = null   # always a FlipperBase at runtime
+var _flipper_velcro_t: float = 12.0         # px along arm_dir from pivot
+var _flipper_velcro_normal_side: float = 1.0  # which side of arm (+1 or -1)
+
 # Dermal Regenerator
 const DERMAL_REGEN_HEAL: float = 60.0
 const DERMAL_REGEN_CHANNEL_DURATION: float = 1.0
@@ -252,7 +266,7 @@ func _physics_process(delta):
 	# super speed system off for the duration of the attachment.
 	var current_speed = linear_velocity.length()
 	var was_super_speed = is_super_speed
-	if _bumper_magnet_attached:
+	if _bumper_magnet_attached or _flipper_velcro_latched:
 		was_super_speed = false  # prevents cooldown from triggering on the way out
 		is_super_speed = false
 		is_super_speed_cooldown = false
@@ -345,8 +359,8 @@ func _physics_process(delta):
 		if time_freeze_timer <= 0.0:
 			_unfreeze_world_bodies()
 
-	# Ocean physics — suppressed while magnetically pinned to a bumper
-	if not _bumper_magnet_attached:
+	# Ocean physics — suppressed while pinned to a bumper or flipper
+	if not _bumper_magnet_attached and not _flipper_velcro_latched:
 		if ocean:
 			apply_ocean_effects(delta)
 		else:
@@ -383,7 +397,20 @@ func _physics_process(delta):
 			animated_sprite.scale = Vector2.ONE
 
 	if control_suspended:
+		if _flipper_velcro_latched:
+			_cancel_flipper_velcro()
 		return
+
+	# Flipper Velcro: hold-based, intercepts input before normal movement
+	var _fv_slot := AlienTechManager.get_slot_index_for_tech(AlienTechRegistry.FLIPPER_VELCRO)
+	if _fv_slot != -1:
+		var fv_action := _slot_action(_fv_slot)
+		if Input.is_action_pressed(fv_action):
+			_update_flipper_velcro(delta)
+		elif _flipper_velcro_latched:
+			_launch_from_flipper_velcro()
+		if _flipper_velcro_latched:
+			return
 
 	# Input
 	var movement_input = Vector2(
@@ -414,9 +441,11 @@ func _physics_process(delta):
 
 	# Alien Tech active slot buttons
 	if Input.is_action_just_pressed("tech_slot_left"):
-		AlienTechManager.try_activate_slot(0)
+		if _fv_slot != 0:
+			AlienTechManager.try_activate_slot(0)
 	if Input.is_action_just_pressed("tech_slot_right"):
-		AlienTechManager.try_activate_slot(1)
+		if _fv_slot != 1:
+			AlienTechManager.try_activate_slot(1)
 
 	# Bumper magnet: release button → launch
 	if _bumper_magnet_active:
@@ -479,6 +508,9 @@ func _update_sprite_modulate():
 			# Fast golden flicker while seeking
 			var flash := (sin(Time.get_ticks_msec() * 0.12) + 1.0) * 0.5
 			sprite.modulate = Color(1.0, 0.85, 0.0).lerp(Color(1.0, 1.0, 0.5), flash)
+	elif _flipper_velcro_latched:
+		var flash := (sin(Time.get_ticks_msec() * 0.06) + 1.0) * 0.5
+		sprite.modulate = Color(0.2, 1.0, 0.6).lerp(Color(0.6, 1.0, 0.85), flash)
 	elif deflector_shield_active:
 		var flash := (sin(Time.get_ticks_msec() * 0.04) + 1.0) * 0.5
 		sprite.modulate = Color(0.3, 0.7, 1.0).lerp(Color.WHITE, flash * 0.5)
@@ -674,6 +706,8 @@ func take_damage(amount: float, use_iframes: bool = false):
 		_cancel_bumper_magnet()
 	if _dermal_regen_active:
 		_cancel_dermal_regen()
+	if _flipper_velcro_latched:
+		_cancel_flipper_velcro()
 
 	current_health -= amount
 
@@ -1479,3 +1513,98 @@ func _cancel_dermal_regen() -> void:
 	_dermal_regen_active = false
 	_dermal_regen_timer = 0.0
 	_dermal_regen_slot = -1
+
+# ---------------------------------------------------------------------------
+# FLIPPER VELCRO
+# ---------------------------------------------------------------------------
+
+func _update_flipper_velcro(delta: float) -> void:
+	if _flipper_velcro_latched:
+		_update_flipper_velcro_slide(delta)
+	else:
+		_try_latch_to_flipper()
+
+func _try_latch_to_flipper() -> void:
+	for body in touching_walls:
+		if body is FlipperBase and is_instance_valid(body):
+			_latch_to_flipper(body as FlipperBase)
+			return
+
+func _latch_to_flipper(flipper: FlipperBase) -> void:
+	_flipper_velcro_latched = true
+	_flipper_velcro_target = flipper
+
+	var arm_dir: Vector2 = flipper.collision_shape.position.normalized()
+	var perp: Vector2 = Vector2(-arm_dir.y, arm_dir.x)
+	var rel: Vector2 = global_position - flipper.global_position
+
+	_flipper_velcro_t = clamp(
+		rel.dot(arm_dir),
+		FLIPPER_VELCRO_ARM_MIN_T,
+		FLIPPER_VELCRO_ARM_MAX_T
+	)
+	_flipper_velcro_normal_side = sign(rel.dot(perp))
+	if _flipper_velcro_normal_side == 0.0:
+		_flipper_velcro_normal_side = 1.0
+
+	linear_velocity = Vector2.ZERO
+
+func _update_flipper_velcro_slide(delta: float) -> void:
+	if not is_instance_valid(_flipper_velcro_target):
+		_cancel_flipper_velcro()
+		return
+
+	var flipper: FlipperBase = _flipper_velcro_target as FlipperBase
+	var arm_dir: Vector2 = flipper.collision_shape.position.normalized()
+	var perp: Vector2 = Vector2(-arm_dir.y, arm_dir.x)
+
+	var stick := Vector2(
+		Input.get_axis("move_left", "move_right"),
+		Input.get_axis("move_up", "move_down")
+	)
+	if GameSettings.thrust_inverted:
+		stick = -stick
+
+	_flipper_velcro_t += stick.dot(arm_dir) * FLIPPER_VELCRO_SLIDE_SPEED * delta
+	_flipper_velcro_t = clamp(
+		_flipper_velcro_t,
+		FLIPPER_VELCRO_ARM_MIN_T,
+		FLIPPER_VELCRO_ARM_MAX_T
+	)
+
+	global_position = flipper.global_position + arm_dir * _flipper_velcro_t + perp * (_flipper_velcro_normal_side * FLIPPER_VELCRO_PLAYER_OFFSET)
+	linear_velocity = Vector2.ZERO
+
+func _launch_from_flipper_velcro() -> void:
+	if not is_instance_valid(_flipper_velcro_target):
+		_cancel_flipper_velcro()
+		return
+
+	var flipper: FlipperBase = _flipper_velcro_target as FlipperBase
+
+	# Trigger the full flipper animation (force-flip for 0.25s then returns to rest)
+	flipper.trigger_flip(0.25)
+	# Prevent the flipper's hit_body from double-applying force in the next frame
+	flipper.hit_bodies[get_instance_id()] = 0.5
+
+	# Compute launch direction: tangent to our position relative to the pivot,
+	# oriented in the flip rotation direction.
+	var rel: Vector2 = global_position - flipper.global_position
+	var dist: float = max(rel.length(), 5.0)
+	var rel_dir: Vector2 = rel / dist
+	var flip_sign: float = sign(flipper.get_flip_angle() - flipper.get_rest_angle())
+	var tangent: Vector2 = Vector2(-rel_dir.y, rel_dir.x)
+	if flip_sign < 0:
+		tangent = -tangent
+
+	# Multiplier is slightly higher than the regular hit_body formula (0.12 vs 0.10)
+	# to compensate for velcro starting from zero velocity while regular flips are additive.
+	var impulse: float = clamp(flipper.flip_force * dist * 0.15, flipper.flip_force * 1.2, flipper.flip_force * 4.0)
+	linear_velocity = tangent * impulse
+
+	_cancel_flipper_velcro()
+
+func _cancel_flipper_velcro() -> void:
+	_flipper_velcro_latched = false
+	_flipper_velcro_target = null
+	_flipper_velcro_t = 12.0

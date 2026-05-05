@@ -19,6 +19,7 @@ var previous_rotation: float = 0.0
 var angular_velocity: float = 0.0
 var hit_bodies: Dictionary = {}
 var is_actively_moving: bool = false
+var _force_flip_timer: float = 0.0  # > 0 while a velcro-triggered flip is running
 var active_movement_timer: float = 0.0
 var active_movement_duration: float = 0.3
 var last_input_was_press: bool = false
@@ -59,8 +60,14 @@ func _ready():
 	update_collision_rotation()
 
 func _physics_process(delta):
-	# Input handling
-	if Input.is_action_pressed(flip_input):
+	# Force-flip override (Flipper Velcro tech): hold flip position for the timer duration,
+	# then fall through to normal input so the flipper naturally returns to rest.
+	if _force_flip_timer > 0.0:
+		_force_flip_timer -= delta
+		if not is_flipping:
+			activate_flip()
+	# Normal input handling
+	elif Input.is_action_pressed(flip_input):
 		if not is_flipping:
 			activate_flip()
 	else:
@@ -174,11 +181,17 @@ func update_sprite_frame():
 		animated_sprite.play('extend')
 
 
+func trigger_flip(duration: float = 0.25) -> void:
+	"""Fire a complete flip cycle for `duration` seconds, ignoring normal flipper input.
+	Used by Flipper Velcro tech on launch so the flipper visually snaps and returns."""
+	_force_flip_timer = duration
+	activate_flip()
+
 func activate_flip():
 	is_flipping = true
 	target_rotation = get_flip_angle()
 	hit_bodies.clear()
-	
+
 	is_actively_moving = true
 	active_movement_timer = active_movement_duration
 	last_input_was_press = true
