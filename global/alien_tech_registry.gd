@@ -176,10 +176,10 @@ func get_random_choices(count: int, exclude: Array[String] = []) -> Array[Dictio
 			pool.append(tech)
 	pool.shuffle()
 	# always return time freeze for now for testing
-	for i in range(pool.size()):
-		if pool[i]["id"] == THING_BRINGER:
-			var temp = pool[i]
-			pool[i] = pool[0]
-			pool[0] = temp
-			break
+	# for i in range(pool.size()):
+	# 	if pool[i]["id"] == THING_BRINGER:
+	# 		var temp = pool[i]
+	# 		pool[i] = pool[0]
+	# 		pool[0] = temp
+	# 		break
 	return pool.slice(0, min(count, pool.size()))
