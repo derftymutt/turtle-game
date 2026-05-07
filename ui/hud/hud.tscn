@@ -160,6 +160,20 @@ step = 0.01
 texture_under = ExtResource("10_5uuaq")
 texture_progress = ExtResource("11_p3vm3")
 
+[node name="TimerSpacer" type="Control" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=600000001]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TimerLabel" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=600000002]
+visible = false
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = ExtResource("2_4d6w6")
+theme_override_font_sizes/font_size = 18
+text = "2:00"
+horizontal_alignment = 2
+
 [node name="AlienTechContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=400000001]
 layout_mode = 2
 size_flags_horizontal = 3
