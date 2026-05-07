@@ -4,6 +4,8 @@ class_name HUD
 ## Heads-Up Display for score, health, and experimental meters
 ## Air and energy systems are toggleable for prototyping
 
+signal time_expired
+
 # References (will be found dynamically)
 var score_label: Label
 var ufo_pieces_label: Label
@@ -57,6 +59,16 @@ var current_energy: float = 100.0
 var is_touching_wall: bool = false
 var wall_recovery_active: bool = false  # NEW: Track if we're actively recovering from wall
 
+# Timer system
+@export_group("Timer System")
+@export var timer_enabled: bool = false
+@export var level_time_limit: float = 120.0
+var timer_label: Label = null
+var time_remaining: float = 0.0
+var _timer_active: bool = false
+var _timer_expired: bool = false
+var _timer_flash_timer: float = 0.0
+
 # Trash cluster score spawning
 const TRASH_CLUSTER_SCENE = preload("res://entities/collectibles/trash_cluster/trash_cluster.tscn")
 const CLUSTER_SCORE_INTERVAL: int = 200
@@ -103,6 +115,14 @@ func _ready():
 	if not energy_bar:
 		push_warning("HUD: Could not find EnergyBar!")
 	
+	timer_label = find_child("TimerLabel")
+	if timer_label:
+		timer_label.visible = timer_enabled
+	if timer_enabled:
+		time_remaining = level_time_limit
+		_timer_active = true
+		_update_timer_display()
+
 	# Apply black borders to all progress bars
 	_apply_bar_borders()
 	# Set all label text to black
@@ -173,6 +193,17 @@ func _process(delta):
 	if slot_b_icon:
 		slot_b_icon.modulate.a = 0.5 if dimmed_b else 1.0
 
+	# Level timer countdown
+	if _timer_active:
+		time_remaining = max(0.0, time_remaining - delta)
+		if time_remaining <= 10.0:
+			_timer_flash_timer += delta * 6.0
+		_update_timer_display()
+		if time_remaining <= 0.0:
+			_timer_active = false
+			_timer_expired = true
+			time_expired.emit()
+
 	# Handle wall recovery visual feedback
 	if wall_recovery_active and energy_bar:
 		energy_pulse_timer += delta * energy_pulse_speed
@@ -195,6 +226,20 @@ func _process(delta):
 		energy_pulse_timer = 0.0
 		# Reset to normal color coding when not recovering from wall
 		update_energy(current_energy, max_energy)
+
+func _update_timer_display() -> void:
+	if not timer_label:
+		return
+	var mins := int(time_remaining) / 60
+	var secs := int(time_remaining) % 60
+	timer_label.text = "%d:%02d" % [mins, secs]
+	if time_remaining > 30.0:
+		timer_label.modulate = Color.WHITE
+	elif time_remaining > 10.0:
+		timer_label.modulate = Color.YELLOW
+	else:
+		var pulse := (sin(_timer_flash_timer) + 1.0) / 2.0
+		timer_label.modulate = Color.WHITE.lerp(Color.RED, 0.5 + pulse * 0.5)
 
 ## Set all HUD labels to black text
 func _apply_label_colors() -> void:

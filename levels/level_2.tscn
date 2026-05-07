@@ -113,6 +113,9 @@ top_level = true
 position = Vector2(0, -160)
 texture = ExtResource("2_wgvos")
 
+[node name="HUD" parent="." index="1" unique_id=1369229575]
+timer_enabled = true
+
 [node name="SkyBackground" parent="." index="4" unique_id=967020750 instance=ExtResource("2_m4706")]
 
 [node name="Ocean" parent="." index="7" unique_id=863147586 instance=ExtResource("3_0srwa")]
