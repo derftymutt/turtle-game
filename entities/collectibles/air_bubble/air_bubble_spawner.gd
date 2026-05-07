@@ -66,11 +66,15 @@ func spawn_bubble_wave():
 func spawn_bubble():
 	"""Spawn a single air bubble"""
 	var bubble = bubble_scene.instantiate()
+
+	if randf() < 0.2:
+		bubble.with_energy = true
+
 	get_parent().add_child(bubble)
-	
+
 	# Determine spawn position
 	var spawn_pos: Vector2
-	
+
 	if use_fixed_points and not spawn_points.is_empty():
 		# Random from spawn points
 		var point = spawn_points.pick_random()
@@ -78,9 +82,9 @@ func spawn_bubble():
 	else:
 		# Random within bounds
 		spawn_pos = get_random_spawn_position()
-	
+
 	bubble.global_position = spawn_pos
-	
+
 	# Optional: Add slight random offset for variety
 	bubble.global_position += Vector2(
 		randf_range(-20, 20),
