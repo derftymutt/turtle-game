@@ -21,10 +21,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -92.0
-offset_top = -141.0
-offset_right = 92.0
-offset_bottom = 141.0
+offset_left = -220.0
+offset_top = -165.0
+offset_right = 220.0
+offset_bottom = 165.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -32,6 +32,7 @@ grow_vertical = 2
 layout_mode = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer" unique_id=1660065690]
+custom_minimum_size = Vector2(390, 0)
 layout_mode = 2
 theme_override_constants/separation = 15
 alignment = 1
@@ -41,6 +42,13 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 32
 text = "GAME OVER"
 horizontal_alignment = 1
+
+[node name="HintLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer" unique_id=823741092]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = ""
+horizontal_alignment = 1
+autowrap_mode = 3
 
 [node name="FinalScoreLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer" unique_id=1215740609]
 layout_mode = 2
