@@ -21,6 +21,7 @@ class_name AirBubble
 @export var lifetime: float = 15.0  # Max lifetime regardless of position
 
 # Internal variables
+var with_energy: bool = false
 var ocean: Ocean = null
 var collected: bool = false
 var despawning: bool = false
@@ -58,6 +59,8 @@ func _ready():
 		visual_node = $Sprite2D
 	elif has_node("AnimatedSprite2D"):
 		visual_node = $AnimatedSprite2D
+		if with_energy:
+			($AnimatedSprite2D as AnimatedSprite2D).play("with_energy")
 	
 	# Connect Area2D for player detection
 	if has_node("Area2D"):
@@ -146,7 +149,11 @@ func collect(collector):
 		hud.current_air = new_air
 	else:
 		push_warning("No HUD found! Cannot restore air.")
-	
+
+	# Also fully restore energy if this is an energy bubble
+	if with_energy and hud:
+		hud.update_energy(hud.max_energy, hud.max_energy)
+
 	# Satisfying collection animation - bubble pops!
 	var tween = create_tween()
 	tween.set_parallel(true)
