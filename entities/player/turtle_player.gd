@@ -841,7 +841,7 @@ func _setup_super_speed_area():
 	super_speed_area.body_entered.connect(_on_super_speed_area_entered)
 
 func _setup_rest_particles():
-	"""Create orange upward-drifting particles shown while resting on a wall
+	"""Create yellow upward-drifting particles shown while resting on a wall
 	   to telegraph the accelerated energy recovery mechanic."""
 	rest_particles = CPUParticles2D.new()
 	rest_particles.name = "RestParticles"
@@ -868,9 +868,9 @@ func _setup_rest_particles():
 	rest_particles.scale_amount_min = 1.5
 	rest_particles.scale_amount_max = 3.0
 
-	# Orange colour, fading to transparent
-	rest_particles.color = Color(1.0, 0.82, 0.1, 0.9)
-	rest_particles.color_ramp = _make_orange_fade_gradient()
+	# Yellow colour, fading to transparent
+	rest_particles.color = Color(1.0, 1.0, 0.1, 0.9)
+	rest_particles.color_ramp = _make_yellow_fade_gradient()
 
 	# Render above the turtle sprite (sprite z_index = 15)
 	rest_particles.z_as_relative = false
@@ -878,10 +878,10 @@ func _setup_rest_particles():
 
 	add_child(rest_particles)
 
-func _make_orange_fade_gradient() -> Gradient:
+func _make_yellow_fade_gradient() -> Gradient:
 	var g = Gradient.new()
-	g.set_color(0, Color(1.0, 0.9, 0.2, 1.0))    # bright golden yellow at birth
-	g.set_color(1, Color(1.0, 0.65, 0.0, 0.0))   # warm gold, fully transparent at death
+	g.set_color(0, Color(1.0, 1.0, 0.2, 1.0))    # bright yellow at birth
+	g.set_color(1, Color(1.0, 1.0, 0.0, 0.0))    # yellow, fully transparent at death
 	return g
 
 func _update_rest_particles():

@@ -7,11 +7,11 @@ class_name HUD
 # References (will be found dynamically)
 var score_label: Label
 var ufo_pieces_label: Label
-var health_bar: ProgressBar
+var health_bar: TextureProgressBar
 var air_container: Control
-var air_bar: ProgressBar
+var air_bar: TextureProgressBar
 var energy_container: Control
-var energy_bar: ProgressBar
+var energy_bar: TextureProgressBar
 var super_speed_indicator: Label
 var hud_container: Control  # Container for flash effect
 
@@ -170,13 +170,13 @@ func _process(delta):
 		# Pulse between current color and bright cyan
 		var pulse = (sin(energy_pulse_timer) + 1.0) / 2.0
 		
-		# Get the base color (green/yellow/red based on energy level)
-		var base_color = Color.ORANGE
+		# Get the base color (white/orange/red based on energy level)
+		var base_color = Color.WHITE
 		var energy_ratio = current_energy / max_energy
 		if energy_ratio <= 0.2:
 			base_color = Color.RED
 		elif energy_ratio <= 0.5:
-			base_color = Color.YELLOW
+			base_color = Color.ORANGE
 		
 		# Pulse to bright cyan to indicate wall recovery
 		var recovery_color = base_color.lerp(Color.GOLD, pulse * 0.7)
@@ -215,10 +215,11 @@ func _apply_bar_borders() -> void:
 	fill_style.corner_radius_bottom_left = RADIUS
 	fill_style.corner_radius_bottom_right = RADIUS
 
-	for bar: ProgressBar in [health_bar, air_bar, energy_bar]:
-		if bar:
-			bar.add_theme_stylebox_override("background", bg_style)
-			bar.add_theme_stylebox_override("fill", fill_style)
+# var bars: Array[Range] = [health_bar, air_bar, energy_bar]
+# for bar in bars:
+#     if bar:
+#         bar.add_theme_stylebox_override("background", bg_style)
+#         bar.add_theme_stylebox_override("fill", fill_style)
 
 ## Update score display
 func update_score(new_score: int):
@@ -226,7 +227,7 @@ func update_score(new_score: int):
 	current_score = new_score
 	GameManager.current_score = new_score
 	if score_label:
-		score_label.text = "Score: %d" % current_score
+		score_label.text = "%d" % current_score
 	# Only spawn a cluster when score is actually increasing past a milestone
 	if new_score > previous_score and current_score >= _next_cluster_score:
 		_next_cluster_score += CLUSTER_SCORE_INTERVAL
@@ -330,9 +331,9 @@ func update_energy(energy: float, max_en: float):
 		if not wall_recovery_active:
 			# Color code energy bar
 			if energy / max_en > 0.5:
-				energy_bar.modulate = Color.ORANGE
+				energy_bar.modulate = Color.WHITE
 			elif energy / max_en > 0.2:
-				energy_bar.modulate = Color.YELLOW
+				energy_bar.modulate = Color.ORANGE
 			else:
 				energy_bar.modulate = Color.RED
 
@@ -385,7 +386,7 @@ func update_ufo_pieces(collected: int, needed: int):
 	pieces_needed = needed
 	
 	if ufo_pieces_label:
-		ufo_pieces_label.text = "UFO Parts: %d/%d" % [collected, needed]
+		ufo_pieces_label.text = "%d/%d" % [collected, needed]
 
 		# Color code: green when complete, black otherwise
 		if collected >= needed and needed > 0:
