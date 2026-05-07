@@ -909,11 +909,11 @@ func _get_powerup_flash_color() -> Color:
 	var flash = (sin(Time.get_ticks_msec() * 0.031) + 1.0) * 0.5
 
 	if shield_active:
-		return Color(8.05, 7.925, 0.0, 1.0).lerp(Color(0.02, 0.0, 0.0, 1.0), flash)
+		return Color(3.0, 3.0, 3.0, 1.0).lerp(Color(0.6, 0.6, 0.6, 1.0), flash)
 	elif energy_freeze_active:
-		return Color(2.0, 0.7, 0.0, 1.0).lerp(Color(0.4, 0.15, 0.0, 1.0), flash)
+		return Color(8.05, 7.925, 0.0, 1.0).lerp(Color(0.3, 0.25, 0.0, 1.0), flash)
 	elif rapid_fire_active:
-		return Color(0.0, 2.5, 0.5, 1.0).lerp(Color(0.4, 1.0, 0.4, 1.0), flash)
+		return Color(2.5, 0.0, 2.5, 1.0).lerp(Color(0.6, 0.0, 0.6, 1.0), flash)
 	return Color.WHITE
 
 func _apply_super_speed_visuals(delta: float):
