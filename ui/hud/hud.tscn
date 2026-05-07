@@ -1,6 +1,67 @@
 [gd_scene format=3 uid="uid://bahema85c45s"]
 
 [ext_resource type="Script" uid="uid://c8gcxh4gmwsi3" path="res://ui/hud/hud.gd" id="1_ahhtf"]
+[ext_resource type="FontFile" uid="uid://ctao8eoiqrfep" path="res://assets/fonts/PixelMiddle.ttf" id="2_4d6w6"]
+[ext_resource type="Texture2D" uid="uid://tvlrbd3c8bkv" path="res://entities/collectibles/ufo_piece/sprites/ufo_piece_grey.png" id="3_e0nub"]
+[ext_resource type="Texture2D" uid="uid://bcynrj04icper" path="res://ui/hud/sprites/health_meter_bg.png" id="4_imuuq"]
+[ext_resource type="Texture2D" uid="uid://dwnmb08db2821" path="res://ui/hud/sprites/health_meter_icon.png" id="4_kwc50"]
+[ext_resource type="Texture2D" uid="uid://d8dx2kcqskbg" path="res://ui/hud/sprites/health_meter_fill.png" id="5_kwc50"]
+[ext_resource type="Texture2D" uid="uid://cvho2qcv4n0fs" path="res://ui/hud/sprites/air_meter_icon.png" id="7_aixkq"]
+[ext_resource type="Texture2D" uid="uid://ct7hxton2584k" path="res://ui/hud/sprites/air_meter_bg.png" id="8_cxhb7"]
+[ext_resource type="Texture2D" uid="uid://br88qhislrpjo" path="res://ui/hud/sprites/air_meter_fill.png" id="9_5uuaq"]
+[ext_resource type="Texture2D" uid="uid://b85n8f6j75w5" path="res://ui/hud/sprites/energy_meter_bg.png" id="10_5uuaq"]
+[ext_resource type="Texture2D" uid="uid://uni07lsgrsjy" path="res://ui/hud/sprites/energy_meter_icon.png" id="10_p3vm3"]
+[ext_resource type="Texture2D" uid="uid://dwrg7nis3xtfh" path="res://ui/hud/sprites/energy_meter_fill.png" id="11_p3vm3"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_w75iv"]
+atlas = ExtResource("3_e0nub")
+region = Rect2(0, 0, 12, 12)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_imuuq"]
+atlas = ExtResource("3_e0nub")
+region = Rect2(12, 0, 12, 12)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kwc50"]
+atlas = ExtResource("3_e0nub")
+region = Rect2(24, 0, 12, 12)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_o2lis"]
+atlas = ExtResource("3_e0nub")
+region = Rect2(36, 0, 12, 12)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gfles"]
+atlas = ExtResource("3_e0nub")
+region = Rect2(48, 0, 12, 12)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_aixkq"]
+atlas = ExtResource("3_e0nub")
+region = Rect2(60, 0, 12, 12)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_cxhb7"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_w75iv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_imuuq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kwc50")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_o2lis")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gfles")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_aixkq")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
 
 [node name="HUD" type="CanvasLayer" unique_id=113944192 groups=["hud"]]
 script = ExtResource("1_ahhtf")
@@ -21,62 +82,76 @@ theme_override_constants/separation = 6
 
 [node name="ScoreLabel" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1757691156]
 layout_mode = 2
-theme_override_font_sizes/font_size = 9
-text = "Score: 0"
+theme_override_fonts/font = ExtResource("2_4d6w6")
+theme_override_font_sizes/font_size = 18
+text = "0"
 
-[node name="UFOPiecesLabel" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=448331090]
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=209910509]
 layout_mode = 2
-theme_override_font_sizes/font_size = 9
-text = "UFO: 0/0"
+
+[node name="Control" type="Control" parent="MarginContainer/VBoxContainer/HBoxContainer/HBoxContainer" unique_id=1872220412]
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="MarginContainer/VBoxContainer/HBoxContainer/HBoxContainer/Control" unique_id=1097306872]
+position = Vector2(8, 8)
+sprite_frames = SubResource("SpriteFrames_cxhb7")
+autoplay = "default"
+
+[node name="UFOPiecesLabel" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/HBoxContainer" unique_id=448331090]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_4d6w6")
+theme_override_font_sizes/font_size = 18
+text = "0/0"
 
 [node name="HealthContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1169449475]
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_constants/separation = 2
 
-[node name="HealthLabel" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/HealthContainer" unique_id=727431917]
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer/HealthContainer" unique_id=89560721]
 layout_mode = 2
-theme_override_font_sizes/font_size = 9
-text = "Health"
+texture = ExtResource("4_kwc50")
+stretch_mode = 5
 
-[node name="HealthBar" type="ProgressBar" parent="MarginContainer/VBoxContainer/HBoxContainer/HealthContainer" unique_id=144372041]
-custom_minimum_size = Vector2(55, 12)
+[node name="HealthBar" type="TextureProgressBar" parent="MarginContainer/VBoxContainer/HBoxContainer/HealthContainer" unique_id=476738002]
+custom_minimum_size = Vector2(140, 14)
 layout_mode = 2
-value = 100.0
-show_percentage = false
+texture_under = ExtResource("4_imuuq")
+texture_progress = ExtResource("5_kwc50")
 
 [node name="AirContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1848566808]
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_constants/separation = 2
 
-[node name="AirLabel" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/AirContainer" unique_id=1351889758]
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer/AirContainer" unique_id=2037010304]
 layout_mode = 2
-theme_override_font_sizes/font_size = 9
-text = "Air"
+texture = ExtResource("7_aixkq")
+stretch_mode = 5
 
-[node name="AirBar" type="ProgressBar" parent="MarginContainer/VBoxContainer/HBoxContainer/AirContainer" unique_id=117113140]
-custom_minimum_size = Vector2(55, 12)
+[node name="AirBar" type="TextureProgressBar" parent="MarginContainer/VBoxContainer/HBoxContainer/AirContainer" unique_id=1230478574]
 layout_mode = 2
 max_value = 30.0
-value = 30.0
-show_percentage = false
+step = 0.01
+texture_under = ExtResource("8_cxhb7")
+texture_progress = ExtResource("9_5uuaq")
 
 [node name="EnergyContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=424453015]
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_constants/separation = 2
 
-[node name="EnergyLabel" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/EnergyContainer" unique_id=1123686249]
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer/EnergyContainer" unique_id=215697369]
 layout_mode = 2
-theme_override_font_sizes/font_size = 9
-text = "Energy"
+texture = ExtResource("10_p3vm3")
+stretch_mode = 5
 
-[node name="EnergyBar" type="ProgressBar" parent="MarginContainer/VBoxContainer/HBoxContainer/EnergyContainer" unique_id=1827549335]
-custom_minimum_size = Vector2(55, 12)
+[node name="EnergyBar" type="TextureProgressBar" parent="MarginContainer/VBoxContainer/HBoxContainer/EnergyContainer" unique_id=1597600583]
 layout_mode = 2
-value = 100.0
-show_percentage = false
+step = 0.01
+texture_under = ExtResource("10_5uuaq")
+texture_progress = ExtResource("11_p3vm3")
 
 [node name="AlienTechContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=400000001]
 layout_mode = 2
