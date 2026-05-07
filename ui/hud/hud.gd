@@ -19,8 +19,10 @@ var hud_container: Control  # Container for flash effect
 var tech_piece_label:  Label       = null
 var slot_a_label:      Label       = null
 var slot_b_label:      Label       = null
-var slot_a_cooldown:   ProgressBar = null
-var slot_b_cooldown:   ProgressBar = null
+var slot_a_cooldown:   TextureProgressBar = null
+var slot_b_cooldown:   TextureProgressBar = null
+var slot_a_icon:       TextureRect = null
+var slot_b_icon:       TextureRect = null
 
 # Game state
 var current_score: int = 0
@@ -131,6 +133,8 @@ func _ready():
 	slot_b_label     = find_child("SlotBLabel")
 	slot_a_cooldown  = find_child("SlotACooldown")
 	slot_b_cooldown  = find_child("SlotBCooldown")
+	slot_a_icon      = find_child("SlotAIcon")
+	slot_b_icon      = find_child("SlotBIcon")
 
 	AlienTechManager.piece_collected.connect(_on_tech_piece_collected)
 	AlienTechManager.tech_slots_changed.connect(_on_tech_slots_changed)
@@ -158,10 +162,16 @@ func _process(delta):
 		slot_a_cooldown.value = _get_slot_bar_value(0)
 	if slot_b_cooldown and slot_b_cooldown.visible:
 		slot_b_cooldown.value = _get_slot_bar_value(1)
+	var dimmed_a := _is_slot_dimmed(0)
 	if slot_a_label:
-		slot_a_label.modulate.a = 0.5 if _is_slot_dimmed(0) else 1.0
+		slot_a_label.modulate.a = 0.5 if dimmed_a else 1.0
+	if slot_a_icon:
+		slot_a_icon.modulate.a = 0.5 if dimmed_a else 1.0
+	var dimmed_b := _is_slot_dimmed(1)
 	if slot_b_label:
-		slot_b_label.modulate.a = 0.5 if _is_slot_dimmed(1) else 1.0
+		slot_b_label.modulate.a = 0.5 if dimmed_b else 1.0
+	if slot_b_icon:
+		slot_b_icon.modulate.a = 0.5 if dimmed_b else 1.0
 
 	# Handle wall recovery visual feedback
 	if wall_recovery_active and energy_bar:
@@ -415,18 +425,18 @@ func _on_boss_level_started(level_number: int):
 
 func _on_tech_piece_collected(current: int, needed: int):
 	if tech_piece_label:
-		tech_piece_label.text = "Tech: %d/%d" % [current, needed]
+		tech_piece_label.text = "%d/%d" % [current, needed]
 
 func _on_tech_slots_changed(slot_a: Dictionary, slot_b: Dictionary):
-	_update_slot_display(slot_a_label, slot_a_cooldown, slot_a, "L")
-	_update_slot_display(slot_b_label, slot_b_cooldown, slot_b, "R")
+	_update_slot_display(slot_a_label, slot_a_cooldown, slot_a_icon, slot_a)
+	_update_slot_display(slot_b_label, slot_b_cooldown, slot_b_icon, slot_b)
 
-func _update_slot_display(label: Label, cooldown_bar: ProgressBar,
-		tech: Dictionary, letter: String):
+func _update_slot_display(label: Label, cooldown_bar: TextureProgressBar,
+		icon: TextureRect, tech: Dictionary):
 	if not label:
 		return
 	if tech.is_empty():
-		label.text = "[%s] ---" % letter
+		label.text = ""
 		label.modulate = Color(0.5, 0.5, 0.5, 0.8)
 		if cooldown_bar:
 			cooldown_bar.visible = false
@@ -435,9 +445,9 @@ func _update_slot_display(label: Label, cooldown_bar: ProgressBar,
 		var max_ammo := AlienTechManager.PHASE_SHIFTER_MAX_AMMO
 		var recharging := AlienTechManager.phase_shifter_recharging
 		if recharging:
-			label.text = "[%s] PHASE --/%d" % [letter, max_ammo]
+			label.text = "Phase Shifter --/%d" % max_ammo
 		else:
-			label.text = "[%s] PHASE %d/%d" % [letter, ammo, max_ammo]
+			label.text = "Phase Shifter %d/%d" % [ammo, max_ammo]
 		label.modulate = tech.get("color", Color.WHITE)
 		if cooldown_bar:
 			cooldown_bar.visible = true
@@ -445,21 +455,22 @@ func _update_slot_display(label: Label, cooldown_bar: ProgressBar,
 		var powerup_labels: Array = ["SHIELD", "AIR+", "ENERGY", "RAPFIRE"]
 		var stored := AlienTechManager.powerup_replicator_stored
 		if stored >= 0 and stored < powerup_labels.size():
-			label.text = "[%s] RPL:%s" % [letter, powerup_labels[stored]]
+			label.text = "RPL:%s" % powerup_labels[stored]
 		else:
-			label.text = "[%s] REPLICA" % letter
+			label.text = "Powerup Replicator"
 		label.modulate = tech.get("color", Color.WHITE)
 		if cooldown_bar:
 			cooldown_bar.visible = false
 	else:
-		label.text = "[%s] %s" % [letter, tech.get("slot_label", tech.get("name", "?"))]
+		label.text = tech.get("slot_label", tech.get("name", "?"))
 		label.modulate = tech.get("color", Color.WHITE)
 		if cooldown_bar:
-			cooldown_bar.visible = tech.get("needs_input", false) or tech.get("has_passive_bar", false)
+			var tech_id: String = tech.get("id", "")
+			cooldown_bar.visible = AlienTechManager.tech_has_bar(tech_id) or tech.get("has_passive_bar", false)
 
 func _refresh_tech_display():
 	if tech_piece_label:
-		tech_piece_label.text = "Tech: %d/%d" % [
+		tech_piece_label.text = "%d/%d" % [
 			AlienTechManager.pieces_this_threshold,
 			AlienTechManager.PIECES_PER_TECH
 		]
