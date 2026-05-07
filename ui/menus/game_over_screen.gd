@@ -6,6 +6,7 @@ class_name GameOverScreen
 
 @onready var game_over_panel = $Control/CenterContainer/PanelContainer
 @onready var vbox_container = $Control/CenterContainer/PanelContainer/VBoxContainer
+@onready var hint_label = $Control/CenterContainer/PanelContainer/VBoxContainer/HintLabel
 @onready var final_score_label = $Control/CenterContainer/PanelContainer/VBoxContainer/FinalScoreLabel
 @onready var high_score_label = $Control/CenterContainer/PanelContainer/VBoxContainer/HighScoreLabel
 @onready var attempts_label = $Control/CenterContainer/PanelContainer/VBoxContainer/AttemptsLabel
@@ -14,6 +15,52 @@ class_name GameOverScreen
 @onready var quit_button = $Control/CenterContainer/PanelContainer/VBoxContainer/QuitButton
 
 var final_score: int = 0
+
+const HINTS: Array[String] = [
+	"UFO Parts are heavy. Drop them if you need to.",
+	"You won't keep holding a UFO part if you take damage",
+	"Recover energy sparkly fast resting on pinball parts (and your workshop)",
+	"Reincarnation only remembers your most recent alien tech",
+	"Hold your breath longer with air bubble powerups",
+	"Crocodiles just don't wanna die do they",
+	"Clean up the ocean for points",
+	"The ocean is so happy those plastic bottles are gone, she'll give you a powerup",
+	"Alien tech encrusted in trash appear every 200 points",
+	"A clean ocean allows health plants to grow",
+	"Turtles eat apples",
+	"Pinball flippers get the job done",
+	"Nothing can stop you in super speed",
+	"It's tiring to swim. Swim smart!",
+	"What's in the sky?",
+	"Crabs make babies if left alone",
+	"Sea urchins can't be bothered",
+	"Bumper pogo",
+	"It's a dance",
+	"Turtles never run out of saliva",
+	"Relax and let the environment do the work",
+	"Breathe",
+	"Crocodiles love a good race",
+	"You're the only turtle you know that can get from surface to sea floor in one full energy sprint",
+	"You're the turtle, not the hare, after all",
+	"Listen to your lungs!",
+	"Why's the US military so uptight about aliens?",
+	"Trying a variety of alien techs will gain you wisdom",
+	"Ocean currents weeeeeeeee!",
+	"Your name is Flip for a reason",
+]
+
+static var _shown_hint_indices: Array[int] = []
+
+static func _pick_hint() -> String:
+	if _shown_hint_indices.size() >= HINTS.size():
+		_shown_hint_indices.clear()
+	var remaining: Array[int] = []
+	for i in range(HINTS.size()):
+		if not _shown_hint_indices.has(i):
+			remaining.append(i)
+	var idx: int = remaining[randi() % remaining.size()]
+	_shown_hint_indices.append(idx)
+	return HINTS[idx]
 
 func _ready():
 	add_to_group("game_over_screen")
@@ -32,15 +79,18 @@ func _ready():
 func show_game_over(score: int):
 	"""Display the game over screen with final score and high score"""
 	final_score = score
-	
+
 	# Get current level info from LevelManager
 	var level_name = LevelManager.get_current_level_name()
 	var high_score = GameManager.get_high_score(level_name)
-	
+
+	if hint_label:
+		hint_label.text = _pick_hint()
+
 	# Show final score
 	if final_score_label:
 		final_score_label.text = "Final Score: %d" % final_score
-	
+
 	# Show attempt count
 	if attempts_label:
 		attempts_label.text = "Attempts: %d" % LevelManager.attempt_count
