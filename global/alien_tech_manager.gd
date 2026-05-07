@@ -184,6 +184,9 @@ func set_passive_bar(tech_id: String, ratio: float):
 func clear_passive_bar(tech_id: String):
 	_passive_bar_ratios.erase(tech_id)
 
+func tech_has_bar(tech_id: String) -> bool:
+	return _COOLDOWN_DURATIONS.has(tech_id)
+
 # ─── Run lifecycle ───────────────────────────────────────────────────────────
 
 func reset_run():

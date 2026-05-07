@@ -12,6 +12,10 @@
 [ext_resource type="Texture2D" uid="uid://b85n8f6j75w5" path="res://ui/hud/sprites/energy_meter_bg.png" id="10_5uuaq"]
 [ext_resource type="Texture2D" uid="uid://uni07lsgrsjy" path="res://ui/hud/sprites/energy_meter_icon.png" id="10_p3vm3"]
 [ext_resource type="Texture2D" uid="uid://dwrg7nis3xtfh" path="res://ui/hud/sprites/energy_meter_fill.png" id="11_p3vm3"]
+[ext_resource type="Texture2D" uid="uid://b6kds15kk8tw4" path="res://ui/hud/sprites/tech_left_icon.png" id="13_6gxmt"]
+[ext_resource type="Texture2D" uid="uid://b7jh7ou1gcun1" path="res://ui/hud/sprites/tech_meter_bg.png" id="14_olkg6"]
+[ext_resource type="Texture2D" uid="uid://duwdo5p0ymd0f" path="res://ui/hud/sprites/tech_meter_fill.png" id="15_hk13k"]
+[ext_resource type="Texture2D" uid="uid://c8tawqv3ivo5u" path="res://ui/hud/sprites/tech_right_icon.png" id="16_uyo40"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_w75iv"]
 atlas = ExtResource("3_e0nub")
@@ -67,6 +71,8 @@ animations = [{
 script = ExtResource("1_ahhtf")
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=844841658]
+anchors_preset = 10
+anchor_right = 1.0
 theme_override_constants/margin_left = 4
 theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
@@ -132,6 +138,7 @@ stretch_mode = 5
 
 [node name="AirBar" type="TextureProgressBar" parent="MarginContainer/VBoxContainer/HBoxContainer/AirContainer" unique_id=1230478574]
 layout_mode = 2
+size_flags_vertical = 4
 max_value = 30.0
 step = 0.01
 texture_under = ExtResource("8_cxhb7")
@@ -155,41 +162,64 @@ texture_progress = ExtResource("11_p3vm3")
 
 [node name="AlienTechContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=400000001]
 layout_mode = 2
-theme_override_constants/separation = 6
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
 
-[node name="TechPieceLabel" type="Label" parent="MarginContainer/VBoxContainer/AlienTechContainer" unique_id=400000002]
+[node name="LeftTechContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/AlienTechContainer" unique_id=400000003]
 layout_mode = 2
-theme_override_font_sizes/font_size = 9
-text = "Tech: 0/1"
-
-[node name="SlotAContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/AlienTechContainer" unique_id=400000003]
-layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 3
 
-[node name="SlotALabel" type="Label" parent="MarginContainer/VBoxContainer/AlienTechContainer/SlotAContainer" unique_id=400000004]
+[node name="SlotAIcon" type="TextureRect" parent="MarginContainer/VBoxContainer/AlienTechContainer/LeftTechContainer" unique_id=400000010]
+custom_minimum_size = Vector2(12, 12)
 layout_mode = 2
-theme_override_font_sizes/font_size = 9
-text = "[A] ---"
+size_flags_vertical = 4
+texture = ExtResource("13_6gxmt")
+stretch_mode = 5
 
-[node name="SlotACooldown" type="ProgressBar" parent="MarginContainer/VBoxContainer/AlienTechContainer/SlotAContainer" unique_id=400000005]
+[node name="SlotALabel" type="Label" parent="MarginContainer/VBoxContainer/AlienTechContainer/LeftTechContainer" unique_id=400000004]
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = ExtResource("2_4d6w6")
+theme_override_font_sizes/font_size = 18
+
+[node name="SlotACooldown" type="TextureProgressBar" parent="MarginContainer/VBoxContainer/AlienTechContainer/LeftTechContainer" unique_id=1546841720]
 visible = false
-custom_minimum_size = Vector2(40, 6)
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
 max_value = 1.0
-show_percentage = false
+step = 0.01
+texture_under = ExtResource("14_olkg6")
+texture_progress = ExtResource("15_hk13k")
 
-[node name="SlotBContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/AlienTechContainer" unique_id=400000006]
+[node name="RightTechContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/AlienTechContainer" unique_id=400000006]
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 3
+alignment = 2
 
-[node name="SlotBLabel" type="Label" parent="MarginContainer/VBoxContainer/AlienTechContainer/SlotBContainer" unique_id=400000007]
-layout_mode = 2
-theme_override_font_sizes/font_size = 9
-text = "[B] ---"
-
-[node name="SlotBCooldown" type="ProgressBar" parent="MarginContainer/VBoxContainer/AlienTechContainer/SlotBContainer" unique_id=400000008]
+[node name="SlotBCooldown" type="TextureProgressBar" parent="MarginContainer/VBoxContainer/AlienTechContainer/RightTechContainer" unique_id=814791018]
 visible = false
-custom_minimum_size = Vector2(40, 6)
 layout_mode = 2
+size_flags_vertical = 4
 max_value = 1.0
-show_percentage = false
+step = 0.01
+fill_mode = 1
+texture_under = ExtResource("14_olkg6")
+texture_progress = ExtResource("15_hk13k")
+
+[node name="SlotBLabel" type="Label" parent="MarginContainer/VBoxContainer/AlienTechContainer/RightTechContainer" unique_id=400000007]
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = ExtResource("2_4d6w6")
+theme_override_font_sizes/font_size = 18
+
+[node name="SlotBIcon" type="TextureRect" parent="MarginContainer/VBoxContainer/AlienTechContainer/RightTechContainer" unique_id=400000011]
+custom_minimum_size = Vector2(12, 12)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("16_uyo40")
+stretch_mode = 5

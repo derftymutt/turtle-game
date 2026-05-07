@@ -84,7 +84,7 @@ func _destroy():
 	freeze = true
 
 	if _hud:
-		_hud.add_score(25)
+		_hud.add_score(20)
 
 	# Notify the shared tracker — tech piece may spawn from here
 	if all_destroyed_callback.is_valid():
