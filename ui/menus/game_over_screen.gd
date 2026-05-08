@@ -106,14 +106,14 @@ func show_game_over(level_score: int, run_total: int):
 		retry_button.grab_focus()
 
 func _show_save_prompt(action: Callable):
-	"""Show a save-before-quitting dialog, then call action regardless of choice."""
 	var dialog = ConfirmationDialog.new()
 	dialog.title = "Save Progress?"
 	dialog.dialog_text = "Save and resume at Level %d later?" % LevelManager.current_level_number
 	dialog.ok_button_text = "Save"
-	dialog.cancel_button_text = "Don't Save"
+	dialog.cancel_button_text = "Cancel"
 	dialog.process_mode = Node.PROCESS_MODE_ALWAYS
 	add_child(dialog)
+	dialog.add_button("Don't Save", false, "no_save")
 	dialog.confirmed.connect(func():
 		SaveManager.save_game()
 		dialog.queue_free()
@@ -121,7 +121,11 @@ func _show_save_prompt(action: Callable):
 	)
 	dialog.canceled.connect(func():
 		dialog.queue_free()
-		action.call()
+	)
+	dialog.custom_action.connect(func(action_name: StringName):
+		if action_name == "no_save":
+			dialog.queue_free()
+			action.call()
 	)
 	dialog.popup_centered()
 

@@ -261,6 +261,18 @@ func find_empty_slot() -> int:
 			return i
 	return -1
 
+func swap_slots() -> void:
+	var temp_slot := slots[0]
+	slots[0] = slots[1]
+	slots[1] = temp_slot
+	var temp_cd := _cooldowns[0]
+	_cooldowns[0] = _cooldowns[1]
+	_cooldowns[1] = temp_cd
+	var temp_order := _slot_assigned_order[0]
+	_slot_assigned_order[0] = _slot_assigned_order[1]
+	_slot_assigned_order[1] = temp_order
+	tech_slots_changed.emit(slots[0], slots[1])
+
 func _slot_letter(index: int) -> String:
 	match index:
 		0: return "L"

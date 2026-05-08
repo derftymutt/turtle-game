@@ -207,7 +207,7 @@ position = Vector2(95, 17)
 position = Vector2(225, -138)
 
 [node name="ElectricEelSpawner" parent="." index="31" unique_id=1752833975 instance=ExtResource("19_cp3aq")]
-spawn_interval = 15.0
+spawn_interval = 13.0
 
 [node name="HealthPlantSpawner" parent="." index="32" unique_id=1172793188 instance=ExtResource("22_ngvhw")]
 
