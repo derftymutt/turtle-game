@@ -66,19 +66,23 @@ func _enemy_ready():
 func _physics_process(delta):
 	# Lock to surface depth
 	_apply_surface_locking()
-	
+
 	# Visual bobbing animation
 	_update_bobbing(delta)
-	
+
 	# Calculate and apply movement
 	var movement_x = _calculate_movement(delta)
 	global_position.x += movement_x
-	
+
 	# Update sprite animation and orientation
 	_update_sprite_state(movement_x)
-	
+
 	# Prevent excessive rotation
 	rotation = clamp(rotation, deg_to_rad(-15), deg_to_rad(15))
+
+	# Continuously repel any player overlapping the damage area so the turtle
+	# can never get pinned (body_entered only fires once per contact).
+	_repel_overlapping_players()
 
 func _calculate_movement(delta: float) -> float:
 	"""Calculate horizontal movement based on current state"""
@@ -204,6 +208,19 @@ func _deal_damage_to_player(player_node: Node2D):
 	# Extra upward boost if player hit from below
 	if knockback_dir.y > 0:
 		player_node.linear_velocity.y -= upward_boost
+
+func _repel_overlapping_players():
+	if not damage_area:
+		return
+	for body in damage_area.get_overlapping_bodies():
+		if not body.is_in_group("player") or not body is RigidBody2D:
+			continue
+		var push_dir = body.global_position - global_position
+		if push_dir.length() < 0.1:
+			push_dir = Vector2.UP
+		else:
+			push_dir = push_dir.normalized()
+		(body as RigidBody2D).apply_central_force(push_dir * 3000.0)
 
 func die():
 	"""Custom death animation - spin and sink"""
