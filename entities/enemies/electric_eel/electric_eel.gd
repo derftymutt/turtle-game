@@ -233,8 +233,10 @@ func _maintain_depth():
 	var correction = 0.0
 
 	if depth < 0:
-		# Above the water surface - apply strong downward force that grows with distance
-		correction = depth_correction_force * 8.0 + abs(depth) * 2.0
+		# Above ocean surface — hard barrier: clamp position and kill upward velocity
+		global_position.y = ocean.surface_y
+		linear_velocity.y = maxf(linear_velocity.y, 0.0)
+		return
 	elif depth < preferred_depth_min:
 		correction = depth_correction_force
 	elif depth > preferred_depth_max:
