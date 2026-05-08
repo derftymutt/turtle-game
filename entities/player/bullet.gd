@@ -135,6 +135,8 @@ func _on_body_entered(body):
 
 	# Hit trash items
 	if body.is_in_group("trash_items"):
+		if body.has_method("destroy_trash"):
+			body.destroy_trash()
 		queue_free()
 		return
 

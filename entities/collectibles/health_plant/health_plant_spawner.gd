@@ -79,9 +79,17 @@ func _try_spawn_plant() -> void:
 func _find_eligible_walls() -> Array:
 	var eligible: Array = []
 
+	var ocean = get_tree().get_first_node_in_group("ocean")
+	var surface_y = -126.0
+	if ocean:
+		surface_y = ocean.surface_y
+
 	for wall in get_tree().get_nodes_in_group("walls"):
 		if not wall is DeadWall:
 			continue
+
+		if wall.global_position.y <= surface_y:
+			continue  # Skip walls in the sky
 
 		## Use BaseWall's helper — no more direct wall_length property
 		if wall.get_pixel_length() < min_wall_length:

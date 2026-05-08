@@ -107,8 +107,11 @@ func spawn_trash_item(index: int):
 	
 	var trash = trash_item_scene.instantiate()
 	
-	# Calculate spawn position based on pattern
+	# Calculate spawn position based on pattern, clamped to ocean
 	var spawn_pos = calculate_spawn_position(index)
+	var ocean = get_tree().get_first_node_in_group("ocean")
+	if ocean:
+		spawn_pos.y = max(spawn_pos.y, ocean.surface_y + 10.0)
 	trash.global_position = spawn_pos
 	
 	# Calculate drift direction based on spawn side

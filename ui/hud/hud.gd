@@ -61,8 +61,8 @@ var wall_recovery_active: bool = false  # NEW: Track if we're actively recoverin
 
 # Timer system
 @export_group("Timer System")
-@export var timer_enabled: bool = false
-@export var level_time_limit: float = 120.0
+@export var timer_enabled: bool = true
+@export var level_time_limit: float = 240.0
 var timer_label: Label = null
 var time_remaining: float = 0.0
 var _timer_active: bool = false
@@ -310,6 +310,12 @@ func _spawn_trash_cluster():
 		cluster.drift_speed = 38.0
 		scene.add_child(cluster)
 		cluster.global_position = inv * Vector2(-55, spawn_y)
+	# Ensure the cluster spawns in the ocean, not the sky
+	var ocean = get_tree().get_first_node_in_group("ocean")
+	var min_world_y = -116.0  # 10px below default surface_y of -126
+	if ocean:
+		min_world_y = ocean.surface_y + 10.0
+	cluster.global_position.y = max(cluster.global_position.y, min_world_y)
 	print("👾 Trash cluster spawned at score %d" % current_score)
 
 ## Update health display
