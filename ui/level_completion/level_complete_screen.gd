@@ -3,56 +3,66 @@ extends CanvasLayer
 class_name LevelCompleteScreen
 
 ## Simple overlay screen shown when a level is completed
-## Displays completion message and score before transitioning to next level
 
-# Node references
 @onready var title_label: Label = $CenterContainer/VBoxContainer/TitleLabel
-@onready var pieces_label: Label = $CenterContainer/VBoxContainer/StatsContainer/PiecesLabel
 @onready var score_label: Label = $CenterContainer/VBoxContainer/StatsContainer/ScoreLabel
+@onready var time_bonus_label: Label = $CenterContainer/VBoxContainer/StatsContainer/TimeBonusLabel
+@onready var first_try_label: Label = $CenterContainer/VBoxContainer/StatsContainer/FirstTryLabel
+@onready var variety_label: Label = $CenterContainer/VBoxContainer/StatsContainer/VarietyLabel
+@onready var total_score_label: Label = $CenterContainer/VBoxContainer/StatsContainer/TotalScoreLabel
 @onready var attempts_label: Label = $CenterContainer/VBoxContainer/StatsContainer/AttemptsLabel
 @onready var continue_label: Label = $CenterContainer/VBoxContainer/ContinueLabel
+@onready var next_level_button: Button = $CenterContainer/VBoxContainer/NextLevelButton
 
-# Animation
 var pulse_timer: float = 0.0
 var pulse_speed: float = 3.0
 
 func _ready():
-	# Start hidden
 	hide()
-	
-	# Verify node references
-	if not title_label:
-		push_warning("LevelCompleteScreen: Missing TitleLabel!")
-	if not score_label:
-		push_warning("LevelCompleteScreen: Missing ScoreLabel!")
-	if not pieces_label:
-		push_warning("LevelCompleteScreen: Missing PiecesLabel!")
-	if not attempts_label:
-		push_warning("LevelCompleteScreen: Missing AttemptsLabel!")
-	if not continue_label:
-		push_warning("LevelCompleteScreen: Missing ContinueLabel!")
+	next_level_button.pressed.connect(_on_next_level_pressed)
 
 func _process(delta):
-	# Pulse the "Assembling UFO..." text
 	if visible and continue_label:
 		pulse_timer += delta * pulse_speed
 		var alpha = (sin(pulse_timer) + 1.0) / 2.0
 		continue_label.modulate.a = 0.5 + (alpha * 0.5)
 
-func show_completion(level_number: int, final_score: int, pieces_collected: int, pieces_needed: int, attempts: int = 1):
-	"""Display the level complete screen with stats"""
-	# Update labels
+func show_completion(
+	level_number: int,
+	level_score: int,
+	run_total: int,
+	time_bonus: int,
+	first_try_bonus: int,
+	variety_count: int,
+	_pieces_collected: int,
+	_pieces_needed: int,
+	attempts: int = 1
+):
 	if title_label:
 		title_label.text = "Level %d Complete!" % level_number
-	
-	if pieces_label:
-		pieces_label.text = "All %d UFO Pieces Collected!" % pieces_needed
-		
-		
-	print('final_score', final_score)
-	
+
 	if score_label:
-		score_label.text = "Score: %d" % final_score
+		score_label.text = "Level Score: %d" % level_score
+
+	if time_bonus_label:
+		time_bonus_label.text = "Time Bonus: +%d" % time_bonus
+		time_bonus_label.modulate = Color.CYAN if time_bonus > 0 else Color.GRAY
+
+	if first_try_label:
+		if first_try_bonus > 0:
+			first_try_label.text = "First Try! +%d" % first_try_bonus
+			first_try_label.modulate = Color.GOLD
+			first_try_label.visible = true
+		else:
+			first_try_label.visible = false
+
+	if variety_label:
+		var variety_pts = variety_count * LevelManager.VARIETY_BONUS_PER_TECH
+		variety_label.text = "Tech Variety: %d unique (+%d at run end)" % [variety_count, variety_pts]
+		variety_label.modulate = Color.MEDIUM_PURPLE
+
+	if total_score_label:
+		total_score_label.text = "Total Score: %d" % run_total
 
 	if attempts_label:
 		attempts_label.text = "Attempts: %d" % attempts
@@ -60,34 +70,31 @@ func show_completion(level_number: int, final_score: int, pieces_collected: int,
 	if continue_label:
 		continue_label.text = "Assembling UFO..."
 		pulse_timer = 0.0
-	
-	# Play entrance animation
+
+	get_tree().paused = true
 	show()
 	_play_entrance_animation()
-	
-	print("🎉 Level Complete screen shown!")
+	next_level_button.grab_focus()
+
+func _on_next_level_pressed():
+	get_tree().paused = false
+	LevelManager.load_next_level()
 
 func _play_entrance_animation():
-	"""Simple fade-in and scale animation"""
 	var container = $CenterContainer/VBoxContainer
-	
 	if not container:
 		return
-	
-	# Start from small and transparent
+
 	container.scale = Vector2(0.5, 0.5)
 	container.modulate.a = 0.0
-	
-	# Tween to full size and opacity
+
 	var tween = create_tween()
 	tween.set_parallel(true)
-	
 	tween.tween_property(container, "scale", Vector2.ONE, 0.5)\
 		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	
 	tween.tween_property(container, "modulate:a", 1.0, 0.3)\
 		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
-## Hide the screen (called before scene transition)
 func hide_screen():
+	get_tree().paused = false
 	hide()

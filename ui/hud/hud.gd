@@ -541,6 +541,9 @@ func _get_slot_bar_value(slot_index: int) -> float:
 		return float(AlienTechManager.phase_shifter_ammo) / float(AlienTechManager.PHASE_SHIFTER_MAX_AMMO)
 	return 1.0 - AlienTechManager.get_cooldown_ratio(slot_index)
 
+func freeze_timer():
+	_timer_active = false
+
 func _is_slot_dimmed(slot_index: int) -> bool:
 	var tech := AlienTechManager.slots[slot_index]
 	if tech.get("id", "") == AlienTechRegistry.PHASE_SHIFTER:

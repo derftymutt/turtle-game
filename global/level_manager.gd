@@ -35,6 +35,11 @@ var pieces_needed_by_level: Dictionary = {
 	# etc...
 }
 
+# Performance bonus constants
+const FIRST_TRY_BONUS: int = 300
+const MAX_TIME_BONUS: int = 300
+const VARIETY_BONUS_PER_TECH: int = 75
+
 # Boss levels — completion is triggered by defeating the boss, not delivering pieces
 var boss_levels: Dictionary = {
 	5: true,
@@ -101,36 +106,46 @@ func complete_level():
 	"""Trigger level completion sequence"""
 	level_complete.emit()
 	print("🚀 Level %d complete! Assembling UFO..." % current_level_number)
-	
+
+	# Freeze HUD timer immediately so time_remaining stays accurate for bonus calc
+	var hud = get_tree().get_first_node_in_group("hud")
+	if hud and hud.has_method("freeze_timer"):
+		hud.freeze_timer()
+
+	# Compute per-level performance bonuses
+	var time_bonus: int = 0
+	if hud and hud.get("timer_enabled"):
+		time_bonus = int(floor(hud.time_remaining / hud.level_time_limit * MAX_TIME_BONUS))
+	var first_try_bonus: int = FIRST_TRY_BONUS if attempt_count == 1 else 0
+
+	# Accumulate level score + per-level bonuses into run total
+	GameManager.total_score += GameManager.current_score + time_bonus + first_try_bonus
+
+	print("📊 Level bonuses — Time: +%d, First Try: +%d" % [time_bonus, first_try_bonus])
+
 	# Update high score for completed level
 	var level_name = "level_%d" % current_level_number
 	GameManager.update_high_score(level_name, GameManager.current_score)
-	
-	# Show level complete screen
-	_show_level_complete_screen()
-	
-	# Wait a bit longer to let player enjoy the moment
-	await get_tree().create_timer(3.0).timeout
-	load_next_level()
 
-func _show_level_complete_screen():
-	"""Create and show the level complete screen"""
-	# Look for existing level complete screen in the scene tree
+	# Show level complete screen
+	_show_level_complete_screen(time_bonus, first_try_bonus)
+	# Progression is now driven by the player pressing "Next Level" on the completion screen
+
+func _show_level_complete_screen(time_bonus: int, first_try_bonus: int):
 	var level_complete_screen = get_tree().get_first_node_in_group("level_complete_screen")
-	
 	if level_complete_screen and level_complete_screen.has_method("show_completion"):
-		
-		print('gamemanager score:', GameManager.current_score)
-		# Update existing screen
 		level_complete_screen.show_completion(
 			current_level_number,
 			GameManager.current_score,
+			GameManager.total_score,
+			time_bonus,
+			first_try_bonus,
+			AlienTechManager.get_variety_count(),
 			pieces_collected,
 			pieces_needed,
 			attempt_count
 		)
 	else:
-		# No screen found - this is okay, just log it
 		print("⚠️ No LevelCompleteScreen found in scene. Add one to levels for visual feedback!")
 
 func load_next_level():
@@ -140,8 +155,11 @@ func load_next_level():
 	if next_level in level_scenes:
 		load_level(next_level)
 	else:
-		print("🎉 Game complete! No more levels.")
-		# TODO: Load credits/end screen
+		var variety_bonus = AlienTechManager.get_variety_count() * VARIETY_BONUS_PER_TECH
+		GameManager.total_score += variety_bonus
+		print("🎉 Game complete! Variety bonus: +%d (%d unique techs). Final score: %d" % [
+			variety_bonus, AlienTechManager.get_variety_count(), GameManager.total_score
+		])
 		GameManager.load_main_menu()
 
 func load_level(level_number: int):

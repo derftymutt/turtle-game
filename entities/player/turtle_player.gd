@@ -770,7 +770,7 @@ func die():
 	else:
 		var game_over_screen = get_tree().get_first_node_in_group("game_over_screen")
 		if game_over_screen and game_over_screen.has_method("show_game_over"):
-			game_over_screen.show_game_over(final_score, GameManager.current_level)
+			game_over_screen.show_game_over(final_score, GameManager.total_score)
 		else:
 			push_warning("No GameOverScreen found!")
 			await get_tree().create_timer(2.0).timeout

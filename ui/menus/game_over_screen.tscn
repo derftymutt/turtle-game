@@ -53,13 +53,14 @@ autowrap_mode = 3
 [node name="FinalScoreLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer" unique_id=1215740609]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
-text = "Final Score: 0"
+text = "Level Score: 0"
 horizontal_alignment = 1
 
-[node name="HighScoreLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer" unique_id=1457209019]
+[node name="TotalScoreLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
-size_flags_horizontal = 4
-text = "High Score: 0"
+theme_override_font_sizes/font_size = 16
+text = "Run Total: 0"
+horizontal_alignment = 1
 
 [node name="AttemptsLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer" unique_id=112837461]
 layout_mode = 2

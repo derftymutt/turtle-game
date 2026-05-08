@@ -2,7 +2,7 @@
 extends CanvasLayer
 class_name PauseMenu
 
-## Pause menu - toggled by the "pause" input action during gameplay
+## Pause menu — toggled by the "pause" input action during gameplay
 
 @onready var resume_button = $Control/CenterContainer/PanelContainer/VBoxContainer/ResumeButton
 @onready var quit_button = $Control/CenterContainer/PanelContainer/VBoxContainer/QuitButton
@@ -14,10 +14,10 @@ func _ready():
 	if resume_button:
 		resume_button.pressed.connect(_on_resume_pressed)
 	if quit_button:
+		quit_button.text = "Quit to Menu"
 		quit_button.pressed.connect(_on_quit_pressed)
 
 func _input(event):
-	# Toggle pause menu on "pause" action
 	if event.is_action_pressed("pause"):
 		if visible:
 			_resume()
@@ -29,7 +29,6 @@ func _input(event):
 	if not visible:
 		return
 
-	# Keyboard/controller confirm
 	if event.is_action_pressed("ui_accept"):
 		if resume_button and resume_button.has_focus():
 			_on_resume_pressed()
@@ -49,6 +48,28 @@ func _resume():
 func _on_resume_pressed():
 	_resume()
 
+func _show_save_prompt(action: Callable):
+	"""Show a save-before-quitting dialog, then call action regardless of choice."""
+	var dialog = ConfirmationDialog.new()
+	dialog.title = "Save Progress?"
+	dialog.dialog_text = "Save and resume at Level %d later?" % LevelManager.current_level_number
+	dialog.ok_button_text = "Save"
+	dialog.cancel_button_text = "Don't Save"
+	dialog.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(dialog)
+	dialog.confirmed.connect(func():
+		SaveManager.save_game()
+		dialog.queue_free()
+		action.call()
+	)
+	dialog.canceled.connect(func():
+		dialog.queue_free()
+		action.call()
+	)
+	dialog.popup_centered()
+
 func _on_quit_pressed():
-	get_tree().paused = false
-	GameManager.load_main_menu()
+	_show_save_prompt(func():
+		get_tree().paused = false
+		GameManager.load_main_menu()
+	)
