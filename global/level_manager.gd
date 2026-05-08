@@ -8,13 +8,22 @@ signal level_complete
 signal level_started(level_number)
 signal boss_level_started(level_number)
 
+# The game ends after this level — beats it → victory screen
+const TOTAL_LEVELS: int = 5
+
 # Level progression
-var current_level_number: int = 1
+var current_level_number: int = 0
 var pieces_collected: int = 0
 var pieces_needed: int = 3
-var attempt_count: int = 1  # How many attempts on the current level
+var attempt_count: int = 1        # Attempts on the current level only
+var total_attempt_count: int = 0  # Cumulative across all levels; incremented every load_level()
 var alien_tech_pieces_collected: int = 0  # Persists across retries; resets only on new level
 var flora_hidden_budget: int = -1          # Rolled once per level; -1 = not yet rolled
+
+# Time tracking (wall-clock milliseconds)
+var _attempt_start_time_ms: int = 0
+var total_time_ms: int = 0       # All attempts including failures
+var successful_time_ms: int = 0  # Only successful attempts
 
 # Level scene registry
 var level_scenes: Dictionary = {
@@ -48,6 +57,18 @@ var boss_levels: Dictionary = {
 
 func _ready():
 	print("🎮 LevelManager initialized")
+
+func reset_run():
+	"""Called by GameManager.reset_game() to start a fresh run."""
+	current_level_number = 0
+	attempt_count = 1
+	total_attempt_count = 0
+	pieces_collected = 0
+	alien_tech_pieces_collected = 0
+	flora_hidden_budget = -1
+	_attempt_start_time_ms = 0
+	total_time_ms = 0
+	successful_time_ms = 0
 
 func is_boss_level(level_number: int = -1) -> bool:
 	"""Returns true if the given level (or current level) is a boss level"""
@@ -104,6 +125,13 @@ func deliver_piece():
 
 func complete_level():
 	"""Trigger level completion sequence"""
+	# Capture this attempt's duration before any state changes
+	if _attempt_start_time_ms > 0:
+		var elapsed := Time.get_ticks_msec() - _attempt_start_time_ms
+		total_time_ms += elapsed
+		successful_time_ms += elapsed
+		_attempt_start_time_ms = 0
+
 	level_complete.emit()
 	print("🚀 Level %d complete! Assembling UFO..." % current_level_number)
 
@@ -132,6 +160,14 @@ func complete_level():
 	# Progression is now driven by the player pressing "Next Level" on the completion screen
 
 func _show_level_complete_screen(time_bonus: int, first_try_bonus: int):
+	# Final level: skip the per-level summary and go straight to the victory screen
+	if current_level_number >= TOTAL_LEVELS:
+		var variety_bonus := AlienTechManager.get_variety_count() * VARIETY_BONUS_PER_TECH
+		GameManager.total_score += variety_bonus
+		print("🏆 Game complete! Variety bonus: +%d. Final score: %d" % [variety_bonus, GameManager.total_score])
+		GameManager.load_victory_screen()
+		return
+
 	var level_complete_screen = get_tree().get_first_node_in_group("level_complete_screen")
 	if level_complete_screen and level_complete_screen.has_method("show_completion"):
 		level_complete_screen.show_completion(
@@ -151,16 +187,13 @@ func _show_level_complete_screen(time_bonus: int, first_try_bonus: int):
 func load_next_level():
 	"""Load the next level scene"""
 	var next_level = current_level_number + 1
-	
 	if next_level in level_scenes:
 		load_level(next_level)
 	else:
+		# Fallback for any level beyond TOTAL_LEVELS
 		var variety_bonus = AlienTechManager.get_variety_count() * VARIETY_BONUS_PER_TECH
 		GameManager.total_score += variety_bonus
-		print("🎉 Game complete! Variety bonus: +%d (%d unique techs). Final score: %d" % [
-			variety_bonus, AlienTechManager.get_variety_count(), GameManager.total_score
-		])
-		GameManager.load_main_menu()
+		GameManager.load_victory_screen()
 
 func load_level(level_number: int):
 	"""Load a specific level scene"""
@@ -168,27 +201,34 @@ func load_level(level_number: int):
 		push_error("Level %d not found in level_scenes!" % level_number)
 		return
 
-	# Reset attempts only when loading a genuinely new level (not a retry)
+	# Reset per-level state when entering a genuinely new level (not a retry)
 	if level_number != current_level_number:
 		attempt_count = 1
 		alien_tech_pieces_collected = 0
 		flora_hidden_budget = -1
 	current_level_number = level_number
-	pieces_collected = 0  # Reset for new level
-	
+	pieces_collected = 0
+
+	# Every call to load_level() starts one attempt (new or retry)
+	total_attempt_count += 1
+	_attempt_start_time_ms = Time.get_ticks_msec()
+
 	var level_path = level_scenes[level_number]
 	print("📂 Loading level %d: %s" % [level_number, level_path])
-	
-	# Reset carrying state between levels
+
 	GameManager.is_carrying_piece = false
 	GameManager.carried_piece = null
-	
+
 	get_tree().change_scene_to_file(level_path)
 
 func restart_current_level():
 	"""Restart the current level (for game over)"""
 	attempt_count += 1
-	load_level(current_level_number)
+	# Failed attempt counts toward total time only
+	if _attempt_start_time_ms > 0:
+		total_time_ms += Time.get_ticks_msec() - _attempt_start_time_ms
+		_attempt_start_time_ms = 0
+	load_level(current_level_number)  # load_level increments total_attempt_count and resets start time
 
 func get_or_roll_flora_budget(min_count: int, max_count: int) -> int:
 	if flora_hidden_budget < 0:

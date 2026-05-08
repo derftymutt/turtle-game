@@ -13,7 +13,31 @@ func _ready():
 	guide_screen = get_tree().get_first_node_in_group("guide_screen")
 	_build_buttons()
 
+func _format_ms(ms: int) -> String:
+	var total_sec := ms / 1000
+	var minutes := total_sec / 60
+	var seconds := total_sec % 60
+	return "%d:%02d" % [minutes, seconds]
+
 func _build_buttons():
+	# === BEST VICTORY RECORDS ===
+	var best_victory := SaveManager.get_best_victory_score()
+	var best_time_ms := SaveManager.get_best_victory_time_ms()
+	if best_victory > 0 or best_time_ms > 0:
+		var records_label := Label.new()
+		var records_text := ""
+		if best_victory > 0:
+			records_text += "Best Score: %d" % best_victory
+		if best_time_ms > 0:
+			if records_text != "":
+				records_text += "   "
+			records_text += "Best Time: %s" % _format_ms(best_time_ms)
+		records_label.text = records_text
+		records_label.add_theme_font_size_override("font_size", 13)
+		records_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.0))
+		records_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		level_container.add_child(records_label)
+
 	# === CONTINUE (only when a save exists) ===
 	if SaveManager.has_save():
 		var level = SaveManager.get_save_level()
@@ -62,9 +86,11 @@ func _build_buttons():
 	quit_button.pressed.connect(_on_quit_pressed)
 	level_container.add_child(quit_button)
 
-	# Focus the topmost primary button
-	if level_container.get_child_count() > 0:
-		level_container.get_child(0).grab_focus()
+	# Focus the first Button child (skip Labels)
+	for child in level_container.get_children():
+		if child is Button:
+			child.grab_focus()
+			break
 
 func _on_continue_pressed():
 	SaveManager.apply_save()
@@ -115,5 +141,8 @@ func _on_quit_pressed():
 func show_menu():
 	"""Called by guide screen when returning to menu"""
 	visible = true
-	if level_container and level_container.get_child_count() > 0:
-		level_container.get_child(0).grab_focus()
+	if level_container:
+		for child in level_container.get_children():
+			if child is Button:
+				child.grab_focus()
+				break
