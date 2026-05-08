@@ -781,13 +781,11 @@ func die():
 # ---------------------------------------------------------------------------
 
 func _on_body_entered(body: Node):
-	"""Track walls for energy recovery bonus"""
-	if body.is_in_group("walls") or body is StaticBody2D:
+	if body.is_in_group("walls"):
 		if not body in touching_walls:
 			touching_walls.append(body)
 
 func _on_body_exited(body: Node):
-	"""Stop tracking walls when we leave them"""
 	if body in touching_walls:
 		touching_walls.erase(body)
 

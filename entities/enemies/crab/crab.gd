@@ -46,6 +46,10 @@ var ocean: Ocean = null
 var _reproduce_timer: float = 0.0
 var _has_reproduced: bool = false
 
+# Relocation timeout — prevents permanent RELOCATING invincibility if crab gets stuck
+var _relocation_elapsed: float = 0.0
+const RELOCATION_TIMEOUT: float = 3.0
+
 func _enemy_ready():
 	# Physics setup - stays put on floor
 	gravity_scale = 0.0
@@ -140,20 +144,18 @@ func _throwing_behavior(_delta: float):
 
 func _relocating_behavior(delta: float):
 	"""Scuttle to new location"""
+	_relocation_elapsed += delta
+
+	# If stuck (boxed by walls or other crabs), give up and return to idle
+	if _relocation_elapsed >= RELOCATION_TIMEOUT:
+		_finish_relocation()
+		return
+
 	var to_target = relocation_target - global_position
 	var distance = to_target.length()
-	
-	if distance < 20.0:
-		var animated_sprite = get_node_or_null("AnimatedSprite2D")
-		if animated_sprite and animated_sprite.sprite_frames:
-			if current_health <= 10.0 and animated_sprite.sprite_frames.has_animation("near_death"):
-				animated_sprite.play('near_death')
-			elif animated_sprite.sprite_frames.has_animation("default"):
-				animated_sprite.play('default')
 
-		starting_position = global_position
-		current_state = State.IDLE
-		throw_timer = throw_cooldown * 0.5
+	if distance < 20.0:
+		_finish_relocation()
 		return
 
 	# Don't interrupt a damage animation mid-play
@@ -164,12 +166,25 @@ func _relocating_behavior(delta: float):
 				animated_sprite.play('near_death')
 			elif animated_sprite.sprite_frames.has_animation("move"):
 				animated_sprite.play('move')
-	
+
 	var direction = to_target.normalized()
 	apply_central_force(direction * relocation_speed * 10)
-	
+
 	if sprite:
 		sprite.flip_h = direction.x < 0
+
+func _finish_relocation():
+	"""Shared exit path for relocation — reached target or timed out"""
+	_relocation_elapsed = 0.0
+	starting_position = global_position
+	current_state = State.IDLE
+	throw_timer = throw_cooldown * 0.5
+	var animated_sprite = get_node_or_null("AnimatedSprite2D")
+	if animated_sprite and animated_sprite.sprite_frames:
+		if current_health <= 10.0 and animated_sprite.sprite_frames.has_animation("near_death"):
+			animated_sprite.play('near_death')
+		elif animated_sprite.sprite_frames.has_animation("default"):
+			animated_sprite.play('default')
 
 func _lock_to_floor():
 	"""Keep crab locked to floor position"""
@@ -223,42 +238,45 @@ func throw_projectile():
 		sprite.flip_h = horizontal_direction.x < 0
 
 func choose_relocation_target():
-	"""Pick a new floor position away from current spot"""
-	var attempts = 10
-	var best_target = starting_position
-	var best_distance = 0.0
-	
-	for i in attempts:
-		# Generate random position on floor
+	"""Pick a new floor position away from current spot and other crabs"""
+	const MIN_CRAB_SEPARATION: float = 35.0
+	var other_crabs = get_tree().get_nodes_in_group("crabs")
+	var best_target = Vector2(global_position.x, floor_y)
+	var best_score = -INF
+
+	for _i in range(15):
 		var candidate = Vector2(
 			randf_range(floor_min_x, floor_max_x),
 			floor_y
 		)
-		
-		# Prefer positions farther from current location
-		var distance_from_current = candidate.distance_to(global_position)
-		
-		if distance_from_current > best_distance:
-			if distance_from_current >= relocation_distance_min:
-				best_target = candidate
-				best_distance = distance_from_current
-				
-				# If we found a good spot, use it
-				if distance_from_current >= relocation_distance_max:
-					break
-	
+		var dist_from_self = candidate.distance_to(global_position)
+		if dist_from_self < relocation_distance_min:
+			continue
+
+		# Reject positions too close to any other crab
+		var too_close = false
+		for crab in other_crabs:
+			if crab == self or not is_instance_valid(crab):
+				continue
+			if candidate.distance_to(crab.global_position) < MIN_CRAB_SEPARATION:
+				too_close = true
+				break
+		if too_close:
+			continue
+
+		# Score: prefer farther from self, capped at relocation_distance_max
+		var score = min(dist_from_self, relocation_distance_max)
+		if score > best_score:
+			best_score = score
+			best_target = candidate
+
 	return best_target
 
 ## PUBLIC METHOD: Called by CrabSpawner to make baby crab relocate
 func relocate_from_parent():
-	"""Force this crab to relocate (used for reproduction)"""
-	# Choose a relocation target
 	relocation_target = choose_relocation_target()
-	
-	# Enter relocating state
 	current_state = State.RELOCATING
-	
-	print("Baby crab relocating to: ", relocation_target)
+	_relocation_elapsed = 0.0
 
 ## Override take_damage to trigger relocation and reset reproduction timer
 func take_damage(amount: float):
@@ -276,10 +294,9 @@ func take_damage(amount: float):
 	if current_health <= 0:
 		die()
 	elif was_alive and current_state != State.RELOCATING:
-		# Still alive and not already relocating - scuttle away!
 		relocation_target = choose_relocation_target()
 		current_state = State.RELOCATING
-		print("Crab relocating to: ", relocation_target)
+		_relocation_elapsed = 0.0
 
 ## Override die() for crab death animation
 func die():
