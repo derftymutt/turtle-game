@@ -21,10 +21,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -220.0
-offset_top = -165.0
-offset_right = 220.0
-offset_bottom = 165.0
+offset_left = -190.0
+offset_top = -145.0
+offset_right = 190.0
+offset_bottom = 145.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -32,44 +32,44 @@ grow_vertical = 2
 layout_mode = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer" unique_id=1660065690]
-custom_minimum_size = Vector2(390, 0)
+custom_minimum_size = Vector2(340, 0)
 layout_mode = 2
-theme_override_constants/separation = 15
+theme_override_constants/separation = 8
 alignment = 1
 
 [node name="GameOverLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer" unique_id=709398221]
 layout_mode = 2
-theme_override_font_sizes/font_size = 32
+theme_override_font_sizes/font_size = 24
 text = "GAME OVER"
 horizontal_alignment = 1
 
 [node name="HintLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer" unique_id=823741092]
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 12
 text = ""
 horizontal_alignment = 1
 autowrap_mode = 3
 
 [node name="FinalScoreLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer" unique_id=1215740609]
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 15
 text = "Level Score: 0"
 horizontal_alignment = 1
 
 [node name="TotalScoreLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 13
 text = "Run Total: 0"
 horizontal_alignment = 1
 
 [node name="AttemptsLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer" unique_id=112837461]
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 15
 text = "Attempts: 0"
 horizontal_alignment = 1
 
 [node name="RetryButton" type="Button" parent="Control/CenterContainer/PanelContainer/VBoxContainer" unique_id=390383220]
-custom_minimum_size = Vector2(150, 40)
+custom_minimum_size = Vector2(140, 32)
 layout_mode = 2
 text = "Retry"
 
@@ -78,6 +78,6 @@ layout_mode = 2
 text = "Main Menu"
 
 [node name="QuitButton" type="Button" parent="Control/CenterContainer/PanelContainer/VBoxContainer" unique_id=1031823826]
-custom_minimum_size = Vector2(150, 40)
+custom_minimum_size = Vector2(140, 32)
 layout_mode = 2
 text = "Quit"

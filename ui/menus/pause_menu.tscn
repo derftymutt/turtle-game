@@ -29,10 +29,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -92.0
-offset_top = -100.0
-offset_right = 92.0
-offset_bottom = 100.0
+offset_left = -120.0
+offset_top = -130.0
+offset_right = 120.0
+offset_bottom = 130.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -40,22 +40,44 @@ grow_vertical = 2
 layout_mode = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer"]
+custom_minimum_size = Vector2(210, 0)
 layout_mode = 2
-theme_override_constants/separation = 15
+theme_override_constants/separation = 8
 alignment = 1
 
 [node name="PausedLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 32
+theme_override_font_sizes/font_size = 20
 text = "PAUSED"
 horizontal_alignment = 1
 
+[node name="TechInfoContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="SlotLLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = ""
+autowrap_mode = 3
+
+[node name="SlotRLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = ""
+autowrap_mode = 3
+
 [node name="ResumeButton" type="Button" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
-custom_minimum_size = Vector2(150, 40)
+custom_minimum_size = Vector2(150, 30)
 layout_mode = 2
 text = "Resume"
 
+[node name="SwapTechButton" type="Button" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
+custom_minimum_size = Vector2(150, 30)
+layout_mode = 2
+text = "Swap L ↔ R"
+
 [node name="QuitButton" type="Button" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
-custom_minimum_size = Vector2(150, 40)
+custom_minimum_size = Vector2(150, 30)
 layout_mode = 2
 text = "Quit"

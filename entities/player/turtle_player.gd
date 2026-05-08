@@ -781,7 +781,7 @@ func die():
 # ---------------------------------------------------------------------------
 
 func _on_body_entered(body: Node):
-	if body.is_in_group("walls"):
+	if body.is_in_group("walls") or body.is_in_group("flippers"):
 		if not body in touching_walls:
 			touching_walls.append(body)
 

@@ -127,34 +127,23 @@ func _physics_process(delta):
 		visual_node.position.y = sin(bob_offset) * bob_amount
 
 func _on_area_body_entered(body: Node2D):
-	"""Detect bullet hits"""
 	if is_destroyed:
 		return
-	
-	# Check if it's a bullet (check by group or script)
-	if body.is_in_group("bullets"):	
-		add_score(points)	
+	if body.is_in_group("bullets"):
 		destroy_trash()
 		return
-	
-	# Also check if body has bullet-like properties
 	if body.has_method("set_velocity") and body.collision_layer == 4:
-		add_score(points)
 		destroy_trash()
 		return
 
 func destroy_trash():
-	"""Called when successfully shot by player"""
+	"""Called when successfully shot by player. Always awards points exactly once."""
 	if is_destroyed:
 		return
-	
 	is_destroyed = true
+	add_score(points)
 	freeze = true
-	
-	# Emit signal to notify sequence manager
 	trash_destroyed.emit(self)
-	
-	# Satisfying destruction effect
 	play_destruction_effect()
 
 func play_destruction_effect():
