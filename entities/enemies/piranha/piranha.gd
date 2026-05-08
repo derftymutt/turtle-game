@@ -218,17 +218,22 @@ func _maintain_depth():
 	"""Apply vertical forces to stay within preferred depth range"""
 	if not ocean:
 		return
-	
+
 	var depth = ocean.get_depth(global_position)
 	var correction = 0.0
-	
-	if depth < preferred_depth_min:
+
+	if depth < 0:
+		# Above ocean surface — hard barrier: clamp position and kill upward velocity
+		global_position.y = ocean.surface_y
+		linear_velocity.y = maxf(linear_velocity.y, 0.0)
+		return
+	elif depth < preferred_depth_min:
 		# Too shallow - push down
 		correction = depth_correction_force
 	elif depth > preferred_depth_max:
 		# Too deep - push up
 		correction = -depth_correction_force
-	
+
 	if correction != 0:
 		apply_central_force(Vector2(0, correction))
 

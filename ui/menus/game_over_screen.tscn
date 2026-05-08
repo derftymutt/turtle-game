@@ -40,13 +40,12 @@ alignment = 1
 [node name="GameOverLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer" unique_id=709398221]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
-text = "GAME OVER"
+text = "OUCH"
 horizontal_alignment = 1
 
 [node name="HintLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer" unique_id=823741092]
 layout_mode = 2
 theme_override_font_sizes/font_size = 12
-text = ""
 horizontal_alignment = 1
 autowrap_mode = 3
 
@@ -56,7 +55,7 @@ theme_override_font_sizes/font_size = 15
 text = "Level Score: 0"
 horizontal_alignment = 1
 
-[node name="TotalScoreLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
+[node name="TotalScoreLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer" unique_id=1570351895]
 layout_mode = 2
 theme_override_font_sizes/font_size = 13
 text = "Run Total: 0"
@@ -71,7 +70,7 @@ horizontal_alignment = 1
 [node name="RetryButton" type="Button" parent="Control/CenterContainer/PanelContainer/VBoxContainer" unique_id=390383220]
 custom_minimum_size = Vector2(140, 32)
 layout_mode = 2
-text = "Retry"
+text = "Try Again"
 
 [node name="MenuButton" type="Button" parent="Control/CenterContainer/PanelContainer/VBoxContainer" unique_id=467809130]
 layout_mode = 2

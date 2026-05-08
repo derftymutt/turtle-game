@@ -190,10 +190,16 @@ func _lock_to_floor():
 	"""Keep crab locked to floor position"""
 	var target_y = floor_y
 	var y_error = target_y - global_position.y
-	
+
+	# Hard ceiling at ocean surface — should never trigger normally, but guards
+	# against physics edge cases that could launch the crab out of the water
+	if ocean and global_position.y < ocean.surface_y:
+		global_position.y = ocean.surface_y
+		linear_velocity.y = maxf(linear_velocity.y, 0.0)
+
 	# Apply vertical force to maintain floor position
 	apply_central_force(Vector2(0, y_error * position_lock_strength))
-	
+
 	# Dampen vertical movement
 	linear_velocity.y *= 0.8
 
