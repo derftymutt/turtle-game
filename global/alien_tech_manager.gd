@@ -58,6 +58,11 @@ var _passive_bar_ratios: Dictionary = {}
 
 var time_freeze_active: bool = false
 
+# Variety tracking — acts as a set; keys are tech IDs currently "alive" this run
+# Grows when a tech is assigned, shrinks when death penalty removes one,
+# re-grows if that tech is later reacquired
+var _live_unique_techs: Dictionary = {}
+
 # ─── Powerup Replicator state ────────────────────────────────────────────────
 
 var powerup_replicator_stored: int = -1  # -1 = empty
@@ -126,6 +131,7 @@ func assign_tech(tech_id: String, slot_index: int):
 	_cooldowns[slot_index] = 0.0
 	_slot_assigned_order[slot_index] = _assignment_counter
 	_assignment_counter += 1
+	_live_unique_techs[tech_id] = true
 	print("👽 Slot %s assigned: %s" % [_slot_letter(slot_index), tech["name"]])
 	tech_slots_changed.emit(slots[0], slots[1])
 
@@ -189,6 +195,9 @@ func tech_has_bar(tech_id: String) -> bool:
 
 # ─── Run lifecycle ───────────────────────────────────────────────────────────
 
+func get_variety_count() -> int:
+	return _live_unique_techs.size()
+
 func reset_run():
 	pieces_this_threshold = 0
 	total_pieces_collected = 0
@@ -197,6 +206,7 @@ func reset_run():
 	_slot_assigned_order = [-1, -1]
 	_assignment_counter = 0
 	_passive_bar_ratios.clear()
+	_live_unique_techs.clear()
 	phase_shifter_ammo = PHASE_SHIFTER_MAX_AMMO
 	phase_shifter_recharging = false
 	phase_shifter_recharge_timer = 0.0
@@ -237,7 +247,9 @@ func remove_oldest_tech() -> String:
 		if _slot_assigned_order[i] < _slot_assigned_order[oldest]:
 			oldest = i
 	var tech_name: String = slots[oldest].get("name", "")
+	var tech_id: String = slots[oldest].get("id", "")
 	clear_slot(oldest)
+	_live_unique_techs.erase(tech_id)
 	print("👽 AlienTechManager: Lost oldest tech on death: %s" % tech_name)
 	return tech_name
 

@@ -27,6 +27,7 @@ LevelManager="*uid://de6da58bko7nu"
 _mcp_game_helper="*res://addons/godot_ai/runtime/game_helper.gd"
 AlienTechRegistry="*res://global/alien_tech_registry.gd"
 AlienTechManager="*res://global/alien_tech_manager.gd"
+SaveManager="*res://global/save_manager.gd"
 
 [debug]
 
