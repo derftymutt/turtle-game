@@ -60,6 +60,7 @@ var hud: HUD = null
 
 # Wall contact tracking for energy recovery bonus
 var touching_walls: Array = []
+var _is_underwater: bool = true  # updated every physics frame; used by sparkle emitter
 
 # Super speed damage detection
 var super_speed_area: Area2D = null
@@ -385,6 +386,8 @@ func _physics_process(delta):
 		var depth = ocean.get_depth(global_position) if ocean else 0.0
 		var is_underwater = depth > 3
 
+		_is_underwater = is_underwater
+
 		if is_underwater:
 			var out_of_air = hud.drain_air(delta)
 			if out_of_air:
@@ -392,7 +395,8 @@ func _physics_process(delta):
 		else:
 			hud.refill_air(delta)
 
-		hud.recover_energy(delta, touching_walls.size() > 0)
+		var at_surface: bool = not is_underwater
+		hud.recover_energy(delta, touching_walls.size() > 0 or at_surface)
 
 	_update_rest_particles()
 
@@ -886,7 +890,7 @@ func _update_rest_particles():
 	if not rest_particles:
 		return
 	var energy_not_full = hud and hud.current_energy < hud.max_energy
-	var should_emit = touching_walls.size() > 0 and energy_not_full
+	var should_emit = (touching_walls.size() > 0 or not _is_underwater) and energy_not_full
 	if rest_particles.emitting != should_emit:
 		rest_particles.emitting = should_emit
 
@@ -1324,7 +1328,7 @@ func _activate_time_freeze() -> void:
 func _freeze_world_bodies() -> void:
 	_time_frozen_bodies.clear()
 	var groups := ["enemies", "bullets", "plane_projectiles", "enemy_projectiles",
-				   "trash_clusters", "trash_cluster_pieces", "trash_items",
+				   "trash_clusters", "trash_cluster_pieces",
 				   "powerups", "air_bubbles"]
 	for group in groups:
 		for node in get_tree().get_nodes_in_group(group):
@@ -1349,6 +1353,25 @@ func _freeze_world_bodies() -> void:
 				})
 				node.set_physics_process(false)
 				node.set_process(false)
+	# Trash items: stop movement without hard-freezing the physics body.
+	# freeze=true converts to a static body which breaks bullet contact detection;
+	# zeroing velocity + pausing process is enough to hold them in place
+	# (gravity_scale=0 means no forces accumulate while process is off).
+	for node in get_tree().get_nodes_in_group("trash_items"):
+		if not is_instance_valid(node) or node.is_queued_for_deletion():
+			continue
+		if node is RigidBody2D:
+			var rb := node as RigidBody2D
+			_time_frozen_bodies.append({
+				"body":    rb,
+				"lin_vel": rb.linear_velocity,
+				"ang_vel": rb.angular_velocity,
+				"type":    "soft_rigid",
+			})
+			rb.linear_velocity = Vector2.ZERO
+			rb.angular_velocity = 0.0
+			rb.set_physics_process(false)
+			rb.set_process(false)
 	# Pause all spawners so nothing new appears during the freeze.
 	# Must use process_mode (not set_process) so child Timer nodes also stop.
 	var spawner_groups := ["spawners", "trash_spawners"]
@@ -1371,6 +1394,12 @@ func _unfreeze_world_bodies() -> void:
 				if not entry["was_frozen"]:
 					rb.linear_velocity = entry["lin_vel"]
 					rb.angular_velocity = entry["ang_vel"]
+				rb.set_physics_process(true)
+				rb.set_process(true)
+			"soft_rigid":
+				var rb := body as RigidBody2D
+				rb.linear_velocity = entry["lin_vel"]
+				rb.angular_velocity = entry["ang_vel"]
 				rb.set_physics_process(true)
 				rb.set_process(true)
 			"animatable":
