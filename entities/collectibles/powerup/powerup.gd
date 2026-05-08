@@ -165,27 +165,32 @@ func collect(collector):
 		collector.apply_powerup(resolved_type)
 	else:
 		push_error("⚠️ Player doesn't have apply_powerup method! Powerup NOT applied!")
-	
-	# SUPER OBVIOUS collection animation
-	var tween = create_tween()
-	tween.set_parallel(true)
-	
-	# Zoom to player FAST
-	tween.tween_property(self, "global_position", collector.global_position, 0.15)\
-		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
-	
-	# MEGA BRIGHT flash (5x brightness!)
+
+	# For RANDOM: swap to the resolved sprite first
+	if powerup_type == PowerupType.RANDOM and visual_node is AnimatedSprite2D:
+		match resolved_type:
+			PowerupType.SHIELD:         visual_node.play("shield")
+			PowerupType.AIR_RESERVE:    visual_node.play("air")
+			PowerupType.ENERGY_ENDLESS: visual_node.play("energy")
+			PowerupType.RAPID_FIRE:     visual_node.play("rapid_fire")
+
+	# Reset modulate so the sprite art is visible during the zoom
 	if visual_node:
-		visual_node.modulate = Color.WHITE * 5.0
-		tween.tween_property(visual_node, "modulate", Color.WHITE * 10.0, 0.1)
-	
-	# Explode scale up then down
-	tween.tween_property(self, "scale", Vector2.ONE * 3.0, 0.1)\
+		visual_node.modulate = Color.WHITE
+
+	# Fly to player (runs concurrently with scale)
+	var move_tween = create_tween()
+	move_tween.tween_property(self, "global_position", collector.global_position, 0.15)\
+		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+
+	# Sequential scale: up then down — the down step starts from wherever up left off,
+	# avoiding the snap-back-to-1 glitch that happened with a delayed parallel tween
+	var scale_tween = create_tween()
+	scale_tween.tween_property(self, "scale", Vector2.ONE * 4.0, 0.2)\
 		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	tween.tween_property(self, "scale", Vector2.ZERO, 0.2).set_delay(0.1)\
+	scale_tween.tween_property(self, "scale", Vector2.ZERO, 0.25)\
 		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
-	
-	tween.finished.connect(queue_free)
+	scale_tween.finished.connect(queue_free)
 
 func start_despawn():
 	"""Despawn powerup after timeout"""
