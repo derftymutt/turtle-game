@@ -47,6 +47,7 @@ const HINTS: Array[String] = [
 	"Trying a variety of alien techs will gain you wisdom",
 	"Ocean currents weeeeeeeee!",
 	"Your name is Flip for a reason",
+	"The surface is invigorating"
 ]
 
 static var _shown_hint_indices: Array[int] = []
