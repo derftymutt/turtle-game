@@ -36,15 +36,21 @@ func get_high_score(level_name: String) -> int:
 
 func load_main_menu():
 	current_score = 0
-	# total_score is intentionally NOT reset here — it persists until reset_game()
-	# so the run's final score survives the transition to the main menu
 	is_carrying_piece = false
 	carried_piece = null
 	get_tree().change_scene_to_file("res://ui/menus/main_menu.tscn")
+
+func load_victory_screen():
+	current_score = 0
+	is_carrying_piece = false
+	carried_piece = null
+	get_tree().paused = false
+	get_tree().change_scene_to_file("res://ui/menus/victory_screen.tscn")
 
 func reset_game():
 	current_score = 0
 	total_score = 0
 	is_carrying_piece = false
 	carried_piece = null
+	LevelManager.reset_run()
 	AlienTechManager.reset_run()

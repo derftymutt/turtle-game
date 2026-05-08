@@ -1,0 +1,114 @@
+[gd_scene format=3 uid="uid://bvs4q7r2tnxp1"]
+
+[ext_resource type="Script" uid="uid://cx3m8p5dwn1ky" path="res://ui/menus/victory_screen.gd" id="1_victory"]
+
+[node name="VictoryScreen" type="CanvasLayer"]
+script = ExtResource("1_victory")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.04, 0.08, 0.2, 1)
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CenterContainer" type="CenterContainer" parent="Control"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -180.0
+offset_top = -140.0
+offset_right = 180.0
+offset_bottom = 140.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="Control/CenterContainer"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer"]
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="YouWonLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0, 1)
+theme_override_font_sizes/font_size = 30
+text = "YOU WON!"
+horizontal_alignment = 1
+
+[node name="FinalScoreLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Final Score: 0"
+horizontal_alignment = 1
+
+[node name="AttemptsLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Total Attempts: 0"
+horizontal_alignment = 1
+
+[node name="TotalTimeLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Total Time: 0:00"
+horizontal_alignment = 1
+
+[node name="SuccessTimeLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Successful Time: 0:00"
+horizontal_alignment = 1
+
+[node name="BestScoreLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Best Victory: 0"
+horizontal_alignment = 1
+
+[node name="BestTimeLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Best Time: 0:00"
+horizontal_alignment = 1
+
+[node name="NewBestLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0, 1)
+theme_override_font_sizes/font_size = 16
+text = "NEW BEST!"
+horizontal_alignment = 1
+visible = false
+
+[node name="NewBestTimeLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 1, 0.6, 1)
+theme_override_font_sizes/font_size = 16
+text = "NEW BEST TIME!"
+horizontal_alignment = 1
+visible = false
+
+[node name="PlayAgainButton" type="Button" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
+custom_minimum_size = Vector2(160, 36)
+layout_mode = 2
+text = "Play Again"
+
+[node name="MainMenuButton" type="Button" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
+custom_minimum_size = Vector2(160, 36)
+layout_mode = 2
+text = "Main Menu"
