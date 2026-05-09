@@ -26,6 +26,14 @@ var slot_b_cooldown:   TextureProgressBar = null
 var slot_a_icon:       TextureRect = null
 var slot_b_icon:       TextureRect = null
 
+var _powerup_icons: Array = []
+var _placeholder_tex: Texture2D = null
+
+var _slot_a_rpl_container: HBoxContainer = null
+var _slot_b_rpl_container: HBoxContainer = null
+var _slot_a_rpl_icons: Array = []
+var _slot_b_rpl_icons: Array = []
+
 # Game state
 var current_score: int = 0
 var current_health: float = 100.0
@@ -155,6 +163,11 @@ func _ready():
 	slot_b_cooldown  = find_child("SlotBCooldown")
 	slot_a_icon      = find_child("SlotAIcon")
 	slot_b_icon      = find_child("SlotBIcon")
+	_build_powerup_icons()
+	if slot_a_label:
+		_slot_a_rpl_container = _create_rpl_icon_container(slot_a_label.get_parent(), _slot_a_rpl_icons)
+	if slot_b_label:
+		_slot_b_rpl_container = _create_rpl_icon_container(slot_b_label.get_parent(), _slot_b_rpl_icons)
 
 	AlienTechManager.piece_collected.connect(_on_tech_piece_collected)
 	AlienTechManager.tech_slots_changed.connect(_on_tech_slots_changed)
@@ -469,23 +482,57 @@ func _on_level_started(level_number: int):
 func _on_boss_level_started(level_number: int):
 	"""Called when a boss level starts - replace UFO counter with boss prompt"""
 	if ufo_pieces_label:
-		ufo_pieces_label.text = "⚠ Defeat the Boss!"
+		ufo_pieces_label.text = ""
 		ufo_pieces_label.add_theme_color_override("font_color", Color.RED)
 
 # ─── Alien Tech display ───────────────────────────────────────────────────────
+
+func _build_powerup_icons():
+	var sheet: Texture2D = load("res://entities/collectibles/powerup/sprites/powerup.png")
+	var regions := [
+		Rect2(64, 0, 16, 16),   # SHIELD
+		Rect2(32, 0, 16, 16),   # AIR_RESERVE
+		Rect2(0, 0, 16, 16),    # ENERGY_ENDLESS
+		Rect2(96, 0, 16, 16),   # RAPID_FIRE
+	]
+	for region in regions:
+		var atlas := AtlasTexture.new()
+		atlas.atlas = sheet
+		atlas.region = region
+		_powerup_icons.append(atlas)
+	var img := Image.create(1, 1, false, Image.FORMAT_RGBA8)
+	img.set_pixel(0, 0, Color.WHITE)
+	_placeholder_tex = ImageTexture.create_from_image(img)
+
+func _create_rpl_icon_container(parent: Node, icons_out: Array) -> HBoxContainer:
+	var container := HBoxContainer.new()
+	container.add_theme_constant_override("separation", 2)
+	container.visible = false
+	parent.add_child(container)
+	for i in 3:
+		var tr := TextureRect.new()
+		tr.custom_minimum_size = Vector2(12, 12)
+		tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		tr.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		container.add_child(tr)
+		icons_out.append(tr)
+	return container
 
 func _on_tech_piece_collected(current: int, needed: int):
 	if tech_piece_label:
 		tech_piece_label.text = "%d/%d" % [current, needed]
 
 func _on_tech_slots_changed(slot_a: Dictionary, slot_b: Dictionary):
-	_update_slot_display(slot_a_label, slot_a_cooldown, slot_a_icon, slot_a)
-	_update_slot_display(slot_b_label, slot_b_cooldown, slot_b_icon, slot_b)
+	_update_slot_display(slot_a_label, slot_a_cooldown, slot_a_icon, slot_a, _slot_a_rpl_container, _slot_a_rpl_icons)
+	_update_slot_display(slot_b_label, slot_b_cooldown, slot_b_icon, slot_b, _slot_b_rpl_container, _slot_b_rpl_icons)
 
 func _update_slot_display(label: Label, cooldown_bar: TextureProgressBar,
-		icon: TextureRect, tech: Dictionary):
+		icon: TextureRect, tech: Dictionary,
+		rpl_container: HBoxContainer = null, rpl_icons: Array = []):
 	if not label:
 		return
+	if rpl_container:
+		rpl_container.visible = false
 	if tech.is_empty():
 		label.text = ""
 		label.modulate = Color(0.5, 0.5, 0.5, 0.8)
@@ -503,15 +550,25 @@ func _update_slot_display(label: Label, cooldown_bar: TextureProgressBar,
 		if cooldown_bar:
 			cooldown_bar.visible = true
 	elif tech.get("id", "") == AlienTechRegistry.POWERUP_REPLICATOR:
-		var powerup_labels: Array = ["SHIELD", "AIR+", "ENERGY", "RAPFIRE"]
-		var stored := AlienTechManager.powerup_replicator_stored
-		if stored >= 0 and stored < powerup_labels.size():
-			label.text = "RPL:%s" % powerup_labels[stored]
-		else:
-			label.text = "Powerup Replicator"
+		var slots_state := AlienTechManager.powerup_replicator_slots
+		var selected := AlienTechManager.powerup_replicator_selected
+		label.text = tech.get("slot_label", tech.get("name", "?"))
 		label.modulate = tech.get("color", Color.WHITE)
 		if cooldown_bar:
 			cooldown_bar.visible = false
+		if rpl_container and rpl_icons.size() == 3:
+			var filled_count := 0
+			for i in 3:
+				var ir: TextureRect = rpl_icons[i]
+				var st: int = slots_state[i]
+				if st >= 0 and st < _powerup_icons.size():
+					ir.texture = _powerup_icons[st]
+					ir.modulate = Color.WHITE if i == selected else Color(0.5, 0.5, 0.5, 1.0)
+					ir.visible = true
+					filled_count += 1
+				else:
+					ir.visible = false
+			rpl_container.visible = filled_count > 0
 	else:
 		label.text = tech.get("slot_label", tech.get("name", "?"))
 		label.modulate = tech.get("color", Color.WHITE)
@@ -530,7 +587,7 @@ func _refresh_tech_display():
 func _on_phase_shifter_ammo_changed(_current: int, _max_ammo: int, _recharging: bool):
 	_on_tech_slots_changed(AlienTechManager.slots[0], AlienTechManager.slots[1])
 
-func _on_powerup_replicator_changed(_stored_type: int):
+func _on_powerup_replicator_changed():
 	_on_tech_slots_changed(AlienTechManager.slots[0], AlienTechManager.slots[1])
 
 func _get_slot_bar_value(slot_index: int) -> float:
@@ -549,5 +606,6 @@ func _is_slot_dimmed(slot_index: int) -> bool:
 	if tech.get("id", "") == AlienTechRegistry.PHASE_SHIFTER:
 		return AlienTechManager.phase_shifter_recharging
 	if tech.get("id", "") == AlienTechRegistry.POWERUP_REPLICATOR:
-		return AlienTechManager.powerup_replicator_stored < 0
+		var sel := AlienTechManager.powerup_replicator_selected
+		return AlienTechManager.powerup_replicator_slots[sel] < 0
 	return AlienTechManager.get_cooldown_ratio(slot_index) > 0.0
