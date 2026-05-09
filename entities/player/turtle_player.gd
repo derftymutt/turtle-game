@@ -1353,27 +1353,8 @@ func _freeze_world_bodies() -> void:
 				})
 				node.set_physics_process(false)
 				node.set_process(false)
-	# Trash items: stop movement without hard-freezing the physics body.
-	# freeze=true converts to a static body which breaks bullet contact detection;
-	# zeroing velocity + pausing process is enough to hold them in place
-	# (gravity_scale=0 means no forces accumulate while process is off).
-	for node in get_tree().get_nodes_in_group("trash_items"):
-		if not is_instance_valid(node) or node.is_queued_for_deletion():
-			continue
-		if node is RigidBody2D:
-			var rb := node as RigidBody2D
-			_time_frozen_bodies.append({
-				"body":    rb,
-				"lin_vel": rb.linear_velocity,
-				"ang_vel": rb.angular_velocity,
-				"type":    "soft_rigid",
-			})
-			rb.linear_velocity = Vector2.ZERO
-			rb.angular_velocity = 0.0
-			rb.set_physics_process(false)
-			rb.set_process(false)
-	# Pause all spawners so nothing new appears during the freeze.
-	# Must use process_mode (not set_process) so child Timer nodes also stop.
+	# Pause all spawners FIRST. process_mode=DISABLED propagates to children,
+	# which would include trash items — we handle that below.
 	var spawner_groups := ["spawners", "trash_spawners"]
 	for group in spawner_groups:
 		for node in get_tree().get_nodes_in_group(group):
@@ -1381,6 +1362,28 @@ func _freeze_world_bodies() -> void:
 				continue
 			_time_frozen_bodies.append({"body": node, "type": "spawner", "process_mode": node.process_mode})
 			node.process_mode = Node.PROCESS_MODE_DISABLED
+	# Trash items: their parent spawner is now DISABLED, which would remove them
+	# from the physics simulation via inheritance. Override with PROCESS_MODE_ALWAYS
+	# so their physics body stays live and bullets can still hit them.
+	# is_time_frozen flag zeroes velocity each frame so they appear frozen.
+	# Spawners are appended before trash items so unfreeze restores spawners first,
+	# letting INHERIT correctly flow back when trash items are restored.
+	for node in get_tree().get_nodes_in_group("trash_items"):
+		if not is_instance_valid(node) or node.is_queued_for_deletion():
+			continue
+		if node is TrashItem:
+			var trash := node as TrashItem
+			_time_frozen_bodies.append({
+				"body":         trash,
+				"lin_vel":      trash.linear_velocity,
+				"ang_vel":      trash.angular_velocity,
+				"process_mode": trash.process_mode,
+				"type":         "trash_frozen",
+			})
+			trash.linear_velocity = Vector2.ZERO
+			trash.angular_velocity = 0.0
+			trash.is_time_frozen = true
+			trash.process_mode = Node.PROCESS_MODE_ALWAYS
 
 func _unfreeze_world_bodies() -> void:
 	for entry in _time_frozen_bodies:
@@ -1396,12 +1399,12 @@ func _unfreeze_world_bodies() -> void:
 					rb.angular_velocity = entry["ang_vel"]
 				rb.set_physics_process(true)
 				rb.set_process(true)
-			"soft_rigid":
-				var rb := body as RigidBody2D
-				rb.linear_velocity = entry["lin_vel"]
-				rb.angular_velocity = entry["ang_vel"]
-				rb.set_physics_process(true)
-				rb.set_process(true)
+			"trash_frozen":
+				var trash := body as TrashItem
+				trash.is_time_frozen = false
+				trash.process_mode = entry["process_mode"]
+				trash.linear_velocity = entry["lin_vel"]
+				trash.angular_velocity = entry["ang_vel"]
 			"animatable":
 				body.set_physics_process(true)
 				body.set_process(true)
