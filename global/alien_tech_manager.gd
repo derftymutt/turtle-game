@@ -23,7 +23,7 @@ signal tech_slots_changed(slot_a: Dictionary, slot_b: Dictionary)
 signal tech_activated(slot_index: int, tech_id: String)
 signal tech_cooldown_ready(slot_index: int, tech_id: String)
 signal phase_shifter_ammo_changed(current: int, max_ammo: int, recharging: bool)
-signal powerup_replicator_changed(stored_type: int)  # -1 = empty
+signal powerup_replicator_changed()
 
 # ─── Run state ───────────────────────────────────────────────────────────────
 
@@ -65,7 +65,8 @@ var _live_unique_techs: Dictionary = {}
 
 # ─── Powerup Replicator state ────────────────────────────────────────────────
 
-var powerup_replicator_stored: int = -1  # -1 = empty
+var powerup_replicator_slots: Array[int] = [-1, -1, -1]  # -1 = empty
+var powerup_replicator_selected: int = 0                   # which slot is highlighted
 
 # ─── Phase Shifter ammo ──────────────────────────────────────────────────────
 
@@ -210,7 +211,8 @@ func reset_run():
 	phase_shifter_ammo = PHASE_SHIFTER_MAX_AMMO
 	phase_shifter_recharging = false
 	phase_shifter_recharge_timer = 0.0
-	powerup_replicator_stored = -1
+	powerup_replicator_slots = [-1, -1, -1]
+	powerup_replicator_selected = 0
 	print("👽 AlienTechManager: Run reset")
 
 # ─── Phase Shifter ───────────────────────────────────────────────────────────
@@ -282,11 +284,40 @@ func _slot_letter(index: int) -> String:
 # ─── Powerup Replicator ──────────────────────────────────────────────────────
 
 func store_replicated_powerup(powerup_type: int):
-	powerup_replicator_stored = powerup_type
-	powerup_replicator_changed.emit(powerup_type)
+	for i in 3:
+		if powerup_replicator_slots[i] < 0:
+			powerup_replicator_slots[i] = powerup_type
+			# If current selection is empty, point it at the new slot
+			if powerup_replicator_slots[powerup_replicator_selected] < 0:
+				powerup_replicator_selected = i
+			powerup_replicator_changed.emit()
+			return
+	# All 3 slots full — drop the powerup (player still got the effect)
+
+func cycle_replicator_selection():
+	var filled: Array[int] = []
+	for i in 3:
+		if powerup_replicator_slots[i] >= 0:
+			filled.append(i)
+	if filled.size() <= 1:
+		return
+	var cur_pos := filled.find(powerup_replicator_selected)
+	if cur_pos < 0:
+		cur_pos = 0
+	powerup_replicator_selected = filled[(cur_pos + 1) % filled.size()]
+	powerup_replicator_changed.emit()
 
 func consume_replicated_powerup() -> int:
-	var stored := powerup_replicator_stored
-	powerup_replicator_stored = -1
-	powerup_replicator_changed.emit(-1)
+	var idx := powerup_replicator_selected
+	var stored := powerup_replicator_slots[idx]
+	if stored < 0:
+		return -1
+	powerup_replicator_slots[idx] = -1
+	# Auto-select leftmost remaining filled slot
+	powerup_replicator_selected = 0
+	for i in 3:
+		if powerup_replicator_slots[i] >= 0:
+			powerup_replicator_selected = i
+			break
+	powerup_replicator_changed.emit()
 	return stored

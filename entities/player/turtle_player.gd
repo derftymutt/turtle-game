@@ -167,6 +167,10 @@ var _deflector_visual: Line2D = null
 
 # Powerup Replicator
 var _using_replicator: bool = false  # guard to prevent recursive storage on replicator-use
+const REPLICATOR_LONG_PRESS: float = 0.5
+var _rpl_held_slot: int = -1
+var _rpl_press_timer: float = 0.0
+var _rpl_long_pressed: bool = false
 
 # Time Freeze
 var time_freeze_active: bool = false
@@ -451,12 +455,28 @@ func _physics_process(delta):
 			GameManager.carried_piece.drop_piece(true)
 
 	# Alien Tech active slot buttons
-	if Input.is_action_just_pressed("tech_slot_left"):
-		if _fv_slot != 0:
-			AlienTechManager.try_activate_slot(0)
-	if Input.is_action_just_pressed("tech_slot_right"):
-		if _fv_slot != 1:
-			AlienTechManager.try_activate_slot(1)
+	var _rpl_slot := AlienTechManager.get_slot_index_for_tech(AlienTechRegistry.POWERUP_REPLICATOR)
+	for _slot_idx in [0, 1]:
+		var _action: String = "tech_slot_left" if _slot_idx == 0 else "tech_slot_right"
+		if _slot_idx == _rpl_slot:
+			# Replicator: tap = cycle selection, long-press = activate selected
+			if Input.is_action_just_pressed(_action):
+				_rpl_held_slot = _slot_idx
+				_rpl_press_timer = 0.0
+				_rpl_long_pressed = false
+			if _rpl_held_slot == _slot_idx:
+				if Input.is_action_pressed(_action):
+					_rpl_press_timer += delta
+					if not _rpl_long_pressed and _rpl_press_timer >= REPLICATOR_LONG_PRESS:
+						_rpl_long_pressed = true
+						_use_powerup_replicator()
+				if Input.is_action_just_released(_action):
+					if not _rpl_long_pressed:
+						AlienTechManager.cycle_replicator_selection()
+					_rpl_held_slot = -1
+		else:
+			if _fv_slot != _slot_idx and Input.is_action_just_pressed(_action):
+				AlienTechManager.try_activate_slot(_slot_idx)
 
 	# Bumper magnet: release button → launch
 	if _bumper_magnet_active:
@@ -1216,6 +1236,8 @@ func _clamp_to_boundaries(target_pos: Vector2) -> Vector2:
 	)
 
 func _on_alien_tech_slots_changed_player(_slot_a: Dictionary, _slot_b: Dictionary):
+	_rpl_held_slot = -1
+	_rpl_long_pressed = false
 	if AlienTechManager.is_tech_active(AlienTechRegistry.BUBBLE_SHIELD):
 		if bubble_shield_hp == 0.0 and bubble_shield_regen_timer <= 0.0:
 			bubble_shield_hp = 1.0
