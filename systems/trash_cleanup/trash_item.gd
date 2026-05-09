@@ -33,6 +33,7 @@ signal trash_destroyed(trash_item)
 var bob_offset: float = 0.0
 var age: float = 0.0
 var is_destroyed: bool = false
+var is_time_frozen: bool = false
 var visual_node: Node2D = null
 var sequence_id: int = -1  # Which sequence does this belong to?
 
@@ -90,7 +91,11 @@ func _ready():
 func _physics_process(delta):
 	if is_destroyed:
 		return
-	
+	if is_time_frozen:
+		linear_velocity = Vector2.ZERO
+		angular_velocity = 0.0
+		return
+
 	# Track lifetime
 	age += delta
 	if age >= max_lifetime:
