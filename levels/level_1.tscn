@@ -19,9 +19,11 @@
 [ext_resource type="PackedScene" uid="uid://bgrcf873d7ity" path="res://entities/collectibles/health_plant/health_plant_spawner.tscn" id="22_i6od7"]
 [ext_resource type="PackedScene" uid="uid://4het8fdlmvgj" path="res://entities/environment/flippers/flipper_left_down.tscn" id="22_ryfpa"]
 [ext_resource type="PackedScene" uid="uid://b5olvcks1vnwn" path="res://entities/environment/flippers/flipper_right_down.tscn" id="23_ntdhj"]
+[ext_resource type="PackedScene" uid="uid://c41fis6pd8gh2" path="res://systems/space_debris/space_debris_group.tscn" id="23_ryfpa"]
+[ext_resource type="PackedScene" uid="uid://dq7r6j7ritsv7" path="res://entities/collectibles/powerup/powerup.tscn" id="24_0fu15"]
+[ext_resource type="PackedScene" uid="uid://q614lo3kanxc" path="res://systems/space_debris/space_debris.tscn" id="24_ntdhj"]
 [ext_resource type="PackedScene" uid="uid://8edo3etakc1a" path="res://entities/environment/walls/dead_wall/dead_wall.tscn" id="24_ryfpa"]
 [ext_resource type="Texture2D" uid="uid://bm428btwp720u" path="res://entities/environment/ocean_boundaries/ocean_floor.png" id="25_0fu15"]
-[ext_resource type="PackedScene" uid="uid://bwdbbu1jhxn2n" path="res://entities/environment/walls/bumper_wall/bumper_wall.tscn" id="25_ntdhj"]
 [ext_resource type="TileSet" uid="uid://dyl02kfc4a681" path="res://entities/environment/ocean_boundaries/ocean_wall.tres" id="26_4knja"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ryfpa"]
@@ -100,10 +102,6 @@ size = Vector2(8.000183, 768.00024)
 
 [node name="LevelBase" unique_id=519430445 instance=ExtResource("1_lrvbd")]
 
-[node name="HUD" parent="." index="0" unique_id=1369229575]
-desperation_enabled = true
-desperation_max_multiplier = 1.75
-
 [node name="SkyBackground" parent="." index="3" unique_id=967020750 instance=ExtResource("2_ntdhj")]
 
 [node name="Ocean" parent="." index="6" unique_id=2062759388 instance=ExtResource("2_oqlok")]
@@ -159,6 +157,7 @@ radius = 16.0
 [node name="CircularBumper2" parent="CircularBumpers" index="1" unique_id=699960614 instance=ExtResource("18_oqlok")]
 position = Vector2(-185, 80)
 physics_material_override = SubResource("PhysicsMaterial_ntdhj")
+variant = "2"
 
 [node name="CircularBumper3" parent="CircularBumpers" index="2" unique_id=1564020895 instance=ExtResource("18_oqlok")]
 position = Vector2(0, 60)
@@ -181,13 +180,7 @@ radius = 16.0
 [node name="CircularBumper7" parent="CircularBumpers" index="6" unique_id=365714998 instance=ExtResource("18_oqlok")]
 position = Vector2(185, 80)
 physics_material_override = SubResource("PhysicsMaterial_pnpm1")
-
-[node name="BumperWall2" parent="CircularBumpers" index="7" unique_id=1997660828 instance=ExtResource("25_ntdhj")]
-position = Vector2(185, 80)
-mirrored = true
-
-[node name="BumperWall3" parent="CircularBumpers" index="8" unique_id=1609845940 instance=ExtResource("25_ntdhj")]
-position = Vector2(-185, 80)
+variant = "3"
 
 [node name="UfoWorkshop" parent="." index="18" unique_id=625327535 instance=ExtResource("21_w75he")]
 position = Vector2(0, -138)
@@ -360,3 +353,29 @@ color = Color(0.1764706, 0.12156863, 0.023529412, 1)
 
 [node name="DevTechSeeder" parent="." index="32" unique_id=500000002]
 slot_a = 10
+
+[node name="SpaceDebrisGroup" parent="." index="33" unique_id=511816800 instance=ExtResource("23_ryfpa")]
+position = Vector2(-96, -161)
+powerup_scene = ExtResource("24_0fu15")
+
+[node name="SpaceDebris" parent="SpaceDebrisGroup" index="0" unique_id=661989100 instance=ExtResource("24_ntdhj")]
+position = Vector2(-64, -33)
+debris_animation = &"shield"
+
+[node name="SpaceDebris2" parent="SpaceDebrisGroup" index="1" unique_id=882085155 instance=ExtResource("24_ntdhj")]
+position = Vector2(29, -31)
+debris_animation = &"shield"
+
+[node name="SpaceDebrisGroup2" parent="." index="34" unique_id=603951862 instance=ExtResource("23_ryfpa")]
+powerup_type = 4
+powerup_scene = ExtResource("24_0fu15")
+
+[node name="SpaceDebris" parent="SpaceDebrisGroup2" index="0" unique_id=1950655699 instance=ExtResource("24_ntdhj")]
+position = Vector2(82, -195)
+debris_animation = &"wild"
+
+[node name="SpaceDebris2" parent="SpaceDebrisGroup2" index="1" unique_id=1430032598 instance=ExtResource("24_ntdhj")]
+position = Vector2(149, -196)
+debris_animation = &"wild"
+
+[editable path="SpaceDebrisGroup"]

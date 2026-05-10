@@ -8,9 +8,11 @@ extends CanvasLayer
 @onready var level_container = $Control/CenterContainer/VBoxContainer/LevelContainer
 
 var guide_screen = null
+var game_info_screen = null
 
 func _ready():
 	guide_screen = get_tree().get_first_node_in_group("guide_screen")
+	game_info_screen = get_tree().get_first_node_in_group("game_info_screen")
 	_build_buttons()
 
 func _format_ms(ms: int) -> String:
@@ -121,7 +123,11 @@ func _confirm_overwrite_save():
 
 func _start_new_game():
 	GameManager.reset_game()
-	LevelManager.load_level(1)
+	if game_info_screen and game_info_screen.has_method("show_screen"):
+		visible = false
+		game_info_screen.show_screen()
+	else:
+		LevelManager.load_level(1)
 
 func _on_dev_level_selected(level_num: int):
 	GameManager.is_carrying_piece = false

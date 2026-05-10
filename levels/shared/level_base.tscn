@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://bpm3u1q2wx5y" path="res://ui/menus/pause_menu.tscn" id="5_pausemenu"]
 [ext_resource type="PackedScene" path="res://ui/alien_tech/alien_tech_selection_screen.tscn" id="6_atselect"]
 [ext_resource type="Script" path="res://systems/dev/dev_tech_seeder.gd" id="7_devseeder"]
+[ext_resource type="Script" uid="uid://dv8kfm3p9qwr5" path="res://cut_scenes/level_end_cutscene.gd" id="8_lec"]
 
 [node name="LevelBase" type="Node2D" unique_id=1013451131 groups=["level"]]
 script = ExtResource("1_hk6b7")
@@ -23,3 +24,6 @@ script = ExtResource("1_hk6b7")
 
 [node name="DevTechSeeder" type="Node" parent="." unique_id=500000002]
 script = ExtResource("7_devseeder")
+
+[node name="LevelEndCutScene" type="Node2D" parent="." unique_id=500000003]
+script = ExtResource("8_lec")

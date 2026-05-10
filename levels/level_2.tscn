@@ -23,12 +23,14 @@
 [ext_resource type="PackedScene" uid="uid://d3ui83o5ln2lj" path="res://entities/environment/flippers/flipper_left_east.tscn" id="23_itbe0"]
 [ext_resource type="PackedScene" uid="uid://brjd5ho5mmmy4" path="res://entities/environment/flippers/flipper_right_west.tscn" id="24_xrja0"]
 [ext_resource type="PackedScene" uid="uid://8edo3etakc1a" path="res://entities/environment/walls/dead_wall/dead_wall.tscn" id="25_00pa0"]
-[ext_resource type="PackedScene" uid="uid://bwdbbu1jhxn2n" path="res://entities/environment/walls/bumper_wall/bumper_wall.tscn" id="25_amxoe"]
 [ext_resource type="PackedScene" uid="uid://4het8fdlmvgj" path="res://entities/environment/flippers/flipper_left_down.tscn" id="25_he6wg"]
 [ext_resource type="PackedScene" uid="uid://b5olvcks1vnwn" path="res://entities/environment/flippers/flipper_right_down.tscn" id="25_jqt73"]
 [ext_resource type="PackedScene" uid="uid://ko8xdpxfr5ej" path="res://entities/environment/current/current.tscn" id="26_jqt73"]
 [ext_resource type="Texture2D" uid="uid://bm428btwp720u" path="res://entities/environment/ocean_boundaries/ocean_floor.png" id="28_cp3aq"]
 [ext_resource type="TileSet" uid="uid://dyl02kfc4a681" path="res://entities/environment/ocean_boundaries/ocean_wall.tres" id="29_wgvos"]
+[ext_resource type="PackedScene" uid="uid://c41fis6pd8gh2" path="res://systems/space_debris/space_debris_group.tscn" id="30_4xp61"]
+[ext_resource type="PackedScene" uid="uid://dq7r6j7ritsv7" path="res://entities/collectibles/powerup/powerup.tscn" id="31_4yoxl"]
+[ext_resource type="PackedScene" uid="uid://q614lo3kanxc" path="res://systems/space_debris/space_debris.tscn" id="32_6dcgf"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_tv8m3"]
 friction = 0.1
@@ -179,6 +181,7 @@ radius = 16.0
 [node name="CircularBumper5" parent="." index="23" unique_id=1878807691 instance=ExtResource("17_uo0vl")]
 position = Vector2(275, 110)
 physics_material_override = SubResource("PhysicsMaterial_mb3d3")
+variant = "2"
 
 [node name="CircularBumper8" parent="." index="24" unique_id=921027548 instance=ExtResource("17_uo0vl")]
 position = Vector2(200, -40)
@@ -195,6 +198,7 @@ radius = 16.0
 [node name="CircularBumper7" parent="." index="26" unique_id=1802288459 instance=ExtResource("17_uo0vl")]
 position = Vector2(-275, 110)
 physics_material_override = SubResource("PhysicsMaterial_h3b7p")
+variant = "3"
 
 [node name="TrashSequenceSpawner" parent="." index="27" unique_id=886137401 instance=ExtResource("18_k2aru")]
 
@@ -268,14 +272,7 @@ position = Vector2(270, 53)
 physics_material_override = SubResource("PhysicsMaterial_b1cs7")
 angle_preset = 2
 
-[node name="BumperWall5" parent="." index="47" unique_id=642215496 instance=ExtResource("25_amxoe")]
-position = Vector2(275, 110)
-
-[node name="BumperWall6" parent="." index="48" unique_id=1619974252 instance=ExtResource("25_amxoe")]
-position = Vector2(-275, 110)
-mirrored = true
-
-[node name="WorldSafetyBoundaries" type="Node2D" parent="." index="49" unique_id=1838928534]
+[node name="WorldSafetyBoundaries" type="Node2D" parent="." index="47" unique_id=1838928534]
 
 [node name="BoundaryBottom" type="StaticBody2D" parent="WorldSafetyBoundaries" index="0" unique_id=907992518]
 position = Vector2(1.0000612, 175.99995)
@@ -339,22 +336,22 @@ offset_right = -323.4816
 offset_bottom = 62.268524
 color = Color(0.1764706, 0.12156863, 0.023529412, 1)
 
-[node name="OceanFloor" type="TileMapLayer" parent="." index="50" unique_id=56265099]
+[node name="OceanFloor" type="TileMapLayer" parent="." index="48" unique_id=56265099]
 position = Vector2(0, 4)
 tile_map_data = PackedByteArray("AADs/woAAAABAAAAAADt/woAAAAAAAAAAADu/woAAAACAAAAAADv/woAAAABAAAAAADw/woAAAAAAAAAAADx/woAAAAAAAAAAADy/woAAAAAAAAAAADz/woAAAAAAAAAAAD0/woAAAACAAAAAAD1/woAAAAAAAAAAAD2/woAAAAAAAAAAAD3/woAAAAAAAAAAAD4/woAAAAAAAAAAAD5/woAAAACAAAAAAD6/woAAAAAAAAAAAD7/woAAAABAAAAAAD8/woAAAACAAAAAAD9/woAAAABAAAAAAD+/woAAAAAAAAAAAD//woAAAAAAAAAAAAAAAoAAAACAAAAAAABAAoAAAAAAAAAAAACAAoAAAABAAAAAAADAAoAAAAAAAAAAAAEAAoAAAAAAAAAAAAFAAoAAAABAAAAAAAGAAoAAAACAAAAAAAHAAoAAAAAAAAAAAAIAAoAAAABAAAAAAAJAAoAAAABAAAAAAAKAAoAAAAAAAAAAAALAAoAAAABAAAAAAAMAAoAAAAAAAAAAAANAAoAAAAAAAAAAAAOAAoAAAACAAAAAAAPAAoAAAAAAAAAAAAQAAoAAAABAAAAAAARAAoAAAAAAAAAAAASAAoAAAAAAAAAAAATAAoAAAACAAAAAAA=")
 tile_set = SubResource("TileSet_mb3d3")
 
-[node name="OceanWallLeft" type="TileMapLayer" parent="." index="51" unique_id=420150939]
+[node name="OceanWallLeft" type="TileMapLayer" parent="." index="49" unique_id=420150939]
 position = Vector2(0, 4)
 tile_map_data = PackedByteArray("AADY/wkAAAAAAAAAAADY/wgAAAACAAAAAADY/wcAAAABAAAAAADY/wYAAAAAAAAAAADY/wUAAAACAAAAAADY/wQAAAAAAAAAAADY/wMAAAABAAAAAADY/wIAAAACAAAAAADY/wEAAAAAAAAAAADY/wAAAAACAAAAAADY////AAAAAAAAAADY//7/AAAAAAAAAADY//3/AAAAAAAAAADY//z/AAACAAAAAADY//v/AAAAAAAAAADY//r/AAABAAAAAADY//n/AAAAAAAAAADY//j/AAACAAAAAAA=")
 tile_set = ExtResource("29_wgvos")
 
-[node name="OceanWallRight" type="TileMapLayer" parent="." index="52" unique_id=1814571506]
+[node name="OceanWallRight" type="TileMapLayer" parent="." index="50" unique_id=1814571506]
 position = Vector2(632, 4)
 tile_map_data = PackedByteArray("AADY/wkAAAAAAAAAAADY/wgAAAACAAAAAADY/wcAAAABAAAAAADY/wYAAAAAAAAAAADY/wUAAAACAAAAAADY/wQAAAAAAAAAAADY/wMAAAABAAAAAADY/wIAAAACAAAAAADY/wEAAAAAAAAAAADY/wAAAAACAAAAAADY////AAAAAAAAAADY//7/AAAAAAAAAADY//3/AAAAAAAAAADY//z/AAACAAAAAADY//v/AAAAAAAAAADY//r/AAABAAAAAADY//n/AAAAAAAAAADY//j/AAACAAAAAAA=")
 tile_set = ExtResource("29_wgvos")
 
-[node name="OceanCurrent" parent="." index="53" unique_id=1683655070 instance=ExtResource("26_jqt73")]
+[node name="OceanCurrent" parent="." index="51" unique_id=1683655070 instance=ExtResource("26_jqt73")]
 position = Vector2(-119, -88)
 show_debug_arrows = false
 
@@ -367,4 +364,30 @@ position = Vector2(-9, 1)
 [node name="Visuals" parent="OceanCurrent" index="1" unique_id=2005124627]
 position = Vector2(-11, 1)
 
+[node name="SpaceDebrisGroup" parent="." index="53" unique_id=511816800 instance=ExtResource("30_4xp61")]
+position = Vector2(-96, -161)
+powerup_type = 1
+powerup_scene = ExtResource("31_4yoxl")
+
+[node name="SpaceDebris" parent="SpaceDebrisGroup" index="0" unique_id=661989100 instance=ExtResource("32_6dcgf")]
+position = Vector2(-148, -33)
+debris_animation = &"air"
+
+[node name="SpaceDebris2" parent="SpaceDebrisGroup" index="1" unique_id=289798797 instance=ExtResource("32_6dcgf")]
+position = Vector2(-34, -34)
+debris_animation = &"air"
+
+[node name="SpaceDebrisGroup2" parent="." index="54" unique_id=920416913 instance=ExtResource("30_4xp61")]
+powerup_type = 2
+powerup_scene = ExtResource("31_4yoxl")
+
+[node name="SpaceDebris" parent="SpaceDebrisGroup2" index="0" unique_id=1559944845 instance=ExtResource("32_6dcgf")]
+position = Vector2(145, -198)
+debris_animation = &"energy"
+
+[node name="SpaceDebris2" parent="SpaceDebrisGroup2" index="1" unique_id=519572282 instance=ExtResource("32_6dcgf")]
+position = Vector2(211, -198)
+debris_animation = &"energy"
+
 [editable path="OceanCurrent"]
+[editable path="SpaceDebrisGroup"]
