@@ -10,7 +10,7 @@ signal ready_to_reproduce(crab: Crab)
 # Projectile settings
 @export var projectile_scene: PackedScene
 @export var throw_cooldown: float = 1.0  # Time between throws
-@export var throw_velocity: float = 800.0  # Base throw speed
+@export var throw_velocity: float = 280.0  # Base throw speed
 @export var throw_arc_height: float = 0.2  # How much upward angle (0-1)
 @export var detection_range: float = 150.0  # How far can detect player
 
