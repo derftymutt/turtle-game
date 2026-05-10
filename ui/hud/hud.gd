@@ -63,6 +63,10 @@ var air_warning: bool = false
 @export var energy_recovery_rate: float = 15.0
 @export var energy_wall_bonus: float = 40.0
 @export var energy_threshold: float = 15.0
+@export_subgroup("Desperation")
+@export var desperation_enabled: bool = true
+@export var desperation_threshold: float = 0.33
+@export var desperation_max_multiplier: float = 1.75
 var current_energy: float = 100.0
 var is_touching_wall: bool = false
 var wall_recovery_active: bool = false  # NEW: Track if we're actively recovering from wall
@@ -432,7 +436,14 @@ func recover_energy(delta: float, touching_wall: bool = false):
 	var was_wall_recovery = wall_recovery_active
 	wall_recovery_active = touching_wall
 	
-	var recovery = energy_recovery_rate * delta
+	var desperation_mult := 1.0
+	if desperation_enabled and max_health > 0.0:
+		var health_ratio := current_health / max_health
+		if health_ratio < desperation_threshold:
+			var t := 1.0 - (health_ratio / desperation_threshold)
+			desperation_mult = lerp(1.0, desperation_max_multiplier, t)
+
+	var recovery = energy_recovery_rate * desperation_mult * delta
 	if touching_wall:
 		recovery += energy_wall_bonus * delta
 	
