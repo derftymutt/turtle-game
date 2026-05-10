@@ -104,7 +104,7 @@ var _definitions: Array[Dictionary] = [
 	{
 		"id":          POWERUP_REPLICATOR,
 		"name":        "Powerup Replicator",
-		"description": "Automatically copies the next powerup you collect into this slot.\nPress to use the stored copy. A new pickup replaces the stored one.",
+		"description": "Automatically copies powerups in 3 save slots. Quick press to cycle slots, long press to activate.",
 		"slot_label":  "Powerup Replicator",
 		"needs_input": true,
 		"color":       Color(1.0, 0.5, 0.9),

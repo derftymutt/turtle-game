@@ -6,15 +6,15 @@ class_name CrabProjectile
 
 @export var lifetime: float = 3.0
 @export var damage: float = 15.0
-@export var water_drag: float = 0.92  # Less drag than bullets (heavier)
-@export var gravity_multiplier: float = 0.8  # Affected by gravity for arc
+@export var water_drag: float = 0.988  # Slow but maintains speed underwater
+@export var gravity_multiplier: float = 0.4  # Light arc so it travels far
 
 var ocean: Ocean = null
 
 func _ready():
 	# Physics setup
 	gravity_scale = gravity_multiplier
-	linear_damp = 0.5
+	linear_damp = 0.05
 	angular_damp = 2.0
 	lock_rotation = false  # Allow tumbling
 	mass = 0.5  # Heavier than bullets
@@ -53,12 +53,17 @@ func _physics_process(delta):
 	angular_velocity = linear_velocity.x * 0.01
 
 func _on_body_entered(body):
+	# Destroyed by player bullets
+	if body.is_in_group("bullets"):
+		queue_free()
+		return
+
 	# Damage player
 	if body.is_in_group("player") and body.has_method("take_damage"):
 		body.take_damage(damage)
 		queue_free()
 		return
-	
+
 	# Ignore enemies (including other crabs)
 	if body.is_in_group("enemies"):
 		queue_free()
