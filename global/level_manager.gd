@@ -155,6 +155,14 @@ func complete_level():
 	var level_name = "level_%d" % current_level_number
 	GameManager.update_high_score(level_name, GameManager.current_score)
 
+	# Play UFO launch cut scene for non-boss levels before showing the completion screen
+	if not is_boss_level():
+		var cutscene = get_tree().get_first_node_in_group("level_end_cutscene")
+		if cutscene and cutscene.has_method("play"):
+			var workshop = get_tree().get_first_node_in_group("workshop")
+			var pos: Vector2 = workshop.global_position if workshop else Vector2.ZERO
+			await cutscene.play(pos)
+
 	# Show level complete screen
 	_show_level_complete_screen(time_bonus, first_try_bonus)
 	# Progression is now driven by the player pressing "Next Level" on the completion screen

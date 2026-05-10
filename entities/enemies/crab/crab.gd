@@ -33,7 +33,7 @@ signal ready_to_reproduce(crab: Crab)
 @export var reproduce_threshold: float = 40.0  # Seconds til reproduce when not hit
 
 # Internal state
-enum State { IDLE, THROWING, RELOCATING }
+enum State { IDLE, WINDUP, THROWING, RELOCATING }
 var current_state: State = State.IDLE
 var throw_timer: float = 0.0
 var starting_position: Vector2
@@ -41,6 +41,11 @@ var relocation_target: Vector2
 var bob_offset: float = 0.0
 var player: Node2D = null
 var ocean: Ocean = null
+
+# Windup telegraph
+const WINDUP_DURATION: float = 0.6
+var _windup_timer: float = 0.0
+var _windup_node: Node2D = null
 
 # Reproduction tracking (private - use signals to access)
 var _reproduce_timer: float = 0.0
@@ -103,6 +108,8 @@ func _physics_process(delta):
 	match current_state:
 		State.IDLE:
 			_idle_behavior(delta)
+		State.WINDUP:
+			_windup_behavior(delta)
 		State.THROWING:
 			_throwing_behavior(delta)
 		State.RELOCATING:
@@ -125,7 +132,9 @@ func _idle_behavior(delta: float):
 		# Check if player is in range
 		var distance = global_position.distance_to(player.global_position)
 		if distance <= detection_range:
-			current_state = State.THROWING
+			current_state = State.WINDUP
+			_windup_timer = WINDUP_DURATION
+			_start_windup_indicator()
 			throw_timer = throw_cooldown
 	
 	# Reproduction timer (only in IDLE state, only if not already reproduced)
@@ -137,10 +146,35 @@ func _idle_behavior(delta: float):
 			ready_to_reproduce.emit(self)
 			print("🦀 Crab ready to reproduce!")
 
+func _windup_behavior(delta: float):
+	_windup_timer -= delta
+	if _windup_timer <= 0:
+		current_state = State.THROWING
+
 func _throwing_behavior(_delta: float):
-	"""Execute throw animation and spawn projectile"""
+	_stop_windup_indicator()
 	throw_projectile()
 	current_state = State.IDLE
+
+func _start_windup_indicator():
+	_stop_windup_indicator()
+	if not player or not is_instance_valid(player):
+		return
+	var indicator = Sprite2D.new()
+	indicator.texture = preload("res://entities/enemies/crab/sprites/crab_projectile1.png")
+	var to_player = (player.global_position - global_position).normalized()
+	indicator.position = to_player * 14.0 + Vector2(0, -4)
+	indicator.scale = Vector2.ONE
+	_windup_node = indicator
+	add_child(indicator)
+	var tween = create_tween().set_loops()
+	tween.tween_property(indicator, "scale", Vector2(2.5, 2.5), WINDUP_DURATION * 0.4)
+	tween.tween_property(indicator, "scale", Vector2(1.0, 1.0), WINDUP_DURATION * 0.2)
+
+func _stop_windup_indicator():
+	if _windup_node and is_instance_valid(_windup_node):
+		_windup_node.queue_free()
+	_windup_node = null
 
 func _relocating_behavior(delta: float):
 	"""Scuttle to new location"""
@@ -300,13 +334,14 @@ func take_damage(amount: float):
 	if current_health <= 0:
 		die()
 	elif was_alive and current_state != State.RELOCATING:
+		_stop_windup_indicator()
 		relocation_target = choose_relocation_target()
 		current_state = State.RELOCATING
 		_relocation_elapsed = 0.0
 
 ## Override die() for crab death animation
 func die():
-	# Flip upside down and fade death animation
+	_stop_windup_indicator()
 	var tween = create_tween()
 	tween.set_parallel(true)
 	

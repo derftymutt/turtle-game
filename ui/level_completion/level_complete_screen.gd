@@ -78,7 +78,7 @@ func show_completion(
 
 func _on_next_level_pressed():
 	get_tree().paused = false
-	LevelManager.load_next_level()
+	get_tree().change_scene_to_file("res://cut_scenes/level_transition_cutscene.tscn")
 
 func _play_entrance_animation():
 	var container = $CenterContainer/VBoxContainer

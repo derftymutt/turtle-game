@@ -112,7 +112,7 @@ friction = 0.0
 
 [sub_resource type="Curve2D" id="Curve2D_0bvlq"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -6, 24, 0, 0, 0, 0, -17, 50, 0, 0, 0, 0, -36, 72, 0, 0, 0, 0, -65, 87, 0, 0, 0, 0, -96, 97)
+"points": PackedVector2Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -7, 24, 0, 0, 0, 0, -21, 48, 0, 0, 0, 0, -43, 65, 0, 0, 0, 0, -68, 76, 0, 0, 0, 0, -90, 81)
 }
 point_count = 6
 
@@ -142,6 +142,7 @@ level_number = 4
 [node name="SkyBackground" parent="." index="3" unique_id=967020750 instance=ExtResource("2_kqeme")]
 
 [node name="OceanBackground" parent="." index="6" unique_id=593268214 instance=ExtResource("3_pb5nj")]
+position = Vector2(0, -131)
 
 [node name="Ocean" parent="." index="7" unique_id=1274260941 instance=ExtResource("4_egtcm")]
 
@@ -458,7 +459,7 @@ length_units = 1
 mirrored = true
 
 [node name="UfoWorkshop" parent="." index="29" unique_id=625327535 instance=ExtResource("19_746kk")]
-position = Vector2(295, 49)
+position = Vector2(299, 49)
 
 [node name="DeadWall15" parent="." index="30" unique_id=1406475963 instance=ExtResource("10_1gtbd")]
 position = Vector2(296, 65)
@@ -523,12 +524,12 @@ physics_material_override = SubResource("PhysicsMaterial_8oa7c")
 radius = 10.0
 
 [node name="CircularBumper12" parent="." index="42" unique_id=15962175 instance=ExtResource("21_se2qp")]
-position = Vector2(-70, 50)
+position = Vector2(-80, 50)
 physics_material_override = SubResource("PhysicsMaterial_8oa7c")
 radius = 10.0
 
 [node name="CircularBumper13" parent="." index="43" unique_id=1520023327 instance=ExtResource("21_se2qp")]
-position = Vector2(70, 50)
+position = Vector2(80, 50)
 physics_material_override = SubResource("PhysicsMaterial_8oa7c")
 radius = 10.0
 

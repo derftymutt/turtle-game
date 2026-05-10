@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://d33exekcsupic" path="res://ui/menus/main_menu.gd" id="1_5oih7"]
 [ext_resource type="PackedScene" uid="uid://cmdqgqfevkvly" path="res://ui/menus/guide_screen.tscn" id="2_qc8qn"]
+[ext_resource type="PackedScene" path="res://ui/menus/game_info_screen.tscn" id="3_ginfo"]
 
 [node name="MainMenu" type="CanvasLayer" unique_id=2017890914]
 script = ExtResource("1_5oih7")
@@ -49,4 +50,7 @@ theme_override_constants/separation = 10
 alignment = 1
 
 [node name="GuideScreen" parent="." unique_id=1279051161 instance=ExtResource("2_qc8qn")]
+visible = false
+
+[node name="GameInfoScreen" parent="." instance=ExtResource("3_ginfo")]
 visible = false

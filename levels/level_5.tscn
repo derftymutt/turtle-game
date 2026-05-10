@@ -17,8 +17,11 @@
 [ext_resource type="PackedScene" uid="uid://bgrcf873d7ity" path="res://entities/collectibles/health_plant/health_plant_spawner.tscn" id="18_mlk23"]
 [ext_resource type="PackedScene" uid="uid://c55cfm3aeb65a" path="res://systems/trash_cleanup/trash_sequence_spawner.tscn" id="19_b36k0"]
 [ext_resource type="PackedScene" uid="uid://bp6g8v1jmnruo" path="res://entities/environment/walls/circular_bumper/circular_bumper.tscn" id="20_bon8i"]
+[ext_resource type="PackedScene" uid="uid://c41fis6pd8gh2" path="res://systems/space_debris/space_debris_group.tscn" id="20_mmy2b"]
 [ext_resource type="PackedScene" uid="uid://bu0sjqqm7uvm1" path="res://entities/enemies/crocodile/crocodile.tscn" id="21_av2kh"]
+[ext_resource type="PackedScene" uid="uid://dq7r6j7ritsv7" path="res://entities/collectibles/powerup/powerup.tscn" id="21_cekp2"]
 [ext_resource type="PackedScene" uid="uid://d2kw7hdpyp6d0" path="res://entities/enemies/sea_urchin/sea_urchin.tscn" id="21_mmy2b"]
+[ext_resource type="PackedScene" uid="uid://q614lo3kanxc" path="res://systems/space_debris/space_debris.tscn" id="22_mlk23"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_av2kh"]
 size = Vector2(8.000034, 1916.0011)
@@ -300,3 +303,29 @@ length_units = 1
 position = Vector2(102, -5)
 angle_preset = 4
 length_units = 1
+
+[node name="SpaceDebrisGroup" parent="." index="43" unique_id=511816800 instance=ExtResource("20_mmy2b")]
+position = Vector2(-96, -161)
+powerup_type = 2
+powerup_scene = ExtResource("21_cekp2")
+
+[node name="SpaceDebris" parent="SpaceDebrisGroup" index="0" unique_id=661989100 instance=ExtResource("22_mlk23")]
+position = Vector2(-100, -36)
+debris_animation = &"energy"
+
+[node name="SpaceDebris2" parent="SpaceDebrisGroup" index="1" unique_id=1884994381 instance=ExtResource("22_mlk23")]
+position = Vector2(-13, -36)
+debris_animation = &"energy"
+
+[node name="SpaceDebrisGroup2" parent="." index="44" unique_id=224648584 instance=ExtResource("20_mmy2b")]
+powerup_scene = ExtResource("21_cekp2")
+
+[node name="SpaceDebris" parent="SpaceDebrisGroup2" index="0" unique_id=1063911430 instance=ExtResource("22_mlk23")]
+position = Vector2(87, -197)
+debris_animation = &"shield"
+
+[node name="SpaceDebris2" parent="SpaceDebrisGroup2" index="1" unique_id=475393793 instance=ExtResource("22_mlk23")]
+position = Vector2(176, -191)
+debris_animation = &"shield"
+
+[editable path="SpaceDebrisGroup"]
