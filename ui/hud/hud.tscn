@@ -13,6 +13,7 @@
 [ext_resource type="Texture2D" uid="uid://uni07lsgrsjy" path="res://ui/hud/sprites/energy_meter_icon.png" id="10_p3vm3"]
 [ext_resource type="Texture2D" uid="uid://dwrg7nis3xtfh" path="res://ui/hud/sprites/energy_meter_fill.png" id="11_p3vm3"]
 [ext_resource type="Texture2D" uid="uid://b6kds15kk8tw4" path="res://ui/hud/sprites/tech_left_icon.png" id="13_6gxmt"]
+[ext_resource type="FontFile" uid="uid://cv5rmfp2o8uts" path="res://assets/fonts/BoldPixels.ttf" id="14_hk13k"]
 [ext_resource type="Texture2D" uid="uid://b7jh7ou1gcun1" path="res://ui/hud/sprites/tech_meter_bg.png" id="14_olkg6"]
 [ext_resource type="Texture2D" uid="uid://duwdo5p0ymd0f" path="res://ui/hud/sprites/tech_meter_fill.png" id="15_hk13k"]
 [ext_resource type="Texture2D" uid="uid://c8tawqv3ivo5u" path="res://ui/hud/sprites/tech_right_icon.png" id="16_uyo40"]
@@ -195,8 +196,7 @@ stretch_mode = 5
 layout_mode = 2
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 2
-theme_override_fonts/font = ExtResource("2_4d6w6")
-theme_override_font_sizes/font_size = 18
+theme_override_fonts/font = ExtResource("14_hk13k")
 
 [node name="SlotACooldown" type="TextureProgressBar" parent="MarginContainer/VBoxContainer/AlienTechContainer/LeftTechContainer" unique_id=1546841720]
 visible = false
@@ -228,8 +228,7 @@ texture_progress = ExtResource("15_hk13k")
 layout_mode = 2
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 2
-theme_override_fonts/font = ExtResource("2_4d6w6")
-theme_override_font_sizes/font_size = 18
+theme_override_fonts/font = ExtResource("14_hk13k")
 
 [node name="SlotBIcon" type="TextureRect" parent="MarginContainer/VBoxContainer/AlienTechContainer/RightTechContainer" unique_id=400000011]
 custom_minimum_size = Vector2(12, 12)

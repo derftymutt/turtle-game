@@ -100,6 +100,10 @@ size = Vector2(8.000183, 768.00024)
 
 [node name="LevelBase" unique_id=519430445 instance=ExtResource("1_lrvbd")]
 
+[node name="HUD" parent="." index="0" unique_id=1369229575]
+desperation_enabled = true
+desperation_max_multiplier = 1.75
+
 [node name="SkyBackground" parent="." index="3" unique_id=967020750 instance=ExtResource("2_ntdhj")]
 
 [node name="Ocean" parent="." index="6" unique_id=2062759388 instance=ExtResource("2_oqlok")]
