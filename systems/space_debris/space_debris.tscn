@@ -152,7 +152,7 @@ wander_strength = 30.0
 sprite_frames = SubResource("SpriteFrames_wbtbh")
 animation = &"shield"
 autoplay = "air"
-frame_progress = 0.22319165
+frame_progress = 0.0939988
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1457663746]
 shape = SubResource("CircleShape2D_c00hi")
