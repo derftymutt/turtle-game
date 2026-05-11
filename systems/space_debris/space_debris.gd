@@ -26,7 +26,10 @@ var group_owner: SpaceDebrisGroup = null
 @export var wander_interval: float = 3.5
 @export var bob_amount: float = 5.0
 @export var bob_speed: float = 1.4
-@export var spin_speed: float = 0.4
+## Max rotation angle (radians) for the pendulum sway — ~0.3 rad ≈ 17°
+@export var sway_amount: float = 0.3
+## How fast the bag seesaws back and forth (radians/sec driving sin())
+@export var sway_speed: float = 1.2
 
 # ── Visual ────────────────────────────────────────────────────────────────
 @export_group("Visual")
@@ -59,6 +62,8 @@ var group_owner: SpaceDebrisGroup = null
 # ── Internal State ────────────────────────────────────────────────────────
 var is_destroyed: bool = false
 var bob_offset: float = 0.0
+var sway_offset: float = 0.0
+var sway_phase: float = 0.0
 var wander_timer: float = 0.0
 var current_wander: Vector2 = Vector2.ZERO
 var visual_node: Node2D = null
@@ -82,7 +87,12 @@ func _ready() -> void:
 	add_to_group("space_debris")
 
 	bob_offset   = randf() * TAU
+	sway_phase   = randf() * TAU
 	wander_timer = randf_range(0.0, wander_interval)
+
+	# Per-instance speed variation so bags don't sway in lockstep
+	bob_speed  *= randf_range(0.75, 1.35)
+	sway_speed *= randf_range(0.65, 1.5)
 
 	current_wander = Vector2(
 		randf_range(-drift_speed, drift_speed),
@@ -148,10 +158,11 @@ func _physics_process(delta: float) -> void:
 
 	linear_velocity = linear_velocity.lerp(current_wander, delta * wander_strength * 0.1)
 
-	bob_offset += bob_speed * delta
+	bob_offset  += bob_speed  * delta
+	sway_offset += sway_speed * delta
 	if visual_node:
 		visual_node.position.y = sin(bob_offset) * bob_amount
-		visual_node.rotation += spin_speed * delta
+		visual_node.rotation = sin(sway_offset + sway_phase) * sway_amount
 
 
 # ── Bullet Detection ──────────────────────────────────────────────────────
