@@ -10,7 +10,7 @@ class_name GameOverScreen
 @onready var final_score_label = $Control/CenterContainer/PanelContainer/VBoxContainer/FinalScoreLabel
 @onready var total_score_label = $Control/CenterContainer/PanelContainer/VBoxContainer/TotalScoreLabel
 @onready var attempts_label = $Control/CenterContainer/PanelContainer/VBoxContainer/AttemptsLabel
-@onready var retry_button = $Control/CenterContainer/PanelContainer/VBoxContainer/RetryButton
+@onready var continue_button = $Control/CenterContainer/PanelContainer/VBoxContainer/ContinueButton
 @onready var menu_button = $Control/CenterContainer/PanelContainer/VBoxContainer/MenuButton
 @onready var quit_button = $Control/CenterContainer/PanelContainer/VBoxContainer/QuitButton
 
@@ -68,8 +68,8 @@ func _ready():
 	add_to_group("game_over_screen")
 	visible = false
 
-	if retry_button:
-		retry_button.pressed.connect(_on_retry_pressed)
+	if continue_button:
+		continue_button.pressed.connect(_on_continue_button_pressed)
 	if menu_button:
 		menu_button.pressed.connect(_on_menu_pressed)
 	if quit_button:
@@ -90,22 +90,23 @@ func show_game_over(level_score: int, run_total: int):
 		total_score_label.visible = run_total > 0
 
 	if attempts_label:
-		attempts_label.text = "Attempts: %d" % LevelManager.attempt_count
+		var c := LevelManager.continue_count
+		attempts_label.text = "Continues this run: %d" % c if c > 0 else ""
 
 	var lost_tech := AlienTechManager.remove_oldest_tech()
-	if not lost_tech.is_empty() and vbox_container and retry_button:
+	if not lost_tech.is_empty() and vbox_container and continue_button:
 		var tech_lost_label := Label.new()
 		tech_lost_label.text = "%s alien tech lost" % lost_tech
 		tech_lost_label.modulate = Color(1.0, 0.45, 0.2)
 		tech_lost_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		vbox_container.add_child(tech_lost_label)
-		vbox_container.move_child(tech_lost_label, retry_button.get_index())
+		vbox_container.move_child(tech_lost_label, continue_button.get_index())
 
 	visible = true
 	get_tree().paused = true
 
-	if retry_button:
-		retry_button.grab_focus()
+	if continue_button:
+		continue_button.grab_focus()
 
 func _show_save_prompt(action: Callable):
 	var dialog = ConfirmationDialog.new()
@@ -131,7 +132,7 @@ func _show_save_prompt(action: Callable):
 	)
 	dialog.popup_centered()
 
-func _on_retry_pressed():
+func _on_continue_button_pressed():
 	get_tree().paused = false
 	LevelManager.restart_current_level()
 
@@ -150,8 +151,8 @@ func _input(event):
 	if not visible:
 		return
 	if event.is_action_pressed("ui_accept"):
-		if retry_button and retry_button.has_focus():
-			_on_retry_pressed()
+		if continue_button and continue_button.has_focus():
+			_on_continue_button_pressed()
 		elif menu_button and menu_button.has_focus():
 			_on_menu_pressed()
 		elif quit_button and quit_button.has_focus():

@@ -23,7 +23,7 @@ func save_game():
 		"total_score":         GameManager.total_score,
 		"tech_slot_0":         AlienTechManager.slots[0].get("id", ""),
 		"tech_slot_1":         AlienTechManager.slots[1].get("id", ""),
-		"total_attempt_count": LevelManager.total_attempt_count,
+		"continue_count": LevelManager.continue_count,
 		"total_time_ms":       LevelManager.total_time_ms,
 		"successful_time_ms":  LevelManager.successful_time_ms,
 	}
@@ -31,8 +31,8 @@ func save_game():
 	if file:
 		file.store_string(JSON.stringify(data))
 		file.close()
-		print("💾 Saved: Level %d, Total Score %d, Attempts %d" % [
-			data.level_number, data.total_score, data.total_attempt_count])
+		print("💾 Saved: Level %d, Total Score %d, Continues %d" % [
+			data.level_number, data.total_score, data.continue_count])
 
 func load_save() -> Dictionary:
 	if not FileAccess.file_exists(SAVE_PATH):
@@ -56,7 +56,7 @@ func apply_save():
 	if data.is_empty():
 		return
 	GameManager.total_score = data.get("total_score", 0)
-	LevelManager.total_attempt_count = data.get("total_attempt_count", 1)
+	LevelManager.continue_count = data.get("continue_count", 1)
 	AlienTechManager.reset_run()
 	var slot0: String = data.get("tech_slot_0", "")
 	var slot1: String = data.get("tech_slot_1", "")
@@ -67,8 +67,8 @@ func apply_save():
 	LevelManager.current_level_number = data.get("level_number", 1)
 	LevelManager.total_time_ms = data.get("total_time_ms", 0)
 	LevelManager.successful_time_ms = data.get("successful_time_ms", 0)
-	print("📂 Restored: Level %d, Total Score %d, Attempts %d" % [
-		LevelManager.current_level_number, GameManager.total_score, LevelManager.total_attempt_count])
+	print("📂 Restored: Level %d, Total Score %d, Continues %d" % [
+		LevelManager.current_level_number, GameManager.total_score, LevelManager.continue_count])
 
 # ─── Best scores (permanent) ─────────────────────────────────────────────────
 
