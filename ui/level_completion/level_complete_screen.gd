@@ -36,7 +36,7 @@ func show_completion(
 	variety_count: int,
 	_pieces_collected: int,
 	_pieces_needed: int,
-	attempts: int = 1
+	level_continues: int = 0
 ):
 	if title_label:
 		title_label.text = "Level %d Complete!" % level_number
@@ -65,7 +65,12 @@ func show_completion(
 		total_score_label.text = "Total Score: %d" % run_total
 
 	if attempts_label:
-		attempts_label.text = "Attempts: %d" % attempts
+		if level_continues == 0:
+			attempts_label.text = "First try!"
+			attempts_label.modulate = Color.GOLD
+		else:
+			attempts_label.text = "Continues: %d" % level_continues
+			attempts_label.modulate = Color.WHITE
 
 	if continue_label:
 		continue_label.text = "Assembling UFO..."

@@ -21,7 +21,7 @@ func _format_ms(ms: int) -> String:
 func _ready():
 	# Capture run stats before resetting anything
 	var final_score    := GameManager.total_score
-	var total_attempts := LevelManager.total_attempt_count
+	var total_continues := LevelManager.continue_count
 	var total_ms       := LevelManager.total_time_ms
 	var success_ms     := LevelManager.successful_time_ms
 
@@ -47,7 +47,10 @@ func _ready():
 		final_score_label.text = "Final Score: %d" % final_score
 
 	if attempts_label:
-		attempts_label.text = "Total Attempts: %d" % total_attempts
+		if total_continues == 0:
+			attempts_label.text = "No continues — flawless run!"
+		else:
+			attempts_label.text = "Total Continues: %d" % total_continues
 
 	if total_time_label:
 		total_time_label.text = "Total Time: %s" % _format_ms(total_ms)

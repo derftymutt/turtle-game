@@ -15,8 +15,8 @@ const TOTAL_LEVELS: int = 5
 var current_level_number: int = 0
 var pieces_collected: int = 0
 var pieces_needed: int = 3
-var attempt_count: int = 1        # Attempts on the current level only
-var total_attempt_count: int = 0  # Cumulative across all levels; incremented every load_level()
+var attempt_count: int = 1   # Attempts on the current level — used for first-try bonus (internal)
+var continue_count: int = 0  # How many times the player pressed Continue after dying (run total)
 var alien_tech_pieces_collected: int = 0  # Persists across retries; resets only on new level
 var flora_hidden_budget: int = -1          # Rolled once per level; -1 = not yet rolled
 
@@ -62,7 +62,7 @@ func reset_run():
 	"""Called by GameManager.reset_game() to start a fresh run."""
 	current_level_number = 0
 	attempt_count = 1
-	total_attempt_count = 0
+	continue_count = 0
 	pieces_collected = 0
 	alien_tech_pieces_collected = 0
 	flora_hidden_budget = -1
@@ -187,7 +187,7 @@ func _show_level_complete_screen(time_bonus: int, first_try_bonus: int):
 			AlienTechManager.get_variety_count(),
 			pieces_collected,
 			pieces_needed,
-			attempt_count
+			attempt_count - 1  # level continues (0 = first try)
 		)
 	else:
 		print("⚠️ No LevelCompleteScreen found in scene. Add one to levels for visual feedback!")
@@ -217,8 +217,6 @@ func load_level(level_number: int):
 	current_level_number = level_number
 	pieces_collected = 0
 
-	# Every call to load_level() starts one attempt (new or retry)
-	total_attempt_count += 1
 	_attempt_start_time_ms = Time.get_ticks_msec()
 
 	var level_path = level_scenes[level_number]
@@ -230,13 +228,14 @@ func load_level(level_number: int):
 	get_tree().change_scene_to_file(level_path)
 
 func restart_current_level():
-	"""Restart the current level (for game over)"""
+	"""Called when the player presses Continue after dying."""
 	attempt_count += 1
+	continue_count += 1
 	# Failed attempt counts toward total time only
 	if _attempt_start_time_ms > 0:
 		total_time_ms += Time.get_ticks_msec() - _attempt_start_time_ms
 		_attempt_start_time_ms = 0
-	load_level(current_level_number)  # load_level increments total_attempt_count and resets start time
+	load_level(current_level_number)
 
 func get_or_roll_flora_budget(min_count: int, max_count: int) -> int:
 	if flora_hidden_budget < 0:
