@@ -1,6 +1,8 @@
 [gd_scene format=3 uid="uid://bpm3u1q2wx5y"]
 
 [ext_resource type="Script" uid="uid://c7pmu8gd3k5x" path="res://ui/menus/pause_menu.gd" id="1_pausemenu"]
+[ext_resource type="Texture2D" uid="uid://b6kds15kk8tw4" path="res://ui/hud/sprites/tech_left_icon.png" id="2_lefticon"]
+[ext_resource type="Texture2D" uid="uid://c8tawqv3ivo5u" path="res://ui/hud/sprites/tech_right_icon.png" id="3_righticon"]
 
 [node name="PauseMenu" type="CanvasLayer"]
 process_mode = 3
@@ -29,10 +31,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -120.0
-offset_top = -130.0
-offset_right = 120.0
-offset_bottom = 130.0
+offset_left = -175.0
+offset_top = -150.0
+offset_right = 175.0
+offset_bottom = 150.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -40,7 +42,7 @@ grow_vertical = 2
 layout_mode = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer"]
-custom_minimum_size = Vector2(210, 0)
+custom_minimum_size = Vector2(320, 0)
 layout_mode = 2
 theme_override_constants/separation = 8
 alignment = 1
@@ -51,33 +53,91 @@ theme_override_font_sizes/font_size = 20
 text = "PAUSED"
 horizontal_alignment = 1
 
-[node name="TechInfoContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
+[node name="HSeparatorTop" type="HSeparator" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_constants/separation = 4
 
-[node name="SlotLLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoContainer"]
+[node name="TechInfoMargin" type="MarginContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 10
+theme_override_constants/margin_left = 8
+
+[node name="TechInfoContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="SlotLRow" type="HBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer"]
+layout_mode = 2
+theme_override_constants/separation = 7
+
+[node name="SlotLIcon" type="TextureRect" parent="Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLRow"]
+custom_minimum_size = Vector2(14, 14)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("2_lefticon")
+stretch_mode = 5
+
+[node name="SlotLTextContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="SlotLName" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLRow/SlotLTextContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "— empty —"
+
+[node name="SlotLDesc" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLRow/SlotLTextContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.72, 0.72, 1)
+theme_override_font_sizes/font_size = 9
 text = ""
 autowrap_mode = 3
 
-[node name="SlotRLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoContainer"]
+[node name="SlotSeparator" type="HSeparator" parent="Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 10
+modulate = Color(1, 1, 1, 0.25)
+
+[node name="SlotRRow" type="HBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer"]
+layout_mode = 2
+theme_override_constants/separation = 7
+
+[node name="SlotRIcon" type="TextureRect" parent="Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRRow"]
+custom_minimum_size = Vector2(14, 14)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("3_righticon")
+stretch_mode = 5
+
+[node name="SlotRTextContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="SlotRName" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRRow/SlotRTextContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "— empty —"
+
+[node name="SlotRDesc" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRRow/SlotRTextContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.72, 0.72, 1)
+theme_override_font_sizes/font_size = 9
 text = ""
 autowrap_mode = 3
+
+[node name="HSeparatorBottom" type="HSeparator" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
+layout_mode = 2
 
 [node name="ResumeButton" type="Button" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
-custom_minimum_size = Vector2(150, 30)
+custom_minimum_size = Vector2(200, 30)
 layout_mode = 2
 text = "Resume"
 
 [node name="SwapTechButton" type="Button" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
-custom_minimum_size = Vector2(150, 30)
+custom_minimum_size = Vector2(200, 30)
 layout_mode = 2
 text = "Swap L ↔ R"
 
 [node name="QuitButton" type="Button" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
-custom_minimum_size = Vector2(150, 30)
+custom_minimum_size = Vector2(200, 30)
 layout_mode = 2
 text = "Quit"

@@ -9,6 +9,7 @@ extends CanvasLayer
 @onready var new_best_label:      Label  = $Control/CenterContainer/PanelContainer/VBoxContainer/NewBestLabel
 @onready var best_time_label:     Label  = $Control/CenterContainer/PanelContainer/VBoxContainer/BestTimeLabel
 @onready var new_best_time_label: Label  = $Control/CenterContainer/PanelContainer/VBoxContainer/NewBestTimeLabel
+@onready var alien_techs_label:  Label  = $Control/CenterContainer/PanelContainer/VBoxContainer/AlienTechsLabel
 @onready var play_again_button:  Button = $Control/CenterContainer/PanelContainer/VBoxContainer/PlayAgainButton
 @onready var main_menu_button:   Button = $Control/CenterContainer/PanelContainer/VBoxContainer/MainMenuButton
 
@@ -24,6 +25,7 @@ func _ready():
 	var total_continues := LevelManager.continue_count
 	var total_ms       := LevelManager.total_time_ms
 	var success_ms     := LevelManager.successful_time_ms
+	var tech_count     := AlienTechManager.get_variety_count()
 
 	# Persist best victory score and time (separate file — survives new-game deletes)
 	var prev_best := SaveManager.get_best_victory_score()
@@ -51,6 +53,9 @@ func _ready():
 			attempts_label.text = "No continues — flawless run!"
 		else:
 			attempts_label.text = "Total Continues: %d" % total_continues
+
+	if alien_techs_label:
+		alien_techs_label.text = "Alien Techs: %d" % tech_count
 
 	if total_time_label:
 		total_time_label.text = "Total Time: %s" % _format_ms(total_ms)

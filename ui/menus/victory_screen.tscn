@@ -63,6 +63,12 @@ theme_override_font_sizes/font_size = 15
 text = "Total Attempts: 0"
 horizontal_alignment = 1
 
+[node name="AlienTechsLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Alien Techs: 0"
+horizontal_alignment = 1
+
 [node name="TotalTimeLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14

@@ -4,11 +4,20 @@ class_name PauseMenu
 
 ## Pause menu — toggled by the "pause" input action during gameplay
 
-@onready var resume_button = $Control/CenterContainer/PanelContainer/VBoxContainer/ResumeButton
+const _VBOX := "Control/CenterContainer/PanelContainer/VBoxContainer"
+const _TECH := "Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoContainer"
+
+@onready var resume_button    = $Control/CenterContainer/PanelContainer/VBoxContainer/ResumeButton
 @onready var swap_tech_button = $Control/CenterContainer/PanelContainer/VBoxContainer/SwapTechButton
-@onready var quit_button = $Control/CenterContainer/PanelContainer/VBoxContainer/QuitButton
-@onready var slot_l_label = $Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoContainer/SlotLLabel
-@onready var slot_r_label = $Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoContainer/SlotRLabel
+@onready var quit_button      = $Control/CenterContainer/PanelContainer/VBoxContainer/QuitButton
+
+@onready var slot_l_icon: TextureRect = $Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLRow/SlotLIcon
+@onready var slot_l_name: Label       = $Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLRow/SlotLTextContainer/SlotLName
+@onready var slot_l_desc: Label       = $Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLRow/SlotLTextContainer/SlotLDesc
+
+@onready var slot_r_icon: TextureRect = $Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRRow/SlotRIcon
+@onready var slot_r_name: Label       = $Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRRow/SlotRTextContainer/SlotRName
+@onready var slot_r_desc: Label       = $Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRRow/SlotRTextContainer/SlotRDesc
 
 func _ready():
 	add_to_group("pause_menu")
@@ -49,26 +58,28 @@ func _on_swap_tech_pressed():
 	_update_tech_display()
 
 func _update_tech_display():
-	var slot_a = AlienTechManager.slots[0]
-	var slot_b = AlienTechManager.slots[1]
+	_update_slot(AlienTechManager.slots[0], slot_l_icon, slot_l_name, slot_l_desc)
+	_update_slot(AlienTechManager.slots[1], slot_r_icon, slot_r_name, slot_r_desc)
 
-	if slot_l_label:
-		if slot_a.is_empty():
-			slot_l_label.text = "[L] — empty —"
-			slot_l_label.modulate = Color(0.6, 0.6, 0.6)
-		else:
-			slot_l_label.text = "[L] %s\n%s" % [slot_a.get("name", ""), slot_a.get("description", "")]
-			var col = slot_a.get("color", Color.WHITE)
-			slot_l_label.modulate = Color(col.r, col.g, col.b, 1.0)
-
-	if slot_r_label:
-		if slot_b.is_empty():
-			slot_r_label.text = "[R] — empty —"
-			slot_r_label.modulate = Color(0.6, 0.6, 0.6)
-		else:
-			slot_r_label.text = "[R] %s\n%s" % [slot_b.get("name", ""), slot_b.get("description", "")]
-			var col = slot_b.get("color", Color.WHITE)
-			slot_r_label.modulate = Color(col.r, col.g, col.b, 1.0)
+func _update_slot(slot: Dictionary, icon: TextureRect, name_lbl: Label, desc_lbl: Label):
+	if slot.is_empty():
+		if icon:
+			icon.modulate = Color(0.4, 0.4, 0.4, 1.0)
+		if name_lbl:
+			name_lbl.text = "— empty —"
+			name_lbl.modulate = Color(0.5, 0.5, 0.5, 1.0)
+		if desc_lbl:
+			desc_lbl.text = ""
+	else:
+		var tech_color: Color = slot.get("color", Color.WHITE)
+		if icon:
+			icon.modulate = Color.WHITE
+		if name_lbl:
+			name_lbl.text = slot.get("name", "")
+			name_lbl.modulate = tech_color
+		if desc_lbl:
+			desc_lbl.text = slot.get("description", "")
+			desc_lbl.modulate = Color(0.88, 0.88, 0.88, 1.0)
 
 func _show_save_prompt(action: Callable):
 	var dialog = ConfirmationDialog.new()
