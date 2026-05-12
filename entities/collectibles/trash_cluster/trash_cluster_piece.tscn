@@ -3,13 +3,20 @@
 [ext_resource type="Script" uid="uid://rmj63i61rw2n" path="res://entities/collectibles/trash_cluster/trash_cluster_piece.gd" id="1_tpc"]
 [ext_resource type="Texture2D" uid="uid://cy2q40f5wgwns" path="res://entities/collectibles/trash_cluster/sprites/trash_cluster_piece.png" id="2_iui05"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_uo1e3"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_iui05"]
 atlas = ExtResource("2_iui05")
 region = Rect2(0, 0, 12, 12)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_uo1e3"]
+atlas = ExtResource("2_iui05")
+region = Rect2(12, 0, 12, 12)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_tpc"]
 animations = [{
 "frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_iui05")
+}, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_uo1e3")
 }],
@@ -26,7 +33,6 @@ radius = 8.0
 
 [node name="TrashClusterPiece" type="RigidBody2D" unique_id=987200521]
 collision_layer = 128
-collision_mask = 1
 script = ExtResource("1_tpc")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=200565462]
