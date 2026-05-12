@@ -72,7 +72,7 @@ func _run() -> void:
 	await _split()
 	await get_tree().create_timer(0.6).timeout
 	await _plunge()
-	await get_tree().create_timer(0.85).timeout
+	await get_tree().create_timer(0.3).timeout
 	LevelManager.load_next_level()
 
 func _fly_in() -> void:

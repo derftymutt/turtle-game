@@ -237,6 +237,17 @@ func _lock_to_floor():
 	# Dampen vertical movement
 	linear_velocity.y *= 0.8
 
+	# Horizontal separation: push apart from nearby crabs to prevent stacking
+	const SEPARATION_RADIUS: float = 30.0
+	const SEPARATION_FORCE: float = 1200.0
+	for crab in get_tree().get_nodes_in_group("crabs"):
+		if crab == self or not is_instance_valid(crab):
+			continue
+		var delta_x = global_position.x - crab.global_position.x
+		var dist = abs(delta_x)
+		if dist < SEPARATION_RADIUS and dist > 0.1:
+			apply_central_force(Vector2(sign(delta_x) * SEPARATION_FORCE * (1.0 - dist / SEPARATION_RADIUS), 0))
+
 func throw_projectile():
 	"""Throw a projectile at the player"""
 	if not projectile_scene:

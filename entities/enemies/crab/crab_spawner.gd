@@ -21,9 +21,26 @@ func _ready() -> void:
 	# Wait for scene to initialize
 	await get_tree().create_timer(0.1).timeout
 	
-	# Spawn initial crabs
+	# Spawn initial crabs at random positions, each separated from the others
+	var placed_xs: Array[float] = []
+	const MIN_SEP: float = 40.0
 	for i in initial_crab_count:
-		spawn_crab()
+		var x := _random_x_clear_of(placed_xs, MIN_SEP)
+		placed_xs.append(x)
+		spawn_crab(Vector2(x, floor_y))
+
+func _random_x_clear_of(taken: Array[float], min_sep: float) -> float:
+	for _attempt in range(30):
+		var x := randf_range(spawn_area_min_x, spawn_area_max_x)
+		var ok := true
+		for tx in taken:
+			if abs(x - tx) < min_sep:
+				ok = false
+				break
+		if ok:
+			return x
+	# Fallback: just pick a random position if the floor is too crowded
+	return randf_range(spawn_area_min_x, spawn_area_max_x)
 
 func spawn_crab(at_position: Vector2 = Vector2.ZERO) -> Crab:
 	"""Spawn a new crab at the specified position, or random if Vector2.ZERO"""
