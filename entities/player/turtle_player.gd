@@ -3,7 +3,7 @@ extends RigidBody2D
 # Movement properties
 @export var thrust_force: float = 30.0
 @export var max_velocity: float = 2500.0
-@export var kick_animation_duration: float = 0.25
+@export var kick_animation_duration: float = 0.22 # DECREASED: Was 0.25 - snappier feel, less time for player to get off trajectory with long animation
 @export var kick_animation_duration_with_ufo_piece: float = 0.5
 
 # Shooting properties
@@ -14,7 +14,7 @@ extends RigidBody2D
 @export var phase_bullet_scene: PackedScene
 
 # Thrust strengths
-@export var horizontal_thrust: float = 175.0
+@export var horizontal_thrust: float = 200.0 # INCREASED: Was 175.0 - more action feel
 @export var upward_thrust: float = 75.0
 @export var downward_thrust: float = 225.0
 
