@@ -71,12 +71,6 @@ theme_override_font_sizes/font_size = 11
 text = "Continues: 0"
 horizontal_alignment = 1
 
-[node name="ContinueLabel" type="Label" parent="CenterContainer/VBoxContainer" unique_id=1156341924]
-layout_mode = 2
-theme_override_font_sizes/font_size = 10
-text = "Assembling UFO..."
-horizontal_alignment = 1
-
 [node name="NextLevelButton" type="Button" parent="CenterContainer/VBoxContainer"]
 custom_minimum_size = Vector2(160, 34)
 layout_mode = 2

@@ -172,6 +172,8 @@ func _ready():
 		_slot_a_rpl_container = _create_rpl_icon_container(slot_a_label.get_parent(), _slot_a_rpl_icons)
 	if slot_b_label:
 		_slot_b_rpl_container = _create_rpl_icon_container(slot_b_label.get_parent(), _slot_b_rpl_icons)
+		# Mirror the left layout: icons sit left of the label, not right of the icon
+		slot_b_label.get_parent().move_child(_slot_b_rpl_container, slot_b_label.get_index())
 
 	AlienTechManager.piece_collected.connect(_on_tech_piece_collected)
 	AlienTechManager.tech_slots_changed.connect(_on_tech_slots_changed)

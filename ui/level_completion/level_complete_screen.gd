@@ -11,21 +11,11 @@ class_name LevelCompleteScreen
 @onready var variety_label: Label = $CenterContainer/VBoxContainer/StatsContainer/VarietyLabel
 @onready var total_score_label: Label = $CenterContainer/VBoxContainer/StatsContainer/TotalScoreLabel
 @onready var attempts_label: Label = $CenterContainer/VBoxContainer/StatsContainer/AttemptsLabel
-@onready var continue_label: Label = $CenterContainer/VBoxContainer/ContinueLabel
 @onready var next_level_button: Button = $CenterContainer/VBoxContainer/NextLevelButton
-
-var pulse_timer: float = 0.0
-var pulse_speed: float = 3.0
 
 func _ready():
 	hide()
 	next_level_button.pressed.connect(_on_next_level_pressed)
-
-func _process(delta):
-	if visible and continue_label:
-		pulse_timer += delta * pulse_speed
-		var alpha = (sin(pulse_timer) + 1.0) / 2.0
-		continue_label.modulate.a = 0.5 + (alpha * 0.5)
 
 func show_completion(
 	level_number: int,
@@ -66,15 +56,11 @@ func show_completion(
 
 	if attempts_label:
 		if level_continues == 0:
-			attempts_label.text = "First try!"
+			attempts_label.text = ""
 			attempts_label.modulate = Color.GOLD
 		else:
-			attempts_label.text = "Continues: %d" % level_continues
+			attempts_label.text = "Continues used: %d" % level_continues
 			attempts_label.modulate = Color.WHITE
-
-	if continue_label:
-		continue_label.text = "Assembling UFO..."
-		pulse_timer = 0.0
 
 	get_tree().paused = true
 	show()

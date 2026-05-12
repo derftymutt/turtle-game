@@ -15,6 +15,7 @@ var _ufo_left: Sprite2D
 var _ufo_right: Sprite2D
 var _turtle: Sprite2D
 var _canvas: CanvasLayer
+var _level_label: Label
 
 func _ready() -> void:
 	_build_scene()
@@ -51,11 +52,27 @@ func _build_scene() -> void:
 	_turtle.visible = false
 	_canvas.add_child(_turtle)
 
+	var next_level: int = LevelManager.current_level_number + 1
+	_level_label = Label.new()
+	_level_label.text = "Level %d" % next_level
+	_level_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_level_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_level_label.size = Vector2(VP_W, 80.0)
+	_level_label.position = Vector2(0.0, VP_H * 0.5 - 40.0)
+	_level_label.pivot_offset = Vector2(VP_W * 0.5, 40.0)
+	_level_label.scale = Vector2(0.8, 0.8)
+	_level_label.modulate.a = 0.0
+	_level_label.add_theme_font_override("font", load("res://assets/fonts/BoldPixels.ttf"))
+	_level_label.add_theme_font_size_override("font_size", 52)
+	_level_label.add_theme_color_override("font_color", Color.WHITE)
+	_canvas.add_child(_level_label)
+
 func _run() -> void:
 	await _fly_in()
 	await _split()
 	await get_tree().create_timer(0.6).timeout
 	await _plunge()
+	await get_tree().create_timer(0.85).timeout
 	LevelManager.load_next_level()
 
 func _fly_in() -> void:
@@ -124,7 +141,16 @@ func _spawn_break_particles(at: Vector2) -> void:
 	_canvas.add_child(p)
 	p.emitting = true
 
+func _show_level_title() -> void:
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(_level_label, "modulate:a", 1.0, 0.25)\
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.tween_property(_level_label, "scale", Vector2(1.0, 1.0), 0.3)\
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
 func _plunge() -> void:
+	_show_level_title()
 	var target_y: float = VP_H + 140.0
 	var tween := create_tween()
 	tween.set_parallel(true)
