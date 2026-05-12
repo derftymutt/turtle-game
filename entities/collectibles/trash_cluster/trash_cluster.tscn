@@ -3,13 +3,20 @@
 [ext_resource type="Script" uid="uid://c2qgubql51sul" path="res://entities/collectibles/trash_cluster/trash_cluster.gd" id="1_trshclst"]
 [ext_resource type="Texture2D" uid="uid://dnwxwbrsc8gy" path="res://entities/collectibles/trash_cluster/sprites/trash_cluster.png" id="2_t0o0i"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_hhame"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_t0o0i"]
 atlas = ExtResource("2_t0o0i")
 region = Rect2(0, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hhame"]
+atlas = ExtResource("2_t0o0i")
+region = Rect2(24, 0, 24, 24)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_tc"]
 animations = [{
 "frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_t0o0i")
+}, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_hhame")
 }],

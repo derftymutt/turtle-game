@@ -72,9 +72,9 @@ func _build_buttons():
 			btn.pressed.connect(func(): _on_dev_level_selected(level_num))
 			dev_row.add_child(btn)
 
-	# === GUIDE ===
+	# === OPTIONS ===
 	var guide_button = Button.new()
-	guide_button.text = "Guide/Options/Help/PANIC!!!"
+	guide_button.text = "Options"
 	guide_button.custom_minimum_size = Vector2(100, 10)
 	guide_button.add_theme_font_size_override("font_size", 8)
 	guide_button.pressed.connect(_on_guide_pressed)

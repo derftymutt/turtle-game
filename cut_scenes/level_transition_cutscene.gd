@@ -70,6 +70,18 @@ func _fly_in() -> void:
 func _split() -> void:
 	var cx: float = _ufo.position.x
 	var cy: float = _ufo.position.y
+
+	# Pre-split: UFO shakes under stress before breaking.
+	var shake := create_tween()
+	for i in 8:
+		shake.tween_property(_ufo, "position",
+			Vector2(cx + randf_range(-6.0, 6.0), cy + randf_range(-4.0, 4.0)), 0.05)
+	shake.tween_property(_ufo, "position", Vector2(cx, cy), 0.03)
+	await shake.finished
+
+	# Burst of breaking particles at the split point.
+	_spawn_break_particles(Vector2(cx, cy))
+
 	_ufo_left.position = Vector2(cx - 8.0, cy)
 	_ufo_right.position = Vector2(cx + 8.0, cy)
 	_turtle.position = Vector2(cx, cy - 30.0)
@@ -88,6 +100,29 @@ func _split() -> void:
 	tween.tween_property(_turtle, "position:y", cy - 50.0, 0.28)\
 		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	await tween.finished
+
+func _spawn_break_particles(at: Vector2) -> void:
+	var p := CPUParticles2D.new()
+	p.one_shot = true
+	p.explosiveness = 1.0
+	p.amount = 36
+	p.lifetime = 0.75
+	p.direction = Vector2(0.0, -1.0)
+	p.spread = 180.0
+	p.gravity = Vector2(0.0, 200.0)
+	p.initial_velocity_min = 55.0
+	p.initial_velocity_max = 210.0
+	p.scale_amount_min = 2.0
+	p.scale_amount_max = 5.0
+
+	var grad := Gradient.new()
+	grad.set_color(0, Color(1.0, 0.9, 0.3, 1.0))   # bright yellow-white
+	grad.set_color(1, Color(1.0, 0.15, 0.0, 0.0))   # red-orange → transparent
+	p.color_ramp = grad
+
+	p.position = at
+	_canvas.add_child(p)
+	p.emitting = true
 
 func _plunge() -> void:
 	var target_y: float = VP_H + 140.0

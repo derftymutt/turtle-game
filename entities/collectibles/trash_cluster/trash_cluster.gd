@@ -10,7 +10,6 @@ const _TECH_PIECE_SCENE  = preload("res://entities/collectibles/alien_tech_piece
 
 @export var max_hits: int = 3
 @export var drift_speed: float = -38.0   # Negative = left, positive = right
-@export var rotation_speed: float = 0.25
 @export var max_lifetime: float = 30.0
 @export var max_y: float = 10000.0       # World-space y ceiling; set by spawner
 
@@ -20,6 +19,11 @@ var visual_node: AnimatedSprite2D = null
 var _age: float = 0.0
 var _wave_timer: float = 0.0
 var _wave_phase: float = 0.0   # Randomised per-instance so each cluster moves differently
+var _rot_offset: float = 0.0
+var _rot_fast_speed: float = 0.0   # pendulum sway rate
+var _rot_slow_speed: float = 0.0   # slow drift rate (can tip upside down)
+var _rot_small: float = 0.0        # fast sway amplitude (gentle pendulum)
+var _rot_big: float = 0.0          # slow drift amplitude (can exceed π → flip)
 var _flash_timer: float = 0.0
 var _flash_duration: float = 0.12
 var _is_flashing: bool = false
@@ -27,12 +31,18 @@ var _is_flashing: bool = false
 func _ready():
 	gravity_scale = 0.0
 	linear_damp = 0.4
-	angular_damp = 0.3
 	mass = 3.0
+	lock_rotation = true
 	z_index = 50
 	add_to_group("trash_clusters")
 
 	_wave_phase = randf() * TAU
+
+	# Per-instance rotation personality
+	_rot_fast_speed = randf_range(0.8, 1.6)
+	_rot_slow_speed = randf_range(0.08, 0.2)
+	_rot_small      = randf_range(0.2, 0.45)   # quick pendulum: ~12–26°
+	_rot_big        = randf_range(0.5, 3.8)    # slow drift: gentle to full flip
 
 	visual_node = get_node_or_null("AnimatedSprite2D")
 
@@ -67,7 +77,12 @@ func _physics_process(delta: float):
 	var wave_x = sin(t * 0.55 + 1.2) * 4.0 + sin(t * 1.7) * 2.0
 
 	linear_velocity = Vector2(drift_speed + wave_x, wave_y)
-	angular_velocity = rotation_speed
+
+	_rot_offset += delta
+	if visual_node:
+		visual_node.rotation = \
+			sin(_rot_offset * _rot_fast_speed + _wave_phase) * _rot_small + \
+			sin(_rot_offset * _rot_slow_speed + _wave_phase * 1.7) * _rot_big
 
 	if global_position.y > max_y:
 		global_position.y = max_y

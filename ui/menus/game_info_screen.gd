@@ -67,7 +67,10 @@ func _build_content():
 	# Trash cluster + alien tech
 	var row_cluster := _row()
 	row_cluster.add_child(_label_inline("Large trash clusters "))
-	row_cluster.add_child(_static(cluster_tex, Rect2(0, 0, 24, 24), Vector2(26, 26)))
+	# trash_cluster.png: 48x24, 2 frames of 24x24
+	row_cluster.add_child(_anim_sprite(cluster_tex, Vector2(24, 24), [
+		Rect2(0, 0, 24, 24), Rect2(24, 0, 24, 24)
+	], Vector2(26, 26), 3.0))
 	row_cluster.add_child(_label_inline(" hide alien technologies "))
 	# alien_tech_piece.png: 24x12, 2 frames of 12x12
 	row_cluster.add_child(_anim_sprite(alien_tex, Vector2(12, 12), [
