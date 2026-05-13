@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://bpm3u1q2wx5y"]
 
 [ext_resource type="Script" uid="uid://c7pmu8gd3k5x" path="res://ui/menus/pause_menu.gd" id="1_pausemenu"]
+[ext_resource type="PackedScene" uid="uid://cmdqgqfevkvly" path="res://ui/menus/guide_screen.tscn" id="4_guidescreen"]
 [ext_resource type="Texture2D" uid="uid://b6kds15kk8tw4" path="res://ui/hud/sprites/tech_left_icon.png" id="2_lefticon"]
 [ext_resource type="Texture2D" uid="uid://c8tawqv3ivo5u" path="res://ui/hud/sprites/tech_right_icon.png" id="3_righticon"]
 
@@ -137,7 +138,15 @@ custom_minimum_size = Vector2(200, 30)
 layout_mode = 2
 text = "Swap L ↔ R"
 
+[node name="OptionsButton" type="Button" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
+custom_minimum_size = Vector2(200, 30)
+layout_mode = 2
+text = "Options"
+
 [node name="QuitButton" type="Button" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
 custom_minimum_size = Vector2(200, 30)
 layout_mode = 2
 text = "Quit"
+
+[node name="GuideScreen" parent="." instance=ExtResource("4_guidescreen")]
+visible = false

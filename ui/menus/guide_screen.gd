@@ -5,6 +5,7 @@ class_name GuideScreen
 @onready var back_button: Button = $Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonContainer/BackButton
 
 var invert_thrust_checkbox: CheckBox
+var _back_callback: Callable
 
 func _ready():
 	visible = false
@@ -13,7 +14,8 @@ func _ready():
 		back_button.pressed.connect(_on_back_pressed)
 	_build_content()
 
-func show_guide():
+func show_guide(back_callback: Callable = Callable()):
+	_back_callback = back_callback
 	visible = true
 	if back_button:
 		back_button.grab_focus()
@@ -60,9 +62,14 @@ func _build_content():
 
 func _on_back_pressed():
 	hide_guide()
-	var main_menu = get_parent()
-	if main_menu and main_menu.has_method("show_menu"):
-		main_menu.show_menu()
+	if _back_callback.is_valid():
+		var cb := _back_callback
+		_back_callback = Callable()
+		cb.call()
+	else:
+		var main_menu = get_parent()
+		if main_menu and main_menu.has_method("show_menu"):
+			main_menu.show_menu()
 
 func _on_invert_thrust_toggled(pressed: bool):
 	GameSettings.set_thrust_inverted(pressed)

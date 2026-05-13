@@ -351,6 +351,10 @@ offset_right = -323.4816
 offset_bottom = 62.268524
 color = Color(0.1764706, 0.12156863, 0.023529412, 1)
 
+[node name="DevTechSeeder" parent="." index="32" unique_id=500000002]
+enabled = true
+slot_a = 14
+
 [node name="SpaceDebrisGroup" parent="." index="33" unique_id=511816800 instance=ExtResource("23_ryfpa")]
 position = Vector2(-96, -161)
 powerup_scene = ExtResource("24_0fu15")

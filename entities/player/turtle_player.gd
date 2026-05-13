@@ -410,8 +410,11 @@ func _physics_process(delta):
 		control_suspended = false
 		if animated_sprite and is_instance_valid(animated_sprite):
 			animated_sprite.scale = Vector2.ONE
+			animated_sprite.position = Vector2.ZERO
 
 	if control_suspended:
+		if animated_sprite and is_instance_valid(animated_sprite):
+			animated_sprite.position = Vector2(randf_range(-4.0, 4.0), randf_range(-4.0, 4.0))
 		if _flipper_velcro_latched:
 			_cancel_flipper_velcro()
 		return

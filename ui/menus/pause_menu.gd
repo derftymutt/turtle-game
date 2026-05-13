@@ -9,7 +9,9 @@ const _TECH := "Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoCon
 
 @onready var resume_button    = $Control/CenterContainer/PanelContainer/VBoxContainer/ResumeButton
 @onready var swap_tech_button = $Control/CenterContainer/PanelContainer/VBoxContainer/SwapTechButton
+@onready var options_button   = $Control/CenterContainer/PanelContainer/VBoxContainer/OptionsButton
 @onready var quit_button      = $Control/CenterContainer/PanelContainer/VBoxContainer/QuitButton
+@onready var guide_screen     = $GuideScreen
 
 @onready var slot_l_icon: TextureRect = $Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLRow/SlotLIcon
 @onready var slot_l_name: Label       = $Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLRow/SlotLTextContainer/SlotLName
@@ -27,6 +29,8 @@ func _ready():
 		resume_button.pressed.connect(_on_resume_pressed)
 	if swap_tech_button:
 		swap_tech_button.pressed.connect(_on_swap_tech_pressed)
+	if options_button:
+		options_button.pressed.connect(_on_options_pressed)
 	if quit_button:
 		quit_button.text = "Quit to Menu"
 		quit_button.pressed.connect(_on_quit_pressed)
@@ -52,6 +56,15 @@ func _resume():
 
 func _on_resume_pressed():
 	_resume()
+
+func _on_options_pressed():
+	visible = false
+	if guide_screen and guide_screen.has_method("show_guide"):
+		guide_screen.show_guide(func():
+			visible = true
+			if resume_button:
+				resume_button.grab_focus()
+		)
 
 func _on_swap_tech_pressed():
 	AlienTechManager.swap_slots()

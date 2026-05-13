@@ -30,6 +30,7 @@ var _is_playing_damage_animation: bool = false
 var _contact_damage_ready: bool = true
 var _contact_players: Array = []
 var _is_phased: bool = false
+var _hit_iframes_timer: float = 0.0
 
 func _ready():
 	current_health = max_health
@@ -66,6 +67,7 @@ func take_damage(amount: float):
 		return
 	
 	current_health -= amount
+	_hit_iframes_timer = 0.3
 	_play_damage_feedback()
 	
 	if current_health <= 0:
@@ -159,7 +161,9 @@ func _on_damage_area_exited(body: Node2D):
 	_contact_players.erase(body)
 
 ## Continuously re-apply damage while the player remains in the damage area.
-func _process(_delta: float):
+func _process(delta: float):
+	if _hit_iframes_timer > 0.0:
+		_hit_iframes_timer -= delta
 	if not _contact_damage_ready or _contact_players.is_empty() or current_health <= 0:
 		return
 	for body in _contact_players:
@@ -169,6 +173,8 @@ func _process(_delta: float):
 
 ## Deal damage and knockback to player
 func _deal_damage_to_player(player: Node2D):
+	if _hit_iframes_timer > 0.0:
+		return
 	player.take_damage(contact_damage, true)  # true = grant contact iframes
 
 	# Start cooldown so this enemy doesn't fire again until it expires
