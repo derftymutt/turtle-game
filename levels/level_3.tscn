@@ -26,7 +26,6 @@
 [ext_resource type="PackedScene" uid="uid://brjd5ho5mmmy4" path="res://entities/environment/flippers/flipper_right_west.tscn" id="26_8nkwk"]
 [ext_resource type="PackedScene" uid="uid://8edo3etakc1a" path="res://entities/environment/walls/dead_wall/dead_wall.tscn" id="26_e28pm"]
 [ext_resource type="Texture2D" uid="uid://bm428btwp720u" path="res://entities/environment/ocean_boundaries/ocean_floor.png" id="27_8nkwk"]
-[ext_resource type="PackedScene" uid="uid://bwdbbu1jhxn2n" path="res://entities/environment/walls/bumper_wall/bumper_wall.tscn" id="27_tv8m3"]
 [ext_resource type="TileSet" uid="uid://dyl02kfc4a681" path="res://entities/environment/ocean_boundaries/ocean_wall.tres" id="28_kyq6o"]
 [ext_resource type="PackedScene" uid="uid://ko8xdpxfr5ej" path="res://entities/environment/current/current.tscn" id="31_4gw27"]
 [ext_resource type="PackedScene" uid="uid://c41fis6pd8gh2" path="res://systems/space_debris/space_debris_group.tscn" id="31_q26s8"]
@@ -182,6 +181,7 @@ seed_count_max = 4
 position = Vector2(-145, 45)
 physics_material_override = SubResource("PhysicsMaterial_jqt73")
 radius = 10.0
+variant = "3"
 
 [node name="CircularBumper2" parent="CircularBumpers" index="1" unique_id=285227436 instance=ExtResource("17_svivd")]
 position = Vector2(-210, 120)
@@ -197,6 +197,7 @@ radius = 10.0
 position = Vector2(145, 50)
 physics_material_override = SubResource("PhysicsMaterial_wgvos")
 radius = 10.0
+variant = "2"
 
 [node name="CircularBumper6" parent="CircularBumpers" index="4" unique_id=1105303705 instance=ExtResource("17_svivd")]
 position = Vector2(210, 120)
@@ -216,13 +217,6 @@ radius = 16.0
 [node name="CircularBumper9" parent="CircularBumpers" index="7" unique_id=1051804719 instance=ExtResource("17_svivd")]
 position = Vector2(-90, -75)
 physics_material_override = SubResource("PhysicsMaterial_6dcgf")
-
-[node name="BumperWall3" parent="CircularBumpers" index="8" unique_id=2081537971 instance=ExtResource("27_tv8m3")]
-position = Vector2(-145, 45)
-mirrored = true
-
-[node name="BumperWall4" parent="CircularBumpers" index="9" unique_id=328288568 instance=ExtResource("27_tv8m3")]
-position = Vector2(145, 50)
 
 [node name="UfoWorkshop" parent="." index="22" unique_id=625327535 instance=ExtResource("22_8swdu")]
 position = Vector2(-235, -138)
