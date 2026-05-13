@@ -46,6 +46,7 @@ var wiggle_offset: float = 0.0
 
 # Visual effects
 var telegraph_particles: Array = []
+var _is_dying: bool = false
 
 func _enemy_ready():
 	# Physics setup
@@ -77,7 +78,7 @@ func _enemy_ready():
 	damage_area.body_entered.connect(_on_damage_area_entered)
 
 func _physics_process(delta):
-	if not player or not is_instance_valid(player):
+	if _is_dying or not player or not is_instance_valid(player):
 		return
 	
 	# Maintain preferred depth
@@ -359,8 +360,7 @@ func _on_damage_area_entered(body: Node2D):
 
 func die():
 	"""Electric discharge death animation"""
-	# Cleanup any active shocks — use synchronous version so it completes
-	# before the eel is freed, regardless of tween timing.
+	_is_dying = true
 	_cleanup_telegraph_effect()
 	_cleanup_all_shocked_walls()
 	

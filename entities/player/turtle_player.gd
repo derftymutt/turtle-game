@@ -14,7 +14,7 @@ extends RigidBody2D
 @export var phase_bullet_scene: PackedScene
 
 # Thrust strengths
-@export var horizontal_thrust: float = 200.0 # INCREASED: Was 175.0 - more action feel
+@export var horizontal_thrust: float = 175.0
 @export var upward_thrust: float = 75.0
 @export var downward_thrust: float = 225.0
 
@@ -113,9 +113,11 @@ var _contact_iframes_active: bool = false
 var _contact_iframes_timer: float = 0.0
 
 const BUBBLE_SHIELD_REGEN_DURATION: float = 15.0
+const BUBBLE_SHIELD_RADIUS: float = 18.0
 var bubble_shield_hp: float = 0.0
 var bubble_shield_regen_timer: float = 0.0
 var _bubble_flash_timer: float = 0.0
+var _bubble_visual: Line2D = null
 
 # Bumper Magnet
 const BUMPER_MAGNET_DURATION: float = 2.0
@@ -234,11 +236,14 @@ func _ready():
 	_setup_super_speed_area()
 	_setup_rest_particles()
 	_setup_deflector_area()
+	_setup_bubble_visual()
 
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
 	AlienTechManager.tech_activated.connect(_on_alien_tech_activated)
 	AlienTechManager.tech_slots_changed.connect(_on_alien_tech_slots_changed_player)
+	# Sync state for any tech already in slots before this node was ready (e.g. DevTechSeeder)
+	_on_alien_tech_slots_changed_player(AlienTechManager.slots[0], AlienTechManager.slots[1])
 
 	# Show the correct idle frame immediately on spawn
 	_play_animation("idle")
@@ -342,6 +347,8 @@ func _physics_process(delta):
 			bubble_shield_regen_timer -= delta
 			if bubble_shield_regen_timer <= 0.0:
 				bubble_shield_hp = 1.0
+				if _bubble_visual:
+					_bubble_visual.visible = true
 		var _regen_ratio: float = 1.0 if bubble_shield_hp > 0.0 else clamp(1.0 - bubble_shield_regen_timer / BUBBLE_SHIELD_REGEN_DURATION, 0.0, 1.0)
 		AlienTechManager.set_passive_bar(AlienTechRegistry.BUBBLE_SHIELD, _regen_ratio)
 
@@ -514,6 +521,9 @@ func _process(delta: float):
 	if deflector_shield_active and _deflector_visual:
 		var pulse := (sin(Time.get_ticks_msec() * 0.008) + 1.0) * 0.5
 		_deflector_visual.default_color = Color(0.3, 0.7, 1.0, 0.4 + pulse * 0.45)
+	if _bubble_visual and _bubble_visual.visible:
+		var pulse := (sin(Time.get_ticks_msec() * 0.005) + 1.0) * 0.5
+		_bubble_visual.default_color = Color(0.5, 0.9, 1.0, 0.35 + pulse * 0.4)
 
 func _update_sprite_modulate():
 	var sprite = $AnimatedSprite2D
@@ -741,6 +751,8 @@ func take_damage(amount: float, use_iframes: bool = false):
 	if AlienTechManager.is_tech_active(AlienTechRegistry.BUBBLE_SHIELD) and bubble_shield_hp > 0.0:
 		bubble_shield_hp = 0.0
 		bubble_shield_regen_timer = BUBBLE_SHIELD_REGEN_DURATION
+		if _bubble_visual:
+			_bubble_visual.visible = false
 		_bubble_flash_timer = 0.4
 		return  # Shield absorbed — transporter windup NOT canceled
 
@@ -1244,6 +1256,28 @@ func _on_alien_tech_slots_changed_player(_slot_a: Dictionary, _slot_b: Dictionar
 	if AlienTechManager.is_tech_active(AlienTechRegistry.BUBBLE_SHIELD):
 		if bubble_shield_hp == 0.0 and bubble_shield_regen_timer <= 0.0:
 			bubble_shield_hp = 1.0
+		if _bubble_visual:
+			_bubble_visual.visible = bubble_shield_hp > 0.0
+
+# ---------------------------------------------------------------------------
+# BUBBLE SHIELD VISUAL
+# ---------------------------------------------------------------------------
+
+func _setup_bubble_visual() -> void:
+	_bubble_visual = Line2D.new()
+	_bubble_visual.name = "BubbleVisual"
+	var _pts: PackedVector2Array = []
+	var _segs := 36
+	for i in range(_segs + 1):
+		var a := i * TAU / _segs
+		_pts.append(Vector2(cos(a), sin(a)) * BUBBLE_SHIELD_RADIUS)
+	_bubble_visual.points = _pts
+	_bubble_visual.default_color = Color(0.5, 0.9, 1.0, 0.65)
+	_bubble_visual.width = 1.5
+	_bubble_visual.z_as_relative = false
+	_bubble_visual.z_index = 12
+	_bubble_visual.visible = false
+	add_child(_bubble_visual)
 
 # ---------------------------------------------------------------------------
 # DEFLECTOR SHIELD

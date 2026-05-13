@@ -4,7 +4,7 @@ extends Node
 ## Global game state - handles persistent data across levels
 
 # Set to true to show level-select dev buttons on the main menu
-const DEV_MODE: bool = true
+const DEV_MODE: bool = false
 
 # Current run state
 var current_score: int = 0   # Level score — resets each level via HUD._ready()
