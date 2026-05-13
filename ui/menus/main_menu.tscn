@@ -1,8 +1,9 @@
 [gd_scene format=3 uid="uid://u1q38ecdmws8"]
 
 [ext_resource type="Script" uid="uid://d33exekcsupic" path="res://ui/menus/main_menu.gd" id="1_5oih7"]
+[ext_resource type="FontFile" uid="uid://cv5rmfp2o8uts" path="res://assets/fonts/BoldPixels.ttf" id="2_1njj5"]
 [ext_resource type="PackedScene" uid="uid://cmdqgqfevkvly" path="res://ui/menus/guide_screen.tscn" id="2_qc8qn"]
-[ext_resource type="PackedScene" path="res://ui/menus/game_info_screen.tscn" id="3_ginfo"]
+[ext_resource type="PackedScene" uid="uid://cpjcj7cy3ence" path="res://ui/menus/game_info_screen.tscn" id="3_ginfo"]
 
 [node name="MainMenu" type="CanvasLayer" unique_id=2017890914]
 script = ExtResource("1_5oih7")
@@ -41,6 +42,7 @@ layout_mode = 2
 [node name="TitleLabel" type="Label" parent="Control/CenterContainer/VBoxContainer" unique_id=1598903120]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.6, 0.8980392, 0.3137255, 1)
+theme_override_fonts/font = ExtResource("2_1njj5")
 theme_override_font_sizes/font_size = 48
 text = "Turtle Plunge"
 
@@ -52,5 +54,5 @@ alignment = 1
 [node name="GuideScreen" parent="." unique_id=1279051161 instance=ExtResource("2_qc8qn")]
 visible = false
 
-[node name="GameInfoScreen" parent="." instance=ExtResource("3_ginfo")]
+[node name="GameInfoScreen" parent="." unique_id=493138188 instance=ExtResource("3_ginfo")]
 visible = false
