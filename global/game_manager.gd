@@ -14,6 +14,9 @@ var total_score: int = 0     # Cumulative score across all completed levels this
 var is_carrying_piece: bool = false
 var carried_piece: Node = null
 
+# Hard mode: health at level entry (-1 = use full health for first level)
+var persisted_health: float = -1.0
+
 # High scores per level (persists between sessions if you add save/load)
 var high_scores: Dictionary = {
 	"level_1": 0,
@@ -50,6 +53,7 @@ func load_victory_screen():
 func reset_game():
 	current_score = 0
 	total_score = 0
+	persisted_health = -1.0
 	is_carrying_piece = false
 	carried_piece = null
 	LevelManager.reset_run()

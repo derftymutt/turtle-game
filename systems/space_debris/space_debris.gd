@@ -33,7 +33,7 @@ var group_owner: SpaceDebrisGroup = null
 
 # ── Visual ────────────────────────────────────────────────────────────────
 @export_group("Visual")
-@export var points: int = 10
+@export var points: int = 50
 
 ## Texture to display for this debris piece.
 ## Set the same texture on all three pieces in a group so they're

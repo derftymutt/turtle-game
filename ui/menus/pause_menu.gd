@@ -7,6 +7,8 @@ class_name PauseMenu
 const _VBOX := "Control/CenterContainer/PanelContainer/VBoxContainer"
 const _TECH := "Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoContainer"
 
+const _HARD_RED := Color(1.0, 0.18, 0.18)
+
 @onready var resume_button    = $Control/CenterContainer/PanelContainer/VBoxContainer/ResumeButton
 @onready var swap_tech_button = $Control/CenterContainer/PanelContainer/VBoxContainer/SwapTechButton
 @onready var options_button   = $Control/CenterContainer/PanelContainer/VBoxContainer/OptionsButton
@@ -46,6 +48,7 @@ func _input(event):
 func _open():
 	get_tree().paused = true
 	visible = true
+	_apply_hard_mode_style()
 	_update_tech_display()
 	if resume_button:
 		resume_button.grab_focus()
@@ -53,6 +56,16 @@ func _open():
 func _resume():
 	get_tree().paused = false
 	visible = false
+
+func _apply_hard_mode_style():
+	if not GameSettings.hard_mode:
+		return
+	for btn in [resume_button, swap_tech_button, options_button, quit_button]:
+		if btn:
+			btn.add_theme_color_override("font_color", _HARD_RED)
+	for lbl in [slot_l_name, slot_l_desc, slot_r_name, slot_r_desc]:
+		if lbl:
+			lbl.add_theme_color_override("font_color", _HARD_RED)
 
 func _on_resume_pressed():
 	_resume()
@@ -62,6 +75,7 @@ func _on_options_pressed():
 	if guide_screen and guide_screen.has_method("show_guide"):
 		guide_screen.show_guide(func():
 			visible = true
+			_apply_hard_mode_style()
 			if resume_button:
 				resume_button.grab_focus()
 		)

@@ -132,6 +132,12 @@ func complete_level():
 		successful_time_ms += elapsed
 		_attempt_start_time_ms = 0
 
+	# Hard mode: persist the player's current health into the next level
+	if GameSettings.hard_mode:
+		var hud_node = get_tree().get_first_node_in_group("hud")
+		if hud_node:
+			GameManager.persisted_health = hud_node.current_health
+
 	level_complete.emit()
 	print("🚀 Level %d complete! Assembling UFO..." % current_level_number)
 

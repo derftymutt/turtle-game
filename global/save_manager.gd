@@ -17,22 +17,27 @@ func has_save() -> bool:
 func get_save_level() -> int:
 	return load_save().get("level_number", 1)
 
+func get_save_hard_mode() -> bool:
+	return load_save().get("hard_mode", false)
+
 func save_game():
 	var data = {
 		"level_number":        LevelManager.current_level_number,
 		"total_score":         GameManager.total_score,
 		"tech_slot_0":         AlienTechManager.slots[0].get("id", ""),
 		"tech_slot_1":         AlienTechManager.slots[1].get("id", ""),
-		"continue_count": LevelManager.continue_count,
+		"continue_count":      LevelManager.continue_count,
 		"total_time_ms":       LevelManager.total_time_ms,
 		"successful_time_ms":  LevelManager.successful_time_ms,
+		"hard_mode":           GameSettings.hard_mode,
+		"persisted_health":    GameManager.persisted_health,
 	}
 	var file = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if file:
 		file.store_string(JSON.stringify(data))
 		file.close()
-		print("💾 Saved: Level %d, Total Score %d, Continues %d" % [
-			data.level_number, data.total_score, data.continue_count])
+		print("💾 Saved: Level %d, Total Score %d, Continues %d, Hard Mode %s" % [
+			data.level_number, data.total_score, data.continue_count, data.hard_mode])
 
 func load_save() -> Dictionary:
 	if not FileAccess.file_exists(SAVE_PATH):
@@ -67,8 +72,11 @@ func apply_save():
 	LevelManager.current_level_number = data.get("level_number", 1)
 	LevelManager.total_time_ms = data.get("total_time_ms", 0)
 	LevelManager.successful_time_ms = data.get("successful_time_ms", 0)
-	print("📂 Restored: Level %d, Total Score %d, Continues %d" % [
-		LevelManager.current_level_number, GameManager.total_score, LevelManager.continue_count])
+	GameSettings.hard_mode = data.get("hard_mode", false)
+	GameManager.persisted_health = data.get("persisted_health", -1.0)
+	print("📂 Restored: Level %d, Total Score %d, Continues %d, Hard Mode %s" % [
+		LevelManager.current_level_number, GameManager.total_score,
+		LevelManager.continue_count, GameSettings.hard_mode])
 
 # ─── Best scores (permanent) ─────────────────────────────────────────────────
 
@@ -87,6 +95,8 @@ func _save_best_scores(data: Dictionary):
 	if file:
 		file.store_string(JSON.stringify(data))
 		file.close()
+
+# Normal mode
 
 func get_best_victory_score() -> int:
 	return _load_best_scores().get("best_victory_score", 0)
@@ -111,3 +121,29 @@ func save_victory_time(ms: int):
 		data["best_victory_time_ms"] = ms
 		_save_best_scores(data)
 		print("⏱️ New best victory time: %d ms (was %d ms)" % [ms, current_best])
+
+# Hard mode
+
+func get_best_victory_score_hard() -> int:
+	return _load_best_scores().get("best_victory_score_hard", 0)
+
+func save_victory_score_hard(score: int):
+	var data = _load_best_scores()
+	var current_best: int = data.get("best_victory_score_hard", 0)
+	if score > current_best:
+		data["best_victory_score_hard"] = score
+		_save_best_scores(data)
+		print("💀 New hard mode best score: %d (was %d)" % [score, current_best])
+
+func get_best_victory_time_ms_hard() -> int:
+	return _load_best_scores().get("best_victory_time_ms_hard", 0)
+
+func save_victory_time_hard(ms: int):
+	if ms <= 0:
+		return
+	var data = _load_best_scores()
+	var current_best: int = data.get("best_victory_time_ms_hard", 0)
+	if current_best == 0 or ms < current_best:
+		data["best_victory_time_ms_hard"] = ms
+		_save_best_scores(data)
+		print("💀 New hard mode best time: %d ms (was %d ms)" % [ms, current_best])

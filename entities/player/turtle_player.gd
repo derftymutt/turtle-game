@@ -225,6 +225,10 @@ func _ready():
 		push_warning("No Ocean found! Add Ocean scene to level and add it to 'ocean' group.")
 		gravity_scale = 0.1
 
+	# Hard mode: carry health forward from the previous level
+	if GameSettings.hard_mode and GameManager.persisted_health >= 0.0:
+		current_health = GameManager.persisted_health
+
 	hud = get_tree().get_first_node_in_group("hud")
 	if not hud:
 		push_warning("No HUD found! Add HUD scene to level and add it to 'hud' group.")
