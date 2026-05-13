@@ -10,6 +10,8 @@ signal time_expired
 var score_label: Label
 var ufo_pieces_label: Label
 var health_bar: TextureProgressBar
+var boss_health_container: Control
+var boss_health_bar: TextureProgressBar
 var air_container: Control
 var air_bar: TextureProgressBar
 var energy_container: Control
@@ -108,6 +110,8 @@ func _ready():
 	# Find UI nodes dynamically
 	score_label = find_child("ScoreLabel")
 	ufo_pieces_label = find_child("UFOPiecesLabel")
+	boss_health_container = find_child("BossHealthContainer")
+	boss_health_bar = find_child("BossHealthBar")
 	health_bar = find_child("HealthBar")
 	air_container = find_child("AirContainer")
 	air_bar = find_child("AirBar")
@@ -493,11 +497,22 @@ func _on_level_started(level_number: int):
 	# so we don't need to do anything here
 	pass
 
-func _on_boss_level_started(level_number: int):
-	"""Called when a boss level starts - replace UFO counter with boss prompt"""
+func _on_boss_level_started(_level_number: int):
+	# Hide UFO pieces section, show boss health bar
 	if ufo_pieces_label:
-		ufo_pieces_label.text = ""
-		ufo_pieces_label.add_theme_color_override("font_color", Color.RED)
+		ufo_pieces_label.get_parent().visible = false
+	if boss_health_container:
+		boss_health_container.visible = true
+
+	# Connect to submarine boss health signal
+	var boss = get_tree().get_first_node_in_group("submarine_boss")
+	if boss and boss.has_signal("health_changed"):
+		boss.health_changed.connect(_on_boss_health_changed)
+
+func _on_boss_health_changed(current: float, max_hp: float):
+	if boss_health_bar:
+		boss_health_bar.max_value = max_hp
+		boss_health_bar.value = current
 
 # ─── Alien Tech display ───────────────────────────────────────────────────────
 

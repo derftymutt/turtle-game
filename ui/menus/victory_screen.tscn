@@ -28,10 +28,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -180.0
-offset_top = -140.0
-offset_right = 180.0
-offset_bottom = 140.0
+offset_left = -170.0
+offset_top = -160.0
+offset_right = 170.0
+offset_bottom = 160.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -39,64 +39,64 @@ grow_vertical = 2
 layout_mode = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer"]
-custom_minimum_size = Vector2(320, 0)
+custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 5
 alignment = 1
 
 [node name="YouWonLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0, 1)
-theme_override_font_sizes/font_size = 30
+theme_override_font_sizes/font_size = 24
 text = "YOU WON!"
 horizontal_alignment = 1
 
 [node name="FinalScoreLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 17
 text = "Final Score: 0"
 horizontal_alignment = 1
 
 [node name="AttemptsLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 13
 text = "Total Attempts: 0"
 horizontal_alignment = 1
 
 [node name="AlienTechsLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 12
 text = "Alien Techs: 0"
 horizontal_alignment = 1
 
 [node name="TotalTimeLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 12
 text = "Total Time: 0:00"
 horizontal_alignment = 1
 
 [node name="SuccessTimeLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 12
 text = "Successful Time: 0:00"
 horizontal_alignment = 1
 
 [node name="BestScoreLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 12
 text = "Best Victory: 0"
 horizontal_alignment = 1
 
 [node name="BestTimeLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 12
 text = "Best Time: 0:00"
 horizontal_alignment = 1
 
 [node name="NewBestLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 13
 text = "NEW BEST!"
 horizontal_alignment = 1
 visible = false
@@ -104,17 +104,17 @@ visible = false
 [node name="NewBestTimeLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 1, 0.6, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 13
 text = "NEW BEST TIME!"
 horizontal_alignment = 1
 visible = false
 
 [node name="PlayAgainButton" type="Button" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
-custom_minimum_size = Vector2(160, 36)
+custom_minimum_size = Vector2(140, 30)
 layout_mode = 2
 text = "Play Again"
 
 [node name="MainMenuButton" type="Button" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
-custom_minimum_size = Vector2(160, 36)
+custom_minimum_size = Vector2(140, 30)
 layout_mode = 2
 text = "Main Menu"

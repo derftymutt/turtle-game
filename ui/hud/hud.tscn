@@ -17,6 +17,8 @@
 [ext_resource type="Texture2D" uid="uid://b7jh7ou1gcun1" path="res://ui/hud/sprites/tech_meter_bg.png" id="14_olkg6"]
 [ext_resource type="Texture2D" uid="uid://duwdo5p0ymd0f" path="res://ui/hud/sprites/tech_meter_fill.png" id="15_hk13k"]
 [ext_resource type="Texture2D" uid="uid://c8tawqv3ivo5u" path="res://ui/hud/sprites/tech_right_icon.png" id="16_uyo40"]
+[ext_resource type="Texture2D" uid="uid://cb7b62s1rxywo" path="res://entities/enemies/boss_submarine/sprites/boss_meter_bg.png" id="17_boss"]
+[ext_resource type="Texture2D" uid="uid://icas4ttby742" path="res://entities/enemies/boss_submarine/sprites/boss_meter_fill.png" id="18_boss"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_w75iv"]
 atlas = ExtResource("3_e0nub")
@@ -110,6 +112,19 @@ layout_mode = 2
 theme_override_fonts/font = ExtResource("2_4d6w6")
 theme_override_font_sizes/font_size = 18
 text = "0/0"
+
+[node name="BossHealthContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=700000001]
+visible = false
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="BossHealthBar" type="TextureProgressBar" parent="MarginContainer/VBoxContainer/HBoxContainer/BossHealthContainer" unique_id=700000003]
+layout_mode = 2
+size_flags_vertical = 4
+max_value = 500.0
+value = 500.0
+texture_under = ExtResource("17_boss")
+texture_progress = ExtResource("18_boss")
 
 [node name="HealthContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1169449475]
 layout_mode = 2

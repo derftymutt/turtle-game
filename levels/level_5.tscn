@@ -304,6 +304,10 @@ position = Vector2(102, -5)
 angle_preset = 4
 length_units = 1
 
+[node name="DevTechSeeder" parent="." index="42" unique_id=500000002]
+enabled = true
+slot_a = 11
+
 [node name="SpaceDebrisGroup" parent="." index="43" unique_id=511816800 instance=ExtResource("20_mmy2b")]
 position = Vector2(-96, -161)
 powerup_type = 2

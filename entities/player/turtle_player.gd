@@ -1287,7 +1287,7 @@ func _setup_deflector_area() -> void:
 	_deflector_area = Area2D.new()
 	_deflector_area.name = "DeflectorArea"
 	_deflector_area.collision_layer = 0
-	_deflector_area.collision_mask = 4 | 8  # Layer 3 (enemies) + Layer 4 (projectiles)
+	_deflector_area.collision_mask = 4 | 8 | 64  # Layer 3 (enemies) + Layer 4 (player bullets) + Layer 7 (enemy bullets)
 	_deflector_area.monitoring = true
 	_deflector_area.monitorable = false
 
@@ -1327,6 +1327,8 @@ func _on_deflector_body_entered(body: Node2D) -> void:
 		return
 	if body == self or body.is_in_group("player"):
 		return
+	if body.is_in_group("submarine_boss"):
+		return
 	var dir := (body.global_position - global_position)
 	if dir == Vector2.ZERO:
 		dir = Vector2.RIGHT
@@ -1346,6 +1348,8 @@ func _repel_deflected_bodies(delta: float) -> void:
 		return
 	for body in _deflector_area.get_overlapping_bodies():
 		if body == self or body.is_in_group("player"):
+			continue
+		if body.is_in_group("submarine_boss"):
 			continue
 		var dir := (body.global_position - global_position)
 		if dir == Vector2.ZERO:

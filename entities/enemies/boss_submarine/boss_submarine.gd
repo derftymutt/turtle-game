@@ -1,6 +1,8 @@
 extends BaseEnemyStatic
 class_name BossSubmarine
 
+signal health_changed(current: float, max_hp: float)
+
 ## ============================================================
 ## SUBMARINE BOSS
 ## ============================================================
@@ -40,7 +42,7 @@ class_name BossSubmarine
 @export var fan_spread_deg: float = 140.0
 ## Number of missiles in the simultaneous volley
 @export var fan_missile_count: int = 9
-@export var fan_missile_speed: float = 160.0
+@export var fan_missile_speed: float = 120.0
 
 # ── Attack: Around-the-World ─────────────────────────────────
 @export_group("Pattern 2: Around the World")
@@ -50,7 +52,7 @@ class_name BossSubmarine
 @export var arc_step_count: int = 10
 ## Delay between each step (seconds)
 @export var arc_step_delay: float = 0.18
-@export var arc_missile_speed: float = 175.0
+@export var arc_missile_speed: float = 130.0
 
 # ── Attack: Heavy Sweep ──────────────────────────────────────
 @export_group("Pattern 3: Heavy Sweep")
@@ -62,7 +64,7 @@ class_name BossSubmarine
 @export var heavy_burst_spread_deg: float = 12.0
 ## Delay between steps (slower than around-the-world)
 @export var heavy_step_delay: float = 0.32
-@export var heavy_missile_speed: float = 130.0
+@export var heavy_missile_speed: float = 95.0
 
 # ── Drones ────────────────────────────────────────────────────
 @export_group("Drones")
@@ -74,7 +76,7 @@ class_name BossSubmarine
 # ── Invincibility window after a super-speed hit ─────────────
 @export_group("Damage")
 ## Seconds the sub flashes invincible after a hit (prevents combo)
-@export var hit_invincibility_duration: float = 1.2
+@export var hit_invincibility_duration: float = 0.7
 
 # ─────────────────────────────────────────────────────────────
 # Internal state
@@ -136,6 +138,8 @@ func _enemy_ready() -> void:
 	if not drone_scene:
 		push_warning("SubmarineBoss: drone_scene not assigned!")
 
+	health_changed.emit(current_health, max_health)
+
 	# Start the main behaviour loop after a short intro pause
 	_state = State.INTRO
 	await get_tree().create_timer(1.5).timeout
@@ -183,6 +187,7 @@ func on_super_speed_hit(body: Node2D) -> void:
 func _apply_super_speed_damage(amount: float) -> void:
 	current_health -= amount
 	_play_damage_feedback()
+	health_changed.emit(current_health, max_health)
 	_start_hit_invincibility()
 
 	if current_health <= 0:
@@ -190,8 +195,17 @@ func _apply_super_speed_damage(amount: float) -> void:
 
 func _start_hit_invincibility() -> void:
 	_hit_invincible = true
+
+	# Flash white/red to signal the invincibility window
+	var flash_tween := create_tween().set_loops()
+	flash_tween.tween_property(self, "modulate", Color(2.0, 0.3, 0.3, 1.0), 0.08)
+	flash_tween.tween_property(self, "modulate", Color.WHITE, 0.08)
+
 	await get_tree().create_timer(hit_invincibility_duration).timeout
+
 	if is_instance_valid(self):
+		flash_tween.kill()
+		modulate = Color.WHITE
 		_hit_invincible = false
 
 # ─────────────────────────────────────────────────────────────

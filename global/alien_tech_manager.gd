@@ -63,6 +63,9 @@ var time_freeze_active: bool = false
 # re-grows if that tech is later reacquired
 var _live_unique_techs: Dictionary = {}
 
+# Cumulative set of every tech ever assigned this run — never shrinks (used for victory screen)
+var _all_acquired_techs: Dictionary = {}
+
 # ─── Powerup Replicator state ────────────────────────────────────────────────
 
 var powerup_replicator_slots: Array[int] = [-1, -1, -1]  # -1 = empty
@@ -133,6 +136,7 @@ func assign_tech(tech_id: String, slot_index: int):
 	_slot_assigned_order[slot_index] = _assignment_counter
 	_assignment_counter += 1
 	_live_unique_techs[tech_id] = true
+	_all_acquired_techs[tech_id] = true
 	print("👽 Slot %s assigned: %s" % [_slot_letter(slot_index), tech["name"]])
 	tech_slots_changed.emit(slots[0], slots[1])
 
@@ -197,7 +201,7 @@ func tech_has_bar(tech_id: String) -> bool:
 # ─── Run lifecycle ───────────────────────────────────────────────────────────
 
 func get_variety_count() -> int:
-	return _live_unique_techs.size()
+	return _all_acquired_techs.size()
 
 func reset_run():
 	pieces_this_threshold = 0
@@ -208,6 +212,7 @@ func reset_run():
 	_assignment_counter = 0
 	_passive_bar_ratios.clear()
 	_live_unique_techs.clear()
+	_all_acquired_techs.clear()
 	phase_shifter_ammo = PHASE_SHIFTER_MAX_AMMO
 	phase_shifter_recharging = false
 	phase_shifter_recharge_timer = 0.0
