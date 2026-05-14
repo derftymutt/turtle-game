@@ -8,8 +8,19 @@ extends RefCounted
 ##   2. Login shell lookup (`bash -lc 'command -v <exe>'`) — picks up .zshrc / .bashrc
 ##   3. Plain `which` / `where` against the inherited PATH
 ## Caches per-exe so repeated dock refreshes don't fork a shell every frame.
+##
+## Thread safety: `find()` runs on action-worker threads
+## (`_run_client_action_worker` in `mcp_dock.gd`), and `invalidate()` runs on
+## the main thread (manual Refresh path). Godot `Dictionary` is not safe for
+## concurrent mutation, so `_cache` / `_searched` access is guarded by
+## `_mutex`. The mutex is held only across dictionary read/write — the slow
+## `_resolve()` path (FileAccess + `OS.execute`) runs unlocked, so a
+## main-thread `invalidate()` can never block on a worker's subprocess.
+## Two workers racing the same exe both call `_resolve()` and both write
+## back the same answer; that's wasted work, not corruption.
 
 
+static var _mutex: Mutex = Mutex.new()
 static var _cache: Dictionary = {}  # exe_name -> resolved path (or "")
 static var _searched: Dictionary = {}
 
@@ -26,20 +37,33 @@ static func find(exe_names: Array[String]) -> String:
 
 ## Drop cache for one exe (call after the user installs / reinstalls).
 static func invalidate(exe_name: String = "") -> void:
+	_mutex.lock()
 	if exe_name.is_empty():
 		_cache.clear()
 		_searched.clear()
 	else:
 		_cache.erase(exe_name)
 		_searched.erase(exe_name)
+	_mutex.unlock()
 
 
 static func _find_one(exe_name: String) -> String:
-	if _searched.get(exe_name, false):
-		return _cache.get(exe_name, "")
+	_mutex.lock()
+	var already_searched: bool = _searched.get(exe_name, false)
+	var cached: String = _cache.get(exe_name, "")
+	_mutex.unlock()
+	if already_searched:
+		return cached
+	# `_resolve()` does FileAccess + `OS.execute` (forks `bash -lc` /
+	# `which`), which can take 100ms-1s. Holding the mutex across that
+	# would let a concurrent `invalidate()` on the main thread freeze the
+	# editor for the duration of the subprocess — which defeats the whole
+	# point of running CLI lookup off the main thread.
 	var hit := _resolve(exe_name)
+	_mutex.lock()
 	_cache[exe_name] = hit
 	_searched[exe_name] = true
+	_mutex.unlock()
 	return hit
 
 
@@ -70,10 +94,49 @@ static func _resolve(exe_name: String) -> String:
 	var output: Array = []
 	var exit_code := OS.execute(lookup, [exe_name], output, true)
 	if exit_code == 0 and output.size() > 0:
-		var found: String = output[0].strip_edges().split("\n")[0].strip_edges()
+		var lines := PackedStringArray(output[0].split("\n"))
+		var found := _pick_best_path(lines) if is_windows else lines[0].strip_edges()
 		if not found.is_empty():
 			return found
 	return ""
+
+
+## Executable extensions Windows' CreateProcessW can launch from a path
+## (after the cmd.exe wrap in `_cli_exec.gd`). Order is preference: `.exe`
+## is a native PE binary; `.cmd` / `.bat` go through the shell; `.com` is
+## the legacy COM-format executable that some shims still ship.
+const _WINDOWS_EXEC_EXTS := [".exe", ".cmd", ".bat", ".com"]
+
+
+## Pick the best path from `where` output on Windows.
+##
+## npm-installed Node CLIs ship as BOTH `<dir>/<name>` (a POSIX bash shim
+## for WSL / Git Bash users) AND `<dir>/<name>.cmd` (the actual Windows
+## wrapper). `where <name>` lists both. CreateProcessW — the underlying
+## syscall behind `OS.execute_with_pipe` — refuses to launch the
+## extensionless POSIX shim, surfacing as
+## `ERROR: Could not create child process: "...\claude" mcp list`
+## in Godot's output log (#251). Picking a path with a real executable
+## extension dodges that entirely.
+##
+## Extension scan is the OUTER loop so the order in `_WINDOWS_EXEC_EXTS`
+## drives preference — `.exe` wins over `.cmd` even when the `.cmd` shows
+## up first in `where` output (one fewer process per shell-out). Falls
+## back to the first non-empty line when no entry has a recognised
+## extension, so we never come up empty when `where` returned *something*.
+static func _pick_best_path(lines: PackedStringArray) -> String:
+	var stripped := PackedStringArray()
+	for raw in lines:
+		var line := raw.strip_edges()
+		if not line.is_empty():
+			stripped.append(line)
+	if stripped.is_empty():
+		return ""
+	for ext in _WINDOWS_EXEC_EXTS:
+		for candidate in stripped:
+			if candidate.to_lower().ends_with(ext):
+				return candidate
+	return stripped[0]
 
 
 static func _well_known_dirs() -> Array[String]:

@@ -1,6 +1,8 @@
 @tool
 extends RefCounted
 
+const ErrorCodes := preload("res://addons/godot_ai/utils/error_codes.gd")
+
 ## Creates an Environment (+ optional Sky + ProceduralSkyMaterial) chain and
 ## either assigns it to a WorldEnvironment node or saves it to a .tres file.
 ## Bundles sub-resource creation + assignment in a single undo action.
@@ -8,10 +10,12 @@ extends RefCounted
 const ResourceHandler := preload("res://addons/godot_ai/handlers/resource_handler.gd")
 
 var _undo_redo: EditorUndoRedoManager
+var _connection: McpConnection
 
 
-func _init(undo_redo: EditorUndoRedoManager) -> void:
+func _init(undo_redo: EditorUndoRedoManager, connection: McpConnection = null) -> void:
 	_undo_redo = undo_redo
+	_connection = connection
 
 
 const _PRESETS := {
@@ -38,13 +42,33 @@ func create_environment(params: Dictionary) -> Dictionary:
 		return home_err
 
 	if not _PRESETS.has(preset):
-		return McpErrorCodes.make(
-			McpErrorCodes.INVALID_PARAMS,
+		return ErrorCodes.make(
+			ErrorCodes.VALUE_OUT_OF_RANGE,
 			"Invalid preset '%s'. Valid: %s" % [preset, ", ".join(_PRESETS.keys())]
 		)
 
 	var preset_config: Dictionary = _PRESETS[preset]
-	var want_sky: bool = sky_param if sky_param != null else preset_config.sky
+	var want_sky: bool = preset_config.sky
+	var sky_properties: Dictionary = {}
+	if sky_param != null:
+		if sky_param is bool:
+			want_sky = sky_param
+		elif sky_param is Dictionary:
+			var sky_config: Dictionary = (sky_param as Dictionary).duplicate()
+			var material_type: String = String(sky_config.get("sky_material", "procedural")).to_lower()
+			if material_type != "procedural":
+				return ErrorCodes.make(
+					ErrorCodes.INVALID_PARAMS,
+					"sky.sky_material must be 'procedural' when sky is a dictionary"
+				)
+			sky_config.erase("sky_material")
+			sky_properties = sky_config
+			want_sky = true
+		else:
+			return ErrorCodes.make(
+				ErrorCodes.WRONG_TYPE,
+				"sky must be a bool, null, or dictionary of ProceduralSkyMaterial properties"
+			)
 
 	var env := Environment.new()
 	var sky: Sky = null
@@ -59,6 +83,10 @@ func create_environment(params: Dictionary) -> Dictionary:
 		env.background_mode = Environment.BG_CLEAR_COLOR
 
 	_apply_preset(env, sky_material, preset)
+	if not sky_properties.is_empty():
+		var sky_apply_err := ResourceHandler._apply_resource_properties(sky_material, sky_properties)
+		if sky_apply_err != null:
+			return sky_apply_err
 	if preset_config.fog:
 		env.volumetric_fog_enabled = true
 		env.volumetric_fog_density = 0.03
@@ -113,16 +141,14 @@ static func _apply_preset(env: Environment, sky_material: ProceduralSkyMaterial,
 
 
 func _assign_environment(env: Environment, sky: Sky, sky_material: ProceduralSkyMaterial, node_path: String, preset: String) -> Dictionary:
-	var scene_root := EditorInterface.get_edited_scene_root()
-	if scene_root == null:
-		return McpErrorCodes.make(McpErrorCodes.EDITOR_NOT_READY, "No scene open")
-
-	var node := McpScenePath.resolve(node_path, scene_root)
-	if node == null:
-		return McpErrorCodes.make(McpErrorCodes.INVALID_PARAMS, McpScenePath.format_node_error(node_path, scene_root))
+	var _resolved := McpNodeValidator.resolve_or_error(node_path, "node_path")
+	if _resolved.has("error"):
+		return _resolved
+	var node: Node = _resolved.node
+	var scene_root: Node = _resolved.scene_root
 	if not (node is WorldEnvironment):
-		return McpErrorCodes.make(
-			McpErrorCodes.INVALID_PARAMS,
+		return ErrorCodes.make(
+			ErrorCodes.WRONG_TYPE,
 			"Node at %s is %s — must be WorldEnvironment" % [node_path, node.get_class()]
 		)
 
@@ -152,4 +178,4 @@ func _assign_environment(env: Environment, sky: Sky, sky_material: ProceduralSky
 func _save_environment(env: Environment, _sky: Sky, _sky_material: ProceduralSkyMaterial, resource_path: String, overwrite: bool, preset: String) -> Dictionary:
 	return McpResourceIO.save_to_disk(env, resource_path, overwrite, "Environment", {
 		"preset": preset,
-	})
+	}, _connection)

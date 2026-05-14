@@ -2,6 +2,8 @@
 class_name McpResourceIO
 extends RefCounted
 
+const ErrorCodes := preload("res://addons/godot_ai/utils/error_codes.gd")
+
 ## Shared helpers for "save a Resource to .tres" and the mutually-exclusive
 ## path-vs-resource_path param validation that every resource-authoring
 ## handler needs. Extracted to remove 4-way duplication across
@@ -26,12 +28,12 @@ static func validate_home(params: Dictionary, require_property: bool = true) -> 
 
 	if has_node_target and has_file_target:
 		var both_msg := "Provide either path+property or resource_path, not both" if require_property else "Provide either path or resource_path, not both"
-		return McpErrorCodes.make(McpErrorCodes.INVALID_PARAMS, both_msg)
+		return ErrorCodes.make(ErrorCodes.INVALID_PARAMS, both_msg)
 	if not has_node_target and not has_file_target:
 		var none_msg := "Must provide either path+property (assign inline) or resource_path (save .tres)" if require_property else "Must provide either path or resource_path"
-		return McpErrorCodes.make(McpErrorCodes.INVALID_PARAMS, none_msg)
+		return ErrorCodes.make(ErrorCodes.INVALID_PARAMS, none_msg)
 	if require_property and has_node_target and property.is_empty():
-		return McpErrorCodes.make(McpErrorCodes.INVALID_PARAMS, "Missing required param: property (required when path is given)")
+		return ErrorCodes.make(ErrorCodes.INVALID_PARAMS, "Missing required param: property (required when path is given)")
 	return null
 
 
@@ -48,31 +50,53 @@ static func validate_home(params: Dictionary, require_property: bool = true) -> 
 ## a `reason` key in `extra_fields` overrides the default — useful for
 ## tools that edit existing files rather than creating fresh ones.
 ##
+## `pause_target` should be the handler's `McpConnection`. When supplied,
+## `pause_processing` is flipped on around `ResourceSaver.save()` so the
+## dispatcher's WebSocket pump can't re-enter while Godot pumps
+## `Main::iteration()` for the resource-save's progress UI / script-class
+## update task. Without this guard a queued command landing during the
+## save can trigger another `save_to_disk` that tries to add the same
+## `update_scripts_classes` editor task — "Task already exists" → null
+## deref → SIGSEGV. Same family of bug as godotengine/godot#118545 and
+## the same mitigation as `SceneHandler`'s `save_scene*` wraps. See
+## issue #288.
+##
 ## Returns either an error dict or a {"data": {...}} success dict — ready
 ## for the handler to return directly.
-static func save_to_disk(res: Resource, resource_path: String, overwrite: bool, label: String, extra_fields: Dictionary = {}) -> Dictionary:
+static func save_to_disk(
+	res: Resource,
+	resource_path: String,
+	overwrite: bool,
+	label: String,
+	extra_fields: Dictionary = {},
+	pause_target: McpConnection = null,
+) -> Dictionary:
 	if not resource_path.begins_with("res://"):
-		return McpErrorCodes.make(McpErrorCodes.INVALID_PARAMS, "resource_path must start with res://")
+		return ErrorCodes.make(ErrorCodes.INVALID_PARAMS, "resource_path must start with res://")
 
 	var existed_before := FileAccess.file_exists(resource_path)
 	if existed_before and not overwrite:
-		return McpErrorCodes.make(
-			McpErrorCodes.INVALID_PARAMS,
+		return ErrorCodes.make(
+			ErrorCodes.INVALID_PARAMS,
 			"%s already exists at %s (pass overwrite=true to replace)" % [label, resource_path]
 		)
 
 	var dir_path := resource_path.get_base_dir()
 	var mkdir_err := DirAccess.make_dir_recursive_absolute(dir_path)
 	if mkdir_err != OK and mkdir_err != ERR_ALREADY_EXISTS:
-		return McpErrorCodes.make(
-			McpErrorCodes.INTERNAL_ERROR,
+		return ErrorCodes.make(
+			ErrorCodes.INTERNAL_ERROR,
 			"Failed to create directory %s: %s" % [dir_path, error_string(mkdir_err)]
 		)
 
+	if pause_target != null:
+		pause_target.pause_processing = true
 	var save_err := ResourceSaver.save(res, resource_path)
+	if pause_target != null:
+		pause_target.pause_processing = false
 	if save_err != OK:
-		return McpErrorCodes.make(
-			McpErrorCodes.INTERNAL_ERROR,
+		return ErrorCodes.make(
+			ErrorCodes.INTERNAL_ERROR,
 			"Failed to save %s to %s: %s" % [label, resource_path, error_string(save_err)]
 		)
 

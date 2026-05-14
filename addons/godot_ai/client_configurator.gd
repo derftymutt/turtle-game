@@ -16,6 +16,15 @@ extends RefCounted
 ## To add a new client: drop a file in clients/, then preload it in
 ## clients/_registry.gd. No edits required here.
 
+const Client := preload("res://addons/godot_ai/clients/_base.gd")
+const ClientRegistry := preload("res://addons/godot_ai/clients/_registry.gd")
+const JsonStrategy := preload("res://addons/godot_ai/clients/_json_strategy.gd")
+const TomlStrategy := preload("res://addons/godot_ai/clients/_toml_strategy.gd")
+const CliStrategy := preload("res://addons/godot_ai/clients/_cli_strategy.gd")
+const ManualCommand := preload("res://addons/godot_ai/clients/_manual_command.gd")
+const CliFinder := preload("res://addons/godot_ai/clients/_cli_finder.gd")
+const WindowsPortReservation := preload("res://addons/godot_ai/utils/windows_port_reservation.gd")
+
 const SERVER_NAME := "godot-ai"
 
 ## Fallback ports. Live port selection goes through `http_port()` / `ws_port()`,
@@ -27,6 +36,8 @@ const DEFAULT_HTTP_PORT := 8000
 const DEFAULT_WS_PORT := 9500
 const SETTING_HTTP_PORT := "godot_ai/http_port"
 const SETTING_WS_PORT := "godot_ai/ws_port"
+const SETTING_STARTUP_TRACE := "godot_ai/log_startup_timing"
+const STARTUP_TRACE_ENV := "GODOT_AI_STARTUP_TRACE"
 const MIN_PORT := 1024
 const MAX_PORT := 65535
 
@@ -74,6 +85,7 @@ static func ensure_settings_registered() -> void:
 		return
 	_register_port_setting(es, SETTING_HTTP_PORT, DEFAULT_HTTP_PORT)
 	_register_port_setting(es, SETTING_WS_PORT, DEFAULT_WS_PORT)
+	_register_bool_setting(es, SETTING_STARTUP_TRACE, false)
 
 
 static func _register_port_setting(es: EditorSettings, key: String, default_port: int) -> void:
@@ -86,6 +98,27 @@ static func _register_port_setting(es: EditorSettings, key: String, default_port
 		"hint": PROPERTY_HINT_RANGE,
 		"hint_string": "%d,%d,1" % [MIN_PORT, MAX_PORT],
 	})
+
+
+static func _register_bool_setting(es: EditorSettings, key: String, default_value: bool) -> void:
+	if not es.has_setting(key):
+		es.set_setting(key, default_value)
+	es.set_initial_value(key, default_value, false)
+	es.add_property_info({
+		"name": key,
+		"type": TYPE_BOOL,
+	})
+
+
+static func startup_trace_enabled() -> bool:
+	var raw := OS.get_environment(STARTUP_TRACE_ENV).strip_edges().to_lower()
+	if raw == "1" or raw == "true" or raw == "yes" or raw == "on":
+		return true
+	if Engine.is_editor_hint():
+		var es := EditorInterface.get_editor_settings()
+		if es != null and es.has_setting(SETTING_STARTUP_TRACE):
+			return bool(es.get_setting(SETTING_STARTUP_TRACE))
+	return false
 
 
 ## Read the `godot_ai/excluded_domains` EditorSetting as a canonicalized
@@ -115,21 +148,21 @@ static func excluded_domains() -> String:
 ## clamped candidate.
 static func suggest_free_port(start: int, span: int = 2048) -> int:
 	var candidate := clampi(start, MIN_PORT, MAX_PORT - span + 1)
-	return McpWindowsPortReservation.suggest_non_excluded_port(candidate, span, MAX_PORT)
+	return WindowsPortReservation.suggest_non_excluded_port(candidate, span, MAX_PORT)
 
 
 # --- Client operations (string id) ---------------------------------------
 
 static func client_ids() -> PackedStringArray:
-	return McpClientRegistry.ids()
+	return ClientRegistry.ids()
 
 
 static func has_client(id: String) -> bool:
-	return McpClientRegistry.has_id(id)
+	return ClientRegistry.has_id(id)
 
 
 static func client_display_name(id: String) -> String:
-	var c := McpClientRegistry.get_by_id(id)
+	var c := ClientRegistry.get_by_id(id)
 	return c.display_name if c != null else id
 
 
@@ -138,7 +171,7 @@ static func client_display_name(id: String) -> String:
 ## Empty defaults to the live server URL — appropriate for MCP-tool callers
 ## that always run on main.
 static func configure(id: String, url: String = "") -> Dictionary:
-	var client := McpClientRegistry.get_by_id(id)
+	var client := ClientRegistry.get_by_id(id)
 	if client == null:
 		return {"status": "error", "message": "Unknown client: %s" % id}
 	## Capture `url` once so a port flip in EditorSettings between write and
@@ -152,25 +185,25 @@ static func configure(id: String, url: String = "") -> Dictionary:
 	## because the user's installed client is reading a different file than
 	## `path_template` resolves to (issue #201). Re-read the live state and
 	## surface a clear error before the dock reports a bogus green dot.
-	return _verify_post_state(client, result, McpClient.Status.CONFIGURED, url, "configure")
+	return _verify_post_state(client, result, Client.Status.CONFIGURED, url, "configure")
 
 
-static func check_status(id: String) -> McpClient.Status:
-	var client := McpClientRegistry.get_by_id(id)
+static func check_status(id: String) -> Client.Status:
+	var client := ClientRegistry.get_by_id(id)
 	if client == null:
-		return McpClient.Status.NOT_CONFIGURED
+		return Client.Status.NOT_CONFIGURED
 	return _dispatch_check_status(client, http_url())
 
 
-static func check_status_for_url(id: String, url: String) -> McpClient.Status:
-	var client := McpClientRegistry.get_by_id(id)
+static func check_status_for_url(id: String, url: String) -> Client.Status:
+	var client := ClientRegistry.get_by_id(id)
 	if client == null:
-		return McpClient.Status.NOT_CONFIGURED
+		return Client.Status.NOT_CONFIGURED
 	return _dispatch_check_status(client, url)
 
 
-static func check_status_for_url_with_cli_path(id: String, url: String, cli_path: String) -> McpClient.Status:
-	return check_status_details_for_url_with_cli_path(id, url, cli_path).get("status", McpClient.Status.NOT_CONFIGURED)
+static func check_status_for_url_with_cli_path(id: String, url: String, cli_path: String) -> Client.Status:
+	return check_status_details_for_url_with_cli_path(id, url, cli_path).get("status", Client.Status.NOT_CONFIGURED)
 
 
 ## Detailed variant used by the dock refresh worker. Returns
@@ -179,22 +212,22 @@ static func check_status_for_url_with_cli_path(id: String, url: String, cli_path
 ## NOT_CONFIGURED. Callers that only need the status can use the simpler
 ## helper above.
 static func check_status_details_for_url_with_cli_path(id: String, url: String, cli_path: String) -> Dictionary:
-	var client := McpClientRegistry.get_by_id(id)
+	var client := ClientRegistry.get_by_id(id)
 	if client == null:
-		return {"status": McpClient.Status.NOT_CONFIGURED, "error_msg": ""}
+		return {"status": Client.Status.NOT_CONFIGURED, "error_msg": ""}
 	if client.config_type == "cli" and cli_path.is_empty():
-		return {"status": McpClient.Status.NOT_CONFIGURED, "error_msg": ""}
+		return {"status": Client.Status.NOT_CONFIGURED, "error_msg": ""}
 	return _dispatch_check_status_with_cli_path_details(client, url, cli_path)
 
 
 static func client_status_probe_snapshot(id: String) -> Dictionary:
-	var client := McpClientRegistry.get_by_id(id)
+	var client := ClientRegistry.get_by_id(id)
 	if client == null:
 		return {}
 	var cli_path := ""
 	var installed := false
 	if client.config_type == "cli":
-		cli_path = McpCliStrategy.resolve_cli_path(client)
+		cli_path = CliStrategy.resolve_cli_path(client)
 		installed = not cli_path.is_empty()
 	else:
 		installed = client.is_installed()
@@ -205,58 +238,58 @@ static func client_status_probe_snapshot(id: String) -> Dictionary:
 ## `configure()` above for why. The url is only used to format the
 ## verify-after-write diagnostic message; the remove itself doesn't need it.
 static func remove(id: String, url: String = "") -> Dictionary:
-	var client := McpClientRegistry.get_by_id(id)
+	var client := ClientRegistry.get_by_id(id)
 	if client == null:
 		return {"status": "error", "message": "Unknown client: %s" % id}
 	if url.is_empty():
 		url = http_url()
 	var result := _dispatch_remove(client)
-	return _verify_post_state(client, result, McpClient.Status.NOT_CONFIGURED, url, "remove")
+	return _verify_post_state(client, result, Client.Status.NOT_CONFIGURED, url, "remove")
 
 
 # --- Strategy dispatch + verify (testable seam) --------------------------
 
-static func _dispatch_configure(client: McpClient, url: String) -> Dictionary:
+static func _dispatch_configure(client: Client, url: String) -> Dictionary:
 	match client.config_type:
 		"json":
-			return McpJsonStrategy.configure(client, SERVER_NAME, url)
+			return JsonStrategy.configure(client, SERVER_NAME, url)
 		"toml":
-			return McpTomlStrategy.configure(client, SERVER_NAME, url)
+			return TomlStrategy.configure(client, SERVER_NAME, url)
 		"cli":
-			return McpCliStrategy.configure(client, SERVER_NAME, url)
+			return CliStrategy.configure(client, SERVER_NAME, url)
 	return {"status": "error", "message": "Unknown config_type for %s: %s" % [client.id, client.config_type]}
 
 
-static func _dispatch_remove(client: McpClient) -> Dictionary:
+static func _dispatch_remove(client: Client) -> Dictionary:
 	match client.config_type:
 		"json":
-			return McpJsonStrategy.remove(client, SERVER_NAME)
+			return JsonStrategy.remove(client, SERVER_NAME)
 		"toml":
-			return McpTomlStrategy.remove(client, SERVER_NAME)
+			return TomlStrategy.remove(client, SERVER_NAME)
 		"cli":
-			return McpCliStrategy.remove(client, SERVER_NAME)
+			return CliStrategy.remove(client, SERVER_NAME)
 	return {"status": "error", "message": "Unknown config_type for %s: %s" % [client.id, client.config_type]}
 
 
-static func _dispatch_check_status(client: McpClient, url: String) -> McpClient.Status:
+static func _dispatch_check_status(client: Client, url: String) -> Client.Status:
 	return _dispatch_check_status_with_cli_path(client, url, "")
 
 
-static func _dispatch_check_status_with_cli_path(client: McpClient, url: String, cli_path: String) -> McpClient.Status:
-	return _dispatch_check_status_with_cli_path_details(client, url, cli_path).get("status", McpClient.Status.NOT_CONFIGURED)
+static func _dispatch_check_status_with_cli_path(client: Client, url: String, cli_path: String) -> Client.Status:
+	return _dispatch_check_status_with_cli_path_details(client, url, cli_path).get("status", Client.Status.NOT_CONFIGURED)
 
 
-static func _dispatch_check_status_with_cli_path_details(client: McpClient, url: String, cli_path: String) -> Dictionary:
+static func _dispatch_check_status_with_cli_path_details(client: Client, url: String, cli_path: String) -> Dictionary:
 	match client.config_type:
 		"json":
-			return {"status": McpJsonStrategy.check_status(client, SERVER_NAME, url), "error_msg": ""}
+			return {"status": JsonStrategy.check_status(client, SERVER_NAME, url), "error_msg": ""}
 		"toml":
-			return {"status": McpTomlStrategy.check_status(client, SERVER_NAME, url), "error_msg": ""}
+			return {"status": TomlStrategy.check_status(client, SERVER_NAME, url), "error_msg": ""}
 		"cli":
 			if cli_path.is_empty():
-				return McpCliStrategy.check_status_details(client, SERVER_NAME, url, McpCliStrategy.resolve_cli_path(client))
-			return McpCliStrategy.check_status_details(client, SERVER_NAME, url, cli_path)
-	return {"status": McpClient.Status.NOT_CONFIGURED, "error_msg": ""}
+				return CliStrategy.check_status_details(client, SERVER_NAME, url, CliStrategy.resolve_cli_path(client))
+			return CliStrategy.check_status_details(client, SERVER_NAME, url, cli_path)
+	return {"status": Client.Status.NOT_CONFIGURED, "error_msg": ""}
 
 
 ## After a configure/remove returns ok, re-read the live status. If it doesn't
@@ -264,9 +297,9 @@ static func _dispatch_check_status_with_cli_path_details(client: McpClient, url:
 ## status and the resolved config path so the user can self-diagnose. The
 ## strategy's own error path is left untouched — already actionable.
 static func _verify_post_state(
-	client: McpClient,
+	client: Client,
 	result: Dictionary,
-	expected: McpClient.Status,
+	expected: Client.Status,
 	url: String,
 	action: String,
 ) -> Dictionary:
@@ -281,21 +314,21 @@ static func _verify_post_state(
 		"status": "error",
 		"message": "%s reported %s ok but verification still reads %s (expected %s).%s" % [
 			client.display_name, action,
-			McpClient.status_label(actual), McpClient.status_label(expected),
+			Client.status_label(actual), Client.status_label(expected),
 			path_hint,
 		],
 	}
 
 
 static func manual_command(id: String) -> String:
-	var client := McpClientRegistry.get_by_id(id)
+	var client := ClientRegistry.get_by_id(id)
 	if client == null:
 		return ""
-	return McpManualCommand.build(client, SERVER_NAME, http_url(), client.resolved_config_path())
+	return ManualCommand.build(client, SERVER_NAME, http_url(), client.resolved_config_path())
 
 
 static func is_installed(id: String) -> bool:
-	var client := McpClientRegistry.get_by_id(id)
+	var client := ClientRegistry.get_by_id(id)
 	return client != null and client.is_installed()
 
 
@@ -436,19 +469,80 @@ static func get_server_launch_mode() -> String:
 
 
 static func find_uvx() -> String:
+	return CliFinder.find(_uvx_cli_names())
+
+
+static func _uvx_cli_names() -> Array[String]:
 	var names: Array[String] = []
 	names.append("uvx.exe" if OS.get_name() == "Windows" else "uvx")
-	return McpCliFinder.find(names)
+	return names
 
 
+## Drop the `CliFinder` cache for the platform-specific uvx binary
+## name. Pairs with `invalidate_uv_version_cache()` so the dock's
+## `_on_install_uv` can refresh both caches with one call each. The
+## OS-specific name matters: Windows caches under `uvx.exe`, every
+## other platform under `uvx`; hard-coding `"uvx"` here would leave
+## the CLI-path cache stale on Windows after a fresh install and the
+## dock would keep showing "uv: not found" for the rest of the session.
+static func invalidate_uvx_cli_cache() -> void:
+	for name in _uvx_cli_names():
+		CliFinder.invalidate(name)
+
+
+## Drop the entire `CliFinder` cache. Called from any explicit-user-action
+## refresh path (`force=true` in `_request_client_status_refresh` — manual
+## Refresh button, popup-open, compat wrapper, future external API) so a
+## freshly-installed CLI (claude, codex, gemini, …) gets detected without
+## an editor restart. Per-CLI invalidation (`invalidate_uvx_cli_cache`) is
+## preferred when the dock knows which binary changed; this catch-all
+## handles the "any CLI may have been installed since the last sweep" case.
+##
+## Thread safety: `CliFinder.invalidate()` guards `_cache` / `_searched`
+## with a mutex so it can race safely against worker threads calling
+## `find()` from `_run_client_action_worker`. The mutex is held only
+## across the dictionary clear, never across `OS.execute`, so this call
+## can never block the main thread on a subprocess.
+static func invalidate_cli_cache() -> void:
+	CliFinder.invalidate()
+
+
+static var _uv_version_cache: String = ""
+static var _uv_version_searched: bool = false
+
+
+## Cached for the editor session. The dock's `_refresh_setup_status`
+## (called via `call_deferred` from `_build_ui`) calls this on the
+## main thread in user mode, so a single cold `OS.execute(uvx,
+## ["--version"])` adds ~80 ms to the dock's first paint on Linux and
+## more on Windows. Subsequent calls (focus-in refresh, manual Refresh
+## clicks) reuse the cached string.
+##
+## Invalidate via `invalidate_uv_version_cache()` when the user
+## installs / reinstalls uv via the dock so the next refresh reflects
+## the new install. The dock's `_on_install_uv` calls this alongside
+## `CliFinder.invalidate("uvx")` to clear both the path cache and
+## the version cache in one place.
 static func check_uv_version() -> String:
+	if _uv_version_searched:
+		return _uv_version_cache
 	var uvx := find_uvx()
 	if uvx.is_empty():
+		_uv_version_searched = true
+		_uv_version_cache = ""
 		return ""
 	var output: Array = []
 	if OS.execute(uvx, ["--version"], output, true) == 0 and output.size() > 0:
-		return output[0].strip_edges()
-	return ""
+		_uv_version_cache = output[0].strip_edges()
+	else:
+		_uv_version_cache = ""
+	_uv_version_searched = true
+	return _uv_version_cache
+
+
+static func invalidate_uv_version_cache() -> void:
+	_uv_version_searched = false
+	_uv_version_cache = ""
 
 
 static var _venv_python_cache: String = ""

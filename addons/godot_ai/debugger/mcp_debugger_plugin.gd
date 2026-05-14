@@ -2,6 +2,8 @@
 class_name McpDebuggerPlugin
 extends EditorDebuggerPlugin
 
+const ErrorCodes := preload("res://addons/godot_ai/utils/error_codes.gd")
+
 ## Editor-side half of the game-process capture bridge.
 ##
 ## The game-side counterpart (`plugin/addons/godot_ai/runtime/game_helper.gd`,
@@ -32,14 +34,21 @@ const GAME_READY_WAIT_SEC := 20.0
 var _log_buffer: McpLogBuffer
 var _game_log_buffer: McpGameLogBuffer
 
-## Pending request_id -> {connection, deadline_ts, timer}
+## Pending request_id -> {connection, timer, timeout_callable}.
+## We retain the bound timeout lambda so `_clear_pending` can disconnect
+## it on success/error; otherwise the SceneTreeTimer pins the captured
+## request_id until `timeout_sec` elapses (8s default).
 var _pending: Dictionary = {}
 
 ## Flipped true when the game-side autoload sends its "mcp:hello" boot
-## beacon on _ready. Reset when the debugger session drops (game stop).
-## Guards request_game_screenshot so we never send into a debugger
-## channel whose receiving capture hasn't been registered yet.
+## beacon for the current project_run. Reset as soon as a new run is
+## requested, before Godot has attached the fresh debugger session, so
+## editor_state cannot leak readiness from the previous game process.
 var _game_ready := false
+var _game_run_token := 0
+var _ready_run_token := -1
+var _game_session_id := -1
+var _game_run_active := false
 signal game_ready
 
 
@@ -61,8 +70,31 @@ func _has_capture(prefix: String) -> bool:
 ## Do NOT log here: add_debugger_plugin() triggers this virtual before
 ## plugin.gd's _enter_tree logs "plugin loaded", and ci-reload-test
 ## asserts "plugin loaded" is the first line after a plugin reload.
-func _setup_session(_session_id: int) -> void:
+func _setup_session(session_id: int) -> void:
 	_game_ready = false
+	_ready_run_token = -1
+	_game_session_id = session_id
+
+
+func begin_game_run() -> void:
+	_game_run_token += 1
+	_game_run_active = true
+	_game_ready = false
+	_ready_run_token = -1
+	_game_session_id = -1
+	if _log_buffer:
+		_log_buffer.log("[debug] game capture pending run token %d" % _game_run_token)
+
+
+func end_game_run() -> void:
+	_game_run_active = false
+	_game_ready = false
+	_ready_run_token = -1
+	_game_session_id = -1
+
+
+func is_game_capture_ready() -> bool:
+	return _game_run_active and _game_ready and _ready_run_token == _game_run_token
 
 
 func _capture(message: String, data: Array, _session_id: int) -> bool:
@@ -78,6 +110,14 @@ func _capture(message: String, data: Array, _session_id: int) -> bool:
 			_on_log_batch(data)
 			return true
 		"mcp:hello":
+			if not _game_run_active:
+				if _log_buffer:
+					_log_buffer.log("[debug] ignored mcp:hello with no active game run")
+				return true
+			if _game_session_id != -1 and _session_id != _game_session_id:
+				if _log_buffer:
+					_log_buffer.log("[debug] ignored stale mcp:hello from debugger session %d (current %d)" % [_session_id, _game_session_id])
+				return true
 			## Boot beacon from the game-side autoload. Tells us the
 			## game has registered its "mcp" capture and is safe to send
 			## take_screenshot to — before this, Godot's debugger would
@@ -85,6 +125,7 @@ func _capture(message: String, data: Array, _session_id: int) -> bool:
 			## cycle: rotate the game-log buffer so each run starts
 			## clean and gets a new run_id.
 			_game_ready = true
+			_ready_run_token = _game_run_token
 			game_ready.emit()
 			if _game_log_buffer:
 				var run_id := _game_log_buffer.clear_for_new_run()
@@ -128,11 +169,11 @@ func request_game_screenshot(
 
 	var tree := Engine.get_main_loop() as SceneTree
 	if tree == null:
-		_send_error(connection, request_id, McpErrorCodes.INTERNAL_ERROR,
+		_send_error(connection, request_id, ErrorCodes.INTERNAL_ERROR,
 			"Editor main loop is not a SceneTree — cannot schedule capture")
 		return
 
-	if _game_ready:
+	if is_game_capture_ready():
 		_send_take_screenshot(tree, request_id, max_resolution, connection, timeout_sec)
 		return
 
@@ -156,10 +197,10 @@ func _wait_then_send(
 	timeout_sec: float,
 ) -> void:
 	var deadline := Time.get_ticks_msec() + int(GAME_READY_WAIT_SEC * 1000.0)
-	while not _game_ready and Time.get_ticks_msec() < deadline:
+	while not is_game_capture_ready() and Time.get_ticks_msec() < deadline:
 		await tree.process_frame
-	if not _game_ready:
-		_send_error(connection, request_id, McpErrorCodes.INTERNAL_ERROR,
+	if not is_game_capture_ready():
+		_send_error(connection, request_id, ErrorCodes.INTERNAL_ERROR,
 			"Game-side autoload never registered its debugger capture within %ds. Is the game actually running? Check Project Settings → Autoload for _mcp_game_helper." % int(GAME_READY_WAIT_SEC))
 		return
 	_send_take_screenshot(tree, request_id, max_resolution, connection, timeout_sec)
@@ -176,14 +217,18 @@ func _send_take_screenshot(
 ) -> void:
 	var session: EditorDebuggerSession = _first_active_session()
 	if session == null:
-		_send_error(connection, request_id, McpErrorCodes.INTERNAL_ERROR,
+		_send_error(connection, request_id, ErrorCodes.INTERNAL_ERROR,
 			"No active debugger session — is the game actually running and started from this editor?")
 		return
 
-	_pending[request_id] = {"connection": connection}
 	var timer: SceneTreeTimer = tree.create_timer(timeout_sec)
-	timer.timeout.connect(func() -> void: _on_timeout(request_id))
-	_pending[request_id]["timer"] = timer
+	var timeout_callable := func() -> void: _on_timeout(request_id)
+	timer.timeout.connect(timeout_callable)
+	_pending[request_id] = {
+		"connection": connection,
+		"timer": timer,
+		"timeout_callable": timeout_callable,
+	}
 
 	session.send_message("mcp:take_screenshot", [request_id, max_resolution])
 	if _log_buffer:
@@ -239,7 +284,7 @@ func _on_screenshot_error(data: Array) -> void:
 	var connection: McpConnection = pending.connection
 	if connection == null or not is_instance_valid(connection):
 		return
-	_send_error(connection, request_id, McpErrorCodes.INTERNAL_ERROR, message)
+	_send_error(connection, request_id, ErrorCodes.INTERNAL_ERROR, message)
 
 
 func _on_timeout(request_id: String) -> void:
@@ -250,7 +295,7 @@ func _on_timeout(request_id: String) -> void:
 	var connection: McpConnection = pending.connection
 	if connection == null or not is_instance_valid(connection):
 		return
-	_send_error(connection, request_id, McpErrorCodes.INTERNAL_ERROR,
+	_send_error(connection, request_id, ErrorCodes.INTERNAL_ERROR,
 		"Game screenshot timed out. The running game must include the _mcp_game_helper autoload (added automatically when the plugin is enabled — check Project Settings → Autoload). If the autoload is missing, re-enable the plugin and relaunch the game. For headless or custom-main-loop builds, use source='viewport' instead.")
 	if _log_buffer:
 		_log_buffer.log("[debug] !! screenshot timeout (%s)" % request_id)
@@ -259,9 +304,14 @@ func _on_timeout(request_id: String) -> void:
 func _send_error(connection: McpConnection, request_id: String, code: String, message: String) -> void:
 	if connection == null or not is_instance_valid(connection):
 		return
-	var err := McpErrorCodes.make(code, message)
+	var err := ErrorCodes.make(code, message)
 	connection.send_deferred_response(request_id, err)
 
 
 func _clear_pending(request_id: String) -> void:
+	var pending: Dictionary = _pending.get(request_id, {})
+	var timer: SceneTreeTimer = pending.get("timer")
+	var cb: Callable = pending.get("timeout_callable", Callable())
+	if timer != null and timer.timeout.is_connected(cb):
+		timer.timeout.disconnect(cb)
 	_pending.erase(request_id)
