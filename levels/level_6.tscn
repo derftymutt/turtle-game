@@ -12,6 +12,7 @@
 [ext_resource type="PackedScene" uid="uid://b8qcufospawn1" path="res://systems/community_ufo_event/community_ufo_spawner.tscn" id="10_kx1xp"]
 [ext_resource type="PackedScene" uid="uid://b8qdolphin001" path="res://entities/npcs/dolphin/dolphin.tscn" id="11_m516p"]
 [ext_resource type="PackedScene" uid="uid://b8qcmvufo0001" path="res://entities/community_ufo/community_ufo.tscn" id="12_l3m5x"]
+[ext_resource type="PackedScene" uid="uid://c5hxjkqojl37o" path="res://scenes/water_disturbance.tscn" id="13_m516p"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_kx1xp"]
 texture = ExtResource("6_nu44e")
@@ -175,3 +176,5 @@ position = Vector2(-3, -8)
 physics_material_override = SubResource("PhysicsMaterial_nu44e")
 angle_preset = 4
 mirrored = true
+
+[node name="WaterDisturbance" parent="." index="19" unique_id=1393418955 instance=ExtResource("13_m516p")]
