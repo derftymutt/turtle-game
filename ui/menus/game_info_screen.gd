@@ -100,6 +100,7 @@ func _label(text: String) -> Label:
 	l.add_theme_font_size_override("font_size", 13)
 	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	return l
 
 
@@ -114,6 +115,7 @@ func _label_inline(text: String) -> Label:
 func _row() -> HBoxContainer:
 	var r := HBoxContainer.new()
 	r.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	r.alignment = BoxContainer.ALIGNMENT_CENTER
 	r.add_theme_constant_override("separation", 2)
 	return r
 

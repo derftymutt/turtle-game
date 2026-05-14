@@ -100,10 +100,53 @@ func drop_piece(intentional: bool = false):
 	# Disable manual _process() following
 	set_process(false)
 
-	# Give it a little bounce
-	apply_impulse(Vector2(randf_range(-100, 100), -200))
+	# Keep the piece inside the play area and push it away from any nearby wall
+	_clamp_to_play_area()
+	apply_impulse(_safe_drop_impulse())
 
 	print("🔧 Dropped UFO piece")
+
+func _get_play_area_limits() -> Dictionary:
+	const MARGIN := 24.0
+	var limits := {min_x = -INF, max_x = INF}
+	var root = get_tree().current_scene
+	if not root:
+		return limits
+	var wb = root.get_node_or_null("WorldSafetyBoundaries")
+	if not wb:
+		return limits
+	for bname in ["BoundaryLeft", "BoundaryRight"]:
+		var node = wb.get_node_or_null(bname)
+		if not node:
+			continue
+		for child in node.get_children():
+			if not child is CollisionShape2D:
+				continue
+			var col := child as CollisionShape2D
+			var cx := col.global_position.x
+			var hw := 0.0
+			if col.shape is RectangleShape2D:
+				hw = (col.shape as RectangleShape2D).size.x * 0.5
+			match bname:
+				"BoundaryLeft":  limits.min_x = cx + hw + MARGIN
+				"BoundaryRight": limits.max_x = cx - hw - MARGIN
+			break
+	return limits
+
+func _clamp_to_play_area():
+	var lim := _get_play_area_limits()
+	if lim.min_x > -INF and lim.max_x < INF:
+		global_position.x = clamp(global_position.x, lim.min_x, lim.max_x)
+
+func _safe_drop_impulse() -> Vector2:
+	var lim := _get_play_area_limits()
+	var impulse_x := randf_range(-100.0, 100.0)
+	const WALL_PROXIMITY := 32.0
+	if lim.min_x > -INF and global_position.x - lim.min_x < WALL_PROXIMITY:
+		impulse_x = abs(impulse_x)   # push right, away from left wall
+	elif lim.max_x < INF and lim.max_x - global_position.x < WALL_PROXIMITY:
+		impulse_x = -abs(impulse_x)  # push left, away from right wall
+	return Vector2(impulse_x, -200.0)
 
 func award_delivery_points():
 	"""Called by UFOWorkshop when successfully delivered"""

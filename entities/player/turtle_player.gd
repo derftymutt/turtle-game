@@ -112,6 +112,8 @@ const CONTACT_IFRAME_DURATION: float = 0.75
 var _contact_iframes_active: bool = false
 var _contact_iframes_timer: float = 0.0
 
+var _level_complete: bool = false
+
 const BUBBLE_SHIELD_REGEN_DURATION: float = 15.0
 const BUBBLE_SHIELD_RADIUS: float = 18.0
 var bubble_shield_hp: float = 0.0
@@ -246,6 +248,7 @@ func _ready():
 	body_exited.connect(_on_body_exited)
 	AlienTechManager.tech_activated.connect(_on_alien_tech_activated)
 	AlienTechManager.tech_slots_changed.connect(_on_alien_tech_slots_changed_player)
+	LevelManager.level_complete.connect(func(): _level_complete = true)
 	# Sync state for any tech already in slots before this node was ready (e.g. DevTechSeeder)
 	_on_alien_tech_slots_changed_player(AlienTechManager.slots[0], AlienTechManager.slots[1])
 
@@ -747,6 +750,8 @@ func apply_flipper_force(direction: Vector2, force_multiplier: float = 5.0):
 # ---------------------------------------------------------------------------
 
 func take_damage(amount: float, use_iframes: bool = false):
+	if _level_complete:
+		return
 	if use_iframes and _contact_iframes_active:
 		return
 	if is_super_speed or is_super_speed_cooldown or shield_active or transporter_invincible or deflector_shield_active:

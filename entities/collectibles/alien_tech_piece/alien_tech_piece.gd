@@ -18,6 +18,8 @@ func _collectible_ready():
 	_glow_offset = randf() * TAU
 	angular_velocity = spin_speed
 	add_to_group("alien_tech_pieces")
+	# Sound must play through the pause that the selection screen triggers immediately after collect
+	$SfxCollect.process_mode = Node.PROCESS_MODE_ALWAYS
 
 func _collectible_physics_process(_delta: float):
 	if ocean:
