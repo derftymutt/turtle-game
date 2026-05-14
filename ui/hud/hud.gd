@@ -18,6 +18,7 @@ var energy_container: Control
 var energy_bar: TextureProgressBar
 var super_speed_indicator: Label
 var hud_container: Control  # Container for flash effect
+var danger_overlay: ColorRect
 
 # Alien Tech displays
 var tech_piece_label:  Label       = null
@@ -98,9 +99,11 @@ var energy_pulse_speed: float = 8.0  # NEW: How fast the pulse is
 func _ready():
 	add_to_group("hud")
 	
+	danger_overlay = find_child("DangerOverlay")
+
 	# Find the main container
 	for child in get_children():
-		if child is Control:
+		if child is Control and not child == danger_overlay:
 			hud_container = child
 			break
 	
@@ -192,12 +195,18 @@ func _process(delta):
 		var pulse = (sin(air_flash_timer) + 1.0) / 2.0
 		var warning_color = Color.WHITE.lerp(Color(1.0, 0.3, 0.3, 1.0), pulse)
 		hud_container.modulate = warning_color
-		
+
+		if danger_overlay:
+			var screen_pulse = (sin(air_flash_timer) + 1.0) / 2.0
+			danger_overlay.color = Color(0.15, 0.0, 0.0, screen_pulse * 0.5)
+
 		if air_bar:
 			air_bar.modulate = Color.CYAN
 	else:
 		if hud_container:
 			hud_container.modulate = Color.WHITE
+		if danger_overlay:
+			danger_overlay.color = Color(0, 0, 0, 0)
 		air_flash_timer = 0.0
 	
 	# Alien Tech cooldown bars

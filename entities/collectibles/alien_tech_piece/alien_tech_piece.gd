@@ -33,6 +33,7 @@ func _collectible_physics_process(_delta: float):
 		visual_node.modulate = Color(g, g * 0.9, g * 0.6, 1.0)
 
 func _on_collected(collector):
+	$SfxCollect.play()
 	AlienTechManager.collect_piece()
 	var hud = get_tree().get_first_node_in_group("hud")
 	if hud:

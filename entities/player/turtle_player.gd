@@ -771,6 +771,7 @@ func take_damage(amount: float, use_iframes: bool = false):
 		_cancel_flipper_velcro()
 
 	current_health -= amount
+	$SfxDamage.play()
 
 	if hud:
 		hud.update_health(current_health, max_health)
@@ -1189,6 +1190,7 @@ func _activate_transporter():
 	# If there's no room (already at the edge), the clamp lands us at the wall — player's problem.
 	var raw_target = global_position + dir * TRANSPORTER_DISTANCE
 	global_position = _clamp_to_boundaries(raw_target)
+	$SfxTeleport.play()
 	linear_velocity *= 0.3
 	transporter_invincible = true
 	transporter_invincible_timer = TRANSPORTER_INVINCIBLE_DURATION

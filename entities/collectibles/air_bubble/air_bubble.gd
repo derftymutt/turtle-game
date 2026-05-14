@@ -133,8 +133,9 @@ func collect(collector):
 	"""Collect bubble and restore air via HUD"""
 	if collected:
 		return
-	
+
 	collected = true
+	$SfxCollect.play()
 	freeze = true
 	
 	# Find HUD and restore air
