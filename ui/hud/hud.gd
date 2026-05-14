@@ -86,7 +86,7 @@ var _timer_flash_timer: float = 0.0
 
 # Trash cluster score spawning
 const TRASH_CLUSTER_SCENE = preload("res://entities/collectibles/trash_cluster/trash_cluster.tscn")
-const CLUSTER_SCORE_INTERVAL: int = 200
+const CLUSTER_SCORE_INTERVAL: int = 250
 var _next_cluster_score: int = CLUSTER_SCORE_INTERVAL
 
 # Visual feedback

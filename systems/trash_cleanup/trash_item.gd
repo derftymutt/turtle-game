@@ -8,7 +8,7 @@ class_name TrashItem
 signal trash_destroyed(trash_item)
 
 # Score
-@export var points: int = 25
+@export var points: int = 20
 
 # Movement properties
 @export var drift_speed: Vector2 = Vector2(-80, 0)  # Default: drift left
@@ -147,6 +147,7 @@ func destroy_trash():
 		return
 	is_destroyed = true
 	add_score(points)
+	GameManager.spawn_floating_score(global_position, points)
 	freeze = true
 	trash_destroyed.emit(self)
 	play_destruction_effect()

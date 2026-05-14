@@ -90,7 +90,8 @@ func deliver_piece(piece: UFOPiece):
 	
 	# 🆕 AWARD POINTS HERE (not on pickup!)
 	piece.award_delivery_points()
-	
+	GameManager.spawn_floating_score(global_position, piece.point_value)
+
 	# Notify LevelManager
 	LevelManager.deliver_piece()
 	

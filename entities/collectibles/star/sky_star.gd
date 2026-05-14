@@ -38,6 +38,7 @@ func _on_collected(collector):
 	# Award points immediately
 	if collector.has_method("add_score"):
 		collector.add_score(point_value)
+	GameManager.spawn_floating_score(global_position, point_value)
 
 	# Notify seeder before tweening so it can recount right away
 	star_collected.emit()

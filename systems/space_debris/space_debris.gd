@@ -182,6 +182,7 @@ func _get_shot() -> void:
 	freeze = true
 	if hud:
 		hud.add_score(points)
+	GameManager.spawn_floating_score(global_position, points)
 	debris_destroyed.emit(self)
 	_play_destruction_effect()
 

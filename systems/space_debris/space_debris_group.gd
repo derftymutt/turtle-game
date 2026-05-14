@@ -107,6 +107,7 @@ func _on_group_cleared() -> void:
 	var hud: HUD = get_tree().get_first_node_in_group("hud")
 	if hud:
 		hud.add_score(clear_bonus)
+	GameManager.spawn_floating_score(last_destroyed_position, clear_bonus)
 
 	# Spawn the powerup at the location of the last destroyed piece.
 	# The powerup will fall with gravity into the ocean below.

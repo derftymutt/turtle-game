@@ -85,6 +85,7 @@ func _destroy():
 
 	if _hud:
 		_hud.add_score(20)
+	GameManager.spawn_floating_score(global_position, 20)
 
 	# Notify the shared tracker — tech piece may spawn from here
 	if all_destroyed_callback.is_valid():

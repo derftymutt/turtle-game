@@ -3,6 +3,8 @@ extends Node
 
 ## Global game state - handles persistent data across levels
 
+const _FloatingScore = preload("res://ui/floating_score/floating_score.gd")
+
 # Set to true to show level-select dev buttons on the main menu
 const DEV_MODE: bool = false
 
@@ -58,3 +60,12 @@ func reset_game():
 	carried_piece = null
 	LevelManager.reset_run()
 	AlienTechManager.reset_run()
+
+func spawn_floating_score(at_position: Vector2, amount: int) -> void:
+	var level := get_tree().get_first_node_in_group("level")
+	if not level:
+		return
+	var fs := _FloatingScore.new()
+	level.add_child(fs)
+	fs.global_position = at_position
+	fs.setup(amount)

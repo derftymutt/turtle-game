@@ -40,6 +40,7 @@ func _on_collected(collector):
 	var hud = get_tree().get_first_node_in_group("hud")
 	if hud:
 		hud.add_score(point_value)
+	GameManager.spawn_floating_score(global_position, point_value)
 
 	var tween = create_tween()
 	tween.set_parallel(true)

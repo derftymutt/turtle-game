@@ -64,7 +64,8 @@ func _on_collected(collector):
 	# Award score through player
 	if collector.has_method("add_score"):
 		collector.add_score(point_value)
-	
+	GameManager.spawn_floating_score(global_position, point_value)
+
 	# Tween to turtle with satisfying animation
 	var tween = create_tween()
 	tween.set_parallel(true)
