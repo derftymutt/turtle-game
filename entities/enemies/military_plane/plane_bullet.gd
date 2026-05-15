@@ -9,17 +9,24 @@ class_name PlaneBullet
 @export var lifetime: float = 3.0
 @export var speed: float = 300.0
 
+var _ocean: Node2D = null
+
 func _ready() -> void:
 	# NOTE: Set in Inspector:
 	#   Collision Layer: 4  (projectiles)
 	#   Collision Mask:  player layer only
 	add_to_group("plane_projectiles")
+	_ocean = get_tree().get_first_node_in_group("ocean")
 
 	await get_tree().create_timer(lifetime).timeout
 	if is_instance_valid(self):
 		queue_free()
 
 func _physics_process(delta: float) -> void:
+	if _ocean and _ocean.get_depth(global_position) > 0:
+		queue_free()
+		return
+
 	# Rotate sprite to face direction of travel
 	if velocity.length() > 5.0:
 		rotation = velocity.angle()

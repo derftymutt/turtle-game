@@ -27,6 +27,7 @@ class_name HomingMissile
 var target: Node2D = null
 var current_speed: float = 0.0
 var age: float = 0.0
+var _ocean: Node2D = null
 
 
 func _ready() -> void:
@@ -36,6 +37,7 @@ func _ready() -> void:
 	add_to_group("plane_projectiles")
 
 	target = get_tree().get_first_node_in_group("player")
+	_ocean = get_tree().get_first_node_in_group("ocean")
 	current_speed = initial_speed
 	velocity = Vector2.DOWN * current_speed
 
@@ -45,6 +47,10 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if _ocean and _ocean.get_depth(global_position) > 0:
+		queue_free()
+		return
+
 	age += delta
 
 	# ── Acceleration ──────────────────────────────────────────────────────

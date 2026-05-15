@@ -107,7 +107,8 @@ func drop_piece(intentional: bool = false):
 	print("🔧 Dropped UFO piece")
 
 func _get_play_area_limits() -> Dictionary:
-	const MARGIN := 24.0
+	# Small margin — just enough to keep the piece inside the wall geometry
+	const MARGIN := 6.0
 	var limits := {min_x = -INF, max_x = INF}
 	var root = get_tree().current_scene
 	if not root:
@@ -139,14 +140,7 @@ func _clamp_to_play_area():
 		global_position.x = clamp(global_position.x, lim.min_x, lim.max_x)
 
 func _safe_drop_impulse() -> Vector2:
-	var lim := _get_play_area_limits()
-	var impulse_x := randf_range(-100.0, 100.0)
-	const WALL_PROXIMITY := 32.0
-	if lim.min_x > -INF and global_position.x - lim.min_x < WALL_PROXIMITY:
-		impulse_x = abs(impulse_x)   # push right, away from left wall
-	elif lim.max_x < INF and lim.max_x - global_position.x < WALL_PROXIMITY:
-		impulse_x = -abs(impulse_x)  # push left, away from right wall
-	return Vector2(impulse_x, -200.0)
+	return Vector2(randf_range(-100.0, 100.0), -200.0)
 
 func award_delivery_points():
 	"""Called by UFOWorkshop when successfully delivered"""
