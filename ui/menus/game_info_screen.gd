@@ -1,12 +1,21 @@
 extends CanvasLayer
 class_name GameInfoScreen
 
+const _SFX_MENU_SELECT = preload("res://assets/sounds/sfx/menu select_1.wav")
+var _sfx_select: AudioStreamPlayer
+
 @onready var content_container: VBoxContainer = $Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ContentContainer
 @onready var start_button: Button = $Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonContainer/StartButton
 
 func _ready():
 	visible = false
 	add_to_group("game_info_screen")
+
+	_sfx_select = AudioStreamPlayer.new()
+	_sfx_select.stream = _SFX_MENU_SELECT
+	_sfx_select.volume_db = -10.0
+	add_child(_sfx_select)
+
 	if start_button:
 		start_button.pressed.connect(_on_start_pressed)
 	_build_content()
@@ -62,11 +71,12 @@ func _build_content():
 	row_trash.add_child(_anim_sprite(powerup_tex, Vector2(16, 16), [
 		Rect2(128, 0, 16, 16), Rect2(144, 0, 16, 16)
 	], Vector2(26, 26), 5.0))
+	row_trash.add_child(_label_inline(" and points"))
 	content_container.add_child(row_trash)
 
 	# Trash cluster + alien tech
 	var row_cluster := _row()
-	row_cluster.add_child(_label_inline("Large trash clusters "))
+	row_cluster.add_child(_label_inline("Trash bags "))
 	# trash_cluster.png: 48x24, 2 frames of 24x24
 	row_cluster.add_child(_anim_sprite(cluster_tex, Vector2(24, 24), [
 		Rect2(0, 0, 24, 24), Rect2(24, 0, 24, 24)
@@ -89,6 +99,8 @@ func _build_content():
 
 
 func _on_start_pressed():
+	if _sfx_select:
+		_sfx_select.play()
 	LevelManager.load_level(1)
 
 

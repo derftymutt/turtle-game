@@ -151,6 +151,7 @@ func _show_level_title() -> void:
 
 func _plunge() -> void:
 	_show_level_title()
+	$SfxFall.play()
 	var target_y: float = VP_H + 140.0
 	var tween := create_tween()
 	tween.set_parallel(true)

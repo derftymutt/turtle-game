@@ -2,6 +2,9 @@
 extends StaticBody2D
 class_name CircularBumper
 
+const _SFX_BUMPER_LARGE = preload("res://assets/sounds/sfx/bumper large_1.wav")
+const _SFX_BUMPER_SMALL = preload("res://assets/sounds/sfx/bumper small_1.wav")
+
 ## CIRCULAR BUMPER — Classic pinball-style bumper that reflects the turtle with added force.
 ##
 ## PIXEL-PERFECT RULE:
@@ -182,10 +185,18 @@ func _apply_sprite() -> void:
 
 ## --- Hit Response ---
 
+var _sfx_bumper: AudioStreamPlayer
+
 func _on_body_hit(body: Node2D) -> void:
 	if body.is_in_group("player") and body is RigidBody2D:
 		_apply_bumper_force(body)
 		_play_hit_animation()
+		if not _sfx_bumper:
+			_sfx_bumper = AudioStreamPlayer.new()
+			_sfx_bumper.volume_db = 10.0
+			add_child(_sfx_bumper)
+		_sfx_bumper.stream = _SFX_BUMPER_SMALL if size_preset == SizePreset.SMALL else _SFX_BUMPER_LARGE
+		_sfx_bumper.play()
 
 func _apply_bumper_force(body: RigidBody2D) -> void:
 	var collision_normal := (body.global_position - global_position).normalized()

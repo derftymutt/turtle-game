@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://vpyabw1d03vm" path="res://entities/collectibles/health_plant/health_plant.gd" id="1_ov0bq"]
 [ext_resource type="Texture2D" uid="uid://bos5qly4cs7i4" path="res://entities/collectibles/health_plant/sprites/healh_plant.png" id="2_ewy55"]
+[ext_resource type="AudioStream" uid="uid://dkjkjymo362d2" path="res://assets/sounds/sfx/collect powerup_1.wav" id="3_bkami"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_bkami"]
 atlas = ExtResource("2_ewy55")
@@ -44,7 +45,6 @@ radius = 11.0
 
 [node name="HealthPlant" type="Node2D" unique_id=435949565]
 script = ExtResource("1_ov0bq")
-lifetime = 25.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1913558519]
 sprite_frames = SubResource("SpriteFrames_67a2p")
@@ -58,3 +58,7 @@ collision_mask = 32
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=614366174]
 shape = SubResource("CircleShape2D_5e7ww")
+
+[node name="SfxCollect" type="AudioStreamPlayer" parent="." unique_id=1885136009]
+stream = ExtResource("3_bkami")
+volume_db = -15.0

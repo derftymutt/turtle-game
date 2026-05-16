@@ -99,8 +99,15 @@ func collect(collector):
 	"""Restore health and apply bonuses"""
 	if collected:
 		return
-	
+
 	collected = true
+
+	# Reparent SfxCollect to the parent scene so it survives this node's queue_free
+	var sfx = get_node_or_null("SfxCollect")
+	if sfx:
+		sfx.reparent(get_parent())
+		sfx.play()
+		sfx.finished.connect(sfx.queue_free)
 	
 	# Restore health through player
 	if collector.has_method("restore_health"):

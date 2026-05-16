@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://c2qgubql51sul" path="res://entities/collectibles/trash_cluster/trash_cluster.gd" id="1_trshclst"]
 [ext_resource type="Texture2D" uid="uid://dnwxwbrsc8gy" path="res://entities/collectibles/trash_cluster/sprites/trash_cluster.png" id="2_t0o0i"]
+[ext_resource type="AudioStream" uid="uid://couvx8ak5jxag" path="res://assets/sounds/sfx/alien tech appears_1.wav" id="3_sfxappears"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_t0o0i"]
 atlas = ExtResource("2_t0o0i")
@@ -49,3 +50,7 @@ collision_mask = 8
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=543784715]
 shape = SubResource("CircleShape2D_area")
+
+[node name="SfxAppears" type="AudioStreamPlayer" parent="." unique_id=1670734538]
+stream = ExtResource("3_sfxappears")
+volume_db = 10.0

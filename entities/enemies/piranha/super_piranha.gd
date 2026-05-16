@@ -30,6 +30,7 @@ func _animate_swimming(delta: float):
 
 ## Override die() to show this was a tougher enemy
 func die():
+	_play_die_sound()
 	# Optional: Different death effect for super piranhas
 	var tween = create_tween()
 	tween.set_parallel(true)

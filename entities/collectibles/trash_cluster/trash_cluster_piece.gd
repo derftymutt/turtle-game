@@ -2,6 +2,8 @@ extends RigidBody2D
 class_name TrashClusterPiece
 
 ## Small debris piece that breaks off a TrashCluster.
+
+const _SFX_SHOOT_TRASH = preload("res://assets/sounds/sfx/shoot trash_1.wav")
 ## Sinks to the bottom with sway. Destroying all 4 from a cluster reveals
 ## an alien tech piece via the all_destroyed_callback.
 
@@ -82,6 +84,12 @@ func _destroy():
 		return
 	is_destroyed = true
 	freeze = true
+	var sfx := AudioStreamPlayer.new()
+	sfx.stream = _SFX_SHOOT_TRASH
+	sfx.volume_db = -10.0
+	get_parent().add_child(sfx)
+	sfx.play()
+	sfx.finished.connect(sfx.queue_free)
 
 	if _hud:
 		_hud.add_score(20)

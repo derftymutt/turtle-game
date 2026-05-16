@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://dohn0oo35f7m5"]
 
 [ext_resource type="Script" uid="uid://c2kxo8gmu2l2d" path="res://ui/level_completion/level_complete_screen.gd" id="1_ba1n4"]
+[ext_resource type="AudioStream" path="res://assets/sounds/sfx/beat level_1.wav" id="2_sfxbeat"]
 
 [node name="LevelCompleteScreen" type="CanvasLayer" unique_id=1103608067 groups=["level_complete_screen"]]
 process_mode = 3
@@ -75,3 +76,7 @@ horizontal_alignment = 1
 custom_minimum_size = Vector2(160, 34)
 layout_mode = 2
 text = "Next Level"
+
+[node name="SfxBeat" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("2_sfxbeat")
+volume_db = -10.0

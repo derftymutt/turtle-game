@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://bb1cp0ck31btg"
+path="res://.godot/imported/turtle damage_1.wav-2402159e31753bd6593fea30d3d7bc1e.sample"
+
+[deps]
+
+source_file="res://assets/sounds/sfx/turtle damage_1.wav"
+dest_files=["res://.godot/imported/turtle damage_1.wav-2402159e31753bd6593fea30d3d7bc1e.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

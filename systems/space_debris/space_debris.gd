@@ -2,6 +2,8 @@
 extends RigidBody2D
 class_name SpaceDebris
 
+const _SFX_SHOOT_TRASH = preload("res://assets/sounds/sfx/shoot trash_1.wav")
+
 ## An individual piece of space debris floating in the sky.
 ## Unlike ocean trash (which drifts through and despawns), space debris
 ## LIVES PERMANENTLY in the sky until the player shoots it.
@@ -180,6 +182,12 @@ func _on_area_body_entered(body: Node2D) -> void:
 func _get_shot() -> void:
 	is_destroyed = true
 	freeze = true
+	var sfx := AudioStreamPlayer.new()
+	sfx.stream = _SFX_SHOOT_TRASH
+	sfx.volume_db = -10.0
+	get_parent().add_child(sfx)
+	sfx.play()
+	sfx.finished.connect(sfx.queue_free)
 	if hud:
 		hud.add_score(points)
 	GameManager.spawn_floating_score(global_position, points)

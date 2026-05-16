@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://bfn25fngx511m"
+path="res://.godot/imported/ufo piece pick up_1.wav-7a395e46266d6fab99b456744e6a1397.sample"
+
+[deps]
+
+source_file="res://assets/sounds/sfx/ufo piece pick up_1.wav"
+dest_files=["res://.godot/imported/ufo piece pick up_1.wav-7a395e46266d6fab99b456744e6a1397.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

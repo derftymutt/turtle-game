@@ -140,8 +140,9 @@ func collect(collector):
 		return
 	
 	collected = true
+	$SfxCollect.play()
 	freeze = true
-	
+
 	# Resolve RANDOM to an actual powerup type at collection time
 	var resolved_type = powerup_type
 	if powerup_type == PowerupType.RANDOM:

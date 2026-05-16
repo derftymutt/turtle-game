@@ -87,7 +87,8 @@ func attempt_delivery():
 func deliver_piece(piece: UFOPiece):
 	"""Accept the UFO piece and remove it from world"""
 	print("🛠️ Workshop received UFO piece!")
-	
+	$SfxDeliver.play()
+
 	# 🆕 AWARD POINTS HERE (not on pickup!)
 	piece.award_delivery_points()
 	GameManager.spawn_floating_score(global_position, piece.point_value)

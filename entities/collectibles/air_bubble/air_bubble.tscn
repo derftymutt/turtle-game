@@ -87,4 +87,4 @@ shape = SubResource("CircleShape2D_oispj")
 
 [node name="SfxCollect" type="AudioStreamPlayer" parent="." unique_id=19131163]
 stream = ExtResource("3_4elmp")
-volume_db = -20.0
+volume_db = 0.0

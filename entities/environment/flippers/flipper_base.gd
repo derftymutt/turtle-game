@@ -1,6 +1,10 @@
 extends StaticBody2D
 class_name FlipperBase
 
+const _SFX_FLIPPER_LEFT = preload("res://assets/sounds/sfx/flipper left_1.wav")
+const _SFX_FLIPPER_RIGHT = preload("res://assets/sounds/sfx/flipper right_1.wav")
+const _SFX_FLIPPER_LAUNCH = preload("res://assets/sounds/sfx/flipper launch_1.wav")
+
 ## PIXEL-PERFECT FLIPPER - Correct approach:
 ## - DON'T rotate StaticBody2D (sprite stays in place)
 ## - Rotate ONLY collision shapes (for physics)
@@ -28,6 +32,8 @@ var cradle_threshold: float = 0.2
 var was_cradling: bool = false
 
 var base_collision_rotation: float = 0.0  # Store initial collision rotation from scene
+var _sfx_flip: AudioStreamPlayer
+var _sfx_launch: AudioStreamPlayer
 var base_collision_position: Vector2 = Vector2.ZERO  # Store initial collision position from scene
 var base_area_collision_position: Vector2 = Vector2.ZERO
 
@@ -40,6 +46,14 @@ var _is_phased: bool = false
 
 func _ready():
 	add_to_group("flippers")
+	_sfx_flip = AudioStreamPlayer.new()
+	_sfx_flip.stream = _SFX_FLIPPER_LEFT if flip_input == "flipper_left" else _SFX_FLIPPER_RIGHT
+	_sfx_flip.volume_db = -10.0
+	add_child(_sfx_flip)
+	_sfx_launch = AudioStreamPlayer.new()
+	_sfx_launch.stream = _SFX_FLIPPER_LAUNCH
+	_sfx_launch.volume_db = 0.0
+	add_child(_sfx_launch)
 	target_rotation = get_rest_angle()
 	current_rotation = target_rotation
 	
@@ -188,6 +202,8 @@ func trigger_flip(duration: float = 0.25) -> void:
 	activate_flip()
 
 func activate_flip():
+	if _sfx_flip:
+		_sfx_flip.play()
 	is_flipping = true
 	target_rotation = get_flip_angle()
 	hit_bodies.clear()
@@ -231,6 +247,8 @@ func hit_body(body: RigidBody2D, is_press_action: bool, was_cradle_release: bool
 	impulse_strength = clamp(impulse_strength, flip_force * 0.5, flip_force * 3.0)
 	
 	body.linear_velocity += tangent * impulse_strength
+	if _sfx_launch:
+		_sfx_launch.play()
 
 
 ## Phase Shift

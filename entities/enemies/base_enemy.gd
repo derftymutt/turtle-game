@@ -5,6 +5,7 @@ class_name BaseEnemy
 ## Child classes override specific methods for custom behavior
 
 const _ALIEN_TECH_PIECE_SCENE = preload("res://entities/collectibles/alien_tech_piece/alien_tech_piece.tscn")
+const _ENEMY_DIE_SFX = preload("res://assets/sounds/sfx/dead enemy_1.wav")
 
 # Collision behavior
 @export var pass_through_player: bool = false  # If true, player can pass through but still takes damage
@@ -218,9 +219,19 @@ func phase_shift(duration: float) -> void:
 	set_deferred("collision_mask", original_mask)
 
 ## Override in child classes for custom death behavior
+func _play_die_sound() -> void:
+	# Attach to parent so the sound outlives queue_free on the enemy node
+	var sfx := AudioStreamPlayer.new()
+	sfx.stream = _ENEMY_DIE_SFX
+	sfx.volume_db = -5.0
+	get_parent().add_child(sfx)
+	sfx.play()
+	sfx.finished.connect(sfx.queue_free)
+
 func die():
 	if randf() < 0.02:
 		_drop_alien_tech_piece()
+	_play_die_sound()
 	# Default death: simple fade out and remove
 	var tween = create_tween()
 	tween.tween_property(self, "modulate:a", 0.0, 0.3)

@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bgdc5r8l8uqll" path="res://entities/collectibles/ufo_piece/ufo_piece.gd" id="1_j8jpc"]
 [ext_resource type="Texture2D" uid="uid://tvlrbd3c8bkv" path="res://entities/collectibles/ufo_piece/sprites/ufo_piece_grey.png" id="2_kb87b"]
+[ext_resource type="AudioStream" path="res://assets/sounds/sfx/ufo piece pick up_1.wav" id="3_sfxufopickup"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_dr38e"]
 atlas = ExtResource("2_kb87b")
@@ -78,3 +79,7 @@ collision_mask = 32
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=459025843]
 shape = SubResource("CircleShape2D_r20ta")
+
+[node name="SfxPickup" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("3_sfxufopickup")
+volume_db = -10.0

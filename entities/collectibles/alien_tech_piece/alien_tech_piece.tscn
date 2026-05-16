@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://tropia3reesq" path="res://entities/collectibles/alien_tech_piece/alien_tech_piece.gd" id="1_atpiece"]
 [ext_resource type="Texture2D" uid="uid://cpqc2e0qlcj8o" path="res://entities/collectibles/alien_tech_piece/sprites/alien_tech_piece.png" id="2_mpnry"]
 [ext_resource type="AudioStream" uid="uid://cc7exukep7r25" path="res://assets/sounds/sfx/turtle-alien-tech-collect.mp3" id="3_sfxatp"]
+[ext_resource type="AudioStream" uid="uid://c77hsfoxjip3g" path="res://assets/sounds/sfx/powerup appears_1.wav" id="5_gk506"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_mpnry"]
 atlas = ExtResource("2_mpnry")
@@ -53,5 +54,9 @@ shape = SubResource("CircleShape2D_area")
 
 [node name="SfxCollect" type="AudioStreamPlayer" parent="." unique_id=614570433]
 stream = ExtResource("3_sfxatp")
-volume_db = -20.0
+volume_db = -10.0
 pitch_scale = 2.0
+
+[node name="SfxAppears" type="AudioStreamPlayer" parent="." unique_id=1729981156]
+stream = ExtResource("5_gk506")
+volume_db = 10.0

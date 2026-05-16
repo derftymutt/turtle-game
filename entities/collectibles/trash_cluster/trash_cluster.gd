@@ -5,8 +5,9 @@ class_name TrashCluster
 ## Shoot it several times and it breaks into 4 smaller pieces.
 ## Destroy all 4 pieces to reveal the tech.
 
-const _SMALL_PIECE_SCENE = preload("res://entities/collectibles/trash_cluster/trash_cluster_piece.tscn")
-const _TECH_PIECE_SCENE  = preload("res://entities/collectibles/alien_tech_piece/alien_tech_piece.tscn")
+const _SMALL_PIECE_SCENE   = preload("res://entities/collectibles/trash_cluster/trash_cluster_piece.tscn")
+const _TECH_PIECE_SCENE    = preload("res://entities/collectibles/alien_tech_piece/alien_tech_piece.tscn")
+const _SFX_TRASH_BAG_OPENS = preload("res://assets/sounds/sfx/trash bag opens_1.wav")
 
 @export var max_hits: int = 3
 @export var drift_speed: float = -38.0   # Negative = left, positive = right
@@ -54,6 +55,7 @@ func _ready():
 		push_warning("TrashCluster: No Area2D found!")
 
 	linear_velocity = Vector2(drift_speed, 0)
+	$SfxAppears.play()
 
 func _physics_process(delta: float):
 	if is_destroyed:
@@ -130,6 +132,13 @@ func _break_apart():
 		return
 	is_destroyed = true
 	freeze = true
+
+	var sfx := AudioStreamPlayer.new()
+	sfx.stream = _SFX_TRASH_BAG_OPENS
+	sfx.volume_db = 0.0
+	get_parent().add_child(sfx)
+	sfx.play()
+	sfx.finished.connect(sfx.queue_free)
 
 	var break_pos  = global_position
 	var parent_node = get_parent()

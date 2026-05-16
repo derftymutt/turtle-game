@@ -4,6 +4,14 @@ class_name GameOverScreen
 
 ## Game Over screen with restart, main menu, and quit options
 
+const _SFX_GAME_OVER   = preload("res://assets/sounds/sfx/game over_1.wav")
+const _SFX_MENU_NAV    = preload("res://assets/sounds/sfx/menu nav_1.wav")
+const _SFX_MENU_SELECT = preload("res://assets/sounds/sfx/menu select_1.wav")
+
+var _sfx_game_over:   AudioStreamPlayer
+var _sfx_nav:         AudioStreamPlayer
+var _sfx_select:      AudioStreamPlayer
+
 @onready var game_over_panel = $Control/CenterContainer/PanelContainer
 @onready var vbox_container = $Control/CenterContainer/PanelContainer/VBoxContainer
 @onready var hint_label = $Control/CenterContainer/PanelContainer/VBoxContainer/HintLabel
@@ -68,12 +76,30 @@ func _ready():
 	add_to_group("game_over_screen")
 	visible = false
 
+	_sfx_game_over = AudioStreamPlayer.new()
+	_sfx_game_over.stream = _SFX_GAME_OVER
+	_sfx_game_over.volume_db = 0.0
+	add_child(_sfx_game_over)
+
+	_sfx_nav = AudioStreamPlayer.new()
+	_sfx_nav.stream = _SFX_MENU_NAV
+	_sfx_nav.volume_db = 0.0
+	add_child(_sfx_nav)
+
+	_sfx_select = AudioStreamPlayer.new()
+	_sfx_select.stream = _SFX_MENU_SELECT
+	_sfx_select.volume_db = 0.0
+	add_child(_sfx_select)
+
 	if continue_button:
 		continue_button.pressed.connect(_on_continue_button_pressed)
+		continue_button.focus_entered.connect(func(): _sfx_nav.play())
 	if menu_button:
 		menu_button.pressed.connect(_on_menu_pressed)
+		menu_button.focus_entered.connect(func(): _sfx_nav.play())
 	if quit_button:
 		quit_button.pressed.connect(_on_quit_pressed)
+		quit_button.focus_entered.connect(func(): _sfx_nav.play())
 
 func show_game_over(level_score: int, run_total: int):
 	"""Display the game over screen with level score and cumulative run total"""
@@ -104,6 +130,8 @@ func show_game_over(level_score: int, run_total: int):
 
 	visible = true
 	get_tree().paused = true
+	if _sfx_game_over:
+		_sfx_game_over.play()
 
 	if continue_button:
 		continue_button.grab_focus()
@@ -133,16 +161,22 @@ func _show_save_prompt(action: Callable):
 	dialog.popup_centered()
 
 func _on_continue_button_pressed():
+	if _sfx_select:
+		_sfx_select.play()
 	get_tree().paused = false
 	LevelManager.restart_current_level()
 
 func _on_menu_pressed():
+	if _sfx_select:
+		_sfx_select.play()
 	_show_save_prompt(func():
 		get_tree().paused = false
 		GameManager.load_main_menu()
 	)
 
 func _on_quit_pressed():
+	if _sfx_select:
+		_sfx_select.play()
 	_show_save_prompt(func():
 		get_tree().quit()
 	)

@@ -1,6 +1,8 @@
 extends Node2D
 class_name TrashSequence
 
+const _SFX_POWERUP_APPEARS = preload("res://assets/sounds/sfx/powerup appears_1.wav")
+
 ## Spawns and manages sequences of trash items
 ## Awards powerup when all trash in sequence is destroyed
 
@@ -208,6 +210,12 @@ func fail_sequence():
 
 func spawn_powerup(position: Vector2):
 	"""Spawn the reward powerup"""
+	var sfx := AudioStreamPlayer.new()
+	sfx.stream = _SFX_POWERUP_APPEARS
+	sfx.volume_db = -10.0
+	get_parent().add_child(sfx)
+	sfx.play()
+	sfx.finished.connect(sfx.queue_free)
 	if not powerup_scene:
 		push_error("TrashSequence: No powerup_scene assigned!")
 		return

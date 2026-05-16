@@ -470,6 +470,7 @@ func _physics_process(delta):
 	if Input.is_action_just_pressed("drop_piece"):
 		if GameManager.is_carrying_piece and GameManager.carried_piece:
 			GameManager.carried_piece.drop_piece(true)
+			$SfxUfoDrop.play()
 
 	# Alien Tech active slot buttons
 	var _rpl_slot := AlienTechManager.get_slot_index_for_tech(AlienTechRegistry.POWERUP_REPLICATOR)
@@ -683,6 +684,8 @@ func shoot(direction: Vector2):
 	if animated_sprite:
 		animated_sprite.play("shoot_" + facing_direction)
 		return_to_idle_after_delay()
+
+	$SfxShoot.play()
 
 	# Phase Shifter: hold slot button while shooting → fire phase bullet instead
 	var _phase_slot := AlienTechManager.get_slot_index_for_tech(AlienTechRegistry.PHASE_SHIFTER)

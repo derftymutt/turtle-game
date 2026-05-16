@@ -315,6 +315,7 @@ func _animate_swimming(delta: float):
 
 ## Override die() for piranha death animation
 func die():
+	_play_die_sound()
 	# Spin and float up death animation
 	var tween = create_tween()
 	tween.set_parallel(true)

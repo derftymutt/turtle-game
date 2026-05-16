@@ -8,8 +8,10 @@
 [ext_resource type="Texture2D" uid="uid://djvss84e4sdut" path="res://entities/player/sprites/turtle_kick.png" id="5_85e4a"]
 [ext_resource type="Texture2D" uid="uid://du6lru60n6r1" path="res://entities/player/sprites/turtle_shoot.png" id="6_padro"]
 [ext_resource type="Texture2D" uid="uid://xk0jv14pgeyd" path="res://entities/player/sprites/turtle_damage.png" id="7_85e4a"]
-[ext_resource type="AudioStream" uid="uid://cey4f8tjhd86p" path="res://assets/sounds/sfx/turtle-damage.mp3" id="8_sfxdmg"]
+[ext_resource type="AudioStream" uid="uid://bb1cp0ck31btg" path="res://assets/sounds/sfx/turtle damage_1.wav" id="8_sfxdmg"]
 [ext_resource type="AudioStream" uid="uid://ch6gm20llmggf" path="res://assets/sounds/sfx/teleport-tech-use.mp3" id="9_sfxtp"]
+[ext_resource type="AudioStream" uid="uid://c8msxotfd5iao" path="res://assets/sounds/sfx/turtle shot_1.wav" id="10_sfxshoot"]
+[ext_resource type="AudioStream" uid="uid://bvjiu8i1n40j" path="res://assets/sounds/sfx/ufo piece drop_1.wav" id="11_sfxufodrop"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_n086i"]
 atlas = ExtResource("3_7uinh")
@@ -439,8 +441,16 @@ texture = ExtResource("7_85e4a")
 
 [node name="SfxDamage" type="AudioStreamPlayer" parent="." unique_id=338031590]
 stream = ExtResource("8_sfxdmg")
-volume_db = -20.0
+volume_db = -15.0
 
 [node name="SfxTeleport" type="AudioStreamPlayer" parent="." unique_id=1518139090]
 stream = ExtResource("9_sfxtp")
-volume_db = -35.0
+volume_db = -10.0
+
+[node name="SfxShoot" type="AudioStreamPlayer" parent="." unique_id=773205260]
+stream = ExtResource("10_sfxshoot")
+volume_db = 0.0
+
+[node name="SfxUfoDrop" type="AudioStreamPlayer" parent="." unique_id=1665859102]
+stream = ExtResource("11_sfxufodrop")
+volume_db = -10.0

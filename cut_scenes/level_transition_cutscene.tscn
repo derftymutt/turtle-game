@@ -1,6 +1,11 @@
 [gd_scene format=3 uid="uid://ct5rybeamkvq2"]
 
 [ext_resource type="Script" uid="uid://bt6hnx2j7yle4" path="res://cut_scenes/level_transition_cutscene.gd" id="1_trans"]
+[ext_resource type="AudioStream" path="res://assets/sounds/sfx/fall into new level_1.wav" id="2_sfxfall"]
 
 [node name="LevelTransitionCutScene" type="Node"]
 script = ExtResource("1_trans")
+
+[node name="SfxFall" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("2_sfxfall")
+volume_db = -10.0

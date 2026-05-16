@@ -224,6 +224,7 @@ func _repel_overlapping_players():
 
 func die():
 	"""Custom death animation - spin and sink"""
+	_play_die_sound()
 	var tween = create_tween()
 	tween.set_parallel(true)
 	

@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://dcd6f5ppbpoi3" path="res://entities/collectibles/powerup/powerup.gd" id="1_ieaf5"]
 [ext_resource type="Texture2D" uid="uid://d3p45necbgikq" path="res://entities/collectibles/powerup/sprites/powerup.png" id="2_3f2u0"]
+[ext_resource type="AudioStream" uid="uid://dkjkjymo362d2" path="res://assets/sounds/sfx/collect powerup_1.wav" id="3_sfxcollect"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_obmse"]
 atlas = ExtResource("2_3f2u0")
@@ -125,3 +126,7 @@ collision_mask = 32
 
 [node name="CollisionPolygon2D" type="CollisionShape2D" parent="Area2D" unique_id=625367971]
 shape = SubResource("RectangleShape2D_3f2u0")
+
+[node name="SfxCollect" type="AudioStreamPlayer" parent="." unique_id=97236988]
+stream = ExtResource("3_sfxcollect")
+volume_db = -15.0

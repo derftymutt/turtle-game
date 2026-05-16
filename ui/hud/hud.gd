@@ -19,6 +19,8 @@ var energy_bar: TextureProgressBar
 var super_speed_indicator: Label
 var hud_container: Control  # Container for flash effect
 var danger_overlay: ColorRect
+var sfx_low_air: AudioStreamPlayer
+var sfx_energy_charge: AudioStreamPlayer
 
 # Alien Tech displays
 var tech_piece_label:  Label       = null
@@ -99,6 +101,8 @@ var energy_pulse_speed: float = 8.0  # NEW: How fast the pulse is
 func _ready():
 	add_to_group("hud")
 	
+	sfx_low_air = find_child("SfxLowAir")
+	sfx_energy_charge = find_child("SfxEnergyCharge")
 	danger_overlay = find_child("DangerOverlay")
 
 	# Find the main container
@@ -385,8 +389,12 @@ func update_air(air: float, max_a: float):
 			if not air_warning:
 				air_warning = true
 				air_flash_timer = 0.0
+				if sfx_low_air:
+					sfx_low_air.play()
 		else:
 			air_warning = false
+			if sfx_low_air and sfx_low_air.playing:
+				sfx_low_air.stop()
 			air_bar.modulate = Color.CYAN
 
 ## Drain air while underwater
@@ -449,9 +457,8 @@ func recover_energy(delta: float, touching_wall: bool = false):
 		return
 	
 	# Track if we're getting wall bonus
-	var was_wall_recovery = wall_recovery_active
 	wall_recovery_active = touching_wall
-	
+
 	var desperation_mult := 1.0
 	if desperation_enabled and max_health > 0.0:
 		var health_ratio := current_health / max_health
@@ -465,6 +472,14 @@ func recover_energy(delta: float, touching_wall: bool = false):
 	
 	current_energy = min(max_energy, current_energy + recovery)
 	update_energy(current_energy, max_energy)
+
+	# Sound: play while wall recovery is active and energy isn't full; stop otherwise
+	if sfx_energy_charge:
+		var should_play = wall_recovery_active and current_energy < max_energy
+		if should_play and not sfx_energy_charge.playing:
+			sfx_energy_charge.play()
+		elif not should_play and sfx_energy_charge.playing:
+			sfx_energy_charge.stop()
 
 ## Check if player can thrust (has enough energy)
 func can_thrust() -> bool:

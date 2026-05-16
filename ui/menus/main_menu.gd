@@ -10,16 +10,36 @@ extends CanvasLayer
 var guide_screen = null
 var game_info_screen = null
 
-const _HARD_RED   := Color(1.0, 0.18, 0.18)
-const _HARD_GOLD  := Color(1.0, 0.45, 0.45)   # tinted gold for record labels in hard mode
+const _HARD_RED    := Color(1.0, 0.18, 0.18)
+const _HARD_GOLD   := Color(1.0, 0.45, 0.45)   # tinted gold for record labels in hard mode
 const _NORMAL_GOLD := Color(1.0, 0.85, 0.0)
 
+const _SFX_MENU_NAV    = preload("res://assets/sounds/sfx/menu nav_1.wav")
+const _SFX_MENU_SELECT = preload("res://assets/sounds/sfx/menu select_1.wav")
+
+var _sfx_nav:         AudioStreamPlayer
+var _sfx_select:      AudioStreamPlayer
+var _nav_sound_ready: bool = false
+
 func _ready():
+	_sfx_nav = AudioStreamPlayer.new()
+	_sfx_nav.stream = _SFX_MENU_NAV
+	_sfx_nav.volume_db = 0.0
+	add_child(_sfx_nav)
+
+	_sfx_select = AudioStreamPlayer.new()
+	_sfx_select.stream = _SFX_MENU_SELECT
+	_sfx_select.volume_db = 0.0
+	add_child(_sfx_select)
+
 	guide_screen = get_tree().get_first_node_in_group("guide_screen")
 	game_info_screen = get_tree().get_first_node_in_group("game_info_screen")
 	_build_buttons()
 	if GameSettings.hard_mode and title_label:
 		title_label.add_theme_color_override("font_color", _HARD_RED)
+	# Enable nav sound next frame so the automatic grab_focus() in _build_buttons()
+	# doesn't trigger it on load before the player has touched anything.
+	call_deferred("_enable_nav_sound")
 
 func _format_ms(ms: int) -> String:
 	var total_sec := ms / 1000
@@ -81,6 +101,7 @@ func _build_buttons():
 		elif is_hard:
 			continue_button.add_theme_color_override("font_color", text_color)
 		continue_button.pressed.connect(_on_continue_pressed)
+		_wire_button_sounds(continue_button)
 		level_container.add_child(continue_button)
 
 	# === NEW GAME ===
@@ -90,6 +111,7 @@ func _build_buttons():
 	new_game_button.add_theme_font_size_override("font_size", 18)
 	new_game_button.add_theme_color_override("font_color", text_color)
 	new_game_button.pressed.connect(_on_new_game_pressed)
+	_wire_button_sounds(new_game_button)
 	level_container.add_child(new_game_button)
 
 	# === DEV LEVEL SELECT (hidden in release builds) ===
@@ -105,6 +127,7 @@ func _build_buttons():
 			btn.add_theme_font_size_override("font_size", 10)
 			btn.add_theme_color_override("font_color", text_color)
 			btn.pressed.connect(func(): _on_dev_level_selected(level_num))
+			_wire_button_sounds(btn)
 			dev_row.add_child(btn)
 
 	# === OPTIONS ===
@@ -114,6 +137,7 @@ func _build_buttons():
 	guide_button.add_theme_font_size_override("font_size", 8)
 	guide_button.add_theme_color_override("font_color", text_color)
 	guide_button.pressed.connect(_on_guide_pressed)
+	_wire_button_sounds(guide_button)
 	level_container.add_child(guide_button)
 
 	# === QUIT ===
@@ -123,6 +147,7 @@ func _build_buttons():
 	quit_button.add_theme_font_size_override("font_size", 8)
 	quit_button.add_theme_color_override("font_color", text_color)
 	quit_button.pressed.connect(_on_quit_pressed)
+	_wire_button_sounds(quit_button)
 	level_container.add_child(quit_button)
 
 	# Focus the first Button child (skip Labels)
@@ -132,11 +157,15 @@ func _build_buttons():
 			break
 
 func _on_continue_pressed():
+	if _sfx_select:
+		_sfx_select.play()
 	SaveManager.apply_save()
 	LevelManager.attempt_count = 1
 	LevelManager.load_level(LevelManager.current_level_number)
 
 func _on_new_game_pressed():
+	if _sfx_select:
+		_sfx_select.play()
 	if SaveManager.has_save():
 		_confirm_overwrite_save()
 	else:
@@ -172,6 +201,8 @@ func _on_dev_level_selected(level_num: int):
 	LevelManager.load_level(level_num)
 
 func _on_guide_pressed():
+	if _sfx_select:
+		_sfx_select.play()
 	if guide_screen and guide_screen.has_method("show_guide"):
 		visible = false
 		guide_screen.show_guide(func(): show_menu())
@@ -179,7 +210,15 @@ func _on_guide_pressed():
 		push_warning("MainMenu: Guide screen not found!")
 
 func _on_quit_pressed():
+	if _sfx_select:
+		_sfx_select.play()
 	get_tree().quit()
+
+func _enable_nav_sound() -> void:
+	_nav_sound_ready = true
+
+func _wire_button_sounds(btn: Button) -> void:
+	btn.focus_entered.connect(func(): if _nav_sound_ready: _sfx_nav.play())
 
 func show_menu():
 	"""Called by guide screen when returning to menu"""

@@ -63,7 +63,8 @@ func _on_collected(collector):
 	carrier = collector
 	GameManager.carried_piece = self
 	GameManager.is_carrying_piece = true
-	
+	$SfxPickup.play()
+
 	# 🚫 NO POINTS AWARDED HERE!
 	print("🔧 Picked up UFO piece (no points yet - deliver it!)")
 	

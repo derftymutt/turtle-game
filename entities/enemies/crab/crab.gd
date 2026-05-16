@@ -352,6 +352,7 @@ func take_damage(amount: float):
 
 ## Override die() for crab death animation
 func die():
+	_play_die_sound()
 	_stop_windup_indicator()
 	var tween = create_tween()
 	tween.set_parallel(true)

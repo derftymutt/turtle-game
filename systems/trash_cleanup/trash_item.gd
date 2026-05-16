@@ -1,6 +1,8 @@
 extends RigidBody2D
 class_name TrashItem
 
+const _SFX_SHOOT_TRASH = preload("res://assets/sounds/sfx/shoot trash_1.wav")
+
 ## Individual piece of trash that floats through the scene
 ## Can be shot by player to contribute to sequence completion
 ## Does NOT collide with game elements - purely visual/shootable
@@ -146,6 +148,12 @@ func destroy_trash():
 	if is_destroyed:
 		return
 	is_destroyed = true
+	var sfx := AudioStreamPlayer.new()
+	sfx.stream = _SFX_SHOOT_TRASH
+	sfx.volume_db = -10.0
+	get_parent().add_child(sfx)
+	sfx.play()
+	sfx.finished.connect(sfx.queue_free)
 	add_score(points)
 	GameManager.spawn_floating_score(global_position, points)
 	freeze = true

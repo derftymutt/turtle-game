@@ -12,6 +12,7 @@ class_name LevelCompleteScreen
 @onready var total_score_label: Label = $CenterContainer/VBoxContainer/StatsContainer/TotalScoreLabel
 @onready var attempts_label: Label = $CenterContainer/VBoxContainer/StatsContainer/AttemptsLabel
 @onready var next_level_button: Button = $CenterContainer/VBoxContainer/NextLevelButton
+@onready var sfx_beat: AudioStreamPlayer = $SfxBeat
 
 func _ready():
 	hide()
@@ -64,6 +65,8 @@ func show_completion(
 
 	get_tree().paused = true
 	show()
+	if sfx_beat:
+		sfx_beat.play()
 	_play_entrance_animation()
 	next_level_button.grab_focus()
 

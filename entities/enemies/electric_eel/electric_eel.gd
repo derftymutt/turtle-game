@@ -360,6 +360,7 @@ func _on_damage_area_entered(body: Node2D):
 
 func die():
 	"""Electric discharge death animation"""
+	_play_die_sound()
 	_is_dying = true
 	_cleanup_telegraph_effect()
 	_cleanup_all_shocked_walls()
