@@ -5,21 +5,21 @@ class_name UFOPiece
 ## UFO piece collectible - NO points on pickup, only on delivery
 ## Can be picked up, carried, and dropped
 
+const _MAX_SPEED := 200.0
+
 var is_carried: bool = false
 var carrier: Node2D = null
 var _drop_grace_timer: float = 0.0
+var _cached_limits: Dictionary = {}
 
 func _collectible_ready():
-	# UFO pieces don't sink/sway like stars
 	sink_speed = 0.0
 	sway_amount = 0.0
-	
-	# Heavier than stars
 	mass = 1.5
-	
-	# Disable the base class physics processing (we handle our own)
-	# But keep visual bobbing when not carried
-	pass
+
+	# Continuous collision detection stops the piece from tunnelling through
+	# thin wall geometry if it builds up speed from enemy collisions.
+	continuous_cd = RigidBody2D.CCD_MODE_CAST_SHAPE
 
 func _process(_delta):
 	"""Follow carrier while being carried"""
@@ -38,12 +38,22 @@ func _collectible_physics_process(delta):
 	if _drop_grace_timer > 0.0:
 		_drop_grace_timer -= delta
 
-	# UFO pieces don't sink/sway - they're heavy mechanical parts
-	# Just apply slight gravity to settle on floor
+	# Slight downward force to settle on floor
 	if ocean:
 		var depth = ocean.get_depth(global_position)
 		if depth > 0:
-			apply_central_force(Vector2(0, 20))  # Slight downward force
+			apply_central_force(Vector2(0, 20))
+
+	# Keep piece inside the play area every frame, not just on intentional drop.
+	_enforce_horizontal_bounds()
+
+func _integrate_forces(state: PhysicsDirectBodyState2D):
+	# Cap speed at physics-engine level so crab collisions cannot accelerate
+	# the piece past a safe threshold, even across multiple frames.
+	if is_carried:
+		return
+	if state.linear_velocity.length_squared() > _MAX_SPEED * _MAX_SPEED:
+		state.linear_velocity = state.linear_velocity.normalized() * _MAX_SPEED
 
 func _on_collected(collector):
 	"""Override base class - pickup behavior (NO points!)"""
@@ -139,6 +149,17 @@ func _clamp_to_play_area():
 	var lim := _get_play_area_limits()
 	if lim.min_x > -INF and lim.max_x < INF:
 		global_position.x = clamp(global_position.x, lim.min_x, lim.max_x)
+
+func _enforce_horizontal_bounds():
+	if _cached_limits.is_empty():
+		_cached_limits = _get_play_area_limits()
+	var lim := _cached_limits
+	if lim.min_x > -INF and global_position.x < lim.min_x:
+		global_position.x = lim.min_x
+		linear_velocity.x = maxf(linear_velocity.x, 0.0)
+	elif lim.max_x < INF and global_position.x > lim.max_x:
+		global_position.x = lim.max_x
+		linear_velocity.x = minf(linear_velocity.x, 0.0)
 
 func _safe_drop_impulse() -> Vector2:
 	return Vector2(randf_range(-100.0, 100.0), -200.0)

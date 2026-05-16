@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bgdc5r8l8uqll" path="res://entities/collectibles/ufo_piece/ufo_piece.gd" id="1_j8jpc"]
 [ext_resource type="Texture2D" uid="uid://tvlrbd3c8bkv" path="res://entities/collectibles/ufo_piece/sprites/ufo_piece_grey.png" id="2_kb87b"]
-[ext_resource type="AudioStream" path="res://assets/sounds/sfx/ufo piece pick up_1.wav" id="3_sfxufopickup"]
+[ext_resource type="AudioStream" path="res://assets/sounds/sfx/ufo piece pick up_1.ogg" id="3_sfxufopickup"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_dr38e"]
 atlas = ExtResource("2_kb87b")

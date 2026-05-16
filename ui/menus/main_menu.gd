@@ -14,12 +14,14 @@ const _HARD_RED    := Color(1.0, 0.18, 0.18)
 const _HARD_GOLD   := Color(1.0, 0.45, 0.45)   # tinted gold for record labels in hard mode
 const _NORMAL_GOLD := Color(1.0, 0.85, 0.0)
 
-const _SFX_MENU_NAV    = preload("res://assets/sounds/sfx/menu nav_1.wav")
-const _SFX_MENU_SELECT = preload("res://assets/sounds/sfx/menu select_1.wav")
+const _SFX_MENU_NAV    = preload("res://assets/sounds/sfx/menu nav_1.ogg")
+const _SFX_MENU_SELECT = preload("res://assets/sounds/sfx/menu select_1.ogg")
 
 var _sfx_nav:         AudioStreamPlayer
 var _sfx_select:      AudioStreamPlayer
 var _nav_sound_ready: bool = false
+
+@onready var _sfx_theme: AudioStreamPlayer = $SfxTheme
 
 func _ready():
 	_sfx_nav = AudioStreamPlayer.new()
@@ -31,6 +33,8 @@ func _ready():
 	_sfx_select.stream = _SFX_MENU_SELECT
 	_sfx_select.volume_db = 0.0
 	add_child(_sfx_select)
+
+	_sfx_theme.finished.connect(func(): _sfx_theme.play())
 
 	guide_screen = get_tree().get_first_node_in_group("guide_screen")
 	game_info_screen = get_tree().get_first_node_in_group("game_info_screen")

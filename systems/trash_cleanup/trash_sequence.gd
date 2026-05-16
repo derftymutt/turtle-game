@@ -1,7 +1,7 @@
 extends Node2D
 class_name TrashSequence
 
-const _SFX_POWERUP_APPEARS = preload("res://assets/sounds/sfx/powerup appears_1.wav")
+const _SFX_POWERUP_APPEARS = preload("res://assets/sounds/sfx/powerup appears_1.ogg")
 
 ## Spawns and manages sequences of trash items
 ## Awards powerup when all trash in sequence is destroyed

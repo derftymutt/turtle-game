@@ -7,7 +7,7 @@ class_name TrashCluster
 
 const _SMALL_PIECE_SCENE   = preload("res://entities/collectibles/trash_cluster/trash_cluster_piece.tscn")
 const _TECH_PIECE_SCENE    = preload("res://entities/collectibles/alien_tech_piece/alien_tech_piece.tscn")
-const _SFX_TRASH_BAG_OPENS = preload("res://assets/sounds/sfx/trash bag opens_1.wav")
+const _SFX_TRASH_BAG_OPENS = preload("res://assets/sounds/sfx/trash bag opens_1.ogg")
 
 @export var max_hits: int = 3
 @export var drift_speed: float = -38.0   # Negative = left, positive = right

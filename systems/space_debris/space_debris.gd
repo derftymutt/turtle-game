@@ -2,7 +2,7 @@
 extends RigidBody2D
 class_name SpaceDebris
 
-const _SFX_SHOOT_TRASH = preload("res://assets/sounds/sfx/shoot trash_1.wav")
+const _SFX_SHOOT_TRASH = preload("res://assets/sounds/sfx/shoot trash_1.ogg")
 
 ## An individual piece of space debris floating in the sky.
 ## Unlike ocean trash (which drifts through and despawns), space debris

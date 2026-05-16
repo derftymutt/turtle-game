@@ -3,7 +3,7 @@ class_name TrashClusterPiece
 
 ## Small debris piece that breaks off a TrashCluster.
 
-const _SFX_SHOOT_TRASH = preload("res://assets/sounds/sfx/shoot trash_1.wav")
+const _SFX_SHOOT_TRASH = preload("res://assets/sounds/sfx/shoot trash_1.ogg")
 ## Sinks to the bottom with sway. Destroying all 4 from a cluster reveals
 ## an alien tech piece via the all_destroyed_callback.
 

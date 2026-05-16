@@ -4,6 +4,8 @@
 # ejects upward → all elements plunge off the bottom → next level loads.
 extends Node
 
+const _SFX_UFO_BREAKS = preload("res://assets/sounds/sfx/ufo breaks.ogg")
+
 const VP_W: float = 640.0
 const VP_H: float = 360.0
 const UFO_TRAVEL_X: float = VP_W * 0.55   # x where the UFO stops and splits
@@ -98,6 +100,11 @@ func _split() -> void:
 
 	# Burst of breaking particles at the split point.
 	_spawn_break_particles(Vector2(cx, cy))
+	var sfx := AudioStreamPlayer.new()
+	sfx.stream = _SFX_UFO_BREAKS
+	sfx.volume_db = 0.0
+	add_child(sfx)
+	sfx.play()
 
 	_ufo_left.position = Vector2(cx - 8.0, cy)
 	_ufo_right.position = Vector2(cx + 8.0, cy)

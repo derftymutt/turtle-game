@@ -1,9 +1,9 @@
 extends StaticBody2D
 class_name FlipperBase
 
-const _SFX_FLIPPER_LEFT = preload("res://assets/sounds/sfx/flipper left_1.wav")
-const _SFX_FLIPPER_RIGHT = preload("res://assets/sounds/sfx/flipper right_1.wav")
-const _SFX_FLIPPER_LAUNCH = preload("res://assets/sounds/sfx/flipper launch_1.wav")
+const _SFX_FLIPPER_LEFT = preload("res://assets/sounds/sfx/flipper left_1.ogg")
+const _SFX_FLIPPER_RIGHT = preload("res://assets/sounds/sfx/flipper right_1.ogg")
+const _SFX_FLIPPER_LAUNCH = preload("res://assets/sounds/sfx/flipper launch_1.ogg")
 
 ## PIXEL-PERFECT FLIPPER - Correct approach:
 ## - DON'T rotate StaticBody2D (sprite stays in place)
@@ -250,6 +250,9 @@ func hit_body(body: RigidBody2D, is_press_action: bool, was_cradle_release: bool
 	if _sfx_launch:
 		_sfx_launch.play()
 
+func play_launch_sound() -> void:
+	if _sfx_launch:
+		_sfx_launch.play()
 
 ## Phase Shift
 

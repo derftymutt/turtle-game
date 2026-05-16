@@ -4,9 +4,9 @@ class_name GameOverScreen
 
 ## Game Over screen with restart, main menu, and quit options
 
-const _SFX_GAME_OVER   = preload("res://assets/sounds/sfx/game over_1.wav")
-const _SFX_MENU_NAV    = preload("res://assets/sounds/sfx/menu nav_1.wav")
-const _SFX_MENU_SELECT = preload("res://assets/sounds/sfx/menu select_1.wav")
+const _SFX_GAME_OVER   = preload("res://assets/sounds/sfx/game over_1.ogg")
+const _SFX_MENU_NAV    = preload("res://assets/sounds/sfx/menu nav_1.ogg")
+const _SFX_MENU_SELECT = preload("res://assets/sounds/sfx/menu select_1.ogg")
 
 var _sfx_game_over:   AudioStreamPlayer
 var _sfx_nav:         AudioStreamPlayer

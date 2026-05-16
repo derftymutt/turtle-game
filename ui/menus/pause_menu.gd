@@ -8,8 +8,8 @@ const _VBOX := "Control/CenterContainer/PanelContainer/VBoxContainer"
 const _TECH := "Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoContainer"
 
 const _HARD_RED        := Color(1.0, 0.18, 0.18)
-const _SFX_MENU_NAV    = preload("res://assets/sounds/sfx/menu nav_1.wav")
-const _SFX_MENU_SELECT = preload("res://assets/sounds/sfx/menu select_1.wav")
+const _SFX_MENU_NAV    = preload("res://assets/sounds/sfx/menu nav_1.ogg")
+const _SFX_MENU_SELECT = preload("res://assets/sounds/sfx/menu select_1.ogg")
 
 var _sfx_nav:    AudioStreamPlayer
 var _sfx_select: AudioStreamPlayer

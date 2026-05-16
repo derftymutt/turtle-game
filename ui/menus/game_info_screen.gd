@@ -1,7 +1,7 @@
 extends CanvasLayer
 class_name GameInfoScreen
 
-const _SFX_MENU_SELECT = preload("res://assets/sounds/sfx/menu select_1.wav")
+const _SFX_MENU_SELECT = preload("res://assets/sounds/sfx/menu select_1.ogg")
 var _sfx_select: AudioStreamPlayer
 
 @onready var content_container: VBoxContainer = $Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ContentContainer

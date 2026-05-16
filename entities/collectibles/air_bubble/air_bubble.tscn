@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://ca648mplrrwfx" path="res://entities/collectibles/air_bubble/air_bubble.gd" id="1_5t6o6"]
 [ext_resource type="Texture2D" uid="uid://dnuf0s4dvbs57" path="res://entities/collectibles/air_bubble/sprites/airbubble.png" id="2_gbdwx"]
-[ext_resource type="AudioStream" uid="uid://dfyvtq5npr30f" path="res://assets/sounds/sfx/turtle-bubble-collect.wav" id="3_4elmp"]
+[ext_resource type="AudioStream" path="res://assets/sounds/sfx/turtle-bubble-collect.ogg" id="3_4elmp"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_4elmp"]
 atlas = ExtResource("2_gbdwx")

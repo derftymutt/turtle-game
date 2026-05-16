@@ -2,8 +2,8 @@
 extends StaticBody2D
 class_name CircularBumper
 
-const _SFX_BUMPER_LARGE = preload("res://assets/sounds/sfx/bumper large_1.wav")
-const _SFX_BUMPER_SMALL = preload("res://assets/sounds/sfx/bumper small_1.wav")
+const _SFX_BUMPER_LARGE = preload("res://assets/sounds/sfx/bumper large_1.ogg")
+const _SFX_BUMPER_SMALL = preload("res://assets/sounds/sfx/bumper small_1.ogg")
 
 ## CIRCULAR BUMPER — Classic pinball-style bumper that reflects the turtle with added force.
 ##
@@ -189,14 +189,20 @@ var _sfx_bumper: AudioStreamPlayer
 
 func _on_body_hit(body: Node2D) -> void:
 	if body.is_in_group("player") and body is RigidBody2D:
+		# Suppress hit response while player is magnetically orbiting this bumper
+		if body.get("_bumper_magnet_attached") and body.get("_bumper_magnet_target") == self:
+			return
 		_apply_bumper_force(body)
 		_play_hit_animation()
-		if not _sfx_bumper:
-			_sfx_bumper = AudioStreamPlayer.new()
-			_sfx_bumper.volume_db = 10.0
-			add_child(_sfx_bumper)
-		_sfx_bumper.stream = _SFX_BUMPER_SMALL if size_preset == SizePreset.SMALL else _SFX_BUMPER_LARGE
-		_sfx_bumper.play()
+		_play_bumper_sound()
+
+func _play_bumper_sound() -> void:
+	if not _sfx_bumper:
+		_sfx_bumper = AudioStreamPlayer.new()
+		_sfx_bumper.volume_db = 10.0
+		add_child(_sfx_bumper)
+	_sfx_bumper.stream = _SFX_BUMPER_SMALL if size_preset == SizePreset.SMALL else _SFX_BUMPER_LARGE
+	_sfx_bumper.play()
 
 func _apply_bumper_force(body: RigidBody2D) -> void:
 	var collision_normal := (body.global_position - global_position).normalized()
@@ -275,3 +281,4 @@ func apply_launch_force(body: RigidBody2D, speed_override: float = -1.0) -> void
 	body.linear_velocity = collision_normal * (bounce_force + 100.0)
 	body.linear_velocity = body.linear_velocity.rotated(randf_range(-0.1, 0.1))
 	_play_hit_animation()
+	_play_bumper_sound()

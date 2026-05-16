@@ -5,6 +5,7 @@ class_name HUD
 ## Air and energy systems are toggleable for prototyping
 
 signal time_expired
+signal low_air_warning_changed(is_warning: bool)
 
 # References (will be found dynamically)
 var score_label: Label
@@ -75,6 +76,7 @@ var air_warning: bool = false
 var current_energy: float = 100.0
 var is_touching_wall: bool = false
 var wall_recovery_active: bool = false  # NEW: Track if we're actively recovering from wall
+var level_completing: bool = false  # Suppresses trash cluster spawn and sounds on final piece delivery
 
 # Timer system
 @export_group("Timer System")
@@ -328,6 +330,8 @@ func add_score(points: int):
 	update_score(current_score + points)
 
 func _spawn_trash_cluster():
+	if level_completing:
+		return
 	var scene = get_tree().current_scene
 	if not scene:
 		return
@@ -391,11 +395,15 @@ func update_air(air: float, max_a: float):
 				air_flash_timer = 0.0
 				if sfx_low_air:
 					sfx_low_air.play()
+				low_air_warning_changed.emit(true)
 		else:
+			var was_warning := air_warning
 			air_warning = false
 			if sfx_low_air and sfx_low_air.playing:
 				sfx_low_air.stop()
 			air_bar.modulate = Color.CYAN
+			if was_warning:
+				low_air_warning_changed.emit(false)
 
 ## Drain air while underwater
 func drain_air(delta: float):
@@ -473,13 +481,19 @@ func recover_energy(delta: float, touching_wall: bool = false):
 	current_energy = min(max_energy, current_energy + recovery)
 	update_energy(current_energy, max_energy)
 
-	# Sound: play while wall recovery is active and energy isn't full; stop otherwise
+	# Sound: play while wall recovery is active, energy isn't full, and level isn't completing
 	if sfx_energy_charge:
-		var should_play = wall_recovery_active and current_energy < max_energy
+		var should_play = wall_recovery_active and current_energy < max_energy and not level_completing
 		if should_play and not sfx_energy_charge.playing:
 			sfx_energy_charge.play()
 		elif not should_play and sfx_energy_charge.playing:
 			sfx_energy_charge.stop()
+
+## Called by UFOWorkshop on final piece delivery — silences any active sounds immediately
+func begin_level_completion() -> void:
+	level_completing = true
+	if sfx_energy_charge and sfx_energy_charge.playing:
+		sfx_energy_charge.stop()
 
 ## Check if player can thrust (has enough energy)
 func can_thrust() -> bool:

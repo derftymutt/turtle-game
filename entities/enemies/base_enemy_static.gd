@@ -6,7 +6,7 @@ class_name BaseEnemyStatic
 ## Child classes control movement manually via position/velocity
 
 const _ALIEN_TECH_PIECE_SCENE = preload("res://entities/collectibles/alien_tech_piece/alien_tech_piece.tscn")
-const _ENEMY_DIE_SFX = preload("res://assets/sounds/sfx/dead enemy_1.wav")
+const _ENEMY_DIE_SFX = preload("res://assets/sounds/sfx/dead enemy_1.ogg")
 
 # Collision behavior
 @export var pass_through_player: bool = false

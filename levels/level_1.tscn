@@ -198,11 +198,23 @@ mirrored = true
 
 [node name="FlipperLeftDown" parent="FlipperLeftTop" index="1" unique_id=1447591536 instance=ExtResource("22_ryfpa")]
 position = Vector2(-220, -90)
+rest_angle_degrees = -30.0
+flip_angle_degrees = 60.0
+flip_force = 300.0
+flip_speed = 40.0
+flip_input = "flipper_left"
+collision_rotation_scale = 0.85
 
 [node name="FlipperLeftBottom" type="Node" parent="." index="21" unique_id=909378231]
 
 [node name="FlipperLeftDown2" parent="FlipperLeftBottom" index="0" unique_id=661980428 instance=ExtResource("22_ryfpa")]
 position = Vector2(-255, 55)
+rest_angle_degrees = -30.0
+flip_angle_degrees = 60.0
+flip_force = 300.0
+flip_speed = 40.0
+flip_input = "flipper_left"
+collision_rotation_scale = 0.85
 
 [node name="DeadWall6" parent="FlipperLeftBottom" index="1" unique_id=1144801473 instance=ExtResource("24_ryfpa")]
 position = Vector2(-281, 82)
@@ -214,6 +226,12 @@ mirrored = true
 
 [node name="FlipperLeftDownPixelPerfect" parent="FlipperCenterLeftTop" index="0" unique_id=94480237 instance=ExtResource("22_ryfpa")]
 position = Vector2(-65, -40)
+rest_angle_degrees = -30.0
+flip_angle_degrees = 60.0
+flip_force = 300.0
+flip_speed = 40.0
+flip_input = "flipper_left"
+collision_rotation_scale = 0.85
 
 [node name="DeadWall2" parent="FlipperCenterLeftTop" index="1" unique_id=797132162 instance=ExtResource("24_ryfpa")]
 position = Vector2(-91, -12)
@@ -225,6 +243,12 @@ mirrored = true
 
 [node name="FlipperLeftDown3" parent="FlipperCenterLeftBottom" index="0" unique_id=431302676 instance=ExtResource("22_ryfpa")]
 position = Vector2(-115, 85)
+rest_angle_degrees = -30.0
+flip_angle_degrees = 60.0
+flip_force = 300.0
+flip_speed = 40.0
+flip_input = "flipper_left"
+collision_rotation_scale = 0.85
 
 [node name="DeadWall7" parent="FlipperCenterLeftBottom" index="1" unique_id=1215911155 instance=ExtResource("24_ryfpa")]
 position = Vector2(-141, 113)

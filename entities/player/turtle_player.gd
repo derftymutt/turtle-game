@@ -414,7 +414,7 @@ func _physics_process(delta):
 			hud.refill_air(delta)
 
 		var at_surface: bool = not is_underwater
-		hud.recover_energy(delta, touching_walls.size() > 0 or at_surface)
+		hud.recover_energy(delta, (touching_walls.size() > 0 or at_surface) and not _bumper_magnet_attached)
 
 	_update_rest_particles()
 
@@ -1715,6 +1715,7 @@ func _launch_from_flipper_velcro() -> void:
 
 	# Trigger the full flipper animation (force-flip for 0.25s then returns to rest)
 	flipper.trigger_flip(0.25)
+	flipper.play_launch_sound()
 	# Prevent the flipper's hit_body from double-applying force in the next frame
 	flipper.hit_bodies[get_instance_id()] = 0.5
 

@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://dcd6f5ppbpoi3" path="res://entities/collectibles/powerup/powerup.gd" id="1_ieaf5"]
 [ext_resource type="Texture2D" uid="uid://d3p45necbgikq" path="res://entities/collectibles/powerup/sprites/powerup.png" id="2_3f2u0"]
-[ext_resource type="AudioStream" uid="uid://dkjkjymo362d2" path="res://assets/sounds/sfx/collect powerup_1.wav" id="3_sfxcollect"]
+[ext_resource type="AudioStream" path="res://assets/sounds/sfx/collect powerup_1.ogg" id="3_sfxcollect"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_obmse"]
 atlas = ExtResource("2_3f2u0")

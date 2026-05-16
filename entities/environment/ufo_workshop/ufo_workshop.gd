@@ -2,6 +2,8 @@
 extends StaticBody2D
 class_name UFOWorkshop
 
+const _SFX_BEAT_LEVEL = preload("res://assets/sounds/sfx/beat level_1.ogg")
+
 ## Static workshop at ocean surface where UFO pieces are delivered
 
 #@export var workshop_radius: float = 30.0  # For reference only
@@ -20,9 +22,14 @@ class_name UFOWorkshop
 # Internal state
 var is_player_nearby_with_piece: bool = false
 var pulse_offset: float = 0.0
+var _sfx_beat: AudioStreamPlayer
 
 func _ready():
 	add_to_group("workshop")
+	_sfx_beat = AudioStreamPlayer.new()
+	_sfx_beat.stream = _SFX_BEAT_LEVEL
+	_sfx_beat.volume_db = 0.0
+	add_child(_sfx_beat)
 	
 	# Position at surface (optional - can also set in editor)
 	#global_position.y = surface_y_position
@@ -87,7 +94,16 @@ func attempt_delivery():
 func deliver_piece(piece: UFOPiece):
 	"""Accept the UFO piece and remove it from world"""
 	print("🛠️ Workshop received UFO piece!")
-	$SfxDeliver.play()
+
+	var is_final := (LevelManager.pieces_collected + 1 >= LevelManager.pieces_needed)
+	if is_final:
+		# Final piece: play the level-complete fanfare immediately and silence everything else
+		_sfx_beat.play()
+		var hud = get_tree().get_first_node_in_group("hud")
+		if hud:
+			hud.begin_level_completion()
+	else:
+		$SfxDeliver.play()
 
 	# 🆕 AWARD POINTS HERE (not on pickup!)
 	piece.award_delivery_points()

@@ -8,10 +8,10 @@
 [ext_resource type="Texture2D" uid="uid://djvss84e4sdut" path="res://entities/player/sprites/turtle_kick.png" id="5_85e4a"]
 [ext_resource type="Texture2D" uid="uid://du6lru60n6r1" path="res://entities/player/sprites/turtle_shoot.png" id="6_padro"]
 [ext_resource type="Texture2D" uid="uid://xk0jv14pgeyd" path="res://entities/player/sprites/turtle_damage.png" id="7_85e4a"]
-[ext_resource type="AudioStream" uid="uid://bb1cp0ck31btg" path="res://assets/sounds/sfx/turtle damage_1.wav" id="8_sfxdmg"]
-[ext_resource type="AudioStream" uid="uid://ch6gm20llmggf" path="res://assets/sounds/sfx/teleport-tech-use.mp3" id="9_sfxtp"]
-[ext_resource type="AudioStream" uid="uid://c8msxotfd5iao" path="res://assets/sounds/sfx/turtle shot_1.wav" id="10_sfxshoot"]
-[ext_resource type="AudioStream" uid="uid://bvjiu8i1n40j" path="res://assets/sounds/sfx/ufo piece drop_1.wav" id="11_sfxufodrop"]
+[ext_resource type="AudioStream" path="res://assets/sounds/sfx/turtle damage_1.ogg" id="8_sfxdmg"]
+[ext_resource type="AudioStream" path="res://assets/sounds/sfx/teleport-tech-use.mp3" id="9_sfxtp"]
+[ext_resource type="AudioStream" path="res://assets/sounds/sfx/turtle shot_1.ogg" id="10_sfxshoot"]
+[ext_resource type="AudioStream" path="res://assets/sounds/sfx/ufo piece drop_1.ogg" id="11_sfxufodrop"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_n086i"]
 atlas = ExtResource("3_7uinh")

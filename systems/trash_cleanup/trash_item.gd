@@ -1,7 +1,7 @@
 extends RigidBody2D
 class_name TrashItem
 
-const _SFX_SHOOT_TRASH = preload("res://assets/sounds/sfx/shoot trash_1.wav")
+const _SFX_SHOOT_TRASH = preload("res://assets/sounds/sfx/shoot trash_1.ogg")
 
 ## Individual piece of trash that floats through the scene
 ## Can be shot by player to contribute to sequence completion

@@ -5,12 +5,18 @@
 [ext_resource type="PackedScene" uid="uid://cn5v270vtn1pl" path="res://ui/menus/game_over_screen.tscn" id="3_da5si"]
 [ext_resource type="PackedScene" uid="uid://dohn0oo35f7m5" path="res://ui/level_completion/level_complete_screen.tscn" id="4_se1mh"]
 [ext_resource type="PackedScene" uid="uid://bpm3u1q2wx5y" path="res://ui/menus/pause_menu.tscn" id="5_pausemenu"]
-[ext_resource type="PackedScene" path="res://ui/alien_tech/alien_tech_selection_screen.tscn" id="6_atselect"]
-[ext_resource type="Script" path="res://systems/dev/dev_tech_seeder.gd" id="7_devseeder"]
-[ext_resource type="Script" uid="uid://dv8kfm3p9qwr5" path="res://cut_scenes/level_end_cutscene.gd" id="8_lec"]
+[ext_resource type="PackedScene" uid="uid://tselect001" path="res://ui/alien_tech/alien_tech_selection_screen.tscn" id="6_atselect"]
+[ext_resource type="Script" uid="uid://d22ywt1ov84p1" path="res://systems/dev/dev_tech_seeder.gd" id="7_devseeder"]
+[ext_resource type="Script" uid="uid://dv8kfm3qaqwr5" path="res://cut_scenes/level_end_cutscene.gd" id="8_lec"]
+[ext_resource type="AudioStream" path="res://assets/sounds/sfx/level_song.ogg" id="9_levelsong"]
 
 [node name="LevelBase" type="Node2D" unique_id=1013451131 groups=["level"]]
 script = ExtResource("1_hk6b7")
+
+[node name="SfxLevelSong" type="AudioStreamPlayer" parent="." unique_id=1310977424]
+stream = ExtResource("9_levelsong")
+volume_db = -10.0
+autoplay = true
 
 [node name="HUD" parent="." unique_id=1369229575 instance=ExtResource("2_vmt1o")]
 

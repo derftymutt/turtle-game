@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://c8gcxh4gmwsi3" path="res://ui/hud/hud.gd" id="1_ahhtf"]
 [ext_resource type="FontFile" uid="uid://ctao8eoiqrfep" path="res://assets/fonts/PixelMiddle.ttf" id="2_4d6w6"]
-[ext_resource type="AudioStream" uid="uid://1fxwp8cs4o0l" path="res://assets/sounds/sfx/energy recharge_1.wav" id="3_3rj2y"]
+[ext_resource type="AudioStream" path="res://assets/sounds/sfx/energy recharge_1.ogg" id="3_3rj2y"]
 [ext_resource type="Texture2D" uid="uid://tvlrbd3c8bkv" path="res://entities/collectibles/ufo_piece/sprites/ufo_piece_grey.png" id="3_e0nub"]
 [ext_resource type="Texture2D" uid="uid://bcynrj04icper" path="res://ui/hud/sprites/health_meter_bg.png" id="4_imuuq"]
 [ext_resource type="Texture2D" uid="uid://dwnmb08db2821" path="res://ui/hud/sprites/health_meter_icon.png" id="4_kwc50"]
@@ -20,7 +20,7 @@
 [ext_resource type="Texture2D" uid="uid://c8tawqv3ivo5u" path="res://ui/hud/sprites/tech_right_icon.png" id="16_uyo40"]
 [ext_resource type="Texture2D" uid="uid://cb7b62s1rxywo" path="res://entities/enemies/boss_submarine/sprites/boss_meter_bg.png" id="17_boss"]
 [ext_resource type="Texture2D" uid="uid://icas4ttby742" path="res://entities/enemies/boss_submarine/sprites/boss_meter_fill.png" id="18_boss"]
-[ext_resource type="AudioStream" uid="uid://dqumdyhc14pji" path="res://assets/sounds/sfx/low air_1.wav" id="19_sfxlair"]
+[ext_resource type="AudioStream" path="res://assets/sounds/sfx/low air_1.ogg" id="19_sfxlair"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_w75iv"]
 atlas = ExtResource("3_e0nub")
