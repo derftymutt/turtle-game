@@ -9,7 +9,7 @@ var _glow_offset: float = 0.0
 
 func _collectible_ready():
 	$SfxAppears.play()
-	point_value = 25
+	point_value = 50
 	sink_speed = 20.0
 	sway_amount = 8.0
 	sway_speed = 0.5

@@ -90,8 +90,8 @@ var _timer_flash_timer: float = 0.0
 
 # Trash cluster score spawning
 const TRASH_CLUSTER_SCENE = preload("res://entities/collectibles/trash_cluster/trash_cluster.tscn")
-const CLUSTER_SCORE_INTERVAL: int = 250
-var _next_cluster_score: int = CLUSTER_SCORE_INTERVAL
+const CLUSTER_SCORE_THRESHOLDS: Array[int] = [200, 500, 800, 1200, 1600]
+var _cluster_threshold_index: int = 0
 
 # Visual feedback
 var air_flash_timer: float = 0.0
@@ -322,8 +322,8 @@ func update_score(new_score: int):
 	if score_label:
 		score_label.text = "%d" % current_score
 	# Only spawn a cluster when score is actually increasing past a milestone
-	if new_score > previous_score and current_score >= _next_cluster_score:
-		_next_cluster_score += CLUSTER_SCORE_INTERVAL
+	if new_score > previous_score and _cluster_threshold_index < CLUSTER_SCORE_THRESHOLDS.size() and current_score >= CLUSTER_SCORE_THRESHOLDS[_cluster_threshold_index]:
+		_cluster_threshold_index += 1
 		_spawn_trash_cluster()
 
 func add_score(points: int):
