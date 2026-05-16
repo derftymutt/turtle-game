@@ -4,8 +4,8 @@ extends CanvasLayer
 ## Main Menu — shows Continue (if save exists) and New Game.
 ## Level-select dev buttons are shown only when GameManager.DEV_MODE is true.
 
-@onready var title_label = $Control/CenterContainer/VBoxContainer/TitleLabel
-@onready var level_container = $Control/CenterContainer/VBoxContainer/LevelContainer
+@onready var title_label = $Control/VBoxContainer/TitleMargin/TitleLabel
+@onready var level_container = $Control/VBoxContainer/ButtonCenter/LevelContainer
 
 var guide_screen = null
 var game_info_screen = null

@@ -25,29 +25,37 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="CenterContainer" type="CenterContainer" parent="Control" unique_id=1740028051]
+[node name="VBoxContainer" type="VBoxContainer" parent="Control" unique_id=1801026456]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -134.5
-offset_top = -15.5
-offset_right = 134.5
-offset_bottom = 15.5
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Control/CenterContainer" unique_id=1801026456]
+[node name="TitleMargin" type="MarginContainer" parent="Control/VBoxContainer" unique_id=1740028051]
 layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_top = 48
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
 
-[node name="TitleLabel" type="Label" parent="Control/CenterContainer/VBoxContainer" unique_id=1598903120]
+[node name="TitleLabel" type="Label" parent="Control/VBoxContainer/TitleMargin" unique_id=1598903120]
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.6, 0.8980392, 0.3137255, 1)
 theme_override_fonts/font = ExtResource("2_1njj5")
 theme_override_font_sizes/font_size = 48
 text = "Turtle Plunge"
+horizontal_alignment = 1
 
-[node name="LevelContainer" type="VBoxContainer" parent="Control/CenterContainer/VBoxContainer" unique_id=1613674440]
+[node name="ButtonCenter" type="CenterContainer" parent="Control/VBoxContainer" unique_id=1740028052]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="LevelContainer" type="VBoxContainer" parent="Control/VBoxContainer/ButtonCenter" unique_id=1613674440]
 layout_mode = 2
 theme_override_constants/separation = 10
 alignment = 1
