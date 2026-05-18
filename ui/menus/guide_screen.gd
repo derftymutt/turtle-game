@@ -106,6 +106,7 @@ func _on_hard_mode_toggled(pressed: bool):
 			hard_mode_checkbox.button_pressed = pressed
 			hard_mode_checkbox.set_block_signals(false)
 			dialog.queue_free()
+			_rebuild_main_menu()
 		)
 		dialog.canceled.connect(func():
 			dialog.queue_free()
@@ -141,6 +142,11 @@ func _control_row(action: String, keyboard: String, controller: String, is_heade
 		row.add_child(l)
 
 	return row
+
+func _rebuild_main_menu():
+	var main_menu = get_parent()
+	if main_menu and main_menu.has_method("rebuild_buttons"):
+		main_menu.rebuild_buttons()
 
 func _spacer(height: int) -> Control:
 	var s := Control.new()

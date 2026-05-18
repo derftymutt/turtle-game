@@ -13,6 +13,7 @@ var game_info_screen = null
 const _HARD_RED    := Color(1.0, 0.18, 0.18)
 const _HARD_GOLD   := Color(1.0, 0.45, 0.45)   # tinted gold for record labels in hard mode
 const _NORMAL_GOLD := Color(1.0, 0.85, 0.0)
+const _TITLE_GREEN := Color(0.6, 0.8980392, 0.3137255, 1.0)
 
 const _SFX_MENU_NAV    = preload("res://assets/sounds/sfx/menu nav_1.ogg")
 const _SFX_MENU_SELECT = preload("res://assets/sounds/sfx/menu select_1.ogg")
@@ -51,7 +52,7 @@ func _format_ms(ms: int) -> String:
 	var seconds := total_sec % 60
 	return "%d:%02d" % [minutes, seconds]
 
-func _build_buttons():
+func _build_buttons(grab_focus: bool = true):
 	var is_hard := GameSettings.hard_mode
 	var text_color  := _HARD_RED   if is_hard else Color.WHITE
 	var record_color := _HARD_GOLD if is_hard else _NORMAL_GOLD
@@ -155,10 +156,11 @@ func _build_buttons():
 	level_container.add_child(quit_button)
 
 	# Focus the first Button child (skip Labels)
-	for child in level_container.get_children():
-		if child is Button:
-			child.grab_focus()
-			break
+	if grab_focus:
+		for child in level_container.get_children():
+			if child is Button:
+				child.grab_focus()
+				break
 
 func _on_continue_pressed():
 	if _sfx_select:
@@ -233,6 +235,12 @@ func show_menu():
 			child.grab_focus()
 			break
 
+func rebuild_buttons():
+	for child in level_container.get_children():
+		child.queue_free()
+	_build_buttons(false)
+	_refresh_colors()
+
 func _refresh_colors():
 	"""Re-applies hard-mode text color to all existing menu elements (no rebuild needed)"""
 	var is_hard := GameSettings.hard_mode
@@ -241,7 +249,7 @@ func _refresh_colors():
 		if is_hard:
 			title_label.add_theme_color_override("font_color", _HARD_RED)
 		else:
-			title_label.remove_theme_color_override("font_color")
+			title_label.add_theme_color_override("font_color", _TITLE_GREEN)
 	if not level_container:
 		return
 	for child in level_container.get_children():
