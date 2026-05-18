@@ -45,6 +45,21 @@ theme_override_font_sizes/font_size = 14
 text = "Alien Tech Acquired!"
 horizontal_alignment = 1
 
+[node name="InstructionsCenterContainer" type="CenterContainer" parent="Control/PanelContainer/MarginContainer/VBoxContainer" unique_id=300000010]
+layout_mode = 2
+visible = false
+
+[node name="InstructionsLabel" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer/InstructionsCenterContainer" unique_id=300000012]
+layout_mode = 2
+custom_minimum_size = Vector2(420, 0)
+theme_override_font_sizes/font_size = 9
+text = "• You have slots for 2 techs- Left and Right\n• Active techs are triggered with the corresponding button (Left/Right Bumper or Q/E)\n• Passive techs are always engaged\n• Swap assigned tech slots in the Pause menu"
+autowrap_mode = 3
+
+[node name="TutorialSeparator" type="HSeparator" parent="Control/PanelContainer/MarginContainer/VBoxContainer" unique_id=300000011]
+layout_mode = 2
+visible = false
+
 [node name="SubtitleLabel" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer" unique_id=300000007]
 layout_mode = 2
 theme_override_font_sizes/font_size = 11

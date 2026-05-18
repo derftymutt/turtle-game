@@ -28,7 +28,7 @@ var _definitions: Array[Dictionary] = [
 	{
 		"id":             INERTIA_DAMPENER,
 		"name":           "Inertia Dampener",
-		"description":    "Activate for 3s: air becomes swimmable shallow ocean,\ndeep-water buoyancy normalized. Then recovers for 8s.",
+		"description":    "Activate for 3s: ocean and sky become swimmable as if in shallow water,\n 8s recovery.",
 		"slot_label":     "Inertia Dampener",
 		"needs_input":    true,
 		"has_passive_bar": true,
@@ -53,7 +53,7 @@ var _definitions: Array[Dictionary] = [
 	{
 		"id":          TRANSPORTER,
 		"name":        "Transporter",
-		"description": "Teleport ~200px in your momentum direction. Ignores walls. Brief invincibility on landing.",
+		"description": "Teleport in the direction of your momentum. Brief invincibility on landing.",
 		"slot_label":  "Transporter",
 		"needs_input": true,
 		"color":       Color(0.6, 0.3, 1.0),
@@ -61,7 +61,7 @@ var _definitions: Array[Dictionary] = [
 	{
 		"id":          SALIVA_NANOBOTS,
 		"name":        "Saliva Nanobots",
-		"description": "Bullets gently home toward nearby enemies\nand deal double damage.",
+		"description": "Bullets home toward nearby enemies\nand deal double damage.",
 		"slot_label":  "Saliva Nanobots",
 		"needs_input": false,
 		"color":       Color(0.3, 1.0, 0.5),
@@ -78,7 +78,7 @@ var _definitions: Array[Dictionary] = [
 	{
 		"id":              DERMAL_REGEN,
 		"name":            "Dermal Regenerator",
-		"description":     "Hold to channel a 60 HP heal. One use per level.\nTaking damage during channeling cancels it.",
+		"description":     "Hold slot button to heal. One use per level.\nTaking damage during channeling cancels it.",
 		"slot_label":      "Dermal Regenerator",
 		"needs_input":     true,
 		"has_passive_bar": true,
@@ -87,7 +87,7 @@ var _definitions: Array[Dictionary] = [
 	{
 		"id":              BUMPER_MAGNET,
 		"name":            "Bumper Magnet",
-		"description":     "Hold to magnetically snap to a nearby bumper.\nOrbit with the stick, then release to launch. 10s cooldown.",
+		"description":     "Hold slot button to magnetically snap to a nearby bumper.\nOrbit with the stick, then release to launch. 10s cooldown.",
 		"slot_label":      "Bumper Magnet",
 		"needs_input":     true,
 		"has_passive_bar": true,
@@ -96,7 +96,7 @@ var _definitions: Array[Dictionary] = [
 	{
 		"id":          PHASE_SHIFTER,
 		"name":        "Phase Shifter",
-		"description": "Hold your slot button while shooting to fire phase bullets.\n10 shots before a 10s recharge. Phased enemies are passthrough and harmless for 4s. Works on invincible enemies.",
+		"description": "Hold your slot button while shooting to fire phase bullets.\n10 shots before a 10s recharge. Phased targets are passthrough and harmless for 5s. Works on invincible enemies.",
 		"slot_label":  "Phase Shifter",
 		"needs_input": false,
 		"color":       Color(0.3, 0.9, 1.0),
@@ -138,7 +138,7 @@ var _definitions: Array[Dictionary] = [
 	{
 		"id":              SHOCKWAVE,
 		"name":            "Shockwave",
-		"description":     "Blast 10 damage to all enemies on screen.\nDepletes all energy. 15s cooldown.",
+		"description":     "Blast 1 hit to all enemies on screen.\nDepletes all energy. 15s cooldown.",
 		"slot_label":      "Shockwave",
 		"needs_input":     true,
 		"has_passive_bar": true,

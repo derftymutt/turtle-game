@@ -19,6 +19,9 @@ var carried_piece: Node = null
 # Hard mode: health at level entry (-1 = use full health for first level)
 var persisted_health: float = -1.0
 
+# Tutorial flags — reset each run
+var has_shown_tech_tutorial: bool = false
+
 # High scores per level (persists between sessions if you add save/load)
 var high_scores: Dictionary = {
 	"level_1": 0,
@@ -58,6 +61,7 @@ func reset_game():
 	persisted_health = -1.0
 	is_carrying_piece = false
 	carried_piece = null
+	has_shown_tech_tutorial = false
 	LevelManager.reset_run()
 	AlienTechManager.reset_run()
 

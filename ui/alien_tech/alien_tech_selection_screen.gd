@@ -1,17 +1,27 @@
 extends CanvasLayer
 class_name AlienTechSelectionScreen
 
-@onready var title_label:     Label         = $Control/PanelContainer/MarginContainer/VBoxContainer/TitleLabel
-@onready var subtitle_label:  Label         = $Control/PanelContainer/MarginContainer/VBoxContainer/SubtitleLabel
-@onready var cards_container: HBoxContainer = $Control/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer
-@onready var slot_label:      Label         = $Control/PanelContainer/MarginContainer/VBoxContainer/SlotLabel
+const _SFX_MENU_NAV = preload("res://assets/sounds/sfx/menu nav_1.ogg")
 
+@onready var title_label:              Label          = $Control/PanelContainer/MarginContainer/VBoxContainer/TitleLabel
+@onready var subtitle_label:           Label          = $Control/PanelContainer/MarginContainer/VBoxContainer/SubtitleLabel
+@onready var cards_container:          HBoxContainer  = $Control/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer
+@onready var slot_label:               Label          = $Control/PanelContainer/MarginContainer/VBoxContainer/SlotLabel
+@onready var instructions_container:   CenterContainer = $Control/PanelContainer/MarginContainer/VBoxContainer/InstructionsCenterContainer
+@onready var tutorial_separator:       HSeparator     = $Control/PanelContainer/MarginContainer/VBoxContainer/TutorialSeparator
+@onready var panel_container:          PanelContainer = $Control/PanelContainer
+
+var _sfx_nav: AudioStreamPlayer
 var _pending_tech_id: String = ""
 var _awaiting_slot_choice: bool = false
 
 func _ready():
 	add_to_group("alien_tech_selection")
 	visible = false
+	_sfx_nav = AudioStreamPlayer.new()
+	_sfx_nav.stream = _SFX_MENU_NAV
+	_sfx_nav.volume_db = -10.0
+	add_child(_sfx_nav)
 	AlienTechManager.selection_ready.connect(_on_selection_ready)
 
 func _on_selection_ready(choices: Array):
@@ -19,6 +29,16 @@ func _on_selection_ready(choices: Array):
 		return
 	_awaiting_slot_choice = false
 	_pending_tech_id = choices[0].get("id", "")
+	var show_tutorial = not GameManager.has_shown_tech_tutorial
+	if show_tutorial:
+		GameManager.has_shown_tech_tutorial = true
+	if instructions_container:
+		instructions_container.visible = show_tutorial
+	if tutorial_separator:
+		tutorial_separator.visible = show_tutorial
+	if panel_container:
+		panel_container.offset_top = -180.0 if show_tutorial else -130.0
+		panel_container.offset_bottom = 180.0 if show_tutorial else 130.0
 	_build_tech_display(choices[0])
 	if slot_label:
 		slot_label.visible = false
@@ -49,6 +69,7 @@ func _build_tech_display(tech: Dictionary):
 	equip_btn.add_theme_font_size_override("font_size", 11)
 	equip_btn.modulate = tech_color.lerp(Color.WHITE, 0.35)
 	equip_btn.pressed.connect(_on_equip_pressed)
+	equip_btn.focus_entered.connect(func(): _sfx_nav.play())
 	cards_container.add_child(equip_btn)
 	equip_btn.grab_focus()
 
@@ -58,6 +79,7 @@ func _build_tech_display(tech: Dictionary):
 	skip_btn.focus_mode = Control.FOCUS_ALL
 	skip_btn.add_theme_font_size_override("font_size", 11)
 	skip_btn.pressed.connect(_on_cancel)
+	skip_btn.focus_entered.connect(func(): _sfx_nav.play())
 	cards_container.add_child(skip_btn)
 
 func _clear_cards():
@@ -102,6 +124,7 @@ func _show_slot_choice_ui(incoming_id: String):
 		btn.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		var captured: int = i
 		btn.pressed.connect(func(): _on_replace_pressed(captured))
+		btn.focus_entered.connect(func(): _sfx_nav.play())
 		cards_container.add_child(btn)
 		if first_btn == null:
 			first_btn = btn
@@ -111,6 +134,7 @@ func _show_slot_choice_ui(incoming_id: String):
 	cancel.focus_mode = Control.FOCUS_ALL
 	cancel.add_theme_font_size_override("font_size", 9)
 	cancel.pressed.connect(_on_cancel)
+	cancel.focus_entered.connect(func(): _sfx_nav.play())
 	cards_container.add_child(cancel)
 	if first_btn:
 		first_btn.grab_focus()

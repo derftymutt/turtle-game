@@ -10,6 +10,7 @@ var thrust_inverted: bool = false
 # Difficulty
 var hard_mode: bool = false
 
+
 func _ready():
 	_load_settings()
 
@@ -42,3 +43,4 @@ func set_thrust_inverted(inverted: bool):
 func set_hard_mode(enabled: bool):
 	hard_mode = enabled
 	_save_settings()
+
