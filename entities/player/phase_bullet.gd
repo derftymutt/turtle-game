@@ -46,14 +46,14 @@ func _on_body_entered(body):
 	# Phase enemies — including invincible ones
 	if body.is_in_group("enemies"):
 		if body.has_method("phase_shift"):
-			body.phase_shift(4.0)
+			body.phase_shift(5.0)
 		queue_free()
 		return
 
 	# Phase 2: phase walls, bumpers, and flippers
 	if body.is_in_group("dead_walls") or body.is_in_group("circular_bumpers") or body.is_in_group("flippers"):
 		if body.has_method("phase_shift"):
-			body.phase_shift(3.0)
+			body.phase_shift(5.0)
 		queue_free()
 		return
 
