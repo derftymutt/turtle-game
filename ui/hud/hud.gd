@@ -336,6 +336,8 @@ func _spawn_trash_cluster():
 	if not scene:
 		return
 	var cluster = TRASH_CLUSTER_SCENE.instantiate()
+	cluster.is_first_cluster = not GameManager.first_trash_cluster_spawned
+	GameManager.first_trash_cluster_spawned = true
 	var inv = get_viewport().get_canvas_transform().affine_inverse()
 	var screen_size = get_viewport().get_visible_rect().size
 	var spawn_y = screen_size.y * randf_range(0.3, 0.78)

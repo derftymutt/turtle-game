@@ -15,8 +15,12 @@ const _SFX_FLIPPER_LAUNCH = preload("res://assets/sounds/sfx/flipper launch_1.og
 @export var flip_speed: float = 40.0
 @export var flip_input: String = "flipper_left"
 @export var collision_rotation_scale: float = 0.85  # Scale collision rotation (e.g., 0.9 = 10% less rotation)
+@export var overswing_enabled: bool = false
+@export var overswing_degrees: float = 15.0
+@export var overswing_decay_speed: float = 12.0
 
 var is_flipping: bool = false
+var _overswing_offset: float = 0.0
 var current_rotation: float = 0.0  # Physics rotation
 var target_rotation: float = 0.0
 var previous_rotation: float = 0.0
@@ -119,7 +123,13 @@ func _physics_process(delta):
 	previous_rotation = current_rotation
 	current_rotation = lerp_angle(current_rotation, target_rotation, flip_speed * delta)
 	angular_velocity = (current_rotation - previous_rotation) / delta
-	
+
+	# Decay collision overswing offset back to zero
+	if _overswing_offset != 0.0:
+		_overswing_offset = lerp(_overswing_offset, 0.0, overswing_decay_speed * delta)
+		if abs(_overswing_offset) < 0.001:
+			_overswing_offset = 0.0
+
 	# Update collision and sprite
 	update_collision_rotation()
 	update_sprite_frame()
@@ -162,15 +172,16 @@ func update_collision_rotation():
 	"""Rotate collision shapes by physics angle + base rotation
 	ALSO rotate the position vector so it orbits around the origin (pivot point)"""
 	# Scale the rotation amount for collision (to match sprite angle range)
-	var scaled_rotation = current_rotation * collision_rotation_scale
-	
+	# _overswing_offset is added after scaling so the full overswing arc hits regardless of scale
+	var scaled_rotation = current_rotation * collision_rotation_scale + _overswing_offset
+
 	if collision_shape:
 		# Rotate the shape itself
 		collision_shape.rotation = base_collision_rotation + scaled_rotation
-		
+
 		# Rotate the position vector around origin (0,0)
 		collision_shape.position = base_collision_position.rotated(scaled_rotation)
-	
+
 	if area_collision_shape:
 		area_collision_shape.rotation = base_collision_rotation + scaled_rotation
 		area_collision_shape.position = base_area_collision_position.rotated(scaled_rotation)
@@ -207,6 +218,10 @@ func activate_flip():
 	is_flipping = true
 	target_rotation = get_flip_angle()
 	hit_bodies.clear()
+
+	if overswing_enabled:
+		var flip_direction = sign(get_flip_angle() - get_rest_angle())
+		_overswing_offset = flip_direction * deg_to_rad(overswing_degrees)
 
 	is_actively_moving = true
 	active_movement_timer = active_movement_duration

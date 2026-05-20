@@ -107,7 +107,6 @@ level_number = 3
 [node name="SkyBackground" parent="." index="3" unique_id=967020750 instance=ExtResource("2_8nkwk")]
 
 [node name="Ocean" parent="." index="6" unique_id=863147586 instance=ExtResource("2_bmgug")]
-visible = false
 
 [node name="OceanBackground" parent="." index="7" unique_id=593268214 instance=ExtResource("4_kyq6o")]
 
@@ -250,6 +249,7 @@ curve = SubResource("Curve2D_jqt73")
 
 [node name="FlipperLeftDown" parent="FlipperLeftTop" index="0" unique_id=1447591536 instance=ExtResource("25_tv8m3")]
 position = Vector2(-245, -70)
+overswing_enabled = true
 
 [node name="DeadWall2" parent="FlipperLeftTop" index="1" unique_id=797132162 instance=ExtResource("26_e28pm")]
 position = Vector2(-260, -34)
@@ -261,6 +261,7 @@ mirrored = true
 
 [node name="FlipperLeftDown2" parent="FlipperLeftBottom" index="0" unique_id=8248382 instance=ExtResource("25_tv8m3")]
 position = Vector2(-245, 65)
+overswing_enabled = true
 
 [node name="DeadWall3" parent="FlipperLeftBottom" index="1" unique_id=686630903 instance=ExtResource("26_e28pm")]
 position = Vector2(-261, 101)
@@ -272,11 +273,13 @@ mirrored = true
 
 [node name="FlipperLeftDown3" parent="FlipperMidLeftTop" index="0" unique_id=292295033 instance=ExtResource("25_tv8m3")]
 position = Vector2(-140, -15)
+overswing_enabled = true
 
 [node name="FlipperMidLeftBottom" type="Node" parent="." index="28" unique_id=784933907]
 
 [node name="FlipperLeftDown4" parent="FlipperMidLeftBottom" index="0" unique_id=1818040490 instance=ExtResource("25_tv8m3")]
 position = Vector2(-145, 120)
+overswing_enabled = true
 
 [node name="FlipperCenterLeft" type="Node" parent="." index="29" unique_id=241173618]
 
@@ -309,16 +312,19 @@ angle_preset = 1
 
 [node name="FlipperRightWest" parent="FlipperMidRightTop" index="0" unique_id=189863665 instance=ExtResource("26_8nkwk")]
 position = Vector2(140, -15)
+overswing_enabled = true
 
 [node name="FlipperMidRightBottom" type="Node" parent="." index="32" unique_id=1915925744]
 
 [node name="FlipperRightWest4" parent="FlipperMidRightBottom" index="0" unique_id=2095072078 instance=ExtResource("26_8nkwk")]
 position = Vector2(145, 120)
+overswing_enabled = true
 
 [node name="FlipperRightTop" type="Node" parent="." index="33" unique_id=87822159]
 
 [node name="FlipperRightWest2" parent="FlipperRightTop" index="0" unique_id=53197315 instance=ExtResource("26_8nkwk")]
 position = Vector2(245, -70)
+overswing_enabled = true
 
 [node name="DeadWall6" parent="FlipperRightTop" index="1" unique_id=842702931 instance=ExtResource("26_e28pm")]
 position = Vector2(260, -34)
@@ -329,6 +335,7 @@ angle_preset = 1
 
 [node name="FlipperRightWest3" parent="FlipperRightBottom" index="0" unique_id=920912933 instance=ExtResource("26_8nkwk")]
 position = Vector2(245, 65)
+overswing_enabled = true
 
 [node name="DeadWall7" parent="FlipperRightBottom" index="1" unique_id=544276415 instance=ExtResource("26_e28pm")]
 position = Vector2(261, 101)

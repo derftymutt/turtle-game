@@ -235,9 +235,11 @@ position = Vector2(245, 25)
 
 [node name="FlipperLeftEast" parent="." index="39" unique_id=1178739332 instance=ExtResource("23_itbe0")]
 position = Vector2(-70, 115)
+overswing_enabled = true
 
 [node name="FlipperRightWest" parent="." index="40" unique_id=976369529 instance=ExtResource("24_xrja0")]
 position = Vector2(70, 115)
+overswing_enabled = true
 
 [node name="DeadWall2" parent="." index="41" unique_id=797132162 instance=ExtResource("25_00pa0")]
 position = Vector2(-66, -38)

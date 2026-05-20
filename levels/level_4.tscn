@@ -401,6 +401,12 @@ shape = SubResource("RectangleShape2D_65scv")
 
 [node name="FlipperLeftDown" parent="." index="21" unique_id=598735619 instance=ExtResource("15_65scv")]
 position = Vector2(-40, -90)
+rest_angle_degrees = -30.0
+flip_angle_degrees = 60.0
+flip_force = 300.0
+flip_speed = 40.0
+flip_input = "flipper_left"
+collision_rotation_scale = 0.85
 
 [node name="FlipperRightDownPixelPerfect2" parent="." index="22" unique_id=94480237 instance=ExtResource("16_xtn87")]
 position = Vector2(40, -90)
@@ -582,6 +588,7 @@ radius = 16.0
 
 [node name="FlipperLeftEast" parent="." index="53" unique_id=1459043565 instance=ExtResource("23_lafyp")]
 position = Vector2(-165, 40)
+overswing_enabled = true
 
 [node name="DeadWall" parent="." index="54" unique_id=1961436897 instance=ExtResource("10_1gtbd")]
 position = Vector2(-200, 56)
@@ -594,6 +601,7 @@ angle_preset = 3
 
 [node name="FlipperRightWest" parent="." index="56" unique_id=1092685905 instance=ExtResource("24_w0vta")]
 position = Vector2(165, 40)
+overswing_enabled = true
 
 [node name="OceanCurrent2" parent="." index="57" unique_id=1661200675 instance=ExtResource("20_436cy")]
 position = Vector2(-273, -96)

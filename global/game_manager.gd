@@ -21,6 +21,7 @@ var persisted_health: float = -1.0
 
 # Tutorial flags — reset each run
 var has_shown_tech_tutorial: bool = false
+var first_trash_cluster_spawned: bool = false
 
 # High scores per level (persists between sessions if you add save/load)
 var high_scores: Dictionary = {
@@ -33,6 +34,22 @@ var high_scores: Dictionary = {
 
 func _ready():
 	print("🎮 GameManager initialized")
+
+func _input(event: InputEvent) -> void:
+	if not DEV_MODE:
+		return
+	if event.is_action_pressed("dev_screenshot"):
+		_take_screenshot()
+		get_viewport().set_input_as_handled()
+
+func _take_screenshot() -> void:
+	var image := get_viewport().get_texture().get_image()
+	var dir := OS.get_user_data_dir() + "/screenshots"
+	DirAccess.make_dir_recursive_absolute(dir)
+	var timestamp := Time.get_datetime_string_from_system().replace(":", "-")
+	var path := dir + "/screenshot_%s.png" % timestamp
+	image.save_png(path)
+	print("📸 Screenshot saved: ", path)
 
 func update_high_score(level_name: String, score: int):
 	if score > high_scores.get(level_name, 0):
@@ -62,6 +79,7 @@ func reset_game():
 	is_carrying_piece = false
 	carried_piece = null
 	has_shown_tech_tutorial = false
+	first_trash_cluster_spawned = false
 	LevelManager.reset_run()
 	AlienTechManager.reset_run()
 

@@ -2,14 +2,15 @@ extends RigidBody2D
 class_name TrashCluster
 
 ## Dense ocean debris cluster concealing an alien tech piece.
-## Shoot it several times and it breaks into 4 smaller pieces.
-## Destroy all 4 pieces to reveal the tech.
+## Shoot it several times and it breaks into 0–4 smaller pieces.
+## Destroy all pieces to reveal the tech (0 pieces = immediate reveal).
 
 const _SMALL_PIECE_SCENE   = preload("res://entities/collectibles/trash_cluster/trash_cluster_piece.tscn")
 const _TECH_PIECE_SCENE    = preload("res://entities/collectibles/alien_tech_piece/alien_tech_piece.tscn")
 const _SFX_TRASH_BAG_OPENS = preload("res://assets/sounds/sfx/trash bag opens_1.ogg")
 
 @export var max_hits: int = 3
+@export var is_first_cluster: bool = false
 @export var drift_speed: float = -38.0   # Negative = left, positive = right
 @export var max_lifetime: float = 30.0
 @export var max_y: float = 10000.0       # World-space y floor; set by spawner
@@ -144,27 +145,50 @@ func _break_apart():
 	var parent_node = get_parent()
 	var tech_scene  = _TECH_PIECE_SCENE
 
-	# Shared destruction counter shared by all 4 pieces via closure capture
-	var remaining = {"count": 4}
+	# First cluster always reveals immediately; otherwise weighted 0–4 pieces.
+	# Weights: 0→10%, 1→15%, 2→25%, 3→30%, 4→20%
+	var piece_count: int
+	if is_first_cluster:
+		piece_count = 0
+	else:
+		var r := randf()
+		if r < 0.10:
+			piece_count = 0
+		elif r < 0.25:
+			piece_count = 1
+		elif r < 0.50:
+			piece_count = 2
+		elif r < 0.80:
+			piece_count = 3
+		else:
+			piece_count = 4
 
-	for i in range(4):
-		var piece = _SMALL_PIECE_SCENE.instantiate()
-		parent_node.add_child(piece)
-		piece.global_position = break_pos
+	if piece_count == 0:
+		if is_instance_valid(parent_node):
+			var tech = tech_scene.instantiate()
+			parent_node.add_child(tech)
+			tech.global_position = break_pos
+			tech.apply_central_impulse(Vector2(randf_range(-60, 60), -120))
+	else:
+		# Shared destruction counter via closure capture
+		var remaining = {"count": piece_count}
 
-		# Scatter in evenly-spaced directions with a bit of random jitter
-		var angle = (float(i) / 4.0) * TAU + randf_range(-0.35, 0.35)
-		piece.apply_central_impulse(Vector2.from_angle(angle) * randf_range(90, 200))
+		for i in range(piece_count):
+			var piece = _SMALL_PIECE_SCENE.instantiate()
+			parent_node.add_child(piece)
+			piece.global_position = break_pos
 
-		# When this piece is shot, decrement the counter.
-		# If it reaches zero, all 4 were cleared — spawn the tech piece.
-		piece.all_destroyed_callback = func(pos: Vector2):
-			remaining.count -= 1
-			if remaining.count <= 0 and is_instance_valid(parent_node):
-				var tech = tech_scene.instantiate()
-				parent_node.add_child(tech)
-				tech.global_position = pos
-				tech.apply_central_impulse(Vector2(randf_range(-60, 60), -120))
+			# Scatter in evenly-spaced directions with a bit of random jitter
+			var angle = (float(i) / float(piece_count)) * TAU + randf_range(-0.35, 0.35)
+			piece.apply_central_impulse(Vector2.from_angle(angle) * randf_range(90, 200))
+
+			piece.all_destroyed_callback = func(pos: Vector2):
+				remaining.count -= 1
+				if remaining.count <= 0 and is_instance_valid(parent_node):
+					var tech = tech_scene.instantiate()
+					parent_node.add_child(tech)
+					tech.global_position = pos
+					tech.apply_central_impulse(Vector2(randf_range(-60, 60), -120))
 
 	_play_break_effect()
 
