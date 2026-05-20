@@ -28,6 +28,7 @@ signal ready_to_reproduce(crab: Crab)
 # Visual
 @export var idle_bob_amount: float = 1.0
 @export var idle_bob_speed: float = 0.8
+@export var is_super: bool = false
 
 # Reproduction
 @export var reproduce_threshold: float = 40.0  # Seconds til reproduce when not hit
@@ -50,6 +51,9 @@ var _windup_node: Node2D = null
 # Reproduction tracking (private - use signals to access)
 var _reproduce_timer: float = 0.0
 var _has_reproduced: bool = false
+var _reproduce_warning_particles: CPUParticles2D = null
+
+const REPRODUCE_WARNING_TIME: float = 10.0
 
 # Relocation timeout — prevents permanent RELOCATING invincibility if crab gets stuck
 var _relocation_elapsed: float = 0.0
@@ -63,8 +67,8 @@ func _enemy_ready():
 	mass = 3.0  # Heavy
 	lock_rotation = true
 	
-	# Set health
-	max_health = 30.0
+	# Set health — super crabs have 30 HP (3 shots), regular have 20 HP (2 shots)
+	max_health = 30.0 if is_super else 20.0
 	current_health = max_health
 	contact_damage = 10.0
 	
@@ -87,6 +91,13 @@ func _enemy_ready():
 	
 	# Create collision shape if not present
 	_setup_collision_shape()
+
+	# Play correct idle animation for this crab type
+	var anim_sprite := get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
+	if anim_sprite and anim_sprite.sprite_frames:
+		var anim := _get_idle_anim()
+		if anim_sprite.sprite_frames.has_animation(anim):
+			anim_sprite.play(anim)
 
 func _setup_collision_shape():
 	"""Ensure the RigidBody2D has a collision shape"""
@@ -140,9 +151,13 @@ func _idle_behavior(delta: float):
 	# Reproduction timer (only in IDLE state, only if not already reproduced)
 	if not _has_reproduced:
 		_reproduce_timer -= delta
-		
+
+		if _reproduce_timer <= REPRODUCE_WARNING_TIME and not _reproduce_warning_particles:
+			_start_reproduce_warning()
+
 		if _reproduce_timer <= 0:
 			_has_reproduced = true
+			_stop_reproduce_warning()
 			ready_to_reproduce.emit(self)
 			print("🦀 Crab ready to reproduce!")
 
@@ -196,10 +211,9 @@ func _relocating_behavior(delta: float):
 	if not _is_playing_damage_animation:
 		var animated_sprite = get_node_or_null("AnimatedSprite2D")
 		if animated_sprite and animated_sprite.sprite_frames:
-			if current_health <= 10.0 and animated_sprite.sprite_frames.has_animation("near_death"):
-				animated_sprite.play('near_death')
-			elif animated_sprite.sprite_frames.has_animation("move"):
-				animated_sprite.play('move')
+			var anim := _get_move_anim()
+			if animated_sprite.sprite_frames.has_animation(anim):
+				animated_sprite.play(anim)
 
 	var direction = to_target.normalized()
 	apply_central_force(direction * relocation_speed * 10)
@@ -215,10 +229,51 @@ func _finish_relocation():
 	throw_timer = throw_cooldown * 0.5
 	var animated_sprite = get_node_or_null("AnimatedSprite2D")
 	if animated_sprite and animated_sprite.sprite_frames:
-		if current_health <= 10.0 and animated_sprite.sprite_frames.has_animation("near_death"):
-			animated_sprite.play('near_death')
-		elif animated_sprite.sprite_frames.has_animation("default"):
-			animated_sprite.play('default')
+		var anim := _get_idle_anim()
+		if animated_sprite.sprite_frames.has_animation(anim):
+			animated_sprite.play(anim)
+
+func _get_idle_anim() -> String:
+	if current_health <= 10.0:
+		return "near_death"
+	if is_super and current_health > 20.0:
+		return "super"
+	return "default"
+
+func _get_move_anim() -> String:
+	if current_health <= 10.0:
+		return "near_death"
+	if is_super and current_health > 20.0:
+		return "super_move"
+	return "move"
+
+func _start_reproduce_warning() -> void:
+	var particles := CPUParticles2D.new()
+	particles.emitting = true
+	particles.amount = 14
+	particles.lifetime = 0.9
+	particles.emission_shape = CPUParticles2D.EmissionShape.EMISSION_SHAPE_SPHERE
+	particles.emission_sphere_radius = 11.0
+	particles.direction = Vector2(0, -1)
+	particles.spread = 180.0
+	particles.gravity = Vector2.ZERO
+	particles.initial_velocity_min = 12.0
+	particles.initial_velocity_max = 30.0
+	particles.scale_amount_min = 1.5
+	particles.scale_amount_max = 3.0
+	var gradient := Gradient.new()
+	gradient.set_color(0, Color(1.0, 0.1, 0.1, 1.0))
+	gradient.set_color(1, Color(1.0, 0.05, 0.05, 0.0))
+	particles.color_ramp = gradient
+	particles.z_index = 1
+	add_child(particles)
+	_reproduce_warning_particles = particles
+
+func _stop_reproduce_warning() -> void:
+	if _reproduce_warning_particles and is_instance_valid(_reproduce_warning_particles):
+		_reproduce_warning_particles.emitting = false
+		_reproduce_warning_particles.queue_free()
+	_reproduce_warning_particles = null
 
 func _lock_to_floor():
 	"""Keep crab locked to floor position"""
@@ -339,8 +394,9 @@ func take_damage(amount: float):
 	current_health -= amount
 	_play_damage_feedback()
 	
-	# Reset reproduction timer on damage
+	# Reset reproduction timer on damage — also remove warning particles
 	_reproduce_timer = reproduce_threshold
+	_stop_reproduce_warning()
 	
 	if current_health <= 0:
 		die()
@@ -354,6 +410,7 @@ func take_damage(amount: float):
 func die():
 	_play_die_sound()
 	_stop_windup_indicator()
+	_stop_reproduce_warning()
 	var tween = create_tween()
 	tween.set_parallel(true)
 	

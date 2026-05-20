@@ -637,6 +637,8 @@ position = Vector2(-3, -335)
 [node name="ElectricEelSpawner" parent="." index="67" unique_id=1752833975 instance=ExtResource("33_xqsl0")]
 
 [node name="CrabSpawner" parent="." index="68" unique_id=1296574206 instance=ExtResource("34_pka35")]
+initial_regular_count = 0
+initial_super_count = 1
 
 [node name="SpaceDebrisGroup" parent="." index="69" unique_id=511816800 instance=ExtResource("35_oqno5")]
 powerup_scene = ExtResource("36_uh3nw")

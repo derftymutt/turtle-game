@@ -154,7 +154,7 @@ position = Vector2(-279, 3)
 position = Vector2(-175, 40)
 
 [node name="CrabSpawner" parent="." index="15" unique_id=1401205188 instance=ExtResource("19_46211")]
-initial_crab_count = 2
+initial_super_count = 1
 
 [node name="EelSpawner" type="Node2D" parent="." index="16" unique_id=898521451]
 script = ExtResource("14_4gw27")

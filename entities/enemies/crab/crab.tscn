@@ -40,6 +40,22 @@ region = Rect2(168, 0, 24, 16)
 atlas = ExtResource("3_52iet")
 region = Rect2(192, 0, 24, 16)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_2lmtn"]
+atlas = ExtResource("3_52iet")
+region = Rect2(264, 0, 24, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nxe4v"]
+atlas = ExtResource("3_52iet")
+region = Rect2(288, 0, 24, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gr2ms"]
+atlas = ExtResource("3_52iet")
+region = Rect2(312, 0, 24, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_66pqb"]
+atlas = ExtResource("3_52iet")
+region = Rect2(336, 0, 24, 16)
+
 [sub_resource type="SpriteFrames" id="SpriteFrames_gq6gn"]
 animations = [{
 "frames": [{
@@ -94,6 +110,28 @@ animations = [{
 "loop": true,
 "name": &"near_death",
 "speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2lmtn")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nxe4v")
+}],
+"loop": true,
+"name": &"super",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gr2ms")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_66pqb")
+}],
+"loop": true,
+"name": &"super_move",
+"speed": 5.0
 }]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_0kt5w"]
@@ -116,7 +154,7 @@ projectile_scene = ExtResource("2_52iet")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1136099005]
 sprite_frames = SubResource("SpriteFrames_gq6gn")
-animation = &"near_death"
+animation = &"super_move"
 autoplay = "default"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1761021674]
