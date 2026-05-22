@@ -121,6 +121,14 @@ var bubble_shield_regen_timer: float = 0.0
 var _bubble_flash_timer: float = 0.0
 var _bubble_visual: Line2D = null
 
+# Floating energy bar (drawn above the turtle in screen space)
+const FLOAT_BAR_HALF_WIDTH: float = 9.0   # half the bar width in pixels
+const FLOAT_BAR_Y_OFFSET: float = -14.0  # screen-space pixels above turtle centre
+var _float_energy_bg: Line2D = null
+var _float_energy_sweep: Line2D = null
+var _float_energy_fg: Line2D = null
+var _sweep_phase: float = 0.0
+
 # Bumper Magnet
 const BUMPER_MAGNET_DURATION: float = 2.0
 const BUMPER_MAGNET_RADIUS: float = 30.0       # seek range beyond bumper surface
@@ -243,6 +251,7 @@ func _ready():
 	_setup_rest_particles()
 	_setup_deflector_area()
 	_setup_bubble_visual()
+	_setup_float_energy_bar()
 
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
@@ -413,7 +422,7 @@ func _physics_process(delta):
 		else:
 			hud.refill_air(delta)
 
-		var at_surface: bool = not is_underwater
+		var at_surface: bool = depth <= 8  # wider than air threshold so idle surface float triggers fast recharge
 		hud.recover_energy(delta, (touching_walls.size() > 0 or at_surface) and not _bumper_magnet_attached)
 
 	_update_rest_particles()
@@ -532,6 +541,7 @@ func _process(delta: float):
 	if _bubble_visual and _bubble_visual.visible:
 		var pulse := (sin(Time.get_ticks_msec() * 0.005) + 1.0) * 0.5
 		_bubble_visual.default_color = Color(0.5, 0.9, 1.0, 0.35 + pulse * 0.4)
+	_update_float_energy_bar(delta)
 
 func _update_sprite_modulate():
 	var sprite = $AnimatedSprite2D
@@ -1080,6 +1090,8 @@ func activate_air_reserve():
 func activate_energy_freeze():
 	energy_freeze_active = true
 	energy_freeze_timer = energy_freeze_duration
+	if hud:
+		hud.update_energy(hud.max_energy, hud.max_energy)
 	print("ENERGY FREEZE! No energy drain for ", energy_freeze_duration, " seconds!")
 
 func deactivate_energy_freeze():
@@ -1292,6 +1304,73 @@ func _setup_bubble_visual() -> void:
 	_bubble_visual.z_index = 12
 	_bubble_visual.visible = false
 	add_child(_bubble_visual)
+
+func _setup_float_energy_bar() -> void:
+	_float_energy_bg = Line2D.new()
+	_float_energy_bg.name = "FloatEnergyBg"
+	_float_energy_bg.points = PackedVector2Array([Vector2(-FLOAT_BAR_HALF_WIDTH, 0.0), Vector2(FLOAT_BAR_HALF_WIDTH, 0.0)])
+	_float_energy_bg.default_color = Color(0.15, 0.15, 0.15, 0.8)
+	_float_energy_bg.width = 2.0
+	_float_energy_bg.z_as_relative = false
+	_float_energy_bg.z_index = 25
+	add_child(_float_energy_bg)
+
+	_float_energy_sweep = Line2D.new()
+	_float_energy_sweep.name = "FloatEnergySweep"
+	_float_energy_sweep.points = PackedVector2Array([Vector2(-FLOAT_BAR_HALF_WIDTH, 0.0), Vector2(-FLOAT_BAR_HALF_WIDTH, 0.0)])
+	_float_energy_sweep.default_color = Color(0.0, 1.0, 1.0, 0.95)
+	_float_energy_sweep.width = 2.0
+	_float_energy_sweep.z_as_relative = false
+	_float_energy_sweep.z_index = 26
+	_float_energy_sweep.visible = false
+	add_child(_float_energy_sweep)
+
+	_float_energy_fg = Line2D.new()
+	_float_energy_fg.name = "FloatEnergyFg"
+	_float_energy_fg.points = PackedVector2Array([Vector2(-FLOAT_BAR_HALF_WIDTH, 0.0), Vector2(FLOAT_BAR_HALF_WIDTH, 0.0)])
+	_float_energy_fg.default_color = Color.YELLOW
+	_float_energy_fg.width = 2.0
+	_float_energy_fg.z_as_relative = false
+	_float_energy_fg.z_index = 27
+	add_child(_float_energy_fg)
+
+func _update_float_energy_bar(delta: float) -> void:
+	if not _float_energy_bg or not _float_energy_fg or not _float_energy_sweep:
+		return
+	var show := hud != null and hud.energy_enabled and not _level_complete
+	_float_energy_bg.visible = show
+	_float_energy_fg.visible = show
+	if not show:
+		_float_energy_sweep.visible = false
+		return
+
+	# Keep bar screen-aligned and fixed above turtle regardless of body rotation.
+	# global_rotation = 0 cancels the parent body's spin; rotation = 0 would only
+	# set local rotation and the parent's spin would still be applied on top.
+	var screen_offset := Vector2(0.0, FLOAT_BAR_Y_OFFSET)
+	for node: Line2D in [_float_energy_bg, _float_energy_sweep, _float_energy_fg]:
+		node.global_position = global_position + screen_offset
+		node.global_rotation = 0.0
+
+	var ratio := clampf(hud.current_energy / hud.max_energy, 0.0, 1.0)
+	var fill_x := -FLOAT_BAR_HALF_WIDTH + FLOAT_BAR_HALF_WIDTH * 2.0 * ratio
+	_float_energy_fg.points = PackedVector2Array([Vector2(-FLOAT_BAR_HALF_WIDTH, 0.0), Vector2(fill_x, 0.0)])
+
+	if ratio > 0.2:
+		_float_energy_fg.default_color = Color.YELLOW
+	else:
+		_float_energy_fg.default_color = Color.RED
+
+	# Fast-recharge sweep: bright cyan bar sweeps left→right beneath the yellow fill.
+	# Visible only while wall_recovery_active so it directly telegraphs the mechanic.
+	var fast_charging := hud.wall_recovery_active and hud.current_energy < hud.max_energy
+	_float_energy_sweep.visible = fast_charging
+	if fast_charging:
+		_sweep_phase = fmod(_sweep_phase + delta * 5.0, 1.0)
+		var sweep_x := -FLOAT_BAR_HALF_WIDTH + FLOAT_BAR_HALF_WIDTH * 2.0 * _sweep_phase
+		_float_energy_sweep.points = PackedVector2Array([Vector2(-FLOAT_BAR_HALF_WIDTH, 0.0), Vector2(sweep_x, 0.0)])
+	else:
+		_sweep_phase = 0.0
 
 # ---------------------------------------------------------------------------
 # DEFLECTOR SHIELD
