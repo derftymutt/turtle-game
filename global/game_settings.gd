@@ -10,6 +10,11 @@ var thrust_inverted: bool = false
 # Difficulty
 var hard_mode: bool = false
 
+# Experimental: discrete heart health instead of the fluid health bar.
+# When true, every damage event costs one whole heart (see TurtlePlayer).
+# Takes effect on the next level load / restart.
+var hearts_mode: bool = false
+
 
 func _ready():
 	_load_settings()
@@ -25,6 +30,7 @@ func _load_settings():
 	if result is Dictionary:
 		thrust_inverted = result.get("thrust_inverted", false)
 		hard_mode = result.get("hard_mode", false)
+		hearts_mode = result.get("hearts_mode", false)
 
 func _save_settings():
 	var file = FileAccess.open(SETTINGS_PATH, FileAccess.WRITE)
@@ -32,6 +38,7 @@ func _save_settings():
 		file.store_string(JSON.stringify({
 			"thrust_inverted": thrust_inverted,
 			"hard_mode": hard_mode,
+			"hearts_mode": hearts_mode,
 		}))
 		file.close()
 
@@ -42,5 +49,9 @@ func set_thrust_inverted(inverted: bool):
 
 func set_hard_mode(enabled: bool):
 	hard_mode = enabled
+	_save_settings()
+
+func set_hearts_mode(enabled: bool):
+	hearts_mode = enabled
 	_save_settings()
 

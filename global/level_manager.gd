@@ -51,7 +51,7 @@ var pieces_needed_by_level: Dictionary = {
 # Performance bonus constants
 const FIRST_TRY_BONUS: int = 300
 const MAX_TIME_BONUS: int = 600
-const VARIETY_BONUS_PER_TECH: int = 150
+const VARIETY_BONUS_PER_TECH: int = 500
 
 # Boss levels — completion is triggered by defeating the boss, not delivering pieces
 var boss_levels: Dictionary = {
@@ -154,6 +154,10 @@ func complete_level():
 		var hud_node = get_tree().get_first_node_in_group("hud")
 		if hud_node:
 			GameManager.persisted_health = hud_node.current_health
+		# Hearts mode: carry the exact heart count forward (no rounding)
+		var player_node = get_tree().get_first_node_in_group("player")
+		if player_node and "current_hearts" in player_node:
+			GameManager.persisted_hearts = player_node.current_hearts
 
 	level_complete.emit()
 	print("🚀 Level %d complete! Assembling UFO..." % current_level_number)

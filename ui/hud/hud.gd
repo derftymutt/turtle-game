@@ -11,6 +11,9 @@ signal low_air_warning_changed(is_warning: bool)
 var score_label: Label
 var ufo_pieces_label: Label
 var health_bar: TextureProgressBar
+var health_container: Control            # fluid bar + its heart-icon TextureRect
+var hearts_container: HBoxContainer      # discrete heart icons (hearts_mode)
+var _heart_labels: Array = []
 var boss_health_container: Control
 var boss_health_bar: TextureProgressBar
 var air_container: Control
@@ -122,6 +125,8 @@ func _ready():
 	boss_health_container = find_child("BossHealthContainer")
 	boss_health_bar = find_child("BossHealthBar")
 	health_bar = find_child("HealthBar")
+	health_container = find_child("HealthContainer")
+	_build_hearts_display()
 	air_container = find_child("AirContainer")
 	air_bar = find_child("AirBar")
 	energy_container = find_child("EnergyContainer")
@@ -157,6 +162,7 @@ func _ready():
 	update_score(0)
 	update_ufo_pieces(0, 0)
 	update_health(max_health, max_health)
+	update_hearts(7, 7)
 	update_air(max_air, max_air)
 	update_energy(max_energy, max_energy)
 	set_super_speed_active(false)
@@ -377,6 +383,52 @@ func update_health(health: float, max_hp: float):
 			health_bar.modulate = Color.YELLOW
 		else:
 			health_bar.modulate = Color.RED
+
+## ── Discrete heart health (experimental — GameSettings.hearts_mode) ────────────
+## Built programmatically with plain Label nodes ("♥") so it can be swapped for a
+## sprite later. Shown instead of the fluid bar when hearts_mode is on.
+const HEART_FULL_COLOR := Color(0.30, 0.85, 0.35)
+const HEART_EMPTY_COLOR := Color(0.24, 0.24, 0.26)
+
+func _build_hearts_display() -> void:
+	if not health_container:
+		return
+	var hearts_on: bool = GameSettings.hearts_mode
+
+	hearts_container = HBoxContainer.new()
+	hearts_container.name = "HeartsContainer"
+	hearts_container.add_theme_constant_override("separation", 1)
+	hearts_container.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var parent := health_container.get_parent()
+	parent.add_child(hearts_container)
+	parent.move_child(hearts_container, health_container.get_index() + 1)
+
+	var heart_font: Font = load("res://assets/fonts/BoldPixels.ttf")
+	var max_hearts: int = 7
+	for i in max_hearts:
+		var l := Label.new()
+		l.text = "♥"  # ♥ BLACK HEART SUIT — swap this Label for a sprite later
+		if heart_font:
+			l.add_theme_font_override("font", heart_font)
+		l.add_theme_font_size_override("font_size", 22)
+		l.add_theme_color_override("font_color", HEART_FULL_COLOR)
+		l.add_theme_constant_override("outline_size", 4)
+		l.add_theme_color_override("font_outline_color", Color.BLACK)
+		hearts_container.add_child(l)
+		_heart_labels.append(l)
+
+	health_container.visible = not hearts_on
+	hearts_container.visible = hearts_on
+
+## Update the heart icons. `current`/`max_hearts` come from TurtlePlayer.
+func update_hearts(current: int, max_hearts: int = 7) -> void:
+	for i in _heart_labels.size():
+		var l: Label = _heart_labels[i]
+		l.visible = i < max_hearts
+		l.add_theme_color_override(
+			"font_color",
+			HEART_FULL_COLOR if i < current else HEART_EMPTY_COLOR
+		)
 
 ## Update air display
 func update_air(air: float, max_a: float):

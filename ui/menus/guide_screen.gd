@@ -6,6 +6,7 @@ class_name GuideScreen
 
 var invert_thrust_checkbox: CheckBox
 var hard_mode_checkbox: CheckBox
+var hearts_mode_checkbox: CheckBox
 var _back_callback: Callable
 
 func _ready():
@@ -62,14 +63,24 @@ func _build_content():
 	hard_mode_checkbox.button_pressed = GameSettings.hard_mode
 	hard_mode_checkbox.toggled.connect(_on_hard_mode_toggled)
 
+	hearts_mode_checkbox = CheckBox.new()
+	hearts_mode_checkbox.text = "Heart Health  (experimental: 7 hearts, 1 lost per hit)"
+	hearts_mode_checkbox.add_theme_font_size_override("font_size", 10)
+	hearts_mode_checkbox.add_theme_color_override("font_color", Color(1.0, 0.5, 0.6))
+	hearts_mode_checkbox.button_pressed = GameSettings.hearts_mode
+	hearts_mode_checkbox.toggled.connect(_on_hearts_mode_toggled)
+
 	if back_button:
 		invert_thrust_checkbox.focus_neighbor_bottom = invert_thrust_checkbox.get_path_to(hard_mode_checkbox)
 		hard_mode_checkbox.focus_neighbor_top = hard_mode_checkbox.get_path_to(invert_thrust_checkbox)
-		hard_mode_checkbox.focus_neighbor_bottom = hard_mode_checkbox.get_path_to(back_button)
-		back_button.focus_neighbor_top = back_button.get_path_to(hard_mode_checkbox)
+		hard_mode_checkbox.focus_neighbor_bottom = hard_mode_checkbox.get_path_to(hearts_mode_checkbox)
+		hearts_mode_checkbox.focus_neighbor_top = hearts_mode_checkbox.get_path_to(hard_mode_checkbox)
+		hearts_mode_checkbox.focus_neighbor_bottom = hearts_mode_checkbox.get_path_to(back_button)
+		back_button.focus_neighbor_top = back_button.get_path_to(hearts_mode_checkbox)
 
 	content_container.add_child(invert_thrust_checkbox)
 	content_container.add_child(hard_mode_checkbox)
+	content_container.add_child(hearts_mode_checkbox)
 
 func _on_back_pressed():
 	hide_guide()
@@ -84,6 +95,9 @@ func _on_back_pressed():
 
 func _on_invert_thrust_toggled(pressed: bool):
 	GameSettings.set_thrust_inverted(pressed)
+
+func _on_hearts_mode_toggled(pressed: bool):
+	GameSettings.set_hearts_mode(pressed)
 
 func _on_hard_mode_toggled(pressed: bool):
 	if SaveManager.has_save():

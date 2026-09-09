@@ -6,6 +6,7 @@ class_name HealthPlant
 
 # Health properties
 @export var health_restore_amount: float = 40.0
+@export var heart_restore_amount: int = 4  # Used when GameSettings.hearts_mode is on
 @export var max_health_bonus: float = 0.0  # Optional max health increase
 
 # Visual feedback
@@ -110,7 +111,9 @@ func collect(collector):
 		sfx.finished.connect(sfx.queue_free)
 	
 	# Restore health through player
-	if collector.has_method("restore_health"):
+	if GameSettings.hearts_mode and collector.has_method("restore_hearts"):
+		collector.restore_hearts(heart_restore_amount)
+	elif collector.has_method("restore_health"):
 		collector.restore_health(health_restore_amount)
 	elif collector.has_method("take_damage"):
 		# Fallback: directly modify health
