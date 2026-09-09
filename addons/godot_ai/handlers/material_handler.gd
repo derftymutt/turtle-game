@@ -24,10 +24,12 @@ const _SUPPORTED_SUFFIXES := [".tres", ".material", ".res"]
 
 
 var _undo_redo: EditorUndoRedoManager
+var _connection: McpConnection
 
 
-func _init(undo_redo: EditorUndoRedoManager) -> void:
+func _init(undo_redo: EditorUndoRedoManager, connection: McpConnection = null) -> void:
 	_undo_redo = undo_redo
+	_connection = connection
 
 
 # ============================================================================
@@ -40,7 +42,7 @@ func create_material(params: Dictionary) -> Dictionary:
 	var shader_path: String = params.get("shader_path", "")
 	var overwrite: bool = params.get("overwrite", false)
 
-	var err := _validate_material_path(path, "path")
+	var err := _validate_material_path(path, "path", true)
 	if err != null:
 		return err
 
@@ -65,8 +67,11 @@ func create_material(params: Dictionary) -> Dictionary:
 		if shader_path.is_empty():
 			return ErrorCodes.make(
 				ErrorCodes.INVALID_PARAMS,
-				"ShaderMaterial requires shader_path (res:// path to a .gdshader)"
+				"ShaderMaterial requires shader_path (res:// / uid:// / user:// path to a .gdshader)"
 			)
+		var shader_path_err = McpPathValidator.loadable_error(shader_path, "shader_path")
+		if shader_path_err != null:
+			return shader_path_err
 		if not ResourceLoader.exists(shader_path):
 			return ErrorCodes.make(ErrorCodes.RESOURCE_NOT_FOUND, "Shader not found: %s" % shader_path)
 		var shader_res := ResourceLoader.load(shader_path)
@@ -82,7 +87,7 @@ func create_material(params: Dictionary) -> Dictionary:
 			"Failed to create directory: %s (error %d)" % [dir_path, mkdir_err]
 		)
 
-	var save_err := ResourceSaver.save(mat, path)
+	var save_err := McpResourceIO.guarded_save(mat, path, _connection)
 	if save_err != OK:
 		return ErrorCodes.make(
 			ErrorCodes.INTERNAL_ERROR,
@@ -111,7 +116,7 @@ func create_material(params: Dictionary) -> Dictionary:
 # ============================================================================
 
 func set_param(params: Dictionary) -> Dictionary:
-	var load_result := _load_material_from_path(params.get("path", ""))
+	var load_result := _load_material_from_path(params.get("path", ""), true)
 	if load_result.has("error"):
 		return load_result
 	var mat: Material = load_result.material
@@ -169,7 +174,7 @@ func set_param(params: Dictionary) -> Dictionary:
 # ============================================================================
 
 func set_shader_param(params: Dictionary) -> Dictionary:
-	var load_result := _load_material_from_path(params.get("path", ""))
+	var load_result := _load_material_from_path(params.get("path", ""), true)
 	if load_result.has("error"):
 		return load_result
 	var mat: Material = load_result.material
@@ -297,12 +302,15 @@ func list_materials(params: Dictionary) -> Dictionary:
 	var root: String = params.get("root", "res://")
 	var type_filter: String = params.get("type", "")
 
-	if not root.begins_with("res://"):
-		return ErrorCodes.make(ErrorCodes.VALUE_OUT_OF_RANGE, "root must start with res://")
+	var root_err = McpPathValidator.path_error(root, "root")
+	if root_err != null:
+		return root_err
 
 	var efs := EditorInterface.get_resource_filesystem()
 	if efs == null:
-		return ErrorCodes.make(ErrorCodes.EDITOR_NOT_READY, "EditorFileSystem not available")
+		return ErrorCodes.make_not_ready(
+			ErrorCodes.SUB_EDITOR_UNAVAILABLE,
+			"EditorFileSystem not available", false)
 
 	var results: Array[Dictionary] = []
 	var start_dir := efs.get_filesystem_path(root)
@@ -350,7 +358,7 @@ func assign_material(params: Dictionary) -> Dictionary:
 	if _resolved.has("error"):
 		return _resolved
 	var node: Node = _resolved.node
-	var scene_root: Node = _resolved.scene_root
+	var _scene_root: Node = _resolved.scene_root
 
 	var slot: String = params.get("slot", "override")
 	var resource_path: String = params.get("resource_path", "")
@@ -366,6 +374,9 @@ func assign_material(params: Dictionary) -> Dictionary:
 	var mat: Material = null
 	var material_created := false
 	if not resource_path.is_empty():
+		var rpath_err = McpPathValidator.loadable_error(resource_path, "resource_path")
+		if rpath_err != null:
+			return rpath_err
 		if not ResourceLoader.exists(resource_path):
 			if create_if_missing:
 				# We'd need to create a new file here — refuse; callers should
@@ -442,7 +453,7 @@ func apply_to_node(params: Dictionary) -> Dictionary:
 	if _resolved.has("error"):
 		return _resolved
 	var node: Node = _resolved.node
-	var scene_root: Node = _resolved.scene_root
+	var _scene_root: Node = _resolved.scene_root
 
 	var slot: String = params.get("slot", "override")
 	var slot_result := _resolve_slot_property(node, slot)
@@ -462,21 +473,38 @@ func apply_to_node(params: Dictionary) -> Dictionary:
 
 	var save_to: String = params.get("save_to", "")
 	var saved := false
+	var overwritten := false
 	if not save_to.is_empty():
-		var save_err_validation := _validate_material_path(save_to, "save_to")
+		var save_err_validation := _validate_material_path(save_to, "save_to", true)
 		if save_err_validation != null:
 			return save_err_validation
+		# Same clobber guard as create_material/apply_preset: agents reuse
+		# names like res://materials/metal.tres, and a silent save here
+		# destroys a hand-authored file that undo can't restore (undo only
+		# reverts the node's slot assignment, not file contents). See #685.
+		var existed_before := FileAccess.file_exists(save_to)
+		if existed_before and not params.get("overwrite", false):
+			return ErrorCodes.make(
+				ErrorCodes.INVALID_PARAMS,
+				"Material already exists at %s (pass overwrite=true to replace)" % save_to
+			)
+		overwritten = existed_before
 		var dir_path := save_to.get_base_dir()
 		var mkdir_err := DirAccess.make_dir_recursive_absolute(dir_path)
 		if mkdir_err != OK and mkdir_err != ERR_ALREADY_EXISTS:
 			return ErrorCodes.make(ErrorCodes.INTERNAL_ERROR, "Failed to create directory: %s" % dir_path)
-		var save_err := ResourceSaver.save(mat, save_to)
+		var save_err := McpResourceIO.guarded_save(mat, save_to, _connection)
 		if save_err != OK:
 			return ErrorCodes.make(ErrorCodes.INTERNAL_ERROR, "Failed to save material to %s (error %d)" % [save_to, save_err])
 		var efs := EditorInterface.get_resource_filesystem()
 		if efs != null:
 			efs.update_file(save_to)
-		mat = ResourceLoader.load(save_to)  # Use the saved reference to keep scene ref small.
+		# Prefer the on-disk reference (keeps the scene ref small), but fall
+		# back to the in-memory material if the reload fails — otherwise a null
+		# would clear the slot and crash mat.get_class() below.
+		var reloaded := ResourceLoader.load(save_to)
+		if reloaded != null:
+			mat = reloaded
 		saved = true
 
 	var old_value = node.get(property)
@@ -497,6 +525,7 @@ func apply_to_node(params: Dictionary) -> Dictionary:
 			"applied_params": applied,
 			"material_created": true,
 			"saved_to": save_to if saved else "",
+			"overwritten": overwritten,
 			"undoable": true,
 		}
 	}
@@ -551,17 +580,19 @@ func apply_preset(params: Dictionary) -> Dictionary:
 			inline_result.data["reason"] = "Inline material assigned to node"
 		return inline_result
 
-	# Save-to-disk path.
+	# Save-to-disk path. Validate the path BEFORE the exists/overwrite
+	# check, matching create_material's order — an invalid path should
+	# always be reported as invalid, not as an overwrite conflict.
+	var path_err := _validate_material_path(path, "path", true)
+	if path_err != null:
+		return path_err
+
 	var existed_before := FileAccess.file_exists(path)
 	if existed_before and not params.get("overwrite", false):
 		return ErrorCodes.make(
 			ErrorCodes.INVALID_PARAMS,
 			"Material already exists at %s (pass overwrite=true to replace)" % path
 		)
-
-	var path_err := _validate_material_path(path, "path")
-	if path_err != null:
-		return path_err
 
 	var mat := _instantiate_material(type_str)
 	for prop_name in preset_params:
@@ -574,7 +605,7 @@ func apply_preset(params: Dictionary) -> Dictionary:
 	if mkdir_err != OK and mkdir_err != ERR_ALREADY_EXISTS:
 		return ErrorCodes.make(ErrorCodes.INTERNAL_ERROR, "Failed to create directory: %s" % dir_path)
 
-	var save_err := ResourceSaver.save(mat, path)
+	var save_err := McpResourceIO.guarded_save(mat, path, _connection)
 	if save_err != OK:
 		return ErrorCodes.make(ErrorCodes.INTERNAL_ERROR, "Failed to save material: %s" % path)
 
@@ -588,7 +619,7 @@ func apply_preset(params: Dictionary) -> Dictionary:
 		if _resolved.has("error"):
 			return _resolved
 		var node: Node = _resolved.node
-		var scene_root: Node = _resolved.scene_root
+		var _scene_root: Node = _resolved.scene_root
 		var slot_result := _resolve_slot_property(node, params.get("slot", "override"))
 		if slot_result.has("error"):
 			return slot_result
@@ -623,17 +654,19 @@ func apply_preset(params: Dictionary) -> Dictionary:
 func _apply_param(mat_path: String, property: String, value: Variant, _is_shader: bool) -> void:
 	var mat: Material = ResourceLoader.load(mat_path)
 	if mat == null:
+		push_warning("MCP: Failed to load material for undo/redo: %s" % mat_path)
 		return
 	mat.set(property, value)
-	ResourceSaver.save(mat, mat_path)
+	McpResourceIO.guarded_save(mat, mat_path, _connection)
 
 
 func _apply_shader_param(mat_path: String, param_name: String, value: Variant) -> void:
 	var mat: Material = ResourceLoader.load(mat_path)
 	if mat == null or not (mat is ShaderMaterial):
+		push_warning("MCP: Failed to load shader material for undo/redo: %s" % mat_path)
 		return
 	(mat as ShaderMaterial).set_shader_parameter(param_name, value)
-	ResourceSaver.save(mat, mat_path)
+	McpResourceIO.guarded_save(mat, mat_path, _connection)
 
 
 # ============================================================================
@@ -660,11 +693,12 @@ static func _reverse_type_map() -> Dictionary:
 	return out
 
 
-static func _validate_material_path(path: String, param_name: String) -> Variant:
+static func _validate_material_path(path: String, param_name: String, for_write: bool = false) -> Variant:
 	if path.is_empty():
 		return ErrorCodes.make(ErrorCodes.MISSING_REQUIRED_PARAM, "Missing required param: %s" % param_name)
-	if not path.begins_with("res://"):
-		return ErrorCodes.make(ErrorCodes.INVALID_PARAMS, "%s must start with res:// (got %s)" % [param_name, path])
+	var path_err := McpPathValidator.validate_resource_path(path, for_write)
+	if not path_err.is_empty():
+		return ErrorCodes.make(ErrorCodes.VALUE_OUT_OF_RANGE, "%s: %s" % [param_name, path_err])
 	var has_suffix := false
 	for s in _SUPPORTED_SUFFIXES:
 		if path.ends_with(s):
@@ -678,8 +712,8 @@ static func _validate_material_path(path: String, param_name: String) -> Variant
 	return null
 
 
-func _load_material_from_path(path: String) -> Dictionary:
-	var err := _validate_material_path(path, "path")
+func _load_material_from_path(path: String, for_write: bool = false) -> Dictionary:
+	var err := _validate_material_path(path, "path", for_write)
 	if err != null:
 		return err
 	if not ResourceLoader.exists(path):

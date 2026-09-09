@@ -89,7 +89,7 @@ func create_particle(params: Dictionary) -> Dictionary:
 		# Without a material, the mesh renders flat white — ignoring
 		# ParticleProcessMaterial.color_ramp entirely. Give it the standard
 		# billboard + vertex-color-as-albedo setup so color_ramp works.
-		draw_material = ParticleValues.build_draw_material({})
+		draw_material = ParticleValues.build_draw_material({}).material
 		(draw_mesh as QuadMesh).material = draw_material
 		draw_pass_mesh_created = true
 		draw_material_created = true
@@ -261,16 +261,13 @@ func _set_process_gpu(node: Node, node_path: String, properties: Dictionary) -> 
 
 
 func _set_process_cpu(node: Node, node_path: String, properties: Dictionary) -> Dictionary:
-	# CPU particles expose the same vocabulary directly on the node.
-	# Map a few GPU-only names to the CPU equivalents where they differ.
-	var aliases := {
-		"emission_sphere_radius": "emission_sphere_radius",
-	}
+	# CPU particles expose the same property vocabulary directly on the node,
+	# so property names pass through unchanged.
 	var coerced: Dictionary = {}
 	var old_values: Dictionary = {}
 
 	for property in properties:
-		var prop_name: String = aliases.get(String(property), String(property))
+		var prop_name: String = String(property)
 		var prop_type := _node_property_type(node, prop_name)
 		if prop_type == TYPE_NIL:
 			return ErrorCodes.make(
@@ -344,6 +341,9 @@ func _set_draw_pass_gpu_3d(node: GPUParticles3D, node_path: String, pass_idx: in
 	if int(node.draw_passes) >= pass_idx:
 		existing_mesh = node.get(property_name) as Mesh
 	if not mesh_path.is_empty():
+		var mesh_path_err = McpPathValidator.loadable_error(mesh_path, "mesh_path")
+		if mesh_path_err != null:
+			return mesh_path_err
 		if not ResourceLoader.exists(mesh_path):
 			return ErrorCodes.make(ErrorCodes.RESOURCE_NOT_FOUND, "Mesh not found: %s" % mesh_path)
 		var loaded := ResourceLoader.load(mesh_path)
@@ -360,6 +360,9 @@ func _set_draw_pass_gpu_3d(node: GPUParticles3D, node_path: String, pass_idx: in
 
 	var material: Material = null
 	if not material_path.is_empty():
+		var material_path_err = McpPathValidator.loadable_error(material_path, "material_path")
+		if material_path_err != null:
+			return material_path_err
 		if not ResourceLoader.exists(material_path):
 			return ErrorCodes.make(ErrorCodes.RESOURCE_NOT_FOUND, "Material not found: %s" % material_path)
 		var loaded_mat := ResourceLoader.load(material_path)
@@ -410,6 +413,9 @@ func _set_draw_pass_cpu_3d(node: CPUParticles3D, node_path: String, mesh_path: S
 	var mesh: Mesh = node.mesh
 	var old_mesh: Mesh = mesh
 	if not mesh_path.is_empty():
+		var mesh_path_err = McpPathValidator.loadable_error(mesh_path, "mesh_path")
+		if mesh_path_err != null:
+			return mesh_path_err
 		if not ResourceLoader.exists(mesh_path):
 			return ErrorCodes.make(ErrorCodes.RESOURCE_NOT_FOUND, "Mesh not found: %s" % mesh_path)
 		var loaded := ResourceLoader.load(mesh_path)
@@ -420,6 +426,9 @@ func _set_draw_pass_cpu_3d(node: CPUParticles3D, node_path: String, mesh_path: S
 	var material: Material = null
 	var old_material: Material = node.material_override
 	if not material_path.is_empty():
+		var material_path_err = McpPathValidator.loadable_error(material_path, "material_path")
+		if material_path_err != null:
+			return material_path_err
 		if not ResourceLoader.exists(material_path):
 			return ErrorCodes.make(ErrorCodes.RESOURCE_NOT_FOUND, "Material not found: %s" % material_path)
 		var loaded_mat := ResourceLoader.load(material_path)
@@ -450,6 +459,9 @@ func _set_draw_pass_cpu_3d(node: CPUParticles3D, node_path: String, mesh_path: S
 func _set_draw_pass_2d(node: Node, node_path: String, texture_path: String) -> Dictionary:
 	if texture_path.is_empty():
 		return ErrorCodes.make(ErrorCodes.MISSING_REQUIRED_PARAM, "2D particles require texture param")
+	var texture_path_err = McpPathValidator.loadable_error(texture_path, "texture_path")
+	if texture_path_err != null:
+		return texture_path_err
 	if not ResourceLoader.exists(texture_path):
 		return ErrorCodes.make(ErrorCodes.RESOURCE_NOT_FOUND, "Texture not found: %s" % texture_path)
 	var tex := ResourceLoader.load(texture_path)
@@ -615,18 +627,62 @@ func apply_preset(params: Dictionary) -> Dictionary:
 		process_mat = ParticleProcessMaterial.new()
 		process_material_created = true
 
+	# User-supplied override keys per group. Preset-blueprint keys may skip
+	# silently on types they don't apply to (presets are cross-type by
+	# design); user-requested overrides must apply or error (#770).
+	var user_keys: Dictionary = blueprint.get("user_keys", {})
+	var user_main: Dictionary = user_keys.get("main", {})
+	var user_process: Dictionary = user_keys.get("process", {})
+	var user_draw: Dictionary = user_keys.get("draw", {})
+
 	var draw_mesh: Mesh = null
 	var draw_material: StandardMaterial3D = null
 	var draw_pass_mesh_created := false
 	var draw_material_created := false
+	var applied_draw: Array[String] = []
+	var draw_config: Dictionary = blueprint.get("draw", {})
 	if type_str == "gpu_3d":
+		var draw_result := ParticleValues.build_draw_material(draw_config)
+		if not draw_result.ok:
+			node.free()
+			var msg := String(draw_result.error)
+			if draw_result.get("unknown_key", false):
+				msg = _draw_key_unsupported_message(String(draw_result.key), type_str)
+			return ErrorCodes.make(ErrorCodes.INVALID_PARAMS, msg)
 		draw_mesh = QuadMesh.new()
 		(draw_mesh as QuadMesh).size = Vector2(0.25, 0.25)
-		var draw_config: Dictionary = blueprint.get("draw", {})
-		draw_material = ParticleValues.build_draw_material(draw_config)
+		draw_material = draw_result.material
 		(draw_mesh as QuadMesh).material = draw_material
 		draw_pass_mesh_created = true
 		draw_material_created = true
+		for applied_key in draw_result.applied:
+			applied_draw.append(String(applied_key))
+	elif type_str == "gpu_2d":
+		# GPUParticles2D has no draw-pass material; the one draw override it
+		# supports is draw.texture → the node's texture property.
+		for key in user_draw:
+			if String(key) != "texture":
+				node.free()
+				return ErrorCodes.make(
+					ErrorCodes.INVALID_PARAMS,
+					_draw_key_unsupported_message(String(key), type_str)
+				)
+		if user_draw.has("texture"):
+			var tex_result := _load_draw_texture(draw_config.get("texture"))
+			if tex_result.has("error"):
+				node.free()
+				return tex_result
+			node.set("texture", tex_result.texture)
+			applied_draw.append("texture")
+	else:
+		# cpu_3d / cpu_2d: no draw support — reject user draw overrides
+		# instead of dropping them.
+		for key in user_draw:
+			node.free()
+			return ErrorCodes.make(
+				ErrorCodes.INVALID_PARAMS,
+				_draw_key_unsupported_message(String(key), type_str)
+			)
 
 	# Pre-apply preset values to in-memory targets (no undo needed; nodes not in tree yet).
 	var main_values: Dictionary = blueprint.get("main", {})
@@ -638,9 +694,19 @@ func apply_preset(params: Dictionary) -> Dictionary:
 		var prop_name := String(prop)
 		var prop_type := _object_property_type(node, prop_name)
 		if prop_type == TYPE_NIL:
-			continue  # Silently skip: not all main keys apply to all types.
+			if user_main.has(prop_name):
+				var node_class := node.get_class()
+				node.free()
+				return ErrorCodes.make(
+					ErrorCodes.INVALID_PARAMS,
+					"Override main.%s does not apply to type '%s' (no such property on %s)" % [
+						prop_name, type_str, node_class
+					]
+				)
+			continue  # Blueprint key: not all main keys apply to all types.
 		var coerce_result := ParticleValues.coerce(prop_name, main_values[prop_name], prop_type)
 		if not coerce_result.ok:
+			node.free()
 			return ErrorCodes.make(ErrorCodes.INVALID_PARAMS, String(coerce_result.error))
 		node.set(prop_name, coerce_result.value)
 		applied_main.append(prop_name)
@@ -651,9 +717,19 @@ func apply_preset(params: Dictionary) -> Dictionary:
 		var prop_name := String(prop)
 		var prop_type := _object_property_type(process_target, prop_name)
 		if prop_type == TYPE_NIL:
-			continue  # Silently skip: preset property doesn't apply to this variant.
+			if user_process.has(prop_name):
+				var target_class := process_target.get_class()
+				node.free()
+				return ErrorCodes.make(
+					ErrorCodes.INVALID_PARAMS,
+					"Override process.%s does not apply to type '%s' (no such property on %s)" % [
+						prop_name, type_str, target_class
+					]
+				)
+			continue  # Blueprint key: preset property doesn't apply to this variant.
 		var coerce_result := ParticleValues.coerce(prop_name, process_values[prop_name], prop_type)
 		if not coerce_result.ok:
+			node.free()
 			return ErrorCodes.make(ErrorCodes.INVALID_PARAMS, String(coerce_result.error))
 		process_target.set(prop_name, coerce_result.value)
 		applied_process.append(prop_name)
@@ -683,6 +759,7 @@ func apply_preset(params: Dictionary) -> Dictionary:
 			"class": _VALID_TYPES[type_str],
 			"applied_main": applied_main,
 			"applied_process": applied_process,
+			"applied_draw": applied_draw,
 			"process_material_created": process_material_created,
 			"draw_pass_mesh_created": draw_pass_mesh_created,
 			"draw_material_created": draw_material_created,
@@ -695,6 +772,40 @@ func apply_preset(params: Dictionary) -> Dictionary:
 # ============================================================================
 # Helpers
 # ============================================================================
+
+## Actionable rejection for a user draw override that can't apply to the
+## selected particle type: name the key and where it IS supported.
+static func _draw_key_unsupported_message(key: String, type_str: String) -> String:
+	if key == "texture":
+		return "draw.texture is only supported for gpu_2d (got type '%s')" % type_str
+	var probe := StandardMaterial3D.new()
+	if _object_property_type(probe, key) != TYPE_NIL:
+		return "draw.%s is only supported for gpu_3d (got type '%s')" % [key, type_str]
+	return (
+		"Unknown draw key '%s' (draw overrides configure the gpu_3d "
+		+ "draw-pass StandardMaterial3D; gpu_2d supports only draw.texture)"
+	) % key
+
+
+## Load a Texture2D for the gpu_2d draw.texture override. Returns
+## {texture: Texture2D} or an error dict (same validation as set_draw_pass).
+static func _load_draw_texture(value: Variant) -> Dictionary:
+	if not (value is String) or String(value).is_empty():
+		return ErrorCodes.make(
+			ErrorCodes.INVALID_PARAMS,
+			"draw.texture must be a non-empty res:// path string (got %s)" % type_string(typeof(value))
+		)
+	var texture_path := String(value)
+	var texture_path_err = McpPathValidator.loadable_error(texture_path, "draw.texture")
+	if texture_path_err != null:
+		return texture_path_err
+	if not ResourceLoader.exists(texture_path):
+		return ErrorCodes.make(ErrorCodes.RESOURCE_NOT_FOUND, "Texture not found: %s" % texture_path)
+	var tex := ResourceLoader.load(texture_path)
+	if not (tex is Texture2D):
+		return ErrorCodes.make(ErrorCodes.WRONG_TYPE, "Resource at %s is not a Texture2D" % texture_path)
+	return {"texture": tex}
+
 
 static func _instantiate_particle(type_str: String) -> Node:
 	match type_str:

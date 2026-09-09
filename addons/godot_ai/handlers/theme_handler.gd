@@ -14,10 +14,12 @@ const ErrorCodes := preload("res://addons/godot_ai/utils/error_codes.gd")
 const _COLOR_HINT := "expected hex #rrggbb, named color, or {r,g,b,a} dict"
 
 var _undo_redo: EditorUndoRedoManager
+var _connection: McpConnection
 
 
-func _init(undo_redo: EditorUndoRedoManager) -> void:
+func _init(undo_redo: EditorUndoRedoManager, connection: McpConnection = null) -> void:
 	_undo_redo = undo_redo
+	_connection = connection
 
 
 # ============================================================================
@@ -28,7 +30,7 @@ func create_theme(params: Dictionary) -> Dictionary:
 	var path: String = params.get("path", "")
 	var overwrite: bool = params.get("overwrite", false)
 
-	var err := _validate_res_path(path, ".tres", "path")
+	var err := _validate_res_path(path, ".tres", "path", true)
 	if err != null:
 		return err
 
@@ -52,7 +54,7 @@ func create_theme(params: Dictionary) -> Dictionary:
 		)
 
 	var theme := Theme.new()
-	var save_err := ResourceSaver.save(theme, path)
+	var save_err := McpResourceIO.guarded_save(theme, path, _connection)
 	if save_err != OK:
 		return ErrorCodes.make(
 			ErrorCodes.INTERNAL_ERROR,
@@ -86,12 +88,17 @@ func set_color(params: Dictionary) -> Dictionary:
 		func(v): return _parse_color(v))
 
 
+# constant / font_size parsers validate before coercing: int("abc")/int({})/int([])
+# all return 0 in GDScript (never null), so a bare `int(v)` would silently store
+# garbage as 0 and report success. Returning null for non-numeric input lets
+# _set_scalar's null guard surface a VALUE_OUT_OF_RANGE error, matching the
+# color path's contract.
 func set_constant(params: Dictionary) -> Dictionary:
 	return _set_scalar(params, "constant", func(theme, name, cls): return theme.get_constant(name, cls),
 		func(theme, name, cls, val): theme.set_constant(name, cls, int(val)),
 		func(theme, name, cls): theme.clear_constant(name, cls),
 		func(theme, name, cls): return theme.has_constant(name, cls),
-		func(v): return int(v))
+		func(v): return int(v) if (v is int or v is float or (v is String and v.is_valid_int())) else null)
 
 
 func set_font_size(params: Dictionary) -> Dictionary:
@@ -99,7 +106,7 @@ func set_font_size(params: Dictionary) -> Dictionary:
 		func(theme, name, cls, val): theme.set_font_size(name, cls, int(val)),
 		func(theme, name, cls): theme.clear_font_size(name, cls),
 		func(theme, name, cls): return theme.has_font_size(name, cls),
-		func(v): return int(v))
+		func(v): return int(v) if (v is int or v is float or (v is String and v.is_valid_int())) else null)
 
 
 # Shared implementation for scalar Theme slots (color, constant, font_size).
@@ -139,8 +146,10 @@ func _set_scalar(
 		)
 	var parsed = parser.call(raw_value)
 	if parsed == null:
+		## color slots want a color hint; constant/font_size are integer slots.
+		var hint := _COLOR_HINT if kind == "color" else "expected an integer"
 		return ErrorCodes.make(ErrorCodes.VALUE_OUT_OF_RANGE,
-			"Invalid %s value: %s (%s)" % [kind, raw_value, _COLOR_HINT])
+			"Invalid %s value: %s (%s)" % [kind, raw_value, hint])
 
 	var had_before: bool = has_fn.call(theme, name, class_name_param)
 	var before_value = getter.call(theme, name, class_name_param) if had_before else null
@@ -172,7 +181,7 @@ func _apply_scalar(theme_path: String, setter: Callable, name: String, class_nam
 		push_warning("MCP: Failed to load theme for undo/redo: %s" % theme_path)
 		return
 	setter.call(theme, name, class_name_param, value)
-	ResourceSaver.save(theme, theme_path)
+	McpResourceIO.guarded_save(theme, theme_path, _connection)
 
 
 func _clear_scalar(theme_path: String, clearer: Callable, name: String, class_name_param: String) -> void:
@@ -181,7 +190,7 @@ func _clear_scalar(theme_path: String, clearer: Callable, name: String, class_na
 		push_warning("MCP: Failed to load theme for undo/redo: %s" % theme_path)
 		return
 	clearer.call(theme, name, class_name_param)
-	ResourceSaver.save(theme, theme_path)
+	McpResourceIO.guarded_save(theme, theme_path, _connection)
 
 
 # ============================================================================
@@ -357,7 +366,7 @@ func _apply_stylebox(theme_path: String, name: String, class_name_param: String,
 		push_warning("MCP: Failed to load theme for undo/redo: %s" % theme_path)
 		return
 	theme.set_stylebox(name, class_name_param, sb)
-	ResourceSaver.save(theme, theme_path)
+	McpResourceIO.guarded_save(theme, theme_path, _connection)
 
 
 func _clear_stylebox(theme_path: String, name: String, class_name_param: String) -> void:
@@ -366,7 +375,7 @@ func _clear_stylebox(theme_path: String, name: String, class_name_param: String)
 		push_warning("MCP: Failed to load theme for undo/redo: %s" % theme_path)
 		return
 	theme.clear_stylebox(name, class_name_param)
-	ResourceSaver.save(theme, theme_path)
+	McpResourceIO.guarded_save(theme, theme_path, _connection)
 
 
 # ============================================================================
@@ -394,7 +403,7 @@ func apply_theme(params: Dictionary) -> Dictionary:
 	if _resolved.has("error"):
 		return _resolved
 	var node: Node = _resolved.node
-	var scene_root: Node = _resolved.scene_root
+	var _scene_root: Node = _resolved.scene_root
 	if not node is Control and not node is Window:
 		return ErrorCodes.make(
 			ErrorCodes.WRONG_TYPE,
@@ -423,7 +432,7 @@ func apply_theme(params: Dictionary) -> Dictionary:
 
 func _load_theme_from_params(params: Dictionary) -> Dictionary:
 	var theme_path: String = params.get("theme_path", "")
-	var err := _validate_res_path(theme_path, ".tres")
+	var err := _validate_res_path(theme_path, ".tres", "theme_path", true)
 	if err != null:
 		return err
 	if not ResourceLoader.exists(theme_path):
@@ -434,14 +443,12 @@ func _load_theme_from_params(params: Dictionary) -> Dictionary:
 	return {"theme": theme, "path": theme_path}
 
 
-static func _validate_res_path(path: String, required_suffix: String, param_name: String = "theme_path") -> Variant:
+static func _validate_res_path(path: String, required_suffix: String, param_name: String = "theme_path", for_write: bool = false) -> Variant:
 	if path.is_empty():
 		return ErrorCodes.make(ErrorCodes.MISSING_REQUIRED_PARAM, "Missing required param: %s" % param_name)
-	if not path.begins_with("res://"):
-		return ErrorCodes.make(
-			ErrorCodes.VALUE_OUT_OF_RANGE,
-			"%s must start with res:// (got %s)" % [param_name, path]
-		)
+	var path_err := McpPathValidator.validate_resource_path(path, for_write)
+	if not path_err.is_empty():
+		return ErrorCodes.make(ErrorCodes.VALUE_OUT_OF_RANGE, "%s: %s" % [param_name, path_err])
 	if not path.ends_with(required_suffix):
 		return ErrorCodes.make(
 			ErrorCodes.VALUE_OUT_OF_RANGE,
@@ -452,25 +459,11 @@ static func _validate_res_path(path: String, required_suffix: String, param_name
 
 ## Parse a color from Color, "#rrggbb", "#rrggbbaa", named (red/blue/...) or dict.
 ## Returns null if the input cannot be parsed.
+## Delegates to the canonical parser (#714) — gains [r,g,b(,a)] array
+## support and strict key/component checking, same shapes as every other
+## color-accepting handler.
 static func _parse_color(value: Variant) -> Variant:
-	if value is Color:
-		return value
-	if value is String:
-		var s: String = value
-		# Color.from_string returns the default on parse failure, so call it twice
-		# with distinct sentinels — if both agree, parsing succeeded.
-		var sentinel_a := Color(0, 0, 0, 0)
-		var sentinel_b := Color(1, 1, 1, 1)
-		var a := Color.from_string(s, sentinel_a)
-		var b := Color.from_string(s, sentinel_b)
-		if a != b:
-			return null
-		return a
-	if value is Dictionary:
-		var d: Dictionary = value
-		if d.has("r") and d.has("g") and d.has("b"):
-			return Color(float(d.r), float(d.g), float(d.b), float(d.get("a", 1.0)))
-	return null
+	return McpJsonValues.parse_color(value)
 
 
 static func _serialize_value(value: Variant) -> Variant:

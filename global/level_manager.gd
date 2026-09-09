@@ -19,6 +19,10 @@ var attempt_count: int = 1   # Attempts on the current level — used for first-
 var continue_count: int = 0  # How many times the player pressed Continue after dying (run total)
 var alien_tech_pieces_collected: int = 0  # Persists across retries; resets only on new level
 var flora_hidden_budget: int = -1          # Rolled once per level; -1 = not yet rolled
+var is_tutorial: bool = false              # True while the standalone tutorial scene is active
+
+# Standalone tutorial — separate mode, not part of level progression or scoring
+const TUTORIAL_SCENE: String = "res://levels/tutorial.tscn"
 
 # Time tracking (wall-clock milliseconds)
 var _attempt_start_time_ms: int = 0
@@ -61,6 +65,7 @@ func _ready():
 func reset_run():
 	"""Called by GameManager.reset_game() to start a fresh run."""
 	current_level_number = 0
+	is_tutorial = false
 	attempt_count = 1
 	continue_count = 0
 	pieces_collected = 0
@@ -123,8 +128,20 @@ func deliver_piece():
 	if pieces_collected >= pieces_needed:
 		complete_level()
 
+func load_tutorial():
+	"""Launch the standalone tutorial. Separate mode — no scoring, no progression."""
+	is_tutorial = true
+	GameManager.is_carrying_piece = false
+	GameManager.carried_piece = null
+	print("📘 Loading tutorial")
+	get_tree().change_scene_to_file(TUTORIAL_SCENE)
+
 func complete_level():
 	"""Trigger level completion sequence"""
+	if is_tutorial:
+		# Tutorial owns its own completion flow; never run scoring/progression here.
+		return
+
 	# Capture this attempt's duration before any state changes
 	if _attempt_start_time_ms > 0:
 		var elapsed := Time.get_ticks_msec() - _attempt_start_time_ms
@@ -214,6 +231,8 @@ func load_level(level_number: int):
 	if not level_number in level_scenes:
 		push_error("Level %d not found in level_scenes!" % level_number)
 		return
+
+	is_tutorial = false
 
 	# Reset per-level state when entering a genuinely new level (not a retry)
 	if level_number != current_level_number:

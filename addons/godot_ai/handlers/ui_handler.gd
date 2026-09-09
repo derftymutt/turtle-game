@@ -213,7 +213,7 @@ func set_text(params: Dictionary) -> Dictionary:
 ## Params:
 ##   tree         - Dictionary describing the root node. Required fields: "type".
 ##                  Optional: "name", "properties" (dict), "anchor_preset",
-##                  "anchor_margin", "theme" (res:// path), "children" (array).
+##                  "anchor_margin", "theme" (res://, uid:// or user:// path), "children" (array).
 ##   parent_path  - Parent scene path. Empty or "/" = scene root.
 ##
 ## Validation is done before any scene mutation: class names, property
@@ -295,13 +295,14 @@ func _build_subtree(spec: Dictionary) -> Dictionary:
 				node.free()
 				return apply_err
 
-	# Theme (res:// path -> Resource).
+	# Theme (res:// / uid:// / user:// path -> Resource).
 	if spec.has("theme"):
 		var theme_path: String = str(spec.get("theme", ""))
 		if not theme_path.is_empty():
-			if not theme_path.begins_with("res://"):
+			var theme_path_err = McpPathValidator.loadable_error(theme_path, "theme")
+			if theme_path_err != null:
 				node.free()
-				return ErrorCodes.make(ErrorCodes.VALUE_OUT_OF_RANGE, "theme must be a res:// path")
+				return theme_path_err
 			if not ResourceLoader.exists(theme_path):
 				node.free()
 				return ErrorCodes.make(ErrorCodes.RESOURCE_NOT_FOUND, "Theme not found: %s" % theme_path)
@@ -398,9 +399,12 @@ func _apply_property(node: Node, prop: String, value: Variant) -> Variant:
 			var info: Dictionary = _THEME_OVERRIDE_MAP[prefix]
 			var coerce_type: int = info.coerce_type
 
-			# For stylebox overrides, load from a res:// path.
+			# For stylebox overrides, load from a res:// / uid:// / user:// path.
 			if coerce_type == TYPE_OBJECT:
-				if value is String and value.begins_with("res://"):
+				if value is String and (value.begins_with("res://") or value.begins_with("uid://") or value.begins_with("user://")):
+					var style_path_err = McpPathValidator.loadable_error(value, "stylebox")
+					if style_path_err != null:
+						return style_path_err
 					var res := ResourceLoader.load(value)
 					if res == null or not res is StyleBox:
 						return ErrorCodes.make(
@@ -411,7 +415,7 @@ func _apply_property(node: Node, prop: String, value: Variant) -> Variant:
 				else:
 					return ErrorCodes.make(
 						ErrorCodes.INVALID_PARAMS,
-						"theme_override_styles/ expects a res:// path to a StyleBox"
+						"theme_override_styles/ expects a res:// / uid:// / user:// path to a StyleBox"
 					)
 			else:
 				var coercion := _coerce_for_type(value, coerce_type)
@@ -455,27 +459,19 @@ func _apply_property(node: Node, prop: String, value: Variant) -> Variant:
 static func _coerce_for_type(value: Variant, prop_type: int) -> Dictionary:
 	match prop_type:
 		TYPE_COLOR:
-			if value is Color:
-				return {"ok": true, "value": value}
-			if value is String:
-				var a := Color.from_string(value, Color(0, 0, 0, 0))
-				var b := Color.from_string(value, Color(1, 1, 1, 1))
-				if a == b:
-					return {"ok": true, "value": a}
-				return {"ok": false}
-			if value is Dictionary and value.has("r") and value.has("g") and value.has("b"):
-				return {
-					"ok": true,
-					"value": Color(float(value.r), float(value.g), float(value.b), float(value.get("a", 1.0))),
-				}
+			## Canonical parser (#714): adds [r,g,b(,a)] array support and
+			## strict key/component checking, same shapes everywhere.
+			var parsed_color = McpJsonValues.parse_color(value)
+			if parsed_color != null:
+				return {"ok": true, "value": parsed_color}
 			return {"ok": false}
 		TYPE_VECTOR2:
-			if value is Vector2:
-				return {"ok": true, "value": value}
-			if value is Dictionary and value.has("x") and value.has("y"):
-				return {"ok": true, "value": Vector2(float(value.x), float(value.y))}
-			if value is Array and value.size() == 2:
-				return {"ok": true, "value": Vector2(float(value[0]), float(value[1]))}
+			## Same canonical parser as TYPE_COLOR (CodeRabbit review):
+			## keeping the inline copy here would re-introduce exactly the
+			## permissive-vs-strict drift this PR removes elsewhere.
+			var parsed_v2 = McpJsonValues.parse_vector2(value)
+			if parsed_v2 != null:
+				return {"ok": true, "value": parsed_v2}
 			return {"ok": false}
 		TYPE_VECTOR2I:
 			if value is Vector2i:

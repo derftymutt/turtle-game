@@ -158,7 +158,7 @@ func _assign_texture(tex: Resource, sub_resources: Array, node_path: String, pro
 	if _resolved.has("error"):
 		return _resolved
 	var node: Node = _resolved.node
-	var scene_root: Node = _resolved.scene_root
+	var _scene_root: Node = _resolved.scene_root
 
 	var found := false
 	var prop_type: int = TYPE_NIL
@@ -170,7 +170,7 @@ func _assign_texture(tex: Resource, sub_resources: Array, node_path: String, pro
 	if not found:
 		return ErrorCodes.make(
 			ErrorCodes.PROPERTY_NOT_ON_CLASS,
-			"Property '%s' not found on %s" % [property, node.get_class()]
+			McpPropertyErrors.build_message(node, property)
 		)
 	if prop_type != TYPE_NIL and prop_type != TYPE_OBJECT:
 		return ErrorCodes.make(

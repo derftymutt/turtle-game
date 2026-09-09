@@ -103,6 +103,10 @@ func _process(delta: float):
 # ─── Piece collection ────────────────────────────────────────────────────────
 
 func collect_piece():
+	# The tutorial spawns a trash bag purely as target practice; don't let the
+	# alien tech it hides advance progression or pop the selection screen.
+	if LevelManager.is_tutorial:
+		return
 	pieces_this_threshold += 1
 	total_pieces_collected += 1
 	piece_collected.emit(pieces_this_threshold, PIECES_PER_TECH)

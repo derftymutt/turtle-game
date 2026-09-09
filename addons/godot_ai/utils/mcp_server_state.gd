@@ -6,9 +6,9 @@ extends RefCounted
 ## lifecycle. Single source of truth — supersedes the boolean-flag thicket
 ## (`_server_started_this_session`, `_awaiting_server_version`,
 ## `_server_version_deadline_ms`, `_connection_blocked`,
-## `_can_recover_incompatible`, `_server_dev_version_mismatch_allowed`,
-## `_refresh_retried`, `_adoption_watch_deadline_ms`) and the older
-## terminal-only McpSpawnState string union.
+## `_can_recover_incompatible`, `_refresh_retried`,
+## `_adoption_watch_deadline_ms`) and the older terminal-only
+## McpSpawnState string union.
 ##
 ## The integer values matter — they're what `get_server_status()`
 ## surfaces, what the dock pattern-matches on, and what the test suites
@@ -106,17 +106,11 @@ static func is_terminal_diagnosis(state: int) -> bool:
 	)
 
 
-## True only for READY. Other "ok-ish" states (SPAWNING) are still in
-## flight; READY is the only state where the plugin can treat the server
-## as fully healthy.
-static func is_healthy(state: int) -> bool:
-	return state == READY
-
-
-## True when the dock should consider the server unsuitable for client
-## health checks (incompatible tool surface). Currently just INCOMPATIBLE
-## — FOREIGN_PORT is transitional and may resolve to READY if the
-## foreign occupant turns out to speak our handshake.
+## True when the dock should skip interpreting client health (incompatible
+## tool surface). This must NOT block Configure writes — those take an
+## explicit url and the live plugin version (#916). Currently just
+## INCOMPATIBLE — FOREIGN_PORT is transitional and may resolve to READY
+## if the foreign occupant turns out to speak our handshake.
 static func blocks_client_health(state: int) -> bool:
 	return state == INCOMPATIBLE
 

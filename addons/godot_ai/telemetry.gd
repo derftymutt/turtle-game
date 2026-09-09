@@ -8,11 +8,16 @@
 ## and the bounded-queue worker stay in one place (Python), not
 ## duplicated in GDScript.
 ##
-## Opt-out: honors `GODOT_AI_DISABLE_TELEMETRY` and `DISABLE_TELEMETRY`
-## environment variables on the GDScript side too, so events are never
-## buffered (let alone sent) when the operator opts out — useful when
-## a tester wants to confirm the disable flag is effective before any
-## handshake has happened.
+## Opt-out options priority:
+##   1. `GODOT_AI_DISABLE_TELEMETRY` / `DISABLE_TELEMETRY` env vars —
+##      checked first so CI / operators can force-disable without touching
+##      EditorSettings.
+##   2. The `godot_ai/telemetry_enabled` EditorSetting — set through the
+##      MCP dock and persisted between sessions.
+##
+## When telemetry is disabled, events are never buffered or sent. Only a
+## *truthy* env var force-disables; a falsey or absent env var falls through
+## to the EditorSetting (which defaults to enabled). See McpSettings.telemetry_enabled.
 ##
 ## Buffering: events recorded before the WebSocket is connected go into
 ## a small bounded buffer and flush on the next `record_event` call once
@@ -83,7 +88,7 @@ var _pending: Array = []  # of {name: String, data: Dictionary}
 
 func _init(connection) -> void:
 	_connection = connection
-	_disabled = _resolve_disabled()
+	_disabled = not McpSettings.telemetry_enabled()
 	## Subscribe to ``connection_state_changed`` so events buffered before
 	## the WebSocket handshake (e.g. ``record_dock_startup`` from
 	## ``plugin._enter_tree``) actually leave the editor. Without this,
@@ -93,17 +98,6 @@ func _init(connection) -> void:
 	if _connection != null and _connection.has_signal("connection_state_changed"):
 		_connection.connection_state_changed.connect(_on_connection_state_changed)
 
-static func _truthy(value: String) -> bool:
-	## Match ``plugin.gd::_env_truthy`` semantics — ``strip_edges()`` so
-	## a stray ``" true "`` from shell quoting still parses as truthy.
-	return value.strip_edges().to_lower() in ["1", "true", "yes", "on"]
-
-static func _resolve_disabled() -> bool:
-	if _truthy(OS.get_environment("GODOT_AI_DISABLE_TELEMETRY")):
-		return true
-	if _truthy(OS.get_environment("DISABLE_TELEMETRY")):
-		return true
-	return false
 
 func record_event(name: String, data: Dictionary = {}) -> void:
 	if _disabled:
@@ -152,12 +146,6 @@ func _send_one(name: String, data: Dictionary) -> void:
 func record_dock_startup(extra: Dictionary = {}) -> void:
 	record_event("dock_startup", extra)
 
-func record_plugin_reload(success: bool, error: String = "") -> void:
-	var data := {"success": success}
-	if error != "":
-		data["error"] = error.substr(0, 200)
-	record_event("plugin_reload", data)
-
 func record_self_update(
 	status: String,
 	from_version: String = "",
@@ -178,7 +166,12 @@ func record_dev_server_toggle(action: String) -> void:
 
 
 ## Drain a pending ``plugin_reload`` event written by the previous
-## instance before it disabled itself.
+## instance before it disabled itself. Pending events are currently
+## always success=true — ``record_pending_plugin_reload`` above is the
+## only writer and hardcodes it (a reload that fails never reaches the
+## flush anyway; there is no new instance to drain the key). The
+## error/success parsing below stays tolerant for forward compat with
+## a writer that records failures.
 func flush_pending_plugin_reload() -> void:
 	var parsed = _drain_editor_setting_dict(PENDING_PLUGIN_RELOAD_KEY)
 	if parsed == null:

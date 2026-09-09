@@ -119,6 +119,16 @@ func _build_buttons(grab_focus: bool = true):
 	_wire_button_sounds(new_game_button)
 	level_container.add_child(new_game_button)
 
+	# === TUTORIAL (optional, standalone — no scoring or progression) ===
+	var tutorial_button = Button.new()
+	tutorial_button.text = "Tutorial"
+	tutorial_button.custom_minimum_size = Vector2(200, 32)
+	tutorial_button.add_theme_font_size_override("font_size", 14)
+	tutorial_button.add_theme_color_override("font_color", text_color)
+	tutorial_button.pressed.connect(_on_tutorial_pressed)
+	_wire_button_sounds(tutorial_button)
+	level_container.add_child(tutorial_button)
+
 	# === DEV LEVEL SELECT (hidden in release builds) ===
 	if GameManager.DEV_MODE:
 		var dev_row = HBoxContainer.new()
@@ -200,6 +210,12 @@ func _start_new_game():
 		game_info_screen.show_screen()
 	else:
 		LevelManager.load_level(1)
+
+func _on_tutorial_pressed():
+	if _sfx_select:
+		_sfx_select.play()
+	GameManager.reset_game()
+	LevelManager.load_tutorial()
 
 func _on_dev_level_selected(level_num: int):
 	GameManager.is_carrying_piece = false
