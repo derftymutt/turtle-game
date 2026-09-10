@@ -150,14 +150,14 @@ script = ExtResource("12_fkhgs")
 
 [node name="Prompt" type="Panel" parent="TutorialUI" index="0" unique_id=958601349]
 visible = false
-anchors_preset = 12
-anchor_top = 1.0
+anchors_preset = 14
+anchor_top = 0.5
 anchor_right = 1.0
-anchor_bottom = 1.0
+anchor_bottom = 0.5
 offset_left = 24.0
-offset_top = -198.0
+offset_top = -80.0
 offset_right = -24.0
-offset_bottom = -12.0
+offset_bottom = 76.0
 
 [node name="Margin" type="MarginContainer" parent="TutorialUI/Prompt" index="0" unique_id=1955969009]
 layout_mode = 0
@@ -175,16 +175,23 @@ alignment = 1
 
 [node name="Message" type="Label" parent="TutorialUI/Prompt/Margin/VBox" index="0" unique_id=874467152]
 layout_mode = 2
-size_flags_vertical = 3
 theme_override_font_sizes/font_size = 11
 text = "You are Flip, UFO Repair Turtle. Your goal is to pick up UFO parts from the ocean floor and bring them to your UFO Workshop. Give it a try!"
 horizontal_alignment = 1
 autowrap_mode = 2
 
-[node name="Hint" type="Label" parent="TutorialUI/Prompt/Margin/VBox" index="1" unique_id=91583155]
-modulate = Color(1, 1, 1, 0.55)
+[node name="MessageRich" type="RichTextLabel" parent="TutorialUI/Prompt/Margin/VBox" index="1" unique_id=254621723]
+visible = false
 layout_mode = 2
-theme_override_font_sizes/font_size = 9
+size_flags_vertical = 4
+theme_override_font_sizes/normal_font_size = 11
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+
+[node name="Hint" type="Label" parent="TutorialUI/Prompt/Margin/VBox" index="2" unique_id=91583155]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
 text = "▶  Swim with W A S D"
 horizontal_alignment = 1
 

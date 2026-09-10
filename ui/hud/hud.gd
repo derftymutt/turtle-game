@@ -84,7 +84,7 @@ var level_completing: bool = false  # Suppresses trash cluster spawn and sounds 
 # Timer system
 @export_group("Timer System")
 @export var timer_enabled: bool = true
-@export var level_time_limit: float = 240.0
+@export var level_time_limit: float = 180.0
 var timer_label: Label = null
 var time_remaining: float = 0.0
 var _timer_active: bool = false

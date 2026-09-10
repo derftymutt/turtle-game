@@ -40,16 +40,16 @@ const PIRANHA_SCENE := preload("res://entities/enemies/piranha/piranha.tscn")
 const TRASH_SEQUENCE_SCENE := preload("res://systems/trash_cleanup/trash_sequence.tscn")
 const TRASH_CLUSTER_SCENE := preload("res://entities/collectibles/trash_cluster/trash_cluster.tscn")
 
-const INTRO_TEXT := "You are Flip, UFO Repair Turtle. Your goal is to pick up UFO parts from the ocean floor and bring them to your UFO Workshop. Give it a try!"
+const INTRO_TEXT := "You are Flip, UFO Repair Turtle. Your goal is to pick up UFO parts and bring them to your UFO Workshop. Give it a try!"
 const INTRO_HINT := "▶  Move with the Left Stick   (or W A S D)"
 
 const ENERGY_TEXT := "Swimming uses energy. Energy is shown as a bar above the turtle, with a larger version at the top-right of the screen.\n\nYou recover energy by not swimming — and MUCH faster at the surface.\n\nGo to the surface and watch for the yellow sparkle around you. That shows when you are recovering energy fast."
 
-const FLIPPER_TEXT := "You also recover energy FAST while TOUCHING pinball walls and flippers.\n\nFlippers are a great way to get around — you won't get far without them! Try launching yourself deep into the ocean to reach a UFO part.\n\nFlip with the  L2 / R2  triggers   (or Left Shift / Right Shift)."
+const FLIPPER_TEXT := "You also recover energy FAST while TOUCHING pinball walls and flippers.\n\nFlippers are a great way to get around — you won't get far without them! Try launching yourself deep into the ocean to reach the UFO part.\n\nFlip with the  L2 / R2  triggers   (or Left Shift / Right Shift)."
 const FLIPPER_HINT_LEFT := "▶  Try the LEFT flipper:  L2   (or Left Shift)"
 const FLIPPER_HINT_RIGHT := "▶  Now the RIGHT flipper:  R2   (or Right Shift)"
 
-const DROP_TEXT := "UFO parts are heavy to carry. You can drop the one you're holding with  X   (or Space)."
+const DROP_TEXT := "UFO parts are heavy to carry. You can always drop the part you're carrying by pushing  X   (or Space)."
 
 const MEANIES_TEXT := "Look out for meanies! You can shoot most of them with your turtle spit — aim with the Right Stick   (or  I J K L)."
 
@@ -79,7 +79,14 @@ const TRASH_SAFETY_SECONDS := 34.0
 
 @onready var _prompt: Panel = $Prompt
 @onready var _message: Label = $Prompt/Margin/VBox/Message
+@onready var _message_rich: RichTextLabel = $Prompt/Margin/VBox/MessageRich
 @onready var _hint: Label = $Prompt/Margin/VBox/Hint
+
+# Inline icons for the intro prompt (first frame of each sprite sheet).
+const PART_ICON := preload("res://entities/collectibles/ufo_piece/sprites/ufo_piece_grey.png")
+const PART_ICON_REGION := Rect2(0, 0, 12, 12)
+const WORKSHOP_ICON := preload("res://entities/environment/ufo_workshop/sprites/ufo_workshop2.png")
+const WORKSHOP_ICON_REGION := Rect2(0, 0, 24, 24)
 
 var _step: int = Step.INTRO
 var _hud: Node = null
@@ -110,7 +117,7 @@ func _ready() -> void:
 		_pinball.visible = false
 		_pinball.modulate.a = 0.0
 		_set_pinball_collisions(false)
-	_show_prompt(INTRO_TEXT, INTRO_HINT)
+	_show_intro()
 
 
 func _process(delta: float) -> void:
@@ -397,9 +404,35 @@ func _show_prompt(text: String, hint: String = "") -> void:
 	_prompt_wanted = true
 	if _prompt_tween and _prompt_tween.is_valid():
 		_prompt_tween.kill()
+	_message_rich.visible = false
+	_message.visible = true
 	_message.text = text
 	_hint.text = hint
 	_hint.visible = hint != ""
+	_prompt.modulate.a = 0.0
+	_prompt.visible = true
+	_prompt_tween = create_tween()
+	_prompt_tween.tween_property(_prompt, "modulate:a", 1.0, 0.3)
+
+
+## The intro prompt, built as rich text so the UFO part and workshop icons can
+## sit inline right after their names (like the how-to-play screen).
+func _show_intro() -> void:
+	_prompt_wanted = true
+	if _prompt_tween and _prompt_tween.is_valid():
+		_prompt_tween.kill()
+	_message.visible = false
+	_message_rich.visible = true
+	_message_rich.clear()
+	_message_rich.push_paragraph(HORIZONTAL_ALIGNMENT_CENTER)
+	_message_rich.append_text("You are Flip, UFO Repair Turtle. Your goal is to pick up UFO parts ")
+	_message_rich.add_image(PART_ICON, 14, 14, Color.WHITE, INLINE_ALIGNMENT_CENTER, PART_ICON_REGION)
+	_message_rich.append_text(" and bring them to your UFO Workshop ")
+	_message_rich.add_image(WORKSHOP_ICON, 17, 17, Color.WHITE, INLINE_ALIGNMENT_CENTER, WORKSHOP_ICON_REGION)
+	_message_rich.append_text(". Give it a try!")
+	_message_rich.pop()
+	_hint.text = INTRO_HINT
+	_hint.visible = true
 	_prompt.modulate.a = 0.0
 	_prompt.visible = true
 	_prompt_tween = create_tween()
