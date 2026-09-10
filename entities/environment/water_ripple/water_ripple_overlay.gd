@@ -17,7 +17,7 @@ class_name WaterRippleOverlay
 @export var first_delay: float = 4.0          ## grace period after the level loads
 
 @export_group("Look")
-@export var amp_pixels: float = 3.5           ## peak horizontal displacement (game px)
+@export var amp_pixels: float = 2.5           ## peak horizontal displacement (game px)
 @export var band_width: float = 1.0          ## vertical thickness of the band (screen fraction)
 @export var travel_from: float = -0.30        ## band centre start (screen-V, off the top)
 @export var travel_to: float = 1.30           ## band centre end (screen-V, off the bottom)
