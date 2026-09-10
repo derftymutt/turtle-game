@@ -7,11 +7,6 @@ const SETTINGS_PATH = "user://settings.json"
 # Control settings
 var thrust_inverted: bool = false
 
-# Difficulty is fixed: the game always runs "hard mode" rules — hearts persist
-# across levels (see LevelManager.complete_level / TurtlePlayer). Kept as a var
-# so the existing menu / victory / high-score code that reads it keeps working.
-var hard_mode: bool = true
-
 
 func _ready():
 	_load_settings()

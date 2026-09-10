@@ -10,8 +10,6 @@ extends CanvasLayer
 var guide_screen = null
 var game_info_screen = null
 
-const _HARD_RED    := Color(1.0, 0.18, 0.18)
-const _HARD_GOLD   := Color(1.0, 0.45, 0.45)   # tinted gold for record labels in hard mode
 const _NORMAL_GOLD := Color(1.0, 0.85, 0.0)
 const _TITLE_GREEN := Color(0.6, 0.8980392, 0.3137255, 1.0)
 
@@ -40,8 +38,8 @@ func _ready():
 	guide_screen = get_tree().get_first_node_in_group("guide_screen")
 	game_info_screen = get_tree().get_first_node_in_group("game_info_screen")
 	_build_buttons()
-	if GameSettings.hard_mode and title_label:
-		title_label.add_theme_color_override("font_color", _HARD_RED)
+	if title_label:
+		title_label.add_theme_color_override("font_color", _TITLE_GREEN)
 	# Enable nav sound next frame so the automatic grab_focus() in _build_buttons()
 	# doesn't trigger it on load before the player has touched anything.
 	call_deferred("_enable_nav_sound")
@@ -53,11 +51,9 @@ func _format_ms(ms: int) -> String:
 	return "%d:%02d" % [minutes, seconds]
 
 func _build_buttons(grab_focus: bool = true):
-	var is_hard := GameSettings.hard_mode
-	var text_color  := _HARD_RED   if is_hard else Color.WHITE
-	var record_color := _HARD_GOLD if is_hard else _NORMAL_GOLD
+	var text_color := Color.WHITE
 
-	# === NORMAL MODE BEST VICTORY RECORDS ===
+	# === BEST VICTORY RECORDS ===
 	var best_victory   := SaveManager.get_best_victory_score()
 	var best_time_ms   := SaveManager.get_best_victory_time_ms()
 	if best_victory > 0 or best_time_ms > 0:
@@ -71,40 +67,17 @@ func _build_buttons(grab_focus: bool = true):
 			records_text += "Best Time: %s" % _format_ms(best_time_ms)
 		records_label.text = records_text
 		records_label.add_theme_font_size_override("font_size", 13)
-		records_label.add_theme_color_override("font_color", _NORMAL_GOLD if not is_hard else Color(_NORMAL_GOLD.r * 0.6, _NORMAL_GOLD.g * 0.6, _NORMAL_GOLD.b * 0.6))
+		records_label.add_theme_color_override("font_color", _NORMAL_GOLD)
 		records_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		level_container.add_child(records_label)
-
-	# === HARD MODE BEST VICTORY RECORDS ===
-	var hard_best_score := SaveManager.get_best_victory_score_hard()
-	var hard_best_time  := SaveManager.get_best_victory_time_ms_hard()
-	if hard_best_score > 0 or hard_best_time > 0:
-		var hard_label := Label.new()
-		var hard_text := "[HARD]  "
-		if hard_best_score > 0:
-			hard_text += "Best Score: %d" % hard_best_score
-		if hard_best_time > 0:
-			if hard_best_score > 0:
-				hard_text += "   "
-			hard_text += "Best Time: %s" % _format_ms(hard_best_time)
-		hard_label.text = hard_text
-		hard_label.add_theme_font_size_override("font_size", 13)
-		hard_label.add_theme_color_override("font_color", _HARD_RED)
-		hard_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		level_container.add_child(hard_label)
 
 	# === CONTINUE (only when a save exists) ===
 	if SaveManager.has_save():
 		var level = SaveManager.get_save_level()
-		var save_is_hard := SaveManager.get_save_hard_mode()
 		var continue_button = Button.new()
-		continue_button.text = "Continue  (Level %d)%s" % [level, "  [HARD]" if save_is_hard else ""]
+		continue_button.text = "Continue  (Level %d)" % level
 		continue_button.custom_minimum_size = Vector2(200, 40)
 		continue_button.add_theme_font_size_override("font_size", 18)
-		if save_is_hard:
-			continue_button.add_theme_color_override("font_color", _HARD_RED)
-		elif is_hard:
-			continue_button.add_theme_color_override("font_color", text_color)
 		continue_button.pressed.connect(_on_continue_pressed)
 		_wire_button_sounds(continue_button)
 		level_container.add_child(continue_button)
@@ -258,21 +231,13 @@ func rebuild_buttons():
 	_refresh_colors()
 
 func _refresh_colors():
-	"""Re-applies hard-mode text color to all existing menu elements (no rebuild needed)"""
-	var is_hard := GameSettings.hard_mode
-	var text_color := _HARD_RED if is_hard else Color.WHITE
+	"""Re-applies menu text colors to all existing elements (no rebuild needed)"""
 	if title_label:
-		if is_hard:
-			title_label.add_theme_color_override("font_color", _HARD_RED)
-		else:
-			title_label.add_theme_color_override("font_color", _TITLE_GREEN)
+		title_label.add_theme_color_override("font_color", _TITLE_GREEN)
 	if not level_container:
 		return
 	for child in level_container.get_children():
 		if child is Button:
-			child.add_theme_color_override("font_color", text_color)
+			child.add_theme_color_override("font_color", Color.WHITE)
 		elif child is Label:
-			# Hard mode record label stays red; normal record label follows mode
-			if not child.text.begins_with("[HARD]"):
-				child.add_theme_color_override("font_color",
-					_HARD_GOLD if is_hard else _NORMAL_GOLD)
+			child.add_theme_color_override("font_color", _NORMAL_GOLD)
