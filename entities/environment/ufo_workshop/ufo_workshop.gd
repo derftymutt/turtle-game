@@ -9,6 +9,13 @@ const _SFX_BEAT_LEVEL = preload("res://assets/sounds/sfx/beat level_1.ogg")
 #@export var workshop_radius: float = 30.0  # For reference only
 #@export var surface_y_position: float = -126.0  # Position hint
 
+## Multi-instance selection
+## A level may contain several UFO Workshop instances placed in different spots.
+## On load, exactly one is kept (chosen at random) and the rest remove themselves,
+## so gameplay always sees a single workshop. Higher weight = more likely to be
+## the one that stays. Levels with a single instance are unaffected.
+@export var selection_weight: float = 1.0
+
 # Visual feedback
 @export var idle_color: Color = Color(0.3, 0.6, 1.0, 0.8)  # Blue glow
 @export var active_color: Color = Color(1.0, 0.8, 0.0, 1.0)  # Gold when player nearby
@@ -25,6 +32,12 @@ var pulse_offset: float = 0.0
 var _sfx_beat: AudioStreamPlayer
 
 func _ready():
+	add_to_group("ufo_workshop_candidate")
+	# Elect a single active workshop for this level load. Every instance defers
+	# the same call; a deterministic leader performs the pick once, after all
+	# instances have registered themselves.
+	call_deferred("_elect_single_workshop")
+
 	add_to_group("workshop")
 	_sfx_beat = AudioStreamPlayer.new()
 	_sfx_beat.stream = _SFX_BEAT_LEVEL
@@ -52,6 +65,40 @@ func _ready():
 		LevelManager.level_complete.connect(_on_level_complete)
 	
 	print("🛠️ UFO Workshop ready at surface (y=%.1f)" % global_position.y)
+
+func _elect_single_workshop() -> void:
+	"""Keep exactly one workshop instance per level load; free the rest."""
+	var candidates := get_tree().get_nodes_in_group("ufo_workshop_candidate")
+	candidates = candidates.filter(func(w: Node) -> bool:
+		return is_instance_valid(w) and not w.is_queued_for_deletion())
+	if candidates.size() <= 1:
+		return  # Single instance (or none) — nothing to cull
+
+	# Only the leader (lowest instance id) runs the pick, so every instance's
+	# deferred call resolves to the same outcome.
+	candidates.sort_custom(func(a: Node, b: Node) -> bool:
+		return a.get_instance_id() < b.get_instance_id())
+	if candidates[0] != self:
+		return
+
+	var total_weight := 0.0
+	for w in candidates:
+		total_weight += maxf(0.0, w.selection_weight)
+
+	var chosen: Node = candidates[0]
+	if total_weight > 0.0:
+		var roll := randf() * total_weight
+		for w in candidates:
+			roll -= maxf(0.0, w.selection_weight)
+			if roll <= 0.0:
+				chosen = w
+				break
+
+	for w in candidates:
+		if w != chosen:
+			w.queue_free()
+
+	print("🛠️ UFO Workshop: %d candidates, kept '%s'" % [candidates.size(), chosen.name])
 
 func _process(delta):
 	# Visual pulsing when player nearby with piece

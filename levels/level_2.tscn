@@ -210,71 +210,77 @@ position = Vector2(95, 17)
 [node name="UfoWorkshop" parent="." index="30" unique_id=625327535 instance=ExtResource("21_ngvhw")]
 position = Vector2(225, -138)
 
-[node name="ElectricEelSpawner" parent="." index="31" unique_id=1752833975 instance=ExtResource("19_cp3aq")]
+[node name="UfoWorkshop2" parent="." index="31" unique_id=2104875366 instance=ExtResource("21_ngvhw")]
+position = Vector2(47, -137)
+
+[node name="UfoWorkshop3" parent="." index="32" unique_id=62646562 instance=ExtResource("21_ngvhw")]
+position = Vector2(-257, -137)
+
+[node name="ElectricEelSpawner" parent="." index="33" unique_id=1752833975 instance=ExtResource("19_cp3aq")]
 spawn_interval = 13.0
 
-[node name="HealthPlantSpawner" parent="." index="32" unique_id=1172793188 instance=ExtResource("22_ngvhw")]
+[node name="HealthPlantSpawner" parent="." index="34" unique_id=1172793188 instance=ExtResource("22_ngvhw")]
 
-[node name="FlipperLeftDown" parent="." index="33" unique_id=1447591536 instance=ExtResource("25_he6wg")]
+[node name="FlipperLeftDown" parent="." index="35" unique_id=1447591536 instance=ExtResource("25_he6wg")]
 position = Vector2(-40, -65)
 
-[node name="FlipperLeftDown2" parent="." index="34" unique_id=201881765 instance=ExtResource("25_he6wg")]
+[node name="FlipperLeftDown2" parent="." index="36" unique_id=201881765 instance=ExtResource("25_he6wg")]
 position = Vector2(-245, 25)
 
-[node name="FlipperLeftDown3" parent="." index="35" unique_id=1448928177 instance=ExtResource("25_he6wg")]
+[node name="FlipperLeftDown3" parent="." index="37" unique_id=1448928177 instance=ExtResource("25_he6wg")]
 position = Vector2(155, 25)
 
-[node name="FlipperRightDownPixelPerfect" parent="." index="36" unique_id=94480237 instance=ExtResource("25_jqt73")]
+[node name="FlipperRightDownPixelPerfect" parent="." index="38" unique_id=94480237 instance=ExtResource("25_jqt73")]
 position = Vector2(-155, 25)
 
-[node name="FlipperRightDownPixelPerfect2" parent="." index="37" unique_id=1385805656 instance=ExtResource("25_jqt73")]
+[node name="FlipperRightDownPixelPerfect2" parent="." index="39" unique_id=1385805656 instance=ExtResource("25_jqt73")]
 position = Vector2(40, -65)
 
-[node name="FlipperRightDownPixelPerfect3" parent="." index="38" unique_id=372565698 instance=ExtResource("25_jqt73")]
+[node name="FlipperRightDownPixelPerfect3" parent="." index="40" unique_id=372565698 instance=ExtResource("25_jqt73")]
 position = Vector2(245, 25)
 
-[node name="FlipperLeftEast" parent="." index="39" unique_id=1178739332 instance=ExtResource("23_itbe0")]
+[node name="FlipperLeftEast" parent="." index="41" unique_id=1178739332 instance=ExtResource("23_itbe0")]
 position = Vector2(-70, 115)
 overswing_enabled = true
 
-[node name="FlipperRightWest" parent="." index="40" unique_id=976369529 instance=ExtResource("24_xrja0")]
+[node name="FlipperRightWest" parent="." index="42" unique_id=976369529 instance=ExtResource("24_xrja0")]
 position = Vector2(70, 115)
 overswing_enabled = true
 
-[node name="DeadWall2" parent="." index="41" unique_id=797132162 instance=ExtResource("25_00pa0")]
+[node name="DeadWall2" parent="." index="43" unique_id=797132162 instance=ExtResource("25_00pa0")]
 position = Vector2(-66, -38)
 physics_material_override = SubResource("PhysicsMaterial_b1cs7")
 angle_preset = 2
 mirrored = true
 
-[node name="DeadWall3" parent="." index="42" unique_id=270168581 instance=ExtResource("25_00pa0")]
+[node name="DeadWall3" parent="." index="44" unique_id=270168581 instance=ExtResource("25_00pa0")]
 position = Vector2(-270, 53)
 physics_material_override = SubResource("PhysicsMaterial_b1cs7")
 angle_preset = 2
 mirrored = true
 
-[node name="DeadWall7" parent="." index="43" unique_id=948229591 instance=ExtResource("25_00pa0")]
+[node name="DeadWall7" parent="." index="45" unique_id=948229591 instance=ExtResource("25_00pa0")]
 position = Vector2(130, 53)
 physics_material_override = SubResource("PhysicsMaterial_b1cs7")
 angle_preset = 2
 mirrored = true
 
-[node name="DeadWall4" parent="." index="44" unique_id=247885451 instance=ExtResource("25_00pa0")]
+[node name="DeadWall4" parent="." index="46" unique_id=247885451 instance=ExtResource("25_00pa0")]
 position = Vector2(-130, 53)
 physics_material_override = SubResource("PhysicsMaterial_b1cs7")
 angle_preset = 2
 
-[node name="DeadWall5" parent="." index="45" unique_id=1878808807 instance=ExtResource("25_00pa0")]
+[node name="DeadWall5" parent="." index="47" unique_id=1878808807 instance=ExtResource("25_00pa0")]
 position = Vector2(66, -38)
 physics_material_override = SubResource("PhysicsMaterial_b1cs7")
 angle_preset = 2
 
-[node name="DeadWall6" parent="." index="46" unique_id=503360556 instance=ExtResource("25_00pa0")]
+[node name="DeadWall6" parent="." index="48" unique_id=503360556 instance=ExtResource("25_00pa0")]
 position = Vector2(270, 53)
 physics_material_override = SubResource("PhysicsMaterial_b1cs7")
 angle_preset = 2
 
-[node name="WorldSafetyBoundaries" type="Node2D" parent="." index="47" unique_id=1838928534]
+[node name="WorldSafetyBoundaries" type="Node2D" parent="." index="49" unique_id=1838928534]
 
 [node name="BoundaryBottom" type="StaticBody2D" parent="WorldSafetyBoundaries" index="0" unique_id=907992518]
 position = Vector2(1.0000612, 175.99995)
@@ -338,22 +344,22 @@ offset_right = -323.4816
 offset_bottom = 62.268524
 color = Color(0.1764706, 0.12156863, 0.023529412, 1)
 
-[node name="OceanFloor" type="TileMapLayer" parent="." index="48" unique_id=56265099]
+[node name="OceanFloor" type="TileMapLayer" parent="." index="50" unique_id=56265099]
 position = Vector2(0, 4)
 tile_map_data = PackedByteArray("AADs/woAAAABAAAAAADt/woAAAAAAAAAAADu/woAAAACAAAAAADv/woAAAABAAAAAADw/woAAAAAAAAAAADx/woAAAAAAAAAAADy/woAAAAAAAAAAADz/woAAAAAAAAAAAD0/woAAAACAAAAAAD1/woAAAAAAAAAAAD2/woAAAAAAAAAAAD3/woAAAAAAAAAAAD4/woAAAAAAAAAAAD5/woAAAACAAAAAAD6/woAAAAAAAAAAAD7/woAAAABAAAAAAD8/woAAAACAAAAAAD9/woAAAABAAAAAAD+/woAAAAAAAAAAAD//woAAAAAAAAAAAAAAAoAAAACAAAAAAABAAoAAAAAAAAAAAACAAoAAAABAAAAAAADAAoAAAAAAAAAAAAEAAoAAAAAAAAAAAAFAAoAAAABAAAAAAAGAAoAAAACAAAAAAAHAAoAAAAAAAAAAAAIAAoAAAABAAAAAAAJAAoAAAABAAAAAAAKAAoAAAAAAAAAAAALAAoAAAABAAAAAAAMAAoAAAAAAAAAAAANAAoAAAAAAAAAAAAOAAoAAAACAAAAAAAPAAoAAAAAAAAAAAAQAAoAAAABAAAAAAARAAoAAAAAAAAAAAASAAoAAAAAAAAAAAATAAoAAAACAAAAAAA=")
 tile_set = SubResource("TileSet_mb3d3")
 
-[node name="OceanWallLeft" type="TileMapLayer" parent="." index="49" unique_id=420150939]
+[node name="OceanWallLeft" type="TileMapLayer" parent="." index="51" unique_id=420150939]
 position = Vector2(0, 4)
 tile_map_data = PackedByteArray("AADY/wkAAAAAAAAAAADY/wgAAAACAAAAAADY/wcAAAABAAAAAADY/wYAAAAAAAAAAADY/wUAAAACAAAAAADY/wQAAAAAAAAAAADY/wMAAAABAAAAAADY/wIAAAACAAAAAADY/wEAAAAAAAAAAADY/wAAAAACAAAAAADY////AAAAAAAAAADY//7/AAAAAAAAAADY//3/AAAAAAAAAADY//z/AAACAAAAAADY//v/AAAAAAAAAADY//r/AAABAAAAAADY//n/AAAAAAAAAADY//j/AAACAAAAAAA=")
 tile_set = ExtResource("29_wgvos")
 
-[node name="OceanWallRight" type="TileMapLayer" parent="." index="50" unique_id=1814571506]
+[node name="OceanWallRight" type="TileMapLayer" parent="." index="52" unique_id=1814571506]
 position = Vector2(632, 4)
 tile_map_data = PackedByteArray("AADY/wkAAAAAAAAAAADY/wgAAAACAAAAAADY/wcAAAABAAAAAADY/wYAAAAAAAAAAADY/wUAAAACAAAAAADY/wQAAAAAAAAAAADY/wMAAAABAAAAAADY/wIAAAACAAAAAADY/wEAAAAAAAAAAADY/wAAAAACAAAAAADY////AAAAAAAAAADY//7/AAAAAAAAAADY//3/AAAAAAAAAADY//z/AAACAAAAAADY//v/AAAAAAAAAADY//r/AAABAAAAAADY//n/AAAAAAAAAADY//j/AAACAAAAAAA=")
 tile_set = ExtResource("29_wgvos")
 
-[node name="OceanCurrent" parent="." index="51" unique_id=1683655070 instance=ExtResource("26_jqt73")]
+[node name="OceanCurrent" parent="." index="53" unique_id=1683655070 instance=ExtResource("26_jqt73")]
 position = Vector2(-119, -88)
 show_debug_arrows = false
 
@@ -366,7 +372,7 @@ position = Vector2(-9, 1)
 [node name="Visuals" parent="OceanCurrent" index="1" unique_id=2005124627]
 position = Vector2(-11, 1)
 
-[node name="SpaceDebrisGroup" parent="." index="53" unique_id=511816800 instance=ExtResource("30_4xp61")]
+[node name="SpaceDebrisGroup" parent="." index="55" unique_id=511816800 instance=ExtResource("30_4xp61")]
 position = Vector2(-96, -161)
 powerup_type = 1
 powerup_scene = ExtResource("31_4yoxl")
@@ -379,7 +385,7 @@ debris_animation = &"air"
 position = Vector2(-34, -34)
 debris_animation = &"air"
 
-[node name="SpaceDebrisGroup2" parent="." index="54" unique_id=920416913 instance=ExtResource("30_4xp61")]
+[node name="SpaceDebrisGroup2" parent="." index="56" unique_id=920416913 instance=ExtResource("30_4xp61")]
 powerup_type = 2
 powerup_scene = ExtResource("31_4yoxl")
 
