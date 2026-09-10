@@ -5,8 +5,6 @@ class_name GuideScreen
 @onready var back_button: Button = $Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonContainer/BackButton
 
 var invert_thrust_checkbox: CheckBox
-var hard_mode_checkbox: CheckBox
-var hearts_mode_checkbox: CheckBox
 var _back_callback: Callable
 
 func _ready():
@@ -55,32 +53,12 @@ func _build_content():
 	invert_thrust_checkbox.add_theme_font_size_override("font_size", 10)
 	invert_thrust_checkbox.button_pressed = GameSettings.thrust_inverted
 	invert_thrust_checkbox.toggled.connect(_on_invert_thrust_toggled)
-
-	hard_mode_checkbox = CheckBox.new()
-	hard_mode_checkbox.text = "Hard Mode  (health carries over between levels)"
-	hard_mode_checkbox.add_theme_font_size_override("font_size", 10)
-	hard_mode_checkbox.add_theme_color_override("font_color", Color(1.0, 0.3, 0.3))
-	hard_mode_checkbox.button_pressed = GameSettings.hard_mode
-	hard_mode_checkbox.toggled.connect(_on_hard_mode_toggled)
-
-	hearts_mode_checkbox = CheckBox.new()
-	hearts_mode_checkbox.text = "Heart Health  (experimental: 7 hearts, 1 lost per hit)"
-	hearts_mode_checkbox.add_theme_font_size_override("font_size", 10)
-	hearts_mode_checkbox.add_theme_color_override("font_color", Color(1.0, 0.5, 0.6))
-	hearts_mode_checkbox.button_pressed = GameSettings.hearts_mode
-	hearts_mode_checkbox.toggled.connect(_on_hearts_mode_toggled)
-
-	if back_button:
-		invert_thrust_checkbox.focus_neighbor_bottom = invert_thrust_checkbox.get_path_to(hard_mode_checkbox)
-		hard_mode_checkbox.focus_neighbor_top = hard_mode_checkbox.get_path_to(invert_thrust_checkbox)
-		hard_mode_checkbox.focus_neighbor_bottom = hard_mode_checkbox.get_path_to(hearts_mode_checkbox)
-		hearts_mode_checkbox.focus_neighbor_top = hearts_mode_checkbox.get_path_to(hard_mode_checkbox)
-		hearts_mode_checkbox.focus_neighbor_bottom = hearts_mode_checkbox.get_path_to(back_button)
-		back_button.focus_neighbor_top = back_button.get_path_to(hearts_mode_checkbox)
-
 	content_container.add_child(invert_thrust_checkbox)
-	content_container.add_child(hard_mode_checkbox)
-	content_container.add_child(hearts_mode_checkbox)
+
+	# Focus wiring only after both nodes share a parent tree
+	if back_button:
+		invert_thrust_checkbox.focus_neighbor_bottom = invert_thrust_checkbox.get_path_to(back_button)
+		back_button.focus_neighbor_top = back_button.get_path_to(invert_thrust_checkbox)
 
 func _on_back_pressed():
 	hide_guide()
@@ -95,39 +73,6 @@ func _on_back_pressed():
 
 func _on_invert_thrust_toggled(pressed: bool):
 	GameSettings.set_thrust_inverted(pressed)
-
-func _on_hearts_mode_toggled(pressed: bool):
-	GameSettings.set_hearts_mode(pressed)
-
-func _on_hard_mode_toggled(pressed: bool):
-	if SaveManager.has_save():
-		# Revert the checkbox immediately — user must confirm before it sticks
-		hard_mode_checkbox.set_block_signals(true)
-		hard_mode_checkbox.button_pressed = GameSettings.hard_mode
-		hard_mode_checkbox.set_block_signals(false)
-
-		var dialog = ConfirmationDialog.new()
-		dialog.title = "Switch Hard Mode?"
-		dialog.dialog_text = "Changing hard mode will delete your current saved progress. Continue?"
-		dialog.ok_button_text = "Switch & Delete Save"
-		dialog.cancel_button_text = "Cancel"
-		dialog.process_mode = Node.PROCESS_MODE_ALWAYS
-		add_child(dialog)
-		dialog.confirmed.connect(func():
-			SaveManager.delete_save()
-			GameSettings.set_hard_mode(pressed)
-			hard_mode_checkbox.set_block_signals(true)
-			hard_mode_checkbox.button_pressed = pressed
-			hard_mode_checkbox.set_block_signals(false)
-			dialog.queue_free()
-			_rebuild_main_menu()
-		)
-		dialog.canceled.connect(func():
-			dialog.queue_free()
-		)
-		dialog.popup_centered()
-	else:
-		GameSettings.set_hard_mode(pressed)
 
 
 # ── layout helpers ────────────────────────────────────────────────────────────
@@ -156,11 +101,6 @@ func _control_row(action: String, keyboard: String, controller: String, is_heade
 		row.add_child(l)
 
 	return row
-
-func _rebuild_main_menu():
-	var main_menu = get_parent()
-	if main_menu and main_menu.has_method("rebuild_buttons"):
-		main_menu.rebuild_buttons()
 
 func _spacer(height: int) -> Control:
 	var s := Control.new()

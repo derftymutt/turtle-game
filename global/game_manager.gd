@@ -16,9 +16,7 @@ var total_score: int = 0     # Cumulative score across all completed levels this
 var is_carrying_piece: bool = false
 var carried_piece: Node = null
 
-# Hard mode: health at level entry (-1 = use full health for first level)
-var persisted_health: float = -1.0
-# Hard mode + hearts_mode: exact heart count at level entry (-1 = start full)
+# Exact heart count carried into the next level (-1 = start full, e.g. level 1)
 var persisted_hearts: int = -1
 
 # Tutorial flags — reset each run
@@ -77,7 +75,6 @@ func load_victory_screen():
 func reset_game():
 	current_score = 0
 	total_score = 0
-	persisted_health = -1.0
 	persisted_hearts = -1
 	is_carrying_piece = false
 	carried_piece = null

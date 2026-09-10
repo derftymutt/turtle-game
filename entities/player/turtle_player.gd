@@ -22,17 +22,13 @@ extends RigidBody2D
 @export var upward_thrust_with_piece: float = 25.0
 @export var downward_thrust_with_piece: float = 125.0
 
-# Health
-@export var max_health: float = 100.0
-var current_health: float = 100.0
-
-# Experimental discrete "heart" health (GameSettings.hearts_mode).
-# When enabled, every damage event costs one whole heart regardless of `amount`,
-# and death is triggered when hearts hit 0. current_health is kept in sync as a
-# proportional value so existing ratio consumers (desperation energy regen, hard
-# mode persistence, HUD colour coding) keep working unchanged.
+# Health — discrete hearts. Every damage event costs one whole heart regardless
+# of the incoming `amount`; death fires when hearts reach 0. A single shared grace
+# window (HEART_DAMAGE_IFRAME) after each loss tames rapid / continuous sources
+# that carry no i-frames of their own (drowning, electric shock, projectile
+# streams). Hearts carry across levels (LevelManager persists current_hearts).
 const MAX_HEARTS: int = 7
-const HEART_DAMAGE_IFRAME: float = 0.75  # grace window after any heart loss
+const HEART_DAMAGE_IFRAME: float = 0.75
 var current_hearts: int = MAX_HEARTS
 var _heart_iframe_timer: float = 0.0
 
@@ -169,8 +165,7 @@ var _flipper_velcro_t: float = 12.0         # px along arm_dir from pivot
 var _flipper_velcro_normal_side: float = 1.0  # which side of arm (+1 or -1)
 
 # Dermal Regenerator
-const DERMAL_REGEN_HEAL: float = 60.0
-const DERMAL_REGEN_HEARTS: int = 2  # heal amount when GameSettings.hearts_mode is on
+const DERMAL_REGEN_HEARTS: int = 2  # hearts restored by the Dermal Regenerator tech
 const DERMAL_REGEN_CHANNEL_DURATION: float = 1.0
 
 var _dermal_regen_active: bool = false
@@ -246,26 +241,17 @@ func _ready():
 		push_warning("No Ocean found! Add Ocean scene to level and add it to 'ocean' group.")
 		gravity_scale = 0.1
 
-	# Hard mode: carry health forward from the previous level
-	if GameSettings.hard_mode and GameManager.persisted_health >= 0.0:
-		current_health = GameManager.persisted_health
-
-	# Hearts mode: hard mode carries the exact heart count between levels;
-	# otherwise every level starts at full hearts.
-	if GameSettings.hearts_mode:
-		if GameSettings.hard_mode and GameManager.persisted_hearts >= 0:
-			current_hearts = clampi(GameManager.persisted_hearts, 0, MAX_HEARTS)
-		else:
-			current_hearts = MAX_HEARTS
-		current_health = _hearts_to_health()
+	# Carry the exact heart count forward from the previous level (-1 = start full)
+	if GameManager.persisted_hearts >= 0:
+		current_hearts = clampi(GameManager.persisted_hearts, 0, MAX_HEARTS)
+	else:
+		current_hearts = MAX_HEARTS
 
 	hud = get_tree().get_first_node_in_group("hud")
 	if not hud:
 		push_warning("No HUD found! Add HUD scene to level and add it to 'hud' group.")
 	else:
-		hud.update_health(current_health, max_health)
-		if hud.has_method("update_hearts"):
-			hud.update_hearts(current_hearts, MAX_HEARTS)
+		hud.update_hearts(current_hearts, MAX_HEARTS)
 
 	add_to_group("player")
 
@@ -794,6 +780,10 @@ func take_damage(amount: float, use_iframes: bool = false):
 		return
 	if is_super_speed or is_super_speed_cooldown or shield_active or transporter_invincible or deflector_shield_active:
 		return
+	# Shared grace window after any heart loss — this is what tames rapid /
+	# continuous sources with no i-frames of their own (drowning, shock, volleys).
+	if _heart_iframe_timer > 0.0:
+		return
 
 	if AlienTechManager.is_tech_active(AlienTechRegistry.BUBBLE_SHIELD) and bubble_shield_hp > 0.0:
 		bubble_shield_hp = 0.0
@@ -802,15 +792,6 @@ func take_damage(amount: float, use_iframes: bool = false):
 			_bubble_visual.visible = false
 		_bubble_flash_timer = 0.4
 		return  # Shield absorbed — transporter windup NOT canceled
-
-	# Hearts mode: every damage event costs one whole heart. A single shared
-	# grace window (HEART_DAMAGE_IFRAME) tames continuous/rapid sources that carry
-	# no iframes of their own — drowning, electric shock, projectile streams.
-	if GameSettings.hearts_mode:
-		if _heart_iframe_timer > 0.0:
-			return
-		_take_heart_damage()
-		return
 
 	# Real damage lands — cancel active techs that need aborting
 	if _transporter_windup:
@@ -822,60 +803,22 @@ func take_damage(amount: float, use_iframes: bool = false):
 	if _flipper_velcro_latched:
 		_cancel_flipper_velcro()
 
-	current_health -= amount
+	# One damage event = one heart, regardless of `amount`.
+	current_hearts = max(0, current_hearts - 1)
+	_heart_iframe_timer = HEART_DAMAGE_IFRAME
 	$SfxDamage.play()
 
 	if hud:
-		hud.update_health(current_health, max_health)
+		hud.update_hearts(current_hearts, MAX_HEARTS)
 
 	# Drop piece and check death BEFORE any await — these must fire immediately
 	# and must not be triggered multiple times from repeated per-frame damage.
 	if GameManager.is_carrying_piece and GameManager.carried_piece:
 		GameManager.carried_piece.drop_piece()
 
-	if current_health <= 0:
-		die()
-		return  # die() handles everything from here
-
-	if use_iframes:
-		_contact_iframes_active = true
-		_contact_iframes_timer = CONTACT_IFRAME_DURATION
-
-	_flash(Color.RED, 0.3)
-
-func _hp_per_heart() -> float:
-	return max_health / float(MAX_HEARTS)
-
-func _hearts_to_health() -> float:
-	return _hp_per_heart() * float(current_hearts)
-
-func _take_heart_damage() -> void:
-	# Cancel active techs that need aborting (mirrors the float-damage path)
-	if _transporter_windup:
-		_transporter_canceled = true
-	if _bumper_magnet_active:
-		_cancel_bumper_magnet()
-	if _dermal_regen_active:
-		_cancel_dermal_regen()
-	if _flipper_velcro_latched:
-		_cancel_flipper_velcro()
-
-	current_hearts = max(0, current_hearts - 1)
-	current_health = _hearts_to_health()
-	_heart_iframe_timer = HEART_DAMAGE_IFRAME
-	$SfxDamage.play()
-
-	if hud:
-		hud.update_health(current_health, max_health)
-		if hud.has_method("update_hearts"):
-			hud.update_hearts(current_hearts, MAX_HEARTS)
-
-	if GameManager.is_carrying_piece and GameManager.carried_piece:
-		GameManager.carried_piece.drop_piece()
-
 	if current_hearts <= 0:
 		die()
-		return
+		return  # die() handles everything from here
 
 	# Reuse the contact-iframe blink so the player reads the grace window
 	_contact_iframes_active = true
@@ -886,27 +829,9 @@ func restore_hearts(amount: int) -> void:
 	if amount <= 0:
 		return
 	current_hearts = min(MAX_HEARTS, current_hearts + amount)
-	current_health = _hearts_to_health()
 	if hud:
-		hud.update_health(current_health, max_health)
-		if hud.has_method("update_hearts"):
-			hud.update_hearts(current_hearts, MAX_HEARTS)
+		hud.update_hearts(current_hearts, MAX_HEARTS)
 	_health_restore_flash_timer = 0.2
-
-func restore_health(amount: float):
-	"""Restore health (e.g., from health plants, Dermal Regenerator tech)"""
-	if GameSettings.hearts_mode:
-		# Convert the HP amount to whole hearts (60 HP heal -> ~4 hearts at 7/100)
-		restore_hearts(max(1, int(round(amount / _hp_per_heart()))))
-		return
-
-	current_health = min(max_health, current_health + amount)
-
-	if hud:
-		hud.update_health(current_health, max_health)
-
-	_health_restore_flash_timer = 0.2
-	print("Health restored! Current: ", current_health, "/", max_health)
 
 func die():
 	var final_score = 0
@@ -1798,10 +1723,7 @@ func _update_dermal_regen(delta: float) -> void:
 		_complete_dermal_regen()
 
 func _complete_dermal_regen() -> void:
-	if GameSettings.hearts_mode:
-		restore_hearts(DERMAL_REGEN_HEARTS)
-	else:
-		restore_health(DERMAL_REGEN_HEAL)
+	restore_hearts(DERMAL_REGEN_HEARTS)
 	_dermal_regen_used = true
 	# Leave passive bar at 0.0 (spent) so HUD shows bar-empty + dimmed label
 	# until the player re-spawns or the level resets.

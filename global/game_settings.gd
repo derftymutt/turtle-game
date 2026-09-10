@@ -7,13 +7,10 @@ const SETTINGS_PATH = "user://settings.json"
 # Control settings
 var thrust_inverted: bool = false
 
-# Difficulty
-var hard_mode: bool = false
-
-# Experimental: discrete heart health instead of the fluid health bar.
-# When true, every damage event costs one whole heart (see TurtlePlayer).
-# Takes effect on the next level load / restart.
-var hearts_mode: bool = false
+# Difficulty is fixed: the game always runs "hard mode" rules — hearts persist
+# across levels (see LevelManager.complete_level / TurtlePlayer). Kept as a var
+# so the existing menu / victory / high-score code that reads it keeps working.
+var hard_mode: bool = true
 
 
 func _ready():
@@ -29,16 +26,12 @@ func _load_settings():
 	file.close()
 	if result is Dictionary:
 		thrust_inverted = result.get("thrust_inverted", false)
-		hard_mode = result.get("hard_mode", false)
-		hearts_mode = result.get("hearts_mode", false)
 
 func _save_settings():
 	var file = FileAccess.open(SETTINGS_PATH, FileAccess.WRITE)
 	if file:
 		file.store_string(JSON.stringify({
 			"thrust_inverted": thrust_inverted,
-			"hard_mode": hard_mode,
-			"hearts_mode": hearts_mode,
 		}))
 		file.close()
 
@@ -46,12 +39,3 @@ func set_thrust_inverted(inverted: bool):
 	thrust_inverted = inverted
 	_save_settings()
 	get_tree().call_group("player", "_on_settings_changed")
-
-func set_hard_mode(enabled: bool):
-	hard_mode = enabled
-	_save_settings()
-
-func set_hearts_mode(enabled: bool):
-	hearts_mode = enabled
-	_save_settings()
-

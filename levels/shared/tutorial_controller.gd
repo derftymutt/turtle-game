@@ -40,9 +40,7 @@ func _respawn_player() -> void:
 	if p is RigidBody2D:
 		(p as RigidBody2D).linear_velocity = Vector2.ZERO
 		(p as RigidBody2D).angular_velocity = 0.0
-	p.current_health = p.max_health
+	if p.has_method("restore_hearts"):
+		p.restore_hearts(99)  # clamps to full; also refreshes the HUD hearts
 	p.set("_contact_iframes_active", true)
 	p.set("_contact_iframes_timer", 2.5)
-	var hud_node := get_tree().get_first_node_in_group("hud")
-	if hud_node and hud_node.has_method("update_health"):
-		hud_node.update_health(p.max_health, p.max_health)

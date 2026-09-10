@@ -10,9 +10,7 @@ signal low_air_warning_changed(is_warning: bool)
 # References (will be found dynamically)
 var score_label: Label
 var ufo_pieces_label: Label
-var health_bar: TextureProgressBar
-var health_container: Control            # fluid bar + its heart-icon TextureRect
-var hearts_container: HBoxContainer      # discrete heart icons (hearts_mode)
+var health_container: Control     # HBox from the scene; now holds the heart icons
 var _heart_labels: Array = []
 var boss_health_container: Control
 var boss_health_bar: TextureProgressBar
@@ -45,8 +43,8 @@ var _slot_b_rpl_icons: Array = []
 
 # Game state
 var current_score: int = 0
-var current_health: float = 100.0
-var max_health: float = 100.0
+var current_hearts: int = 7
+var max_hearts: int = 7
 var pieces_collected: int = 0
 var pieces_needed: int = 0
 
@@ -124,7 +122,6 @@ func _ready():
 	ufo_pieces_label = find_child("UFOPiecesLabel")
 	boss_health_container = find_child("BossHealthContainer")
 	boss_health_bar = find_child("BossHealthBar")
-	health_bar = find_child("HealthBar")
 	health_container = find_child("HealthContainer")
 	_build_hearts_display()
 	air_container = find_child("AirContainer")
@@ -138,8 +135,8 @@ func _ready():
 		push_warning("HUD: Could not find ScoreLabel!")
 	if not ufo_pieces_label:
 		push_warning("HUD: Could not find UFOPiecesLabel!")
-	if not health_bar:
-		push_warning("HUD: Could not find HealthBar!")
+	if not health_container:
+		push_warning("HUD: Could not find HealthContainer!")
 	if not air_bar:
 		push_warning("HUD: Could not find AirBar!")
 	if not energy_bar:
@@ -161,8 +158,7 @@ func _ready():
 	# Initialize displays
 	update_score(0)
 	update_ufo_pieces(0, 0)
-	update_health(max_health, max_health)
-	update_hearts(7, 7)
+	update_hearts(max_hearts, max_hearts)
 	update_air(max_air, max_air)
 	update_energy(max_energy, max_energy)
 	set_super_speed_active(false)
@@ -367,44 +363,25 @@ func _spawn_trash_cluster():
 	cluster.global_position.y = max(cluster.global_position.y, min_world_y)
 	print("👾 Trash cluster spawned at score %d" % current_score)
 
-## Update health display
-func update_health(health: float, max_hp: float):
-	current_health = health
-	max_health = max_hp
-	
-	if health_bar:
-		health_bar.max_value = max_hp
-		health_bar.value = health
-		
-		# Color code health bar
-		if health / max_hp > 0.6:
-			health_bar.modulate = Color.GREEN
-		elif health / max_hp > 0.3:
-			health_bar.modulate = Color.YELLOW
-		else:
-			health_bar.modulate = Color.RED
-
-## ── Discrete heart health (experimental — GameSettings.hearts_mode) ────────────
-## Built programmatically with plain Label nodes ("♥") so it can be swapped for a
-## sprite later. Shown instead of the fluid bar when hearts_mode is on.
+## ── Heart health display ─────────────────────────────────────────────────────
+## Built programmatically with plain Label nodes ("♥") so the icon can be swapped
+## for a sprite later. Lives inside the scene's HealthContainer HBox; its old
+## fluid-bar children are hidden at build time.
 const HEART_FULL_COLOR := Color(0.30, 0.85, 0.35)
 const HEART_EMPTY_COLOR := Color(0.24, 0.24, 0.26)
 
 func _build_hearts_display() -> void:
 	if not health_container:
 		return
-	var hearts_on: bool = GameSettings.hearts_mode
 
-	hearts_container = HBoxContainer.new()
-	hearts_container.name = "HeartsContainer"
-	hearts_container.add_theme_constant_override("separation", 1)
-	hearts_container.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	var parent := health_container.get_parent()
-	parent.add_child(hearts_container)
-	parent.move_child(hearts_container, health_container.get_index() + 1)
+	# Retire the old fluid health bar (TextureProgressBar + meter icon)
+	for child in health_container.get_children():
+		child.visible = false
+		child.queue_free()
+
+	health_container.add_theme_constant_override("separation", 1)
 
 	var heart_font: Font = load("res://assets/fonts/BoldPixels.ttf")
-	var max_hearts: int = 7
 	for i in max_hearts:
 		var l := Label.new()
 		l.text = "♥"  # ♥ BLACK HEART SUIT — swap this Label for a sprite later
@@ -414,17 +391,16 @@ func _build_hearts_display() -> void:
 		l.add_theme_color_override("font_color", HEART_FULL_COLOR)
 		l.add_theme_constant_override("outline_size", 4)
 		l.add_theme_color_override("font_outline_color", Color.BLACK)
-		hearts_container.add_child(l)
+		health_container.add_child(l)
 		_heart_labels.append(l)
 
-	health_container.visible = not hearts_on
-	hearts_container.visible = hearts_on
-
-## Update the heart icons. `current`/`max_hearts` come from TurtlePlayer.
-func update_hearts(current: int, max_hearts: int = 7) -> void:
+## Update the heart icons. `current` / `hearts_max` come from TurtlePlayer.
+func update_hearts(current: int, hearts_max: int = 7) -> void:
+	current_hearts = current
+	max_hearts = hearts_max
 	for i in _heart_labels.size():
 		var l: Label = _heart_labels[i]
-		l.visible = i < max_hearts
+		l.visible = i < hearts_max
 		l.add_theme_color_override(
 			"font_color",
 			HEART_FULL_COLOR if i < current else HEART_EMPTY_COLOR
@@ -522,8 +498,8 @@ func recover_energy(delta: float, touching_wall: bool = false):
 	wall_recovery_active = touching_wall
 
 	var desperation_mult := 1.0
-	if desperation_enabled and max_health > 0.0:
-		var health_ratio := current_health / max_health
+	if desperation_enabled and max_hearts > 0:
+		var health_ratio := float(current_hearts) / float(max_hearts)
 		if health_ratio < desperation_threshold:
 			var t := 1.0 - (health_ratio / desperation_threshold)
 			desperation_mult = lerp(1.0, desperation_max_multiplier, t)

@@ -5,9 +5,7 @@ class_name HealthPlant
 ## Spawns at point thresholds and attaches to walls
 
 # Health properties
-@export var health_restore_amount: float = 40.0
-@export var heart_restore_amount: int = 4  # Used when GameSettings.hearts_mode is on
-@export var max_health_bonus: float = 0.0  # Optional max health increase
+@export var heart_restore_amount: int = 4  # hearts restored on pickup
 
 # Visual feedback
 @export var pulse_amount: float = 0.15  # Scale pulsing
@@ -110,28 +108,11 @@ func collect(collector):
 		sfx.play()
 		sfx.finished.connect(sfx.queue_free)
 	
-	# Restore health through player
-	if GameSettings.hearts_mode and collector.has_method("restore_hearts"):
+	# Restore hearts through the player
+	if collector.has_method("restore_hearts"):
 		collector.restore_hearts(heart_restore_amount)
-	elif collector.has_method("restore_health"):
-		collector.restore_health(health_restore_amount)
-	elif collector.has_method("take_damage"):
-		# Fallback: directly modify health
-		collector.current_health = min(
-			collector.max_health, 
-			collector.current_health + health_restore_amount
-		)
-		
-		# Update HUD
-		var hud = get_tree().get_first_node_in_group("hud")
-		if hud:
-			hud.update_health(collector.current_health, collector.max_health)
-	
-	# Optional: increase max health permanently
-	if max_health_bonus > 0 and collector.has_method("increase_max_health"):
-		collector.increase_max_health(max_health_bonus)
-	
-	print("🌿 Health plant collected! Health restored: +", health_restore_amount)
+
+	print("🌿 Health plant collected! Hearts restored: +", heart_restore_amount)
 	
 	# Satisfying collection animation
 	play_collect_animation()

@@ -30,7 +30,6 @@ func save_game():
 		"total_time_ms":       LevelManager.total_time_ms,
 		"successful_time_ms":  LevelManager.successful_time_ms,
 		"hard_mode":           GameSettings.hard_mode,
-		"persisted_health":    GameManager.persisted_health,
 		"persisted_hearts":    GameManager.persisted_hearts,
 	}
 	var file = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
@@ -73,8 +72,6 @@ func apply_save():
 	LevelManager.current_level_number = data.get("level_number", 1)
 	LevelManager.total_time_ms = data.get("total_time_ms", 0)
 	LevelManager.successful_time_ms = data.get("successful_time_ms", 0)
-	GameSettings.hard_mode = data.get("hard_mode", false)
-	GameManager.persisted_health = data.get("persisted_health", -1.0)
 	GameManager.persisted_hearts = int(data.get("persisted_hearts", -1))
 	print("📂 Restored: Level %d, Total Score %d, Continues %d, Hard Mode %s" % [
 		LevelManager.current_level_number, GameManager.total_score,
