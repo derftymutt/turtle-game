@@ -50,7 +50,7 @@ var pieces_needed_by_level: Dictionary = {
 
 # Performance bonus constants
 const FIRST_TRY_BONUS: int = 300
-const MAX_TIME_BONUS: int = 600
+const MAX_TIME_BONUS: int = 1000
 const VARIETY_BONUS_PER_TECH: int = 500
 
 # Boss levels — completion is triggered by defeating the boss, not delivering pieces
