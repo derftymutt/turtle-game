@@ -1,0 +1,34 @@
+[gd_scene format=3 uid="uid://cwtrripple0v1"]
+
+[ext_resource type="Script" uid="uid://dwrfhb0odkg3s" path="res://entities/environment/water_ripple/water_ripple_overlay.gd" id="1_wripl"]
+[ext_resource type="Shader" uid="uid://bko5px342ys63" path="res://entities/environment/water_ripple/water_ripple.gdshader" id="2_wripl"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_wripl"]
+shader = ExtResource("2_wripl")
+shader_parameter/progress = -0.5
+shader_parameter/band_width = 0.16
+shader_parameter/amplitude = 0.0
+shader_parameter/amp_pixels = 3.5
+shader_parameter/surface_v = 0.15
+shader_parameter/shimmer_time = 0.0
+shader_parameter/wobble_freq = 18.0
+shader_parameter/wobble_speed = 2.4
+shader_parameter/lens_strength = 0.3
+shader_parameter/glint = 0.04
+shader_parameter/screen_px = Vector2(640, 360)
+
+[node name="WaterRippleOverlay" type="CanvasLayer" unique_id=1690005274]
+layer = 0
+script = ExtResource("1_wripl")
+interval_min = 5.0
+interval_max = 10.0
+band_width = 1.0
+
+[node name="Ripple" type="ColorRect" parent="." unique_id=56399110]
+material = SubResource("ShaderMaterial_wripl")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2

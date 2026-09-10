@@ -9,6 +9,7 @@
 [ext_resource type="Script" uid="uid://d22ywt1ov84p1" path="res://systems/dev/dev_tech_seeder.gd" id="7_devseeder"]
 [ext_resource type="Script" uid="uid://dv8kfm3qaqwr5" path="res://cut_scenes/level_end_cutscene.gd" id="8_lec"]
 [ext_resource type="AudioStream" path="res://assets/sounds/sfx/level_song.ogg" id="9_levelsong"]
+[ext_resource type="PackedScene" uid="uid://cwtrripple0v1" path="res://entities/environment/water_ripple/water_ripple_overlay.tscn" id="10_wripl"]
 
 [node name="LevelBase" type="Node2D" unique_id=1013451131 groups=["level"]]
 script = ExtResource("1_hk6b7")
@@ -33,3 +34,5 @@ script = ExtResource("7_devseeder")
 
 [node name="LevelEndCutScene" type="Node2D" parent="." unique_id=500000003]
 script = ExtResource("8_lec")
+
+[node name="WaterRippleOverlay" parent="." unique_id=500000004 instance=ExtResource("10_wripl")]
