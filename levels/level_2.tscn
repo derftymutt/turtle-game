@@ -211,7 +211,7 @@ position = Vector2(95, 17)
 position = Vector2(225, -138)
 
 [node name="UfoWorkshop2" parent="." index="31" unique_id=2104875366 instance=ExtResource("21_ngvhw")]
-position = Vector2(47, -137)
+position = Vector2(-200, -64)
 
 [node name="UfoWorkshop3" parent="." index="32" unique_id=62646562 instance=ExtResource("21_ngvhw")]
 position = Vector2(-257, -137)

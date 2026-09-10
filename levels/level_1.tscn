@@ -24,6 +24,7 @@
 [ext_resource type="PackedScene" uid="uid://q614lo3kanxc" path="res://systems/space_debris/space_debris.tscn" id="24_ntdhj"]
 [ext_resource type="PackedScene" uid="uid://8edo3etakc1a" path="res://entities/environment/walls/dead_wall/dead_wall.tscn" id="24_ryfpa"]
 [ext_resource type="Texture2D" uid="uid://bm428btwp720u" path="res://entities/environment/ocean_boundaries/ocean_floor.png" id="25_0fu15"]
+[ext_resource type="PackedScene" uid="uid://tpiece001" path="res://entities/collectibles/alien_tech_piece/alien_tech_piece.tscn" id="26_0fu15"]
 [ext_resource type="TileSet" uid="uid://dyl02kfc4a681" path="res://entities/environment/ocean_boundaries/ocean_wall.tres" id="26_4knja"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ryfpa"]
@@ -398,5 +399,8 @@ debris_animation = &"wild"
 [node name="SpaceDebris2" parent="SpaceDebrisGroup2" index="1" unique_id=1430032598 instance=ExtResource("24_ntdhj")]
 position = Vector2(149, -196)
 debris_animation = &"wild"
+
+[node name="AlienTechPiece" parent="." index="38" unique_id=100000001 instance=ExtResource("26_0fu15")]
+position = Vector2(0, 85)
 
 [editable path="SpaceDebrisGroup"]
