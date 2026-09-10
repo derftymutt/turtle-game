@@ -94,6 +94,19 @@ const TRASH_CLUSTER_SCENE = preload("res://entities/collectibles/trash_cluster/t
 const CLUSTER_SCORE_THRESHOLDS: Array[int] = [200, 500, 800, 1200, 1600]
 var _cluster_threshold_index: int = 0
 
+# Time-based "freebie" trash clusters: a little goodie randomness so trash bags
+# still trickle in during low-scoring stretches. Any score-based cluster resets
+# this timer, so freebies only ever fill the gaps and stay infrequent.
+@export_group("Freebie Trash Clusters")
+@export var freebie_clusters_enabled: bool = true
+@export var freebie_first_delay: float = 30.0       # first freebie fires around here...
+@export var freebie_first_jitter: float = 8.0       # ...give or take this much
+@export var freebie_interval: float = 60.0          # then roughly this often after that...
+@export var freebie_interval_jitter: float = 15.0   # ...give or take this much
+var _freebie_elapsed: float = 0.0
+var _freebie_next_time: float = 0.0
+var _any_cluster_spawned: bool = false
+
 # Visual feedback
 var air_flash_timer: float = 0.0
 var air_flash_interval: float = 0.5
@@ -149,6 +162,8 @@ func _ready():
 		time_remaining = level_time_limit
 		_timer_active = true
 		_update_timer_display()
+
+	_schedule_next_freebie_cluster()
 
 	# Apply black borders to all progress bars
 	_apply_bar_borders()
@@ -244,6 +259,13 @@ func _process(delta):
 			_timer_expired = true
 			time_expired.emit()
 
+	# Freebie trash clusters (score-independent). _spawn_trash_cluster() reschedules
+	# the next one, so a score-based cluster spawning first pushes this back too.
+	if freebie_clusters_enabled and not level_completing:
+		_freebie_elapsed += delta
+		if _freebie_elapsed >= _freebie_next_time:
+			_spawn_trash_cluster()
+
 	# Handle wall recovery visual feedback
 	if wall_recovery_active and energy_bar:
 		energy_pulse_timer += delta * energy_pulse_speed
@@ -331,9 +353,20 @@ func update_score(new_score: int):
 func add_score(points: int):
 	update_score(current_score + points)
 
+func _schedule_next_freebie_cluster() -> void:
+	_freebie_elapsed = 0.0
+	if _any_cluster_spawned:
+		_freebie_next_time = maxf(5.0, freebie_interval + randf_range(-freebie_interval_jitter, freebie_interval_jitter))
+	else:
+		_freebie_next_time = maxf(5.0, freebie_first_delay + randf_range(-freebie_first_jitter, freebie_first_jitter))
+
 func _spawn_trash_cluster():
 	if level_completing:
 		return
+	# Any cluster (score-based or freebie) pushes the next freebie out, so trash
+	# bags stay rare and freebies only fill quiet, low-scoring stretches.
+	_any_cluster_spawned = true
+	_schedule_next_freebie_cluster()
 	var scene = get_tree().current_scene
 	if not scene:
 		return
