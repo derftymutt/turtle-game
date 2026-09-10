@@ -22,6 +22,15 @@ class_name WaterRippleOverlay
 @export var travel_from: float = -0.30        ## band centre start (screen-V, off the top)
 @export var travel_to: float = 1.30           ## band centre end (screen-V, off the bottom)
 
+## Static shader look — pushed to the material once in _ready(), so a second
+## instance can be a gentler/faster companion without needing its own material.
+@export_group("Shader Look")
+@export var wobble_freq: float = 18.0         ## undulations top-to-bottom
+@export var wobble_speed: float = 2.4         ## how fast the undulation crawls
+@export var lens_strength: float = 0.30       ## vertical "bulge" through the band
+@export var glint: float = 0.04               ## brightness lift on the crest
+@export_range(0.0, 1.0) var chroma: float = 1.0  ## amount of RGB colour split
+
 @onready var _rect: ColorRect = $Ripple
 
 var _mat: ShaderMaterial
@@ -34,7 +43,13 @@ var _cur_band_width: float = 0.16
 
 
 func _ready() -> void:
-	_mat = _rect.material as ShaderMaterial
+	# The material is a shared sub-resource of the packed scene, so every
+	# instance would otherwise write shader params to the SAME material and
+	# stomp each other. Give this instance its own copy.
+	var base_mat := _rect.material as ShaderMaterial
+	if base_mat:
+		_mat = base_mat.duplicate() as ShaderMaterial
+		_rect.material = _mat
 	_time_until_next = first_delay
 	_cur_amp_pixels = amp_pixels
 	_cur_band_width = band_width
@@ -47,6 +62,11 @@ func _ready() -> void:
 		_mat.set_shader_parameter("amplitude", 0.0)
 		_mat.set_shader_parameter("progress", travel_from)
 		_mat.set_shader_parameter("band_width", band_width)
+		_mat.set_shader_parameter("wobble_freq", wobble_freq)
+		_mat.set_shader_parameter("wobble_speed", wobble_speed)
+		_mat.set_shader_parameter("lens_strength", lens_strength)
+		_mat.set_shader_parameter("glint", glint)
+		_mat.set_shader_parameter("chroma", chroma)
 
 
 func _process(delta: float) -> void:

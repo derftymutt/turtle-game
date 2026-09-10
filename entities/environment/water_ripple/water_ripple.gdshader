@@ -16,6 +16,7 @@ uniform float wobble_freq = 18.0;    // how many undulations top-to-bottom
 uniform float wobble_speed = 2.4;    // how fast the undulation crawls
 uniform float lens_strength = 0.30;  // slight vertical "bulge" as the band passes
 uniform float glint = 0.04;          // brightness lift on the crest
+uniform float chroma = 1.0;          // 0..1 amount of RGB split (0 = no colour fringing)
 uniform vec2 screen_px = vec2(640.0, 360.0);
 
 void fragment() {
@@ -46,7 +47,7 @@ void fragment() {
 		vec2 uv = SCREEN_UV + offset;
 
 		// Faint chromatic split for the "looking through glass/water" feel
-		float ca = 0.6 * amp_pixels * px.x * k;
+		float ca = 0.6 * amp_pixels * px.x * k * chroma;
 		vec4 col;
 		col.r = texture(screen_tex, uv + vec2(ca, 0.0)).r;
 		col.g = texture(screen_tex, uv).g;
