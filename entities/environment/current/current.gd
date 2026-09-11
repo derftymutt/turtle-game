@@ -89,6 +89,9 @@ class_name OceanCurrent
 var _bubble_texture: ImageTexture = null
 # All spawned emitters, kept so we can toggle them during cycling
 var _emitters: Array[GPUParticles2D] = []
+# One small quad per curve segment — see _build_collision_polygon() for why
+# this replaced a single big ribbon polygon.
+var _segment_shapes: Array[CollisionPolygon2D] = []
 
 # State machine
 enum _State { ACTIVE, INACTIVE, FADING_IN, FADING_OUT }
@@ -295,7 +298,26 @@ func _apply_current_to(body: RigidBody2D) -> void:
 
 # ── Collision polygon generation ──────────────────────────────────────────────
 
+## Builds the current's collision as a chain of small quads, one per curve
+## segment, instead of a single big polygon offset left/right of the whole
+## curve. A one-piece ribbon self-intersects wherever the curve bends
+## tighter than current_width allows, and Godot's automatic convex
+## decomposition can fail outright on that (logs "Convex decomposing
+## failed!") — leaving the current with NO collision shape at all, so it
+## silently stops detecting the player entirely. Each per-segment quad is a
+## simple, inherently-convex shape on its own, so that failure mode can't
+## happen here regardless of how tightly the curve bends.
 func _build_collision_polygon() -> void:
+	for shape in _segment_shapes:
+		if is_instance_valid(shape):
+			shape.queue_free()
+	_segment_shapes.clear()
+	# The scene's own CollisionPolygon2D node is superseded by the per-segment
+	# shapes below — neutralize it rather than remove it, so the @onready
+	# reference (and current.tscn) don't need to change.
+	_collision_polygon.polygon = PackedVector2Array()
+	_collision_polygon.disabled = true
+
 	var curve: Curve2D = _path.curve
 	if curve == null or curve.point_count < 2:
 		push_warning("OceanCurrent (%s): Path2D needs at least 2 points!" % name)
@@ -305,27 +327,25 @@ func _build_collision_polygon() -> void:
 	var sample_count: int = max(int(baked_length / 12.0), 4)
 	var half_width: float = current_width * 0.5
 
-	var left_points: PackedVector2Array = []
-	var right_points: PackedVector2Array = []
-
+	var prev_left: Vector2
+	var prev_right: Vector2
 	for i in range(sample_count + 1):
 		var t: float = float(i) / float(sample_count)
 		var offset: float = t * baked_length
 		var point: Vector2 = curve.sample_baked(offset)
 		var angle: float = curve.sample_baked_with_rotation(offset, true).get_rotation()
 		var perp := Vector2(-sin(angle), cos(angle))
+		var left: Vector2 = point + perp * half_width
+		var right: Vector2 = point - perp * half_width
 
-		left_points.append(point + perp * half_width)
-		right_points.append(point - perp * half_width)
+		if i > 0:
+			var quad := CollisionPolygon2D.new()
+			quad.polygon = PackedVector2Array([prev_left, left, right, prev_right])
+			_area.add_child(quad)
+			_segment_shapes.append(quad)
 
-	var polygon: PackedVector2Array = []
-	for p in left_points:
-		polygon.append(p)
-	right_points.reverse()
-	for p in right_points:
-		polygon.append(p)
-
-	_collision_polygon.polygon = polygon
+		prev_left = left
+		prev_right = right
 
 
 # ── Appear / Disappear ────────────────────────────────────────────────────────
@@ -381,11 +401,15 @@ func turn_off() -> void:
 
 
 func _enable_collision() -> void:
-	_collision_polygon.disabled = false
+	for shape in _segment_shapes:
+		if is_instance_valid(shape):
+			shape.disabled = false
 
 
 func _disable_collision() -> void:
-	_collision_polygon.disabled = true
+	for shape in _segment_shapes:
+		if is_instance_valid(shape):
+			shape.disabled = true
 	_bodies_inside.clear()
 
 

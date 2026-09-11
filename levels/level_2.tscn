@@ -108,6 +108,12 @@ _data = {
 }
 point_count = 11
 
+[sub_resource type="Curve2D" id="Curve2D_4yoxl"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 126, -137, 0, 0, 0, 0, 114, -156, 0, 0, 0, 0, 100, -176, 0, 0, 0, 0, 79, -195, 0, 0, 0, 0, 58, -205, 0, 0, 0, 0, 30, -213, 0, 0, 0, 0, 1, -215, 0, 0, 0, 0, -35, -215, 0, 0, 0, 0, -67, -206, 0, 0, 0, 0, -88, -194, 0, 0, 0, 0, -106, -180, 0, 0, 0, 0, -121, -167, 0, 0, 0, 0, -139, -148, 0, 0, 0, 0, -148, -134)
+}
+point_count = 14
+
 [node name="LevelBase" unique_id=158370714 instance=ExtResource("1_mi4ay")]
 level_number = 2
 
@@ -413,6 +419,8 @@ debris_animation = &"energy"
 [node name="HydroFunnel" parent="." index="60" unique_id=262199370 instance=ExtResource("26_jqt73")]
 position = Vector2(-294, -86)
 propulsion_force = 1600.0
+centering_force = 800.0
+lateral_damping = 1.0
 exit_impulse = 600.0
 hydro_funnel = true
 show_debug_arrows = false
@@ -422,6 +430,8 @@ curve = SubResource("Curve2D_m4706")
 
 [node name="HydroFunnel2" parent="." index="61" unique_id=135921333 instance=ExtResource("26_jqt73")]
 propulsion_force = 1600.0
+centering_force = 800.0
+lateral_damping = 1.0
 exit_impulse = 600.0
 hydro_funnel = true
 show_debug_arrows = false
@@ -435,7 +445,23 @@ position = Vector2(297, -94)
 [node name="DevTechSeeder2" type="Node" parent="." index="62" unique_id=649324248]
 script = ExtResource("32_4xp61")
 
+[node name="HydroFunnel3" parent="." index="63" unique_id=38217051 instance=ExtResource("26_jqt73")]
+propulsion_force = 1600.0
+centering_force = 800.0
+lateral_damping = 1.0
+exit_impulse = 600.0
+hydro_funnel = true
+hydro_funnel_hot_only = true
+show_debug_arrows = false
+
+[node name="Path2D" parent="HydroFunnel3" index="0" unique_id=1461068862]
+curve = SubResource("Curve2D_4yoxl")
+
+[node name="Visuals" parent="HydroFunnel3" index="1" unique_id=2005124627]
+position = Vector2(127, -131)
+
 [editable path="OceanCurrent"]
 [editable path="SpaceDebrisGroup"]
 [editable path="HydroFunnel"]
 [editable path="HydroFunnel2"]
+[editable path="HydroFunnel3"]

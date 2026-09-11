@@ -26,6 +26,7 @@
 [ext_resource type="Texture2D" uid="uid://bm428btwp720u" path="res://entities/environment/ocean_boundaries/ocean_floor.png" id="25_0fu15"]
 [ext_resource type="PackedScene" uid="uid://tpiece001" path="res://entities/collectibles/alien_tech_piece/alien_tech_piece.tscn" id="26_0fu15"]
 [ext_resource type="TileSet" uid="uid://dyl02kfc4a681" path="res://entities/environment/ocean_boundaries/ocean_wall.tres" id="26_4knja"]
+[ext_resource type="PackedScene" uid="uid://ko8xdpxfr5ej" path="res://entities/environment/current/current.tscn" id="27_4knja"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ryfpa"]
 friction = 0.1
@@ -100,6 +101,18 @@ size = Vector2(8.000166, 759.0005)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_4knja"]
 size = Vector2(8.000183, 768.00024)
+
+[sub_resource type="Curve2D" id="Curve2D_voubc"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, -262, -118, 0, 0, 0, 0, -282, -99, 0, 0, 0, 0, -298, -65, 0, 0, 0, 0, -296, -29, 0, 0, 0, 0, -270, -4, 0, 0, 0, 0, -223, 6, 0, 0, 0, 0, -202, 32, 0, 0, 0, 0, -210, 61, 0, 0, 0, 0, -240, 85, 0, 0, 0, 0, -278, 111, 0, 0, 0, 0, -291, 133, 0, 0, 0, 0, -277, 147, 0, 0, 0, 0, -240, 150, 0, 0, 0, 0, -203, 152)
+}
+point_count = 14
+
+[sub_resource type="Curve2D" id="Curve2D_4knja"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 253, -114, 0, 0, 0, 0, 272, -98, 0, 0, 0, 0, 291, -71, 0, 0, 0, 0, 298, -36, 0, 0, 0, 0, 287, -5, 0, 0, 0, 0, 250, 10, 0, 0, 0, 0, 219, 19, 0, 0, 0, 0, 197, 41, 0, 0, 0, 0, 206, 59, 0, 0, 0, 0, 231, 80, 0, 0, 0, 0, 258, 95, 0, 0, 0, 0, 279, 115, 0, 0, 0, 0, 283, 134, 0, 0, 0, 0, 266, 146, 0, 0, 0, 0, 233, 150, 0, 0, 0, 0, 198, 152)
+}
+point_count = 16
 
 [node name="LevelBase" unique_id=519430445 instance=ExtResource("1_lrvbd")]
 
@@ -400,7 +413,41 @@ debris_animation = &"wild"
 position = Vector2(149, -196)
 debris_animation = &"wild"
 
+[node name="DevTechSeeder" parent="." index="35" unique_id=500000002]
+enabled = true
+slot_a = 19
+
 [node name="AlienTechPiece" parent="." index="36" unique_id=100000001 instance=ExtResource("26_0fu15")]
 position = Vector2(0, 82)
 
+[node name="HydroFunnel" parent="." index="39" unique_id=1683655070 instance=ExtResource("27_4knja")]
+propulsion_force = 1600.0
+centering_force = 800.0
+lateral_damping = 1.0
+exit_impulse = 600.0
+hydro_funnel = true
+show_debug_arrows = false
+
+[node name="Path2D" parent="HydroFunnel" index="0" unique_id=1461068862]
+curve = SubResource("Curve2D_voubc")
+
+[node name="Visuals" parent="HydroFunnel" index="1" unique_id=2005124627]
+position = Vector2(-263, -116)
+
+[node name="HydroFunnel2" parent="." index="40" unique_id=1462029198 instance=ExtResource("27_4knja")]
+propulsion_force = 1600.0
+centering_force = 800.0
+lateral_damping = 1.0
+exit_impulse = 600.0
+hydro_funnel = true
+show_debug_arrows = false
+
+[node name="Path2D" parent="HydroFunnel2" index="0" unique_id=1461068862]
+curve = SubResource("Curve2D_4knja")
+
+[node name="Visuals" parent="HydroFunnel2" index="1" unique_id=2005124627]
+position = Vector2(251, -110)
+
 [editable path="SpaceDebrisGroup"]
+[editable path="HydroFunnel"]
+[editable path="HydroFunnel2"]
