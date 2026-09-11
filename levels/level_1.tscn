@@ -26,7 +26,6 @@
 [ext_resource type="Texture2D" uid="uid://bm428btwp720u" path="res://entities/environment/ocean_boundaries/ocean_floor.png" id="25_0fu15"]
 [ext_resource type="PackedScene" uid="uid://tpiece001" path="res://entities/collectibles/alien_tech_piece/alien_tech_piece.tscn" id="26_0fu15"]
 [ext_resource type="TileSet" uid="uid://dyl02kfc4a681" path="res://entities/environment/ocean_boundaries/ocean_wall.tres" id="26_4knja"]
-[ext_resource type="Script" uid="uid://d22ywt1ov84p1" path="res://systems/dev/dev_tech_seeder.gd" id="27_4knja"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ryfpa"]
 friction = 0.1
@@ -401,10 +400,7 @@ debris_animation = &"wild"
 position = Vector2(149, -196)
 debris_animation = &"wild"
 
-[node name="AlienTechPiece" parent="." index="37" unique_id=100000001 instance=ExtResource("26_0fu15")]
+[node name="AlienTechPiece" parent="." index="36" unique_id=100000001 instance=ExtResource("26_0fu15")]
 position = Vector2(0, 82)
-
-[node name="Node" type="Node" parent="." index="39" unique_id=9564700]
-script = ExtResource("27_4knja")
 
 [editable path="SpaceDebrisGroup"]

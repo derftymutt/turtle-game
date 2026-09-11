@@ -81,14 +81,20 @@ func _on_collected(collector):
 
 	# 🚫 NO POINTS AWARDED HERE!
 	print("🔧 Picked up UFO piece (no points yet - deliver it!)")
-	
-	# Remove from physics, but KEEP IN WORLD
-	freeze = true
+
+	# Remove from physics, but KEEP IN WORLD. Deferred: this runs from the
+	# pickup Area2D's body_entered signal, mid physics-query-flush, where
+	# Godot doesn't allow changing collision_layer/collision_mask/freeze
+	# safely — it can silently no-op, leaving the piece's real collision
+	# live while game state thinks it's carried. When that happened it would
+	# visibly jitter against the turtle every physics step instead of
+	# following it cleanly (see the matching note in base_collectible.gd).
 	linear_velocity = Vector2.ZERO
 	angular_velocity = 0.0
-	collision_layer = 0
-	collision_mask = 0
-	
+	set_deferred("freeze", true)
+	set_deferred("collision_layer", 0)
+	set_deferred("collision_mask", 0)
+
 	# Enable _process() for following carrier
 	set_process(true)
 
@@ -106,19 +112,23 @@ func drop_piece(intentional: bool = false):
 	if intentional:
 		_drop_grace_timer = 2.0
 
-	# Restore physics
-	freeze = false
-	collision_layer = 2
-	collision_mask = 1
-
 	# Disable manual _process() following
 	set_process(false)
 
-	# Keep the piece inside the play area and push it away from any nearby wall
+	# Keep the piece inside the play area, then restore physics. Deferred
+	# and bundled into one call (same physics-query-flush hazard as pickup —
+	# see base_collectible.gd) so freeze is actually off before the impulse
+	# is applied; an impulse on a still-frozen body is silently dropped.
 	_clamp_to_play_area()
-	apply_impulse(_safe_drop_impulse())
+	call_deferred("_restore_physics_after_drop")
 
 	print("🔧 Dropped UFO piece")
+
+func _restore_physics_after_drop() -> void:
+	freeze = false
+	collision_layer = 2
+	collision_mask = 1
+	apply_impulse(_safe_drop_impulse())
 
 func _get_play_area_limits() -> Dictionary:
 	# Small margin — just enough to keep the piece inside the wall geometry

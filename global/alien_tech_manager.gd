@@ -52,6 +52,9 @@ const TIME_FREEZE_COOLDOWN_DURATION: float = 10.0
 const GRAVITON_HARNESS_ACTIVE_DURATION:   float = 5.0
 const GRAVITON_HARNESS_COOLDOWN_DURATION: float = 5.0
 
+const MAGNETIC_REPULSION_ACTIVE_DURATION:   float = 8.0
+const MAGNETIC_REPULSION_COOLDOWN_DURATION: float = 5.0
+
 const _COOLDOWN_DURATIONS: Dictionary = {
 	AlienTechRegistry.INERTIA_DAMPENER: INERTIA_DAMPENER_ACTIVE_DURATION + INERTIA_DAMPENER_COOLDOWN_DURATION,
 	AlienTechRegistry.LATERAL_THRUST:   5.0,
@@ -61,6 +64,7 @@ const _COOLDOWN_DURATIONS: Dictionary = {
 	AlienTechRegistry.TIME_FREEZE:      TIME_FREEZE_ACTIVE_DURATION + TIME_FREEZE_COOLDOWN_DURATION,
 	AlienTechRegistry.SHOCKWAVE:        30.0,
 	AlienTechRegistry.GRAVITON_HARNESS: GRAVITON_HARNESS_ACTIVE_DURATION + GRAVITON_HARNESS_COOLDOWN_DURATION,
+	AlienTechRegistry.MAGNETIC_REPULSION: MAGNETIC_REPULSION_ACTIVE_DURATION + MAGNETIC_REPULSION_COOLDOWN_DURATION,
 }
 
 # Techs whose HUD bar should read as two distinct phases — full-color drain
@@ -73,7 +77,17 @@ const _TWO_PHASE_BAR_DURATIONS: Dictionary = {
 	AlienTechRegistry.GRAVITON_HARNESS: {"active": GRAVITON_HARNESS_ACTIVE_DURATION, "cooldown": GRAVITON_HARNESS_COOLDOWN_DURATION},
 	AlienTechRegistry.DEFLECTOR_SHIELD: {"active": DEFLECTOR_SHIELD_ACTIVE_DURATION, "cooldown": DEFLECTOR_SHIELD_COOLDOWN_DURATION},
 	AlienTechRegistry.TIME_FREEZE:      {"active": TIME_FREEZE_ACTIVE_DURATION,      "cooldown": TIME_FREEZE_COOLDOWN_DURATION},
+	AlienTechRegistry.MAGNETIC_REPULSION: {"active": MAGNETIC_REPULSION_ACTIVE_DURATION, "cooldown": MAGNETIC_REPULSION_COOLDOWN_DURATION},
 }
+
+# Techs whose HOT behavior is a manual on/off toggle (via set_passive_bar in
+# turtle_player.gd) rather than "always on" — their bar's "off" state isn't
+# a genuinely-ready cooldown-complete state, it's just not engaged, so it
+# reads as an empty/greyed bar rather than a full-color one. See
+# get_bar_phase()'s "off" phase.
+const _HOT_TOGGLE_TECHS: Array[String] = [
+	AlienTechRegistry.INERTIA_DAMPENER,
+]
 
 var _passive_bar_ratios: Dictionary = {}
 
@@ -250,7 +264,8 @@ func _effective_cooldown_max(slot_index: int, tech_id: String) -> float:
 	match tech_id:
 		AlienTechRegistry.LATERAL_THRUST, AlienTechRegistry.TRANSPORTER, \
 		AlienTechRegistry.SHOCKWAVE, AlienTechRegistry.INERTIA_DAMPENER, \
-		AlienTechRegistry.BUMPER_MAGNET, AlienTechRegistry.GRAVITON_HARNESS:
+		AlienTechRegistry.BUMPER_MAGNET, AlienTechRegistry.GRAVITON_HARNESS, \
+		AlienTechRegistry.MAGNETIC_REPULSION:
 			return 0.0  # hot: no cooldown
 		AlienTechRegistry.TIME_FREEZE:
 			# Hot: active duration doubled, post-active recovery halved.
@@ -293,12 +308,16 @@ func get_bar_phase(slot_index: int) -> Dictionary:
 	if not _TWO_PHASE_BAR_DURATIONS.has(tech_id):
 		return {"phase": "none", "ratio": 0.0}
 	# A tech can override its own bar directly (e.g. hot Inertia Dampener's
-	# manual on/off toggle, via set_passive_bar) — respect that first, full
-	# color either way since it's not really a "cooldown" in that state.
+	# manual on/off toggle, via set_passive_bar) — respect that first. Only
+	# ever present while such a toggle is ON (see _activate_inertia_dampener,
+	# which clears rather than zeroes the entry on toggle-off), so this is
+	# always the "currently engaged" case — full color.
 	if _passive_bar_ratios.has(tech_id):
 		return {"phase": "active", "ratio": _passive_bar_ratios[tech_id]}
 	if is_slot_hot(slot_index):
-		return {"phase": "ready", "ratio": 1.0}  # hot: no cooldown for these techs
+		if tech_id in _HOT_TOGGLE_TECHS:
+			return {"phase": "off", "ratio": 0.0}  # toggle-style hot tech, just not engaged
+		return {"phase": "ready", "ratio": 1.0}  # hot: always-on tech, no cooldown
 	var remaining: float = _cooldowns[slot_index]
 	if remaining <= 0.0:
 		return {"phase": "ready", "ratio": 1.0}
@@ -316,6 +335,16 @@ func set_passive_bar(tech_id: String, ratio: float):
 
 func clear_passive_bar(tech_id: String):
 	_passive_bar_ratios.erase(tech_id)
+
+## Wipes every passive-bar override. Call this when a fresh TurtlePlayer
+## spawns (level load, respawn, retry): all of a tech's per-instance "active"
+## state (e.g. inertia_dampener_active) always resets to false on the new
+## node, but this dict lives on the persistent autoload and won't — left
+## uncleared, a hot toggle-style tech (Inertia Dampener) left ON when the
+## previous player was destroyed would keep reading as "active" (bar full,
+## label blinking) for the new instance despite really starting OFF.
+func clear_all_passive_bars() -> void:
+	_passive_bar_ratios.clear()
 
 func tech_has_bar(tech_id: String) -> bool:
 	return _COOLDOWN_DURATIONS.has(tech_id)

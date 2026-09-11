@@ -190,13 +190,14 @@ var _definitions: Array[Dictionary] = [
 		"hot_description": "Longer beam, double damage.",
 	},
 	{
-		"id":          MAGNETIC_REPULSION,
-		"name":        "Magnetic Repulsion",
-		"description": "Powerups, UFO parts, trash pieces, and tech pieces hover just\noff the ocean floor and walls instead of sinking flush against them.",
-		"slot_label":  "Magnetic Repulsion",
-		"needs_input": false,
-		"color":       Color(0.85, 0.4, 1.0),
-		"hot_description": "Much stronger repulsion — everything floats farther out.",
+		"id":              MAGNETIC_REPULSION,
+		"name":            "Magnetic Repulsion",
+		"description":     "Activate for 8s: powerups, UFO parts, trash pieces, and tech pieces\nhover just off the ocean floor and walls instead of sinking flush\nagainst them. 5s cooldown.",
+		"slot_label":      "Magnetic Repulsion",
+		"needs_input":     true,
+		"has_passive_bar": true,
+		"color":           Color(0.85, 0.4, 1.0),
+		"hot_description": "Always active — no cooldown. Much stronger repulsion — everything floats farther out.",
 	},
 ]
 

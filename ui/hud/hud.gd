@@ -700,11 +700,36 @@ func _sync_hot_border(border: ReferenceRect, label: Label, is_hot: bool, alpha: 
 	var row: Control = label.get_parent()
 	if not row:
 		return
+	# row.get_global_rect() would be the row container's own rect, which is
+	# stretched wide (size_flags_horizontal expand) to split evenly with its
+	# sibling column — reaching halfway across the screen even though the
+	# icon/label/bar inside only use part of that width. Use the tight union
+	# of the row's visible children instead, so the border hugs the content.
 	const PAD := 2.0
-	var rect: Rect2 = row.get_global_rect().grow(PAD)
+	var rect := _tight_content_rect(row)
+	if rect.size == Vector2.ZERO:
+		return
+	rect = rect.grow(PAD)
 	border.global_position = rect.position
 	border.size = rect.size
 	border.modulate.a = alpha
+
+## Union of a Control's visible children's global rects.
+func _tight_content_rect(row: Control) -> Rect2:
+	var result := Rect2()
+	var first := true
+	for child in row.get_children():
+		if not child is Control:
+			continue
+		var c: Control = child
+		if not c.visible:
+			continue
+		var r: Rect2 = c.get_global_rect()
+		if r.size == Vector2.ZERO:
+			continue
+		result = r if first else result.merge(r)
+		first = false
+	return result
 
 func _on_tech_piece_collected(current: int, needed: int):
 	if tech_piece_label:
@@ -815,8 +840,10 @@ func _apply_slot_cooldown_bar(cooldown_bar: TextureProgressBar, slot_index: int)
 	cooldown_bar.value = phase_info.get("ratio", 0.0)
 	# Multiplying the fill's own baked-in color by a neutral grey darkens it
 	# without shifting its hue — a muted version of that same active color,
-	# not a flat generic grey.
-	cooldown_bar.tint_progress = _COOLDOWN_BAR_MUTED if phase == "cooldown" else Color.WHITE
+	# not a flat generic grey. "off" (a hot toggle-style tech, not currently
+	# engaged — see get_bar_phase()) reads the same as "cooldown": greyed,
+	# and its ratio is 0.0 so the bar also empties out, not just dims.
+	cooldown_bar.tint_progress = _COOLDOWN_BAR_MUTED if phase == "cooldown" or phase == "off" else Color.WHITE
 
 const _ACTIVE_BLINK_PERIOD_MSEC: int = 300  # one alpha flip every 300ms (600ms full cycle)
 const _ACTIVE_BLINK_LOW_ALPHA: float = 0.35
@@ -824,8 +851,9 @@ const _ACTIVE_BLINK_LOW_ALPHA: float = 0.35
 ## Drives one slot's label/icon opacity. Two-phase techs (see get_bar_phase())
 ## blink the label while active — a clearer "this is live right now" signal
 ## than the old flat dim — then grey both label and icon out while cooling
-## down, same as before. Everything else keeps the older _is_slot_dimmed()
-## behavior (dim whenever there's any outstanding cooldown at all).
+## down (or, for a hot toggle-style tech, while simply switched off) so the
+## text agrees with the bar. Everything else keeps the older
+## _is_slot_dimmed() behavior (dim whenever there's any outstanding cooldown).
 func _apply_slot_label_state(label: Label, icon: TextureRect, slot_index: int) -> void:
 	if not label and not icon:
 		return
@@ -845,7 +873,7 @@ func _apply_slot_label_state(label: Label, icon: TextureRect, slot_index: int) -
 				label.modulate.a = 1.0 if blink_on else _ACTIVE_BLINK_LOW_ALPHA
 			if icon:
 				icon.modulate.a = 1.0
-		"cooldown":
+		"cooldown", "off":
 			if label:
 				label.modulate.a = 0.5
 			if icon:

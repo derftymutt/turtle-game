@@ -79,8 +79,12 @@ func collect(collector):
 		return
 	
 	collected = true
-	freeze = true
-	
+	# collect() runs from the pickup Area2D's body_entered signal, which fires
+	# mid physics-query-flush — Godot doesn't allow changing `freeze` safely
+	# from there (would warn "Can't change this state while flushing
+	# queries" and can silently no-op). Defer it past the flush instead.
+	set_deferred("freeze", true)
+
 	# Call child implementation
 	_on_collected(collector)
 

@@ -211,6 +211,8 @@ var _time_freeze_active_duration: float = 0.0  # set per-activation; doubled whe
 const MAGNETIC_REPULSION_HOVER: float = 14.0       # px kept clear of the boundary
 const MAGNETIC_REPULSION_HOVER_HOT: float = 30.0
 const MAGNETIC_REPULSION_FORCE: float = 900.0
+var magnetic_repulsion_active: bool = false
+var magnetic_repulsion_timer: float = 0.0
 
 # Thing Bringer
 const THING_BRINGER_RADIUS: float = 30.0
@@ -282,6 +284,11 @@ func _ready():
 
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
+	# Every per-tech "active" flag below (inertia_dampener_active, etc.) always
+	# starts false on this fresh instance — clear any stale passive-bar
+	# override left behind by a previous instance so the HUD doesn't show a
+	# hot toggle-style tech as already active before it's actually been used.
+	AlienTechManager.clear_all_passive_bars()
 	AlienTechManager.tech_activated.connect(_on_alien_tech_activated)
 	AlienTechManager.tech_slots_changed.connect(_on_alien_tech_slots_changed_player)
 	LevelManager.level_complete.connect(func(): _level_complete = true)
@@ -377,6 +384,12 @@ func _physics_process(delta):
 		if graviton_harness_timer <= 0.0:
 			graviton_harness_active = false
 
+	# Hot: always active, no timer needed — see _is_magnetic_repulsion_active().
+	if magnetic_repulsion_active and not AlienTechManager.is_tech_hot(AlienTechRegistry.MAGNETIC_REPULSION):
+		magnetic_repulsion_timer -= delta
+		if magnetic_repulsion_timer <= 0.0:
+			magnetic_repulsion_active = false
+
 	if lateral_thrust_active:
 		lateral_thrust_timer -= delta
 		if lateral_thrust_timer <= 0:
@@ -413,7 +426,7 @@ func _physics_process(delta):
 	if AlienTechManager.is_tech_active(AlienTechRegistry.THING_BRINGER):
 		_update_thing_bringer()
 
-	if AlienTechManager.is_tech_active(AlienTechRegistry.MAGNETIC_REPULSION):
+	if _is_magnetic_repulsion_active():
 		_update_magnetic_repulsion()
 
 	if _bumper_magnet_active:
@@ -1236,12 +1249,22 @@ func _on_alien_tech_activated(slot_index: int, tech_id: String):
 			_activate_shockwave()
 		AlienTechRegistry.GRAVITON_HARNESS:
 			_activate_graviton_harness()
+		AlienTechRegistry.MAGNETIC_REPULSION:
+			_activate_magnetic_repulsion()
 
 func _activate_inertia_dampener():
 	if AlienTechManager.is_tech_hot(AlienTechRegistry.INERTIA_DAMPENER):
 		# Hot: click on, click off — no timer, no cooldown (see _get_effective_cooldown).
 		inertia_dampener_active = not inertia_dampener_active
-		AlienTechManager.set_passive_bar(AlienTechRegistry.INERTIA_DAMPENER, 1.0 if inertia_dampener_active else 0.0)
+		if inertia_dampener_active:
+			AlienTechManager.set_passive_bar(AlienTechRegistry.INERTIA_DAMPENER, 1.0)
+		else:
+			# Erase the override entirely rather than setting it to 0.0 — a
+			# present-but-zero entry still reads as get_bar_phase()'s
+			# "active" (see _passive_bar_ratios.has(tech_id) there), which
+			# kept the label blinking forever after the first toggle-on.
+			# Clearing it falls through to the hot "ready" branch instead.
+			AlienTechManager.clear_passive_bar(AlienTechRegistry.INERTIA_DAMPENER)
 		return
 	inertia_dampener_active = true
 	inertia_dampener_timer = AlienTechManager.INERTIA_DAMPENER_ACTIVE_DURATION
@@ -1256,6 +1279,17 @@ func _activate_graviton_harness():
 ## timed activation is running, or the tech is hot (always active).
 func _is_harness_weightless() -> bool:
 	return graviton_harness_active or AlienTechManager.is_tech_hot(AlienTechRegistry.GRAVITON_HARNESS)
+
+func _activate_magnetic_repulsion():
+	# Hot is always active via _is_magnetic_repulsion_active() regardless of
+	# this timer, so a press while hot (no cooldown gating it) is a harmless no-op.
+	magnetic_repulsion_active = true
+	magnetic_repulsion_timer = AlienTechManager.MAGNETIC_REPULSION_ACTIVE_DURATION
+
+## True whenever the floor/wall repulsion should be running: the cold timed
+## activation is running, or the tech is hot (always active).
+func _is_magnetic_repulsion_active() -> bool:
+	return magnetic_repulsion_active or AlienTechManager.is_tech_hot(AlienTechRegistry.MAGNETIC_REPULSION)
 
 func _activate_lateral_thrust():
 	lateral_thrust_active = true
