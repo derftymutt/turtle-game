@@ -29,6 +29,7 @@
 [ext_resource type="TileSet" uid="uid://dyl02kfc4a681" path="res://entities/environment/ocean_boundaries/ocean_wall.tres" id="28_kyq6o"]
 [ext_resource type="PackedScene" uid="uid://ko8xdpxfr5ej" path="res://entities/environment/current/current.tscn" id="31_4gw27"]
 [ext_resource type="PackedScene" uid="uid://c41fis6pd8gh2" path="res://systems/space_debris/space_debris_group.tscn" id="31_q26s8"]
+[ext_resource type="Script" uid="uid://d22ywt1ov84p1" path="res://systems/dev/dev_tech_seeder.gd" id="32_mb3d3"]
 [ext_resource type="PackedScene" uid="uid://dq7r6j7ritsv7" path="res://entities/collectibles/powerup/powerup.tscn" id="32_o87u6"]
 [ext_resource type="PackedScene" uid="uid://q614lo3kanxc" path="res://systems/space_debris/space_debris.tscn" id="33_h3b7p"]
 
@@ -100,6 +101,24 @@ size = Vector2(8.000183, 768.00024)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xn6mk"]
 size = Vector2(8.000034, 1916.0011)
+
+[sub_resource type="Curve2D" id="Curve2D_4gw27"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, -218, -46, 0, 0, 0, 0, -236, -20, 0, 0, 0, 0, -254, 14, 0, 0, 0, 0, -280, 47, 0, 0, 0, 0, -295, 75, 0, 0, 0, 0, -299, 104, 0, 0, 0, 0, -300, 127, 0, 0, 0, 0, -296, 143, 0, 0, 0, 0, -284, 149, 0, 0, 0, 0, -260, 152, 0, 0, 0, 0, -237, 152, 0, 0, 0, 0, -191, 153)
+}
+point_count = 12
+
+[sub_resource type="Curve2D" id="Curve2D_mb3d3"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 205, -53, 0, 0, 0, 0, 219, -35, 0, 0, 0, 0, 234, -13, 0, 0, 0, 0, 253, 6, 0, 0, 0, 0, 266, 26, 0, 0, 0, 0, 281, 42, 0, 0, 0, 0, 292, 68, 0, 0, 0, 0, 295, 91, 0, 0, 0, 0, 296, 114, 0, 0, 0, 0, 296, 133, 0, 0, 0, 0, 283, 148, 0, 0, 0, 0, 257, 151, 0, 0, 0, 0, 224, 151, 0, 0, 0, 0, 192, 151)
+}
+point_count = 14
+
+[sub_resource type="Curve2D" id="Curve2D_q26s8"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, -92, -23, 0, 0, 0, 0, -62, -21, 0, 0, 0, 0, -29, -19, 0, 0, 0, 0, 12, -23, 0, 0, 0, 0, 43, -22, 0, 0, 0, 0, 86, -19)
+}
+point_count = 6
 
 [node name="LevelBase" unique_id=202497572 instance=ExtResource("1_vkd0v")]
 level_number = 3
@@ -458,6 +477,55 @@ debris_animation = &"bullet"
 position = Vector2(235, -195)
 debris_animation = &"bullet"
 
+[node name="HydroFunnel" parent="." index="49" unique_id=48709372 instance=ExtResource("31_4gw27")]
+propulsion_force = 1600.0
+centering_force = 800.0
+lateral_damping = 1.0
+exit_impulse = 600.0
+hydro_funnel = true
+show_debug_arrows = false
+
+[node name="Path2D" parent="HydroFunnel" index="0" unique_id=1461068862]
+curve = SubResource("Curve2D_4gw27")
+
+[node name="Visuals" parent="HydroFunnel" index="1" unique_id=2005124627]
+position = Vector2(-216, -51)
+
+[node name="HydroFunnel2" parent="." index="50" unique_id=93068104 instance=ExtResource("31_4gw27")]
+propulsion_force = 1600.0
+centering_force = 800.0
+lateral_damping = 1.0
+exit_impulse = 600.0
+hydro_funnel = true
+show_debug_arrows = false
+
+[node name="Path2D" parent="HydroFunnel2" index="0" unique_id=1461068862]
+curve = SubResource("Curve2D_mb3d3")
+
+[node name="Visuals" parent="HydroFunnel2" index="1" unique_id=2005124627]
+position = Vector2(204, -46)
+
+[node name="HydroFunnel3" parent="." index="51" unique_id=32750845 instance=ExtResource("31_4gw27")]
+propulsion_force = 1600.0
+centering_force = 800.0
+lateral_damping = 1.0
+exit_impulse = 600.0
+hydro_funnel = true
+hydro_funnel_hot_only = true
+show_debug_arrows = false
+
+[node name="Path2D" parent="HydroFunnel3" index="0" unique_id=1461068862]
+curve = SubResource("Curve2D_q26s8")
+
+[node name="Visuals" parent="HydroFunnel3" index="1" unique_id=2005124627]
+position = Vector2(-89, -27)
+
+[node name="DevTechSeeder2" type="Node" parent="." index="52" unique_id=1666723360]
+script = ExtResource("32_mb3d3")
+
 [editable path="OceanCurrentLeft"]
 [editable path="OceanCurrentRight"]
 [editable path="SpaceDebrisGroup"]
+[editable path="HydroFunnel"]
+[editable path="HydroFunnel2"]
+[editable path="HydroFunnel3"]
