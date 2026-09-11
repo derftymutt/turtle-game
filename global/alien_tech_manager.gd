@@ -49,8 +49,8 @@ const DEFLECTOR_SHIELD_COOLDOWN_DURATION: float = 10.0
 const TIME_FREEZE_ACTIVE_DURATION:   float = 5.0
 const TIME_FREEZE_COOLDOWN_DURATION: float = 10.0
 
-const INERTIAL_HARNESS_ACTIVE_DURATION:   float = 10.0
-const INERTIAL_HARNESS_COOLDOWN_DURATION: float = 5.0
+const GRAVITON_HARNESS_ACTIVE_DURATION:   float = 10.0
+const GRAVITON_HARNESS_COOLDOWN_DURATION: float = 5.0
 
 const _COOLDOWN_DURATIONS: Dictionary = {
 	AlienTechRegistry.INERTIA_DAMPENER: INERTIA_DAMPENER_ACTIVE_DURATION + INERTIA_DAMPENER_COOLDOWN_DURATION,
@@ -60,7 +60,7 @@ const _COOLDOWN_DURATIONS: Dictionary = {
 	AlienTechRegistry.DEFLECTOR_SHIELD: DEFLECTOR_SHIELD_ACTIVE_DURATION + DEFLECTOR_SHIELD_COOLDOWN_DURATION,
 	AlienTechRegistry.TIME_FREEZE:      TIME_FREEZE_ACTIVE_DURATION + TIME_FREEZE_COOLDOWN_DURATION,
 	AlienTechRegistry.SHOCKWAVE:        30.0,
-	AlienTechRegistry.INERTIAL_HARNESS: INERTIAL_HARNESS_ACTIVE_DURATION + INERTIAL_HARNESS_COOLDOWN_DURATION,
+	AlienTechRegistry.GRAVITON_HARNESS: GRAVITON_HARNESS_ACTIVE_DURATION + GRAVITON_HARNESS_COOLDOWN_DURATION,
 }
 
 var _passive_bar_ratios: Dictionary = {}
@@ -238,7 +238,7 @@ func _effective_cooldown_max(slot_index: int, tech_id: String) -> float:
 	match tech_id:
 		AlienTechRegistry.LATERAL_THRUST, AlienTechRegistry.TRANSPORTER, \
 		AlienTechRegistry.SHOCKWAVE, AlienTechRegistry.INERTIA_DAMPENER, \
-		AlienTechRegistry.BUMPER_MAGNET, AlienTechRegistry.INERTIAL_HARNESS:
+		AlienTechRegistry.BUMPER_MAGNET, AlienTechRegistry.GRAVITON_HARNESS:
 			return 0.0  # hot: no cooldown
 		AlienTechRegistry.TIME_FREEZE:
 			# Hot: active duration doubled, post-active recovery halved.

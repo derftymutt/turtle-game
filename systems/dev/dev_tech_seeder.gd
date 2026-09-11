@@ -13,7 +13,7 @@ class_name DevTechSeeder
 	"Saliva Nanobots", "Bubble Shield", "Dermal Regenerator", "Bumper Magnet",
 	"Phase Shifter", "Powerup Replicator", "Deflector Shield",
 	"Time Freeze", "Flipper Velcro", "Shockwave", "Thing Bringer",
-	"Inertial Harness", "Plasma Spit", "Magnetic Repulsion"
+	"Graviton Harness", "Plasma Spit", "Magnetic Repulsion"
 ) var slot_a: int = 0
 
 @export_enum(
@@ -22,7 +22,7 @@ class_name DevTechSeeder
 	"Saliva Nanobots", "Bubble Shield", "Dermal Regenerator", "Bumper Magnet",
 	"Phase Shifter", "Powerup Replicator", "Deflector Shield",
 	"Time Freeze", "Flipper Velcro", "Shockwave", "Thing Bringer",
-	"Inertial Harness", "Plasma Spit", "Magnetic Repulsion"
+	"Graviton Harness", "Plasma Spit", "Magnetic Repulsion"
 ) var slot_b: int = 0
 
 ## Force the seeded slot straight to HOT state, for testing hot effects without
@@ -48,7 +48,7 @@ const _TECH_IDS: Array[String] = [
 	AlienTechRegistry.FLIPPER_VELCRO,
 	AlienTechRegistry.SHOCKWAVE,
 	AlienTechRegistry.THING_BRINGER,
-	AlienTechRegistry.INERTIAL_HARNESS,
+	AlienTechRegistry.GRAVITON_HARNESS,
 	AlienTechRegistry.PLASMA_SPIT,
 	AlienTechRegistry.MAGNETIC_REPULSION,
 ]

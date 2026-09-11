@@ -21,7 +21,7 @@ const TIME_FREEZE         := "time_freeze"
 const FLIPPER_VELCRO      := "flipper_velcro"
 const SHOCKWAVE           := "shockwave"
 const THING_BRINGER       := "thing_bringer"
-const INERTIAL_HARNESS    := "inertial_harness"
+const GRAVITON_HARNESS    := "graviton_harness"
 const PLASMA_SPIT         := "plasma_spit"
 const MAGNETIC_REPULSION  := "magnetic_repulsion"
 
@@ -171,10 +171,10 @@ var _definitions: Array[Dictionary] = [
 		"hot_description": "Twice the range and pull speed.",
 	},
 	{
-		"id":              INERTIAL_HARNESS,
-		"name":            "Inertial Harness",
+		"id":              GRAVITON_HARNESS,
+		"name":            "Graviton Harness",
 		"description":     "Activate to nullify the weight of a carried UFO part for 10s.\n5s cooldown.",
-		"slot_label":      "Inertial Harness",
+		"slot_label":      "Graviton Harness",
 		"needs_input":     true,
 		"has_passive_bar": true,
 		"color":           Color(0.7, 0.8, 1.0),

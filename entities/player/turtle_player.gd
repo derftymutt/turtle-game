@@ -102,9 +102,9 @@ var control_suspend_timer: float = 0.0
 var inertia_dampener_active: bool = false
 var inertia_dampener_timer: float = 0.0
 
-# Inertial Harness — nullifies carried UFO piece weight while active
-var inertial_harness_active: bool = false
-var inertial_harness_timer: float = 0.0
+# Graviton Harness — nullifies carried UFO piece weight while active
+var graviton_harness_active: bool = false
+var graviton_harness_timer: float = 0.0
 
 var lateral_thrust_active: bool = false
 var lateral_thrust_timer: float = 0.0
@@ -372,10 +372,10 @@ func _physics_process(delta):
 			inertia_dampener_active = false
 
 	# Hot: always weightless, no timer needed — see _is_harness_weightless().
-	if inertial_harness_active and not AlienTechManager.is_tech_hot(AlienTechRegistry.INERTIAL_HARNESS):
-		inertial_harness_timer -= delta
-		if inertial_harness_timer <= 0.0:
-			inertial_harness_active = false
+	if graviton_harness_active and not AlienTechManager.is_tech_hot(AlienTechRegistry.GRAVITON_HARNESS):
+		graviton_harness_timer -= delta
+		if graviton_harness_timer <= 0.0:
+			graviton_harness_active = false
 
 	if lateral_thrust_active:
 		lateral_thrust_timer -= delta
@@ -1234,8 +1234,8 @@ func _on_alien_tech_activated(slot_index: int, tech_id: String):
 			_activate_time_freeze()
 		AlienTechRegistry.SHOCKWAVE:
 			_activate_shockwave()
-		AlienTechRegistry.INERTIAL_HARNESS:
-			_activate_inertial_harness()
+		AlienTechRegistry.GRAVITON_HARNESS:
+			_activate_graviton_harness()
 
 func _activate_inertia_dampener():
 	if AlienTechManager.is_tech_hot(AlienTechRegistry.INERTIA_DAMPENER):
@@ -1246,16 +1246,16 @@ func _activate_inertia_dampener():
 	inertia_dampener_active = true
 	inertia_dampener_timer = AlienTechManager.INERTIA_DAMPENER_ACTIVE_DURATION
 
-func _activate_inertial_harness():
+func _activate_graviton_harness():
 	# Hot is always weightless via _is_harness_weightless() regardless of this
 	# timer, so a press while hot (no cooldown gating it) is a harmless no-op.
-	inertial_harness_active = true
-	inertial_harness_timer = AlienTechManager.INERTIAL_HARNESS_ACTIVE_DURATION
+	graviton_harness_active = true
+	graviton_harness_timer = AlienTechManager.GRAVITON_HARNESS_ACTIVE_DURATION
 
 ## True whenever a carried UFO piece's weight should be ignored: the cold
 ## timed activation is running, or the tech is hot (always active).
 func _is_harness_weightless() -> bool:
-	return inertial_harness_active or AlienTechManager.is_tech_hot(AlienTechRegistry.INERTIAL_HARNESS)
+	return graviton_harness_active or AlienTechManager.is_tech_hot(AlienTechRegistry.GRAVITON_HARNESS)
 
 func _activate_lateral_thrust():
 	lateral_thrust_active = true

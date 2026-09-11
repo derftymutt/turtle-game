@@ -777,7 +777,7 @@ func _update_slot_display(label: Label, cooldown_bar: TextureProgressBar,
 			rpl_container.visible = filled_count > 0
 		var count_label: Label = _slot_a_rpl_count_label if rpl_container == _slot_a_rpl_container else _slot_b_rpl_count_label
 		if count_label:
-			var uses_left := AlienTechManager.powerup_replicator_hot_uses_remaining
+			var uses_left: int = AlienTechManager.powerup_replicator_hot_uses_remaining
 			if uses_left > 0:
 				count_label.text = "x%d" % uses_left
 				count_label.visible = true

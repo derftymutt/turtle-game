@@ -29,7 +29,7 @@ func _process(_delta):
 	var carry_point = carrier.get_node_or_null("CarryPoint")
 	if not carry_point:
 		return
-	# Normally the only carried piece. With Inertial Harness hot (carry 2 at
+	# Normally the only carried piece. With Graviton Harness hot (carry 2 at
 	# once) the second piece offsets from the carry point so they don't overlap.
 	var slot_index: int = GameManager.carried_pieces.find(self)
 	var offset := Vector2.ZERO if slot_index <= 0 else Vector2(-13, 5)
@@ -67,7 +67,7 @@ func _on_collected(collector):
 		collected = false
 		return
 
-	# Check if player has room to carry another (normally 1; 2 with hot Inertial Harness)
+	# Check if player has room to carry another (normally 1; 2 with hot Graviton Harness)
 	if not GameManager.can_carry_more_pieces():
 		# Don't collect - player's hands are full
 		collected = false  # Reset so we can try again

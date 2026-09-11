@@ -19,5 +19,3 @@ texture = ExtResource("2_2qgwa")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=339678823]
 shape = SubResource("CircleShape2D_y25gk")
-
-[connection signal="body_entered" from="." to="." method="_on_body_entered"]

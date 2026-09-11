@@ -125,7 +125,7 @@ func _on_delivery_area_exited(body: Node2D):
 
 func attempt_delivery():
 	"""Try to deliver every UFO piece currently carried (normally 1; can be 2
-	   with hot Inertial Harness). Snapshot the list first since delivering
+	   with hot Graviton Harness). Snapshot the list first since delivering
 	   a piece mutates GameManager.carried_pieces."""
 	for piece in GameManager.carried_pieces.duplicate():
 		if not is_instance_valid(piece):

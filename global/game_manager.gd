@@ -16,7 +16,7 @@ var total_score: int = 0     # Cumulative score across all completed levels this
 # `carried_piece` stays the most-recently-picked-up piece for back-compat with
 # single-piece call sites (thrust weight check, kick animation, etc.) that only
 # care whether *something* is being carried. `carried_pieces` is the real list —
-# normally holds at most 1, or 2 while Inertial Harness is hot (see
+# normally holds at most 1, or 2 while Graviton Harness is hot (see
 # max_carry_capacity()). Always go through add_carried_piece()/remove_carried_piece()
 # so the two stay in sync.
 var is_carrying_piece: bool = false
@@ -87,9 +87,9 @@ func reset_game():
 	LevelManager.reset_run()
 	AlienTechManager.reset_run()
 
-## Hot Inertial Harness lets the turtle carry 2 UFO parts at once instead of 1.
+## Hot Graviton Harness lets the turtle carry 2 UFO parts at once instead of 1.
 func max_carry_capacity() -> int:
-	if AlienTechManager.is_tech_hot(AlienTechRegistry.INERTIAL_HARNESS):
+	if AlienTechManager.is_tech_hot(AlienTechRegistry.GRAVITON_HARNESS):
 		return 2
 	return 1
 
