@@ -22,6 +22,7 @@
 [ext_resource type="PackedScene" uid="uid://dq7r6j7ritsv7" path="res://entities/collectibles/powerup/powerup.tscn" id="21_cekp2"]
 [ext_resource type="PackedScene" uid="uid://d2kw7hdpyp6d0" path="res://entities/enemies/sea_urchin/sea_urchin.tscn" id="21_mmy2b"]
 [ext_resource type="PackedScene" uid="uid://q614lo3kanxc" path="res://systems/space_debris/space_debris.tscn" id="22_mlk23"]
+[ext_resource type="PackedScene" uid="uid://ko8xdpxfr5ej" path="res://entities/environment/current/current.tscn" id="23_cekp2"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_av2kh"]
 size = Vector2(8.000034, 1916.0011)
@@ -58,6 +59,30 @@ bounce = 1.2
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_bon8i"]
 friction = 0.1
 bounce = 1.2
+
+[sub_resource type="Curve2D" id="Curve2D_mlk23"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 296, 118, 0, 0, 0, 0, 278, 134, 0, 0, 0, 0, 249, 144, 0, 0, 0, 0, 213, 146)
+}
+point_count = 4
+
+[sub_resource type="Curve2D" id="Curve2D_cekp2"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, -292, 119, 0, 0, 0, 0, -279, 136, 0, 0, 0, 0, -253, 146, 0, 0, 0, 0, -221, 148)
+}
+point_count = 4
+
+[sub_resource type="Curve2D" id="Curve2D_b36k0"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, -304, -27, 0, 0, 0, 0, -304, -80, 0, 0, 0, 0, -299, -126, 0, 0, 0, 0, -280, -164, 0, 0, 0, 0, -249, -195, 0, 0, 0, 0, -213, -210, 0, 0, 0, 0, -164, -216, 0, 0, 0, 0, -123, -212, 0, 0, 0, 0, -86, -200, 0, 0, 0, 0, -60, -173, 0, 0, 0, 0, -39, -147)
+}
+point_count = 11
+
+[sub_resource type="Curve2D" id="Curve2D_aacai"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 302, -25, 0, 0, 0, 0, 302, -56, 0, 0, 0, 0, 299, -86, 0, 0, 0, 0, 298, -112, 0, 0, 0, 0, 287, -138, 0, 0, 0, 0, 276, -161, 0, 0, 0, 0, 250, -184, 0, 0, 0, 0, 227, -197, 0, 0, 0, 0, 193, -207, 0, 0, 0, 0, 152, -208, 0, 0, 0, 0, 114, -208, 0, 0, 0, 0, 80, -194, 0, 0, 0, 0, 56, -175, 0, 0, 0, 0, 37, -147)
+}
+point_count = 14
 
 [node name="Level5" unique_id=1013451131 instance=ExtResource("1_erq1u")]
 level_number = 5
@@ -328,4 +353,70 @@ debris_animation = &"shield"
 position = Vector2(176, -191)
 debris_animation = &"shield"
 
+[node name="DevTechSeeder" parent="." index="45" unique_id=500000002]
+enabled = true
+slot_a = 19
+slot_a_hot = true
+
+[node name="HydroFunnel" parent="." index="49" unique_id=1683655070 instance=ExtResource("23_cekp2")]
+propulsion_force = 1600.0
+centering_force = 200.0
+lateral_damping = 0.5
+exit_impulse = 600.0
+hydro_funnel = true
+show_debug_arrows = false
+
+[node name="Path2D" parent="HydroFunnel" index="0" unique_id=1461068862]
+curve = SubResource("Curve2D_mlk23")
+
+[node name="Visuals" parent="HydroFunnel" index="1" unique_id=2005124627]
+position = Vector2(285, 140)
+
+[node name="HydroFunnel2" parent="." index="50" unique_id=640866240 instance=ExtResource("23_cekp2")]
+propulsion_force = 1600.0
+centering_force = 200.0
+lateral_damping = 0.5
+exit_impulse = 600.0
+show_debug_arrows = false
+
+[node name="Path2D" parent="HydroFunnel2" index="0" unique_id=1461068862]
+curve = SubResource("Curve2D_cekp2")
+
+[node name="Visuals" parent="HydroFunnel2" index="1" unique_id=2005124627]
+position = Vector2(-294, 117)
+
+[node name="HydroFunnel3" parent="." index="51" unique_id=676046978 instance=ExtResource("23_cekp2")]
+propulsion_force = 1600.0
+centering_force = 800.0
+lateral_damping = 1.0
+exit_impulse = 600.0
+hydro_funnel = true
+hydro_funnel_hot_only = true
+show_debug_arrows = false
+
+[node name="Path2D" parent="HydroFunnel3" index="0" unique_id=1461068862]
+curve = SubResource("Curve2D_b36k0")
+
+[node name="Visuals" parent="HydroFunnel3" index="1" unique_id=2005124627]
+position = Vector2(-301, -20)
+
+[node name="HydroFunnel4" parent="." index="52" unique_id=1293433064 instance=ExtResource("23_cekp2")]
+propulsion_force = 1600.0
+centering_force = 800.0
+lateral_damping = 1.0
+exit_impulse = 600.0
+hydro_funnel = true
+hydro_funnel_hot_only = true
+show_debug_arrows = false
+
+[node name="Path2D" parent="HydroFunnel4" index="0" unique_id=1461068862]
+curve = SubResource("Curve2D_aacai")
+
+[node name="Visuals" parent="HydroFunnel4" index="1" unique_id=2005124627]
+position = Vector2(301, -21)
+
 [editable path="SpaceDebrisGroup"]
+[editable path="HydroFunnel"]
+[editable path="HydroFunnel2"]
+[editable path="HydroFunnel3"]
+[editable path="HydroFunnel4"]

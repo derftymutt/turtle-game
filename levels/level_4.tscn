@@ -136,6 +136,24 @@ _data = {
 }
 point_count = 9
 
+[sub_resource type="Curve2D" id="Curve2D_xtn87"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, -184, -49, 0, 0, 0, 0, -203, -27, 0, 0, 0, 0, -221, -9, 0, 0, 0, 0, -242, 10, 0, 0, 0, 0, -259, 30, 0, 0, 0, 0, -273, 51, 0, 0, 0, 0, -293, 82, 0, 0, 0, 0, -302, 111, 0, 0, 0, 0, -299, 135, 0, 0, 0, 0, -278, 150, 0, 0, 0, 0, -240, 153, 0, 0, 0, 0, -202, 153)
+}
+point_count = 12
+
+[sub_resource type="Curve2D" id="Curve2D_uxflf"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 16, -6, 0, 0, 0, 0, 33, 18, 0, 0, 0, 0, 51, 40, 0, 0, 0, 0, 71, 66, 0, 0, 0, 0, 91, 95, 0, 0, 0, 0, 109, 118, 0, 0, 0, 0, 126, 138, 0, 0, 0, 0, 138, 171, 0, 0, 0, 0, 128, 191, 0, 0, 0, 0, 97, 194, 0, 0, 0, 0, 50, 194)
+}
+point_count = 11
+
+[sub_resource type="Curve2D" id="Curve2D_2xw5q"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 103, -106, 0, 0, 0, 0, 88, -134, 0, 0, 0, 0, 77, -166, 0, 0, 0, 0, 72, -201)
+}
+point_count = 4
+
 [node name="LevelBase" unique_id=1013451131 instance=ExtResource("1_vov61")]
 level_number = 4
 
@@ -737,6 +755,50 @@ position = Vector2(20, 6)
 
 [node name="SkyStarSeeder" parent="." index="80" unique_id=712381982 instance=ExtResource("41_pb5nj")]
 
+[node name="HydroFunnel" parent="." index="86" unique_id=2046641551 instance=ExtResource("20_436cy")]
+propulsion_force = 1600.0
+centering_force = 800.0
+lateral_damping = 1.0
+exit_impulse = 600.0
+hydro_funnel = true
+show_debug_arrows = false
+
+[node name="Path2D" parent="HydroFunnel" index="0" unique_id=1461068862]
+curve = SubResource("Curve2D_xtn87")
+
+[node name="Visuals" parent="HydroFunnel" index="1" unique_id=2005124627]
+position = Vector2(-183, -50)
+
+[node name="HydroFunnel2" parent="." index="87" unique_id=1339560892 instance=ExtResource("20_436cy")]
+position = Vector2(163, -41)
+propulsion_force = 1600.0
+centering_force = 800.0
+lateral_damping = 1.0
+exit_impulse = 600.0
+hydro_funnel = true
+show_debug_arrows = false
+
+[node name="Path2D" parent="HydroFunnel2" index="0" unique_id=1461068862]
+curve = SubResource("Curve2D_uxflf")
+
+[node name="Visuals" parent="HydroFunnel2" index="1" unique_id=2005124627]
+position = Vector2(15, 3)
+
+[node name="HydroFunnel3" parent="." index="88" unique_id=1680384171 instance=ExtResource("20_436cy")]
+propulsion_force = 1600.0
+centering_force = 800.0
+lateral_damping = 1.0
+exit_impulse = 600.0
+hydro_funnel = true
+hydro_funnel_hot_only = true
+show_debug_arrows = false
+
+[node name="Path2D" parent="HydroFunnel3" index="0" unique_id=1461068862]
+curve = SubResource("Curve2D_2xw5q")
+
+[node name="Visuals" parent="HydroFunnel3" index="1" unique_id=2005124627]
+position = Vector2(75, -113)
+
 [editable path="FlipperSkyCenterLeft/DeadWall10"]
 [editable path="FlipperSkyCenterLeft2/DeadWall10"]
 [editable path="CloudFlipperCenterRight/DeadWall11"]
@@ -746,3 +808,6 @@ position = Vector2(20, 6)
 [editable path="OceanCurrent"]
 [editable path="OceanCurrent2"]
 [editable path="OceanCurrent3"]
+[editable path="HydroFunnel"]
+[editable path="HydroFunnel2"]
+[editable path="HydroFunnel3"]
