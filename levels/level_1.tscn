@@ -413,10 +413,6 @@ debris_animation = &"wild"
 position = Vector2(149, -196)
 debris_animation = &"wild"
 
-[node name="DevTechSeeder" parent="." index="35" unique_id=500000002]
-enabled = true
-slot_a = 19
-
 [node name="AlienTechPiece" parent="." index="36" unique_id=100000001 instance=ExtResource("26_0fu15")]
 position = Vector2(0, 82)
 
