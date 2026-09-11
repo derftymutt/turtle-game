@@ -25,10 +25,15 @@ func _process(_delta):
 	"""Follow carrier while being carried"""
 	if not is_carried or carrier == null:
 		return
-	
+
 	var carry_point = carrier.get_node_or_null("CarryPoint")
-	if carry_point:
-		global_position = carry_point.global_position
+	if not carry_point:
+		return
+	# Normally the only carried piece. With Inertial Harness hot (carry 2 at
+	# once) the second piece offsets from the carry point so they don't overlap.
+	var slot_index: int = GameManager.carried_pieces.find(self)
+	var offset := Vector2.ZERO if slot_index <= 0 else Vector2(-13, 5)
+	global_position = carry_point.global_position + offset
 
 func _collectible_physics_process(delta):
 	"""Custom physics - only run when NOT carried"""
@@ -62,17 +67,16 @@ func _on_collected(collector):
 		collected = false
 		return
 
-	# Check if player is already carrying something
-	if GameManager.is_carrying_piece:
-		# Don't collect - player already has one
+	# Check if player has room to carry another (normally 1; 2 with hot Inertial Harness)
+	if not GameManager.can_carry_more_pieces():
+		# Don't collect - player's hands are full
 		collected = false  # Reset so we can try again
 		return
-	
+
 	# Pick up the piece
 	is_carried = true
 	carrier = collector
-	GameManager.carried_piece = self
-	GameManager.is_carrying_piece = true
+	GameManager.add_carried_piece(self)
 	$SfxPickup.play()
 
 	# 🚫 NO POINTS AWARDED HERE!
@@ -96,8 +100,7 @@ func drop_piece(intentional: bool = false):
 
 	is_carried = false
 	collected = false  # Allow re-collection
-	GameManager.carried_piece = null
-	GameManager.is_carrying_piece = false
+	GameManager.remove_carried_piece(self)
 	carrier = null
 
 	if intentional:

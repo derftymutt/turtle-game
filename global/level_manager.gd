@@ -131,8 +131,7 @@ func deliver_piece():
 func load_tutorial():
 	"""Launch the standalone tutorial. Separate mode — no scoring, no progression."""
 	is_tutorial = true
-	GameManager.is_carrying_piece = false
-	GameManager.carried_piece = null
+	GameManager.clear_carried_pieces()
 	print("📘 Loading tutorial")
 	get_tree().change_scene_to_file(TUTORIAL_SCENE)
 
@@ -246,8 +245,7 @@ func load_level(level_number: int):
 	var level_path = level_scenes[level_number]
 	print("📂 Loading level %d: %s" % [level_number, level_path])
 
-	GameManager.is_carrying_piece = false
-	GameManager.carried_piece = null
+	GameManager.clear_carried_pieces()
 
 	get_tree().change_scene_to_file(level_path)
 

@@ -191,8 +191,7 @@ func _on_tutorial_pressed():
 	LevelManager.load_tutorial()
 
 func _on_dev_level_selected(level_num: int):
-	GameManager.is_carrying_piece = false
-	GameManager.carried_piece = null
+	GameManager.clear_carried_pieces()
 	LevelManager.load_level(level_num)
 
 func _on_guide_pressed():

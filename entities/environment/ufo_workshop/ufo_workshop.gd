@@ -112,9 +112,9 @@ func _on_delivery_area_entered(body: Node2D):
 	"""Player entered delivery zone"""
 	if not body.is_in_group("player"):
 		return
-	
+
 	# Check if carrying a piece
-	if GameManager.is_carrying_piece and GameManager.carried_piece:
+	if GameManager.is_carrying_piece:
 		is_player_nearby_with_piece = true
 		attempt_delivery()
 
@@ -124,19 +124,14 @@ func _on_delivery_area_exited(body: Node2D):
 		is_player_nearby_with_piece = false
 
 func attempt_delivery():
-	"""Try to deliver the carried UFO piece"""
-	if not GameManager.is_carrying_piece:
-		return
-	
-	var piece = GameManager.carried_piece
-	if not piece or not is_instance_valid(piece):
-		push_warning("Workshop: Invalid carried piece reference!")
-		GameManager.is_carrying_piece = false
-		GameManager.carried_piece = null
-		return
-	
-	# Successful delivery!
-	deliver_piece(piece)
+	"""Try to deliver every UFO piece currently carried (normally 1; can be 2
+	   with hot Inertial Harness). Snapshot the list first since delivering
+	   a piece mutates GameManager.carried_pieces."""
+	for piece in GameManager.carried_pieces.duplicate():
+		if not is_instance_valid(piece):
+			GameManager.remove_carried_piece(piece)
+			continue
+		deliver_piece(piece)
 
 func deliver_piece(piece: UFOPiece):
 	"""Accept the UFO piece and remove it from world"""
@@ -161,11 +156,10 @@ func deliver_piece(piece: UFOPiece):
 	
 	# Play satisfying delivery animation
 	_play_delivery_animation(piece)
-	
-	# Clear carrier state
-	GameManager.is_carrying_piece = false
-	GameManager.carried_piece = null
-	
+
+	# Clear carrier state (only this piece — a second one may still be carried)
+	GameManager.remove_carried_piece(piece)
+
 	# Update piece state
 	piece.is_carried = false
 	piece.carrier = null

@@ -21,6 +21,9 @@ const TIME_FREEZE         := "time_freeze"
 const FLIPPER_VELCRO      := "flipper_velcro"
 const SHOCKWAVE           := "shockwave"
 const THING_BRINGER       := "thing_bringer"
+const INERTIAL_HARNESS    := "inertial_harness"
+const PLASMA_SPIT         := "plasma_spit"
+const MAGNETIC_REPULSION  := "magnetic_repulsion"
 
 # ─── Tech definitions ────────────────────────────────────────────────────────
 
@@ -166,6 +169,34 @@ var _definitions: Array[Dictionary] = [
 		"needs_input": false,
 		"color":       Color(1.0, 0.85, 0.2),
 		"hot_description": "Twice the range and pull speed.",
+	},
+	{
+		"id":              INERTIAL_HARNESS,
+		"name":            "Inertial Harness",
+		"description":     "Activate to nullify the weight of a carried UFO part for 10s.\n5s cooldown.",
+		"slot_label":      "Inertial Harness",
+		"needs_input":     true,
+		"has_passive_bar": true,
+		"color":           Color(0.7, 0.8, 1.0),
+		"hot_description": "Always active — no cooldown. Carry 2 UFO parts at once.",
+	},
+	{
+		"id":          PLASMA_SPIT,
+		"name":        "Plasma Spit",
+		"description": "Bullets become thin plasma beams that pierce enemies and pass\nthrough all barriers. Slightly shorter range than a regular shot.\nSame damage per hit.",
+		"slot_label":  "Plasma Spit",
+		"needs_input": false,
+		"color":       Color(1.0, 0.2, 0.6),
+		"hot_description": "Longer beam, double damage.",
+	},
+	{
+		"id":          MAGNETIC_REPULSION,
+		"name":        "Magnetic Repulsion",
+		"description": "Powerups, UFO parts, trash pieces, and tech pieces hover just\noff the ocean floor and walls instead of sinking flush against them.",
+		"slot_label":  "Magnetic Repulsion",
+		"needs_input": false,
+		"color":       Color(0.85, 0.4, 1.0),
+		"hot_description": "Much stronger repulsion — everything floats farther out.",
 	},
 ]
 

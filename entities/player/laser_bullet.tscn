@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://cdyaapswbuhck"]
+
+[ext_resource type="Script" path="res://entities/player/laser_bullet.gd" id="1_2fmy8"]
+[ext_resource type="Texture2D" uid="uid://pbcaqjdyp7dn" path="res://entities/player/sprites/turtle-bullet5.png" id="2_8ofww"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_ac8is"]
+radius = 3.0
+
+[node name="LaserBullet" type="RigidBody2D" unique_id=835691872]
+collision_layer = 8
+collision_mask = 132
+gravity_scale = 0.0
+contact_monitor = true
+max_contacts_reported = 8
+script = ExtResource("1_2fmy8")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=697390107]
+modulate = Color(1, 0.2, 0.6, 1)
+scale = Vector2(3.4, 0.55)
+texture = ExtResource("2_8ofww")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1208300960]
+shape = SubResource("CircleShape2D_ac8is")

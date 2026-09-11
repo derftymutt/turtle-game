@@ -4,14 +4,15 @@
 [ext_resource type="PackedScene" uid="uid://lxxb80yuhgk7" path="res://entities/player/bullet.tscn" id="2_7uinh"]
 [ext_resource type="Texture2D" uid="uid://gp4ww5g2xqt3" path="res://entities/player/sprites/turtle5.png" id="3_7uinh"]
 [ext_resource type="PackedScene" path="res://entities/player/phase_bullet.tscn" id="3_padro"]
+[ext_resource type="PackedScene" uid="uid://cdyaapswbuhck" path="res://entities/player/laser_bullet.tscn" id="4_3wcpq"]
 [ext_resource type="Texture2D" uid="uid://b1k0cgwrgpiy6" path="res://entities/player/sprites/turtle_idle.png" id="4_6wpjo"]
 [ext_resource type="Texture2D" uid="uid://djvss84e4sdut" path="res://entities/player/sprites/turtle_kick.png" id="5_85e4a"]
 [ext_resource type="Texture2D" uid="uid://du6lru60n6r1" path="res://entities/player/sprites/turtle_shoot.png" id="6_padro"]
 [ext_resource type="Texture2D" uid="uid://xk0jv14pgeyd" path="res://entities/player/sprites/turtle_damage.png" id="7_85e4a"]
-[ext_resource type="AudioStream" path="res://assets/sounds/sfx/turtle damage_1.ogg" id="8_sfxdmg"]
-[ext_resource type="AudioStream" path="res://assets/sounds/sfx/teleport-tech-use.mp3" id="9_sfxtp"]
-[ext_resource type="AudioStream" path="res://assets/sounds/sfx/turtle shot_1.ogg" id="10_sfxshoot"]
-[ext_resource type="AudioStream" path="res://assets/sounds/sfx/ufo piece drop_1.ogg" id="11_sfxufodrop"]
+[ext_resource type="AudioStream" uid="uid://xgu2spqyhy3p" path="res://assets/sounds/sfx/turtle damage_1.ogg" id="8_sfxdmg"]
+[ext_resource type="AudioStream" uid="uid://ch6gm20llmggf" path="res://assets/sounds/sfx/teleport-tech-use.mp3" id="9_sfxtp"]
+[ext_resource type="AudioStream" uid="uid://3o4a661m3ccc" path="res://assets/sounds/sfx/turtle shot_1.ogg" id="10_sfxshoot"]
+[ext_resource type="AudioStream" uid="uid://b0uig06cy20b8" path="res://assets/sounds/sfx/ufo piece drop_1.ogg" id="11_sfxufodrop"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_n086i"]
 atlas = ExtResource("3_7uinh")
@@ -421,6 +422,7 @@ continuous_cd = 1
 script = ExtResource("1_n086i")
 bullet_scene = ExtResource("2_7uinh")
 phase_bullet_scene = ExtResource("3_padro")
+laser_bullet_scene = ExtResource("4_3wcpq")
 super_speed_color = Color(0.7779172, 1.5036877, 0, 1)
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1828949440]
@@ -449,7 +451,6 @@ volume_db = -10.0
 
 [node name="SfxShoot" type="AudioStreamPlayer" parent="." unique_id=773205260]
 stream = ExtResource("10_sfxshoot")
-volume_db = 0.0
 
 [node name="SfxUfoDrop" type="AudioStreamPlayer" parent="." unique_id=1665859102]
 stream = ExtResource("11_sfxufodrop")

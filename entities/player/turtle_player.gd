@@ -12,6 +12,7 @@ extends RigidBody2D
 @export var bullet_speed: float = 500.0
 @export var bullet_scene: PackedScene
 @export var phase_bullet_scene: PackedScene
+@export var laser_bullet_scene: PackedScene
 
 # Thrust strengths
 @export var horizontal_thrust: float = 175.0
@@ -100,6 +101,10 @@ var control_suspend_timer: float = 0.0
 # Alien Tech state
 var inertia_dampener_active: bool = false
 var inertia_dampener_timer: float = 0.0
+
+# Inertial Harness — nullifies carried UFO piece weight while active
+var inertial_harness_active: bool = false
+var inertial_harness_timer: float = 0.0
 
 var lateral_thrust_active: bool = false
 var lateral_thrust_timer: float = 0.0
@@ -201,6 +206,11 @@ var _rpl_long_pressed: bool = false
 # Time Freeze
 var time_freeze_active: bool = false
 var _time_freeze_active_duration: float = 0.0  # set per-activation; doubled when hot
+
+# Magnetic Repulsion — keeps collectibles hovering off the floor/walls
+const MAGNETIC_REPULSION_HOVER: float = 14.0       # px kept clear of the boundary
+const MAGNETIC_REPULSION_HOVER_HOT: float = 30.0
+const MAGNETIC_REPULSION_FORCE: float = 900.0
 
 # Thing Bringer
 const THING_BRINGER_RADIUS: float = 30.0
@@ -361,6 +371,12 @@ func _physics_process(delta):
 		if inertia_dampener_timer <= 0.0:
 			inertia_dampener_active = false
 
+	# Hot: always weightless, no timer needed — see _is_harness_weightless().
+	if inertial_harness_active and not AlienTechManager.is_tech_hot(AlienTechRegistry.INERTIAL_HARNESS):
+		inertial_harness_timer -= delta
+		if inertial_harness_timer <= 0.0:
+			inertial_harness_active = false
+
 	if lateral_thrust_active:
 		lateral_thrust_timer -= delta
 		if lateral_thrust_timer <= 0:
@@ -396,6 +412,9 @@ func _physics_process(delta):
 
 	if AlienTechManager.is_tech_active(AlienTechRegistry.THING_BRINGER):
 		_update_thing_bringer()
+
+	if AlienTechManager.is_tech_active(AlienTechRegistry.MAGNETIC_REPULSION):
+		_update_magnetic_repulsion()
 
 	if _bumper_magnet_active:
 		_update_bumper_magnet(delta)
@@ -510,10 +529,12 @@ func _physics_process(delta):
 	if shoot_input.length() > 0.1 and can_shoot:
 		shoot(shoot_input.normalized())
 		
-	# Drop carried UFO piece on button press (intentional = grace period before re-pickup)
+	# Drop all carried UFO pieces on button press (intentional = grace period before re-pickup)
 	if Input.is_action_just_pressed("drop_piece"):
-		if GameManager.is_carrying_piece and GameManager.carried_piece:
-			GameManager.carried_piece.drop_piece(true)
+		if GameManager.is_carrying_piece:
+			for piece in GameManager.carried_pieces.duplicate():
+				if is_instance_valid(piece):
+					piece.drop_piece(true)
 			$SfxUfoDrop.play()
 
 	# Alien Tech active slot buttons
@@ -700,7 +721,7 @@ func apply_thrust(direction: Vector2):
 
 	# Thrust strength
 	var thrust_strength: float
-	if GameManager.is_carrying_piece and GameManager.carried_piece:
+	if GameManager.is_carrying_piece and not _is_harness_weightless():
 		thrust_strength = horizontal_thrust_with_piece
 		if kick_direction.y < 0:
 			thrust_strength = upward_thrust_with_piece
@@ -744,7 +765,16 @@ func shoot(direction: Vector2):
 		shoot_timer = active_shoot_cooldown
 		return
 
-	var bullet = bullet_scene.instantiate()
+	# Plasma Spit: passive — every regular shot becomes a piercing plasma beam
+	var bullet
+	if AlienTechManager.is_tech_active(AlienTechRegistry.PLASMA_SPIT) and laser_bullet_scene:
+		bullet = laser_bullet_scene.instantiate()
+		if AlienTechManager.is_tech_hot(AlienTechRegistry.PLASMA_SPIT):
+			bullet.damage *= 2.0
+			bullet.lifetime *= 1.6  # hot: longer beam
+	else:
+		bullet = bullet_scene.instantiate()
+
 	get_parent().add_child(bullet)
 	bullet.global_position = _safe_bullet_spawn(direction)
 	bullet.set_velocity(direction * bullet_speed)
@@ -846,10 +876,12 @@ func take_damage(amount: float, use_iframes: bool = false):
 	if hud:
 		hud.update_hearts(current_hearts, MAX_HEARTS)
 
-	# Drop piece and check death BEFORE any await — these must fire immediately
+	# Drop piece(s) and check death BEFORE any await — these must fire immediately
 	# and must not be triggered multiple times from repeated per-frame damage.
-	if GameManager.is_carrying_piece and GameManager.carried_piece:
-		GameManager.carried_piece.drop_piece()
+	if GameManager.is_carrying_piece:
+		for piece in GameManager.carried_pieces.duplicate():
+			if is_instance_valid(piece):
+				piece.drop_piece()
 
 	if current_hearts <= 0:
 		die()
@@ -1202,6 +1234,8 @@ func _on_alien_tech_activated(slot_index: int, tech_id: String):
 			_activate_time_freeze()
 		AlienTechRegistry.SHOCKWAVE:
 			_activate_shockwave()
+		AlienTechRegistry.INERTIAL_HARNESS:
+			_activate_inertial_harness()
 
 func _activate_inertia_dampener():
 	if AlienTechManager.is_tech_hot(AlienTechRegistry.INERTIA_DAMPENER):
@@ -1211,6 +1245,17 @@ func _activate_inertia_dampener():
 		return
 	inertia_dampener_active = true
 	inertia_dampener_timer = AlienTechManager.INERTIA_DAMPENER_ACTIVE_DURATION
+
+func _activate_inertial_harness():
+	# Hot is always weightless via _is_harness_weightless() regardless of this
+	# timer, so a press while hot (no cooldown gating it) is a harmless no-op.
+	inertial_harness_active = true
+	inertial_harness_timer = AlienTechManager.INERTIAL_HARNESS_ACTIVE_DURATION
+
+## True whenever a carried UFO piece's weight should be ignored: the cold
+## timed activation is running, or the tech is hot (always active).
+func _is_harness_weightless() -> bool:
+	return inertial_harness_active or AlienTechManager.is_tech_hot(AlienTechRegistry.INERTIAL_HARNESS)
 
 func _activate_lateral_thrust():
 	lateral_thrust_active = true
@@ -1992,3 +2037,44 @@ func _update_thing_bringer() -> void:
 		if dist > radius or dist < 1.0:
 			continue
 		rb.linear_velocity = to_player.normalized() * pull_speed
+
+# ---------------------------------------------------------------------------
+# MAGNETIC REPULSION
+# ---------------------------------------------------------------------------
+
+## Pushes powerups, UFO parts, trash cluster pieces, and alien tech pieces
+## away from the ocean floor and the left/right/bottom play-area walls so
+## they hover a short distance clear of them instead of resting flush
+## against the boundary. Reuses the same boundary geometry the turtle itself
+## is clamped to (see _get_boundary_limits()).
+func _update_magnetic_repulsion() -> void:
+	var hot := AlienTechManager.is_tech_hot(AlienTechRegistry.MAGNETIC_REPULSION)
+	var hover := MAGNETIC_REPULSION_HOVER_HOT if hot else MAGNETIC_REPULSION_HOVER
+	var lim := _get_boundary_limits()
+	for group in ["collectibles", "trash_cluster_pieces"]:
+		for node in get_tree().get_nodes_in_group(group):
+			if not is_instance_valid(node) or node.is_queued_for_deletion():
+				continue
+			if not node is RigidBody2D:
+				continue
+			var rb := node as RigidBody2D
+			if rb.freeze:
+				continue
+			# A carried UFO piece isn't in the world for this purpose.
+			if node is UFOPiece and (node as UFOPiece).is_carried:
+				continue
+			var push := Vector2.ZERO
+			if lim.max_y < INF:
+				var dist_floor: float = lim.max_y - rb.global_position.y
+				if dist_floor < hover:
+					push.y -= (hover - maxf(dist_floor, 0.0)) / hover * MAGNETIC_REPULSION_FORCE
+			if lim.min_x > -INF:
+				var dist_left: float = rb.global_position.x - lim.min_x
+				if dist_left < hover:
+					push.x += (hover - maxf(dist_left, 0.0)) / hover * MAGNETIC_REPULSION_FORCE
+			if lim.max_x < INF:
+				var dist_right: float = lim.max_x - rb.global_position.x
+				if dist_right < hover:
+					push.x -= (hover - maxf(dist_right, 0.0)) / hover * MAGNETIC_REPULSION_FORCE
+			if push != Vector2.ZERO:
+				rb.apply_central_force(push)

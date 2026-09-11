@@ -400,7 +400,7 @@ debris_animation = &"wild"
 position = Vector2(149, -196)
 debris_animation = &"wild"
 
-[node name="AlienTechPiece" parent="." index="38" unique_id=100000001 instance=ExtResource("26_0fu15")]
+[node name="AlienTechPiece" parent="." index="37" unique_id=100000001 instance=ExtResource("26_0fu15")]
 position = Vector2(0, 82)
 
 [editable path="SpaceDebrisGroup"]
