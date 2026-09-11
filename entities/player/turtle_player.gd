@@ -118,12 +118,20 @@ const CONTACT_IFRAME_DURATION: float = 0.75
 var _contact_iframes_active: bool = false
 var _contact_iframes_timer: float = 0.0
 
+# Bravado (hot only) — 1s invincibility granted per enemy hit, from bullet.gd
+const BRAVADO_HIT_IFRAME_DURATION: float = 1.0
+var _bravado_iframe_active: bool = false
+var _bravado_iframe_timer: float = 0.0
+
 var _level_complete: bool = false
 
 const BUBBLE_SHIELD_REGEN_DURATION: float = 15.0
 const BUBBLE_SHIELD_RADIUS: float = 18.0
+const BUBBLE_SHIELD_BLAST_RADIUS: float = 40.0  # hot only — enemies caught in this on trigger take damage
+const BUBBLE_SHIELD_BLAST_DAMAGE: float = 15.0
 var bubble_shield_hp: float = 0.0
 var bubble_shield_regen_timer: float = 0.0
+var _bubble_shield_regen_duration: float = BUBBLE_SHIELD_REGEN_DURATION  # halved when hot
 var _bubble_flash_timer: float = 0.0
 var _bubble_visual: Line2D = null
 
@@ -192,6 +200,7 @@ var _rpl_long_pressed: bool = false
 
 # Time Freeze
 var time_freeze_active: bool = false
+var _time_freeze_active_duration: float = 0.0  # set per-activation; doubled when hot
 
 # Thing Bringer
 const THING_BRINGER_RADIUS: float = 30.0
@@ -346,7 +355,8 @@ func _physics_process(delta):
 		if rapid_fire_timer <= 0:
 			deactivate_rapid_fire()
 
-	if inertia_dampener_active:
+	# Hot: a manual on/off toggle (no auto-timeout) — see _activate_inertia_dampener().
+	if inertia_dampener_active and not AlienTechManager.is_tech_hot(AlienTechRegistry.INERTIA_DAMPENER):
 		inertia_dampener_timer -= delta
 		if inertia_dampener_timer <= 0.0:
 			inertia_dampener_active = false
@@ -360,6 +370,11 @@ func _physics_process(delta):
 		transporter_invincible_timer -= delta
 		if transporter_invincible_timer <= 0.0:
 			transporter_invincible = false
+
+	if _bravado_iframe_active:
+		_bravado_iframe_timer -= delta
+		if _bravado_iframe_timer <= 0.0:
+			_bravado_iframe_active = false
 
 	if _contact_iframes_active:
 		_contact_iframes_timer -= delta
@@ -376,7 +391,7 @@ func _physics_process(delta):
 				bubble_shield_hp = 1.0
 				if _bubble_visual:
 					_bubble_visual.visible = true
-		var _regen_ratio: float = 1.0 if bubble_shield_hp > 0.0 else clamp(1.0 - bubble_shield_regen_timer / BUBBLE_SHIELD_REGEN_DURATION, 0.0, 1.0)
+		var _regen_ratio: float = 1.0 if bubble_shield_hp > 0.0 else clamp(1.0 - bubble_shield_regen_timer / _bubble_shield_regen_duration, 0.0, 1.0)
 		AlienTechManager.set_passive_bar(AlienTechRegistry.BUBBLE_SHIELD, _regen_ratio)
 
 	if AlienTechManager.is_tech_active(AlienTechRegistry.THING_BRINGER):
@@ -401,7 +416,7 @@ func _physics_process(delta):
 
 	if time_freeze_active:
 		time_freeze_timer -= delta
-		AlienTechManager.set_passive_bar(AlienTechRegistry.TIME_FREEZE, max(0.0, time_freeze_timer / AlienTechManager.TIME_FREEZE_ACTIVE_DURATION))
+		AlienTechManager.set_passive_bar(AlienTechRegistry.TIME_FREEZE, max(0.0, time_freeze_timer / _time_freeze_active_duration))
 		if time_freeze_timer <= 0.0:
 			_unfreeze_world_bodies()
 
@@ -462,6 +477,15 @@ func _physics_process(delta):
 		elif _flipper_velcro_latched:
 			_launch_from_flipper_velcro()
 		if _flipper_velcro_latched:
+			# Hot: shooting still works while gripping the flipper. Everything
+			# else (movement, other tech slots, etc.) stays locked out either way.
+			if AlienTechManager.is_tech_hot(AlienTechRegistry.FLIPPER_VELCRO):
+				var fv_shoot_input := Vector2(
+					Input.get_axis("shoot_left", "shoot_right"),
+					Input.get_axis("shoot_up", "shoot_down")
+				)
+				if fv_shoot_input.length() > 0.1 and can_shoot:
+					shoot(fv_shoot_input.normalized())
 			return
 
 	# Input
@@ -566,6 +590,9 @@ func _update_sprite_modulate():
 	elif transporter_invincible:
 		var flash = (sin(Time.get_ticks_msec() * 0.06) + 1.0) * 0.5
 		sprite.modulate = Color(0.6, 0.3, 1.0).lerp(Color.WHITE, flash)
+	elif _bravado_iframe_active:
+		var flash = (sin(Time.get_ticks_msec() * 0.08) + 1.0) * 0.5
+		sprite.modulate = Color(1.0, 0.4, 0.2).lerp(Color.WHITE, flash)
 	elif _bubble_flash_timer > 0.0:
 		sprite.modulate = Color(0.3, 0.9, 1.0)
 	elif _dermal_regen_active:
@@ -723,7 +750,11 @@ func shoot(direction: Vector2):
 	bullet.set_velocity(direction * bullet_speed)
 	if AlienTechManager.is_tech_active(AlienTechRegistry.SALIVA_NANOBOTS):
 		bullet.is_homing = true
-		bullet.damage = 20.0
+		if AlienTechManager.is_tech_hot(AlienTechRegistry.SALIVA_NANOBOTS):
+			bullet.damage = 40.0
+			bullet.homing_turn_speed_deg = 300.0
+		else:
+			bullet.damage = 20.0
 
 	can_shoot = false
 	shoot_timer = active_shoot_cooldown
@@ -778,7 +809,7 @@ func take_damage(amount: float, use_iframes: bool = false):
 		return
 	if use_iframes and _contact_iframes_active:
 		return
-	if is_super_speed or is_super_speed_cooldown or shield_active or transporter_invincible or deflector_shield_active:
+	if is_super_speed or is_super_speed_cooldown or shield_active or transporter_invincible or deflector_shield_active or _bravado_iframe_active:
 		return
 	# Shared grace window after any heart loss — this is what tames rapid /
 	# continuous sources with no i-frames of their own (drowning, shock, volleys).
@@ -786,11 +817,15 @@ func take_damage(amount: float, use_iframes: bool = false):
 		return
 
 	if AlienTechManager.is_tech_active(AlienTechRegistry.BUBBLE_SHIELD) and bubble_shield_hp > 0.0:
+		var bubble_hot := AlienTechManager.is_tech_hot(AlienTechRegistry.BUBBLE_SHIELD)
 		bubble_shield_hp = 0.0
-		bubble_shield_regen_timer = BUBBLE_SHIELD_REGEN_DURATION
+		_bubble_shield_regen_duration = BUBBLE_SHIELD_REGEN_DURATION * (0.5 if bubble_hot else 1.0)
+		bubble_shield_regen_timer = _bubble_shield_regen_duration
 		if _bubble_visual:
 			_bubble_visual.visible = false
 		_bubble_flash_timer = 0.4
+		if bubble_hot:
+			_bubble_shield_blast()
 		return  # Shield absorbed — transporter windup NOT canceled
 
 	# Real damage lands — cancel active techs that need aborting
@@ -832,6 +867,12 @@ func restore_hearts(amount: int) -> void:
 	if hud:
 		hud.update_hearts(current_hearts, MAX_HEARTS)
 	_health_restore_flash_timer = 0.2
+
+## Called by bullet.gd when hot Bravado lands a hit — refreshes the 1s window
+## rather than stacking, so repeated hits just keep it topped up.
+func grant_bravado_iframe() -> void:
+	_bravado_iframe_active = true
+	_bravado_iframe_timer = BRAVADO_HIT_IFRAME_DURATION
 
 func die():
 	var final_score = 0
@@ -1163,6 +1204,11 @@ func _on_alien_tech_activated(slot_index: int, tech_id: String):
 			_activate_shockwave()
 
 func _activate_inertia_dampener():
+	if AlienTechManager.is_tech_hot(AlienTechRegistry.INERTIA_DAMPENER):
+		# Hot: click on, click off — no timer, no cooldown (see _get_effective_cooldown).
+		inertia_dampener_active = not inertia_dampener_active
+		AlienTechManager.set_passive_bar(AlienTechRegistry.INERTIA_DAMPENER, 1.0 if inertia_dampener_active else 0.0)
+		return
 	inertia_dampener_active = true
 	inertia_dampener_timer = AlienTechManager.INERTIA_DAMPENER_ACTIVE_DURATION
 
@@ -1303,6 +1349,17 @@ func _on_alien_tech_slots_changed_player(_slot_a: Dictionary, _slot_b: Dictionar
 # BUBBLE SHIELD VISUAL
 # ---------------------------------------------------------------------------
 
+## Hot only — damages every enemy within BUBBLE_SHIELD_BLAST_RADIUS the moment
+## the shield absorbs a hit.
+func _bubble_shield_blast() -> void:
+	for enemy in get_tree().get_nodes_in_group("enemies"):
+		if not is_instance_valid(enemy) or enemy.is_queued_for_deletion():
+			continue
+		if not enemy is Node2D or not enemy.has_method("take_damage"):
+			continue
+		if global_position.distance_to((enemy as Node2D).global_position) <= BUBBLE_SHIELD_BLAST_RADIUS:
+			enemy.take_damage(BUBBLE_SHIELD_BLAST_DAMAGE)
+
 func _setup_bubble_visual() -> void:
 	_bubble_visual = Line2D.new()
 	_bubble_visual.name = "BubbleVisual"
@@ -1424,10 +1481,28 @@ func _setup_deflector_area() -> void:
 	add_child(_deflector_visual)
 
 func _activate_deflector_shield() -> void:
+	var hot := AlienTechManager.is_tech_hot(AlienTechRegistry.DEFLECTOR_SHIELD)
+	_resize_deflector_shield(DEFLECTOR_SHIELD_RADIUS * (2.0 if hot else 1.0))
 	deflector_shield_active = true
 	deflector_shield_timer = DEFLECTOR_SHIELD_DURATION
 	if _deflector_visual:
 		_deflector_visual.visible = true
+
+## Rebuilds the deflector's collision shape and visual ring at the given radius.
+## Called on every activation (not just setup) so hot's doubled radius applies
+## even though the Area2D was created once at spawn.
+func _resize_deflector_shield(radius: float) -> void:
+	if _deflector_area:
+		var col := _deflector_area.get_child(0) as CollisionShape2D
+		if col and col.shape is CircleShape2D:
+			(col.shape as CircleShape2D).radius = radius
+	if _deflector_visual:
+		var pts: PackedVector2Array = []
+		var segs := 36
+		for i in range(segs + 1):
+			var a := i * TAU / segs
+			pts.append(Vector2(cos(a), sin(a)) * radius)
+		_deflector_visual.points = pts
 
 func _on_deflector_body_entered(body: Node2D) -> void:
 	if not deflector_shield_active:
@@ -1490,7 +1565,9 @@ func _use_powerup_replicator() -> void:
 func _activate_time_freeze() -> void:
 	time_freeze_active = true
 	AlienTechManager.time_freeze_active = true
-	time_freeze_timer = AlienTechManager.TIME_FREEZE_ACTIVE_DURATION
+	var hot := AlienTechManager.is_tech_hot(AlienTechRegistry.TIME_FREEZE)
+	_time_freeze_active_duration = AlienTechManager.TIME_FREEZE_ACTIVE_DURATION * (2.0 if hot else 1.0)
+	time_freeze_timer = _time_freeze_active_duration
 	_freeze_world_bodies()
 	AlienTechManager.set_passive_bar(AlienTechRegistry.TIME_FREEZE, 1.0)
 	_flash(Color(0.5, 0.9, 1.0), 0.3)
@@ -1634,6 +1711,13 @@ func _update_bumper_magnet(delta: float) -> void:
 		_update_magnet_seek()
 
 func _update_magnet_seek() -> void:
+	var hot := AlienTechManager.is_tech_hot(AlienTechRegistry.BUMPER_MAGNET)
+	var seek_radius := BUMPER_MAGNET_RADIUS * (3.0 if hot else 1.0)
+	# Hot's pull speed is deliberately pushed past super_speed_threshold — the
+	# existing super-speed system (is_super_speed check + SuperSpeedArea) then
+	# damages any enemy the player collides with while seeking, for free.
+	var pull_speed := BUMPER_MAGNET_PULL_SPEED * (2.0 if hot else 1.0)
+
 	var nearest: CircularBumper = null
 	var nearest_dist: float = INF
 	for node in get_tree().get_nodes_in_group("bumpers"):
@@ -1642,7 +1726,7 @@ func _update_magnet_seek() -> void:
 		var bumper := node as CircularBumper
 		# Distance from player surface to bumper surface
 		var dist_to_surface := global_position.distance_to(bumper.global_position) - bumper.radius - BUMPER_MAGNET_PLAYER_RADIUS
-		if dist_to_surface < BUMPER_MAGNET_RADIUS and dist_to_surface < nearest_dist:
+		if dist_to_surface < seek_radius and dist_to_surface < nearest_dist:
 			nearest = bumper
 			nearest_dist = dist_to_surface
 
@@ -1659,7 +1743,7 @@ func _update_magnet_seek() -> void:
 	if nearest_dist <= 2.0:
 		_attach_to_bumper(nearest)
 	else:
-		linear_velocity = (contact_point - global_position).normalized() * BUMPER_MAGNET_PULL_SPEED
+		linear_velocity = (contact_point - global_position).normalized() * pull_speed
 
 func _attach_to_bumper(bumper: CircularBumper) -> void:
 	_bumper_magnet_target = bumper
@@ -1704,6 +1788,12 @@ func _cancel_bumper_magnet() -> void:
 
 func _start_dermal_regen(slot: int) -> void:
 	if _dermal_regen_used:
+		return
+	if AlienTechManager.is_tech_hot(AlienTechRegistry.DERMAL_REGEN):
+		# Hot: instant, full heal — no channel, so nothing to interrupt.
+		restore_hearts(MAX_HEARTS)
+		_dermal_regen_used = true
+		AlienTechManager.set_passive_bar(AlienTechRegistry.DERMAL_REGEN, 0.0)
 		return
 	_dermal_regen_active = true
 	_dermal_regen_timer = 0.0
@@ -1825,6 +1915,8 @@ func _launch_from_flipper_velcro() -> void:
 	# Multiplier is slightly higher than the regular hit_body formula (0.12 vs 0.10)
 	# to compensate for velcro starting from zero velocity while regular flips are additive.
 	var impulse: float = clamp(flipper.flip_force * dist * 0.15, flipper.flip_force * 1.2, flipper.flip_force * 4.0)
+	if AlienTechManager.is_tech_hot(AlienTechRegistry.FLIPPER_VELCRO):
+		impulse *= 1.75  # hot: releases at much faster speed
 	linear_velocity = tangent * impulse
 
 	_cancel_flipper_velcro()
@@ -1839,13 +1931,20 @@ func _cancel_flipper_velcro() -> void:
 # ---------------------------------------------------------------------------
 
 func _activate_shockwave() -> void:
+	var hot := AlienTechManager.is_tech_hot(AlienTechRegistry.SHOCKWAVE)
 	for enemy in get_tree().get_nodes_in_group("enemies"):
 		if is_instance_valid(enemy) and not enemy.is_queued_for_deletion() and enemy.has_method("take_damage"):
 			enemy.take_damage(10.0)
 	if hud:
 		hud.current_energy = 0.0
 		hud.update_energy(0.0, hud.max_energy)
-	suspend_control(1.0)
+	if hot:
+		# Hot trade-off: no self-stun, but it costs a heart every use (still
+		# subject to the normal heart-damage iframe, which is what keeps this
+		# from being a truly free-spam full-screen nuke).
+		take_damage(1.0)
+	else:
+		suspend_control(1.0)
 	_spawn_shockwave_visual()
 	_flash(Color(1.0, 0.55, 0.1), 0.2)
 
@@ -1874,6 +1973,9 @@ func _spawn_shockwave_visual() -> void:
 # ---------------------------------------------------------------------------
 
 func _update_thing_bringer() -> void:
+	var hot := AlienTechManager.is_tech_hot(AlienTechRegistry.THING_BRINGER)
+	var radius := THING_BRINGER_RADIUS * (2.0 if hot else 1.0)
+	var pull_speed := THING_BRINGER_PULL_SPEED * (2.0 if hot else 1.0)
 	for node in get_tree().get_nodes_in_group("collectibles"):
 		if not is_instance_valid(node) or node.is_queued_for_deletion():
 			continue
@@ -1887,6 +1989,6 @@ func _update_thing_bringer() -> void:
 			continue
 		var to_player := global_position - rb.global_position
 		var dist := to_player.length()
-		if dist > THING_BRINGER_RADIUS or dist < 1.0:
+		if dist > radius or dist < 1.0:
 			continue
-		rb.linear_velocity = to_player.normalized() * THING_BRINGER_PULL_SPEED
+		rb.linear_velocity = to_player.normalized() * pull_speed

@@ -4,6 +4,7 @@ extends RigidBody2D
 @export var water_drag: float = 0.95
 @export var damage: float = 10.0
 @export var is_homing: bool = false
+@export var homing_turn_speed_deg: float = 150.0  # overridden when Saliva Nanobots is hot
 @export var bravado_stamina_restore: float = 20.0
 
 var velocity: Vector2 = Vector2.ZERO
@@ -58,7 +59,6 @@ func _physics_process(delta):
 
 func _apply_homing(delta: float):
 	const HOMING_RANGE: float = 200.0
-	const HOMING_DEGREES_PER_SECOND: float = 150.0
 
 	var nearest: Node2D = null
 	var nearest_dist: float = HOMING_RANGE
@@ -83,7 +83,7 @@ func _apply_homing(delta: float):
 
 	var to_enemy = (nearest.global_position - global_position).normalized()
 	var angle_to = linear_velocity.normalized().angle_to(to_enemy)
-	var max_rot = deg_to_rad(HOMING_DEGREES_PER_SECOND) * delta
+	var max_rot = deg_to_rad(homing_turn_speed_deg) * delta
 	linear_velocity = linear_velocity.rotated(clamp(angle_to, -max_rot, max_rot))
 
 func check_initial_overlaps():
@@ -155,11 +155,7 @@ func _on_body_entered(body):
 	# Hit enemies — with Bravado stamina restore on successful hit
 	if body.is_in_group("enemies") and body.has_method("take_damage"):
 		body.take_damage(damage)
-		if AlienTechManager.is_tech_active(AlienTechRegistry.BRAVADO) and not body.get("is_invincible"):
-			var hud = get_tree().get_first_node_in_group("hud")
-			if hud:
-				hud.current_energy = min(hud.max_energy, hud.current_energy + bravado_stamina_restore)
-				hud.update_energy(hud.current_energy, hud.max_energy)
+		_apply_bravado_hit(body)
 		queue_free()
 		return
 
@@ -172,9 +168,17 @@ func _hit_enemy(body):
 	hit_targets.append(body)
 	if body.has_method("take_damage"):
 		body.take_damage(damage)
-	if AlienTechManager.is_tech_active(AlienTechRegistry.BRAVADO) and not body.get("is_invincible"):
-		var hud = get_tree().get_first_node_in_group("hud")
-		if hud:
-			hud.current_energy = min(hud.max_energy, hud.current_energy + bravado_stamina_restore)
-			hud.update_energy(hud.current_energy, hud.max_energy)
+	_apply_bravado_hit(body)
 	queue_free()
+
+func _apply_bravado_hit(body) -> void:
+	if not AlienTechManager.is_tech_active(AlienTechRegistry.BRAVADO) or body.get("is_invincible"):
+		return
+	var hud = get_tree().get_first_node_in_group("hud")
+	if hud:
+		hud.current_energy = min(hud.max_energy, hud.current_energy + bravado_stamina_restore)
+		hud.update_energy(hud.current_energy, hud.max_energy)
+	if AlienTechManager.is_tech_hot(AlienTechRegistry.BRAVADO):
+		var player = get_tree().get_first_node_in_group("player")
+		if player and player.has_method("grant_bravado_iframe"):
+			player.grant_bravado_iframe()

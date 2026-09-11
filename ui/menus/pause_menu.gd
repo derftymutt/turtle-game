@@ -97,10 +97,10 @@ func _on_swap_tech_pressed():
 	_update_tech_display()
 
 func _update_tech_display():
-	_update_slot(AlienTechManager.slots[0], slot_l_icon, slot_l_name, slot_l_desc)
-	_update_slot(AlienTechManager.slots[1], slot_r_icon, slot_r_name, slot_r_desc)
+	_update_slot(0, AlienTechManager.slots[0], slot_l_icon, slot_l_name, slot_l_desc)
+	_update_slot(1, AlienTechManager.slots[1], slot_r_icon, slot_r_name, slot_r_desc)
 
-func _update_slot(slot: Dictionary, icon: TextureRect, name_lbl: Label, desc_lbl: Label):
+func _update_slot(slot_index: int, slot: Dictionary, icon: TextureRect, name_lbl: Label, desc_lbl: Label):
 	if slot.is_empty():
 		if icon:
 			icon.modulate = Color(0.4, 0.4, 0.4, 1.0)
@@ -117,7 +117,14 @@ func _update_slot(slot: Dictionary, icon: TextureRect, name_lbl: Label, desc_lbl
 			name_lbl.text = slot.get("name", "")
 			name_lbl.modulate = tech_color
 		if desc_lbl:
-			desc_lbl.text = slot.get("description", "")
+			var desc_text: String = slot.get("description", "")
+			# Hot-effect text is a surprise discovered through play — only ever
+			# shown once the tech is actually hot, never as a spoiler up front.
+			if AlienTechManager.is_slot_hot(slot_index):
+				var hot_text: String = slot.get("hot_description", "")
+				if not hot_text.is_empty():
+					desc_text += "\n[HOT] %s" % hot_text
+			desc_lbl.text = desc_text
 			desc_lbl.modulate = Color(0.88, 0.88, 0.88, 1.0)
 
 func _show_save_prompt(action: Callable):

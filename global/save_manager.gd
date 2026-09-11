@@ -23,6 +23,8 @@ func save_game():
 		"total_score":         GameManager.total_score,
 		"tech_slot_0":         AlienTechManager.slots[0].get("id", ""),
 		"tech_slot_1":         AlienTechManager.slots[1].get("id", ""),
+		"tech_hot_0":          AlienTechManager.is_slot_hot(0),
+		"tech_hot_1":          AlienTechManager.is_slot_hot(1),
 		"continue_count":      LevelManager.continue_count,
 		"total_time_ms":       LevelManager.total_time_ms,
 		"successful_time_ms":  LevelManager.successful_time_ms,
@@ -63,8 +65,10 @@ func apply_save():
 	var slot1: String = data.get("tech_slot_1", "")
 	if not slot0.is_empty():
 		AlienTechManager.assign_tech(slot0, 0)
+		AlienTechManager.set_slot_hot(0, data.get("tech_hot_0", false))
 	if not slot1.is_empty():
 		AlienTechManager.assign_tech(slot1, 1)
+		AlienTechManager.set_slot_hot(1, data.get("tech_hot_1", false))
 	LevelManager.current_level_number = data.get("level_number", 1)
 	LevelManager.total_time_ms = data.get("total_time_ms", 0)
 	LevelManager.successful_time_ms = data.get("successful_time_ms", 0)

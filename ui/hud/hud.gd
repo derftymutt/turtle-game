@@ -40,6 +40,15 @@ var _slot_a_rpl_container: HBoxContainer = null
 var _slot_b_rpl_container: HBoxContainer = null
 var _slot_a_rpl_icons: Array = []
 var _slot_b_rpl_icons: Array = []
+var _slot_a_rpl_count_label: Label = null  # hot only — "x2"/"x1" uses-remaining badge
+var _slot_b_rpl_count_label: Label = null
+
+# Hot tech indicator — a flashing red border drawn around the slot's icon+label
+# row. Built at runtime (like the replicator icons above) and kept in sync with
+# its target container's rect every frame, since the row resizes with its text.
+var _slot_a_hot_border: ReferenceRect = null
+var _slot_b_hot_border: ReferenceRect = null
+var _hot_pulse_timer: float = 0.0
 
 # Game state
 var current_score: int = 0
@@ -200,10 +209,17 @@ func _ready():
 	_build_powerup_icons()
 	if slot_a_label:
 		_slot_a_rpl_container = _create_rpl_icon_container(slot_a_label.get_parent(), _slot_a_rpl_icons)
+		_slot_a_rpl_count_label = _create_rpl_count_label(_slot_a_rpl_container)
 	if slot_b_label:
 		_slot_b_rpl_container = _create_rpl_icon_container(slot_b_label.get_parent(), _slot_b_rpl_icons)
 		# Mirror the left layout: icons sit left of the label, not right of the icon
 		slot_b_label.get_parent().move_child(_slot_b_rpl_container, slot_b_label.get_index())
+		_slot_b_rpl_count_label = _create_rpl_count_label(_slot_b_rpl_container)
+
+	if slot_a_label:
+		_slot_a_hot_border = _make_hot_border()
+	if slot_b_label:
+		_slot_b_hot_border = _make_hot_border()
 
 	AlienTechManager.piece_collected.connect(_on_tech_piece_collected)
 	AlienTechManager.tech_slots_changed.connect(_on_tech_slots_changed)
@@ -247,6 +263,8 @@ func _process(delta):
 		slot_b_label.modulate.a = 0.5 if dimmed_b else 1.0
 	if slot_b_icon:
 		slot_b_icon.modulate.a = 0.5 if dimmed_b else 1.0
+
+	_update_hot_borders(delta)
 
 	# Level timer countdown
 	if _timer_active:
@@ -639,7 +657,9 @@ func _create_rpl_icon_container(parent: Node, icons_out: Array) -> HBoxContainer
 	container.add_theme_constant_override("separation", 2)
 	container.visible = false
 	parent.add_child(container)
-	for i in 3:
+	# Always build 4 (not 3) so the container is already sized for a hot batch
+	# (all 4 powerup types, wild) — cold mode simply never fills the 4th.
+	for i in 4:
 		var tr := TextureRect.new()
 		tr.custom_minimum_size = Vector2(12, 12)
 		tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -647,6 +667,54 @@ func _create_rpl_icon_container(parent: Node, icons_out: Array) -> HBoxContainer
 		container.add_child(tr)
 		icons_out.append(tr)
 	return container
+
+## "x2"/"x1" badge shown next to the carousel only during a hot Replicator batch.
+func _create_rpl_count_label(container: HBoxContainer) -> Label:
+	if not container:
+		return null
+	var lbl := Label.new()
+	lbl.add_theme_font_size_override("font_size", 10)
+	lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.3, 1.0))
+	lbl.add_theme_color_override("font_outline_color", Color.BLACK)
+	lbl.add_theme_constant_override("outline_size", 2)
+	lbl.visible = false
+	container.add_child(lbl)
+	return lbl
+
+## Border-only overlay control, parented directly to the HUD CanvasLayer (not
+## inside a Container) so it's free to be positioned/sized manually each frame
+## instead of being fought over by container layout.
+func _make_hot_border() -> ReferenceRect:
+	var rect := ReferenceRect.new()
+	rect.editor_only = false
+	rect.border_color = Color(1.0, 0.15, 0.1, 1.0)
+	rect.border_width = 2.0
+	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	rect.visible = false
+	add_child(rect)
+	return rect
+
+func _update_hot_borders(delta: float) -> void:
+	_hot_pulse_timer += delta * 6.0
+	var pulse := (sin(_hot_pulse_timer) + 1.0) * 0.5
+	var alpha := lerpf(0.35, 1.0, pulse)
+	_sync_hot_border(_slot_a_hot_border, slot_a_label, AlienTechManager.is_slot_hot(0), alpha)
+	_sync_hot_border(_slot_b_hot_border, slot_b_label, AlienTechManager.is_slot_hot(1), alpha)
+
+func _sync_hot_border(border: ReferenceRect, label: Label, is_hot: bool, alpha: float) -> void:
+	if not border:
+		return
+	border.visible = is_hot
+	if not is_hot or not label:
+		return
+	var row: Control = label.get_parent()
+	if not row:
+		return
+	const PAD := 2.0
+	var rect: Rect2 = row.get_global_rect().grow(PAD)
+	border.global_position = rect.position
+	border.size = rect.size
+	border.modulate.a = alpha
 
 func _on_tech_piece_collected(current: int, needed: int):
 	if tech_piece_label:
@@ -669,16 +737,21 @@ func _update_slot_display(label: Label, cooldown_bar: TextureProgressBar,
 		if cooldown_bar:
 			cooldown_bar.visible = false
 	elif tech.get("id", "") == AlienTechRegistry.PHASE_SHIFTER:
-		var ammo := AlienTechManager.phase_shifter_ammo
-		var max_ammo := AlienTechManager.PHASE_SHIFTER_MAX_AMMO
-		var recharging := AlienTechManager.phase_shifter_recharging
-		if recharging:
-			label.text = "Phase Shifter --/%d" % max_ammo
+		if AlienTechManager.is_tech_hot(AlienTechRegistry.PHASE_SHIFTER):
+			label.text = "Phase Shifter ∞"
+			if cooldown_bar:
+				cooldown_bar.visible = false
 		else:
-			label.text = "Phase Shifter %d/%d" % [ammo, max_ammo]
+			var ammo := AlienTechManager.phase_shifter_ammo
+			var max_ammo := AlienTechManager.PHASE_SHIFTER_MAX_AMMO
+			var recharging := AlienTechManager.phase_shifter_recharging
+			if recharging:
+				label.text = "Phase Shifter --/%d" % max_ammo
+			else:
+				label.text = "Phase Shifter %d/%d" % [ammo, max_ammo]
+			if cooldown_bar:
+				cooldown_bar.visible = true
 		label.modulate = tech.get("color", Color.WHITE)
-		if cooldown_bar:
-			cooldown_bar.visible = true
 	elif tech.get("id", "") == AlienTechRegistry.POWERUP_REPLICATOR:
 		var slots_state := AlienTechManager.powerup_replicator_slots
 		var selected := AlienTechManager.powerup_replicator_selected
@@ -686,9 +759,9 @@ func _update_slot_display(label: Label, cooldown_bar: TextureProgressBar,
 		label.modulate = tech.get("color", Color.WHITE)
 		if cooldown_bar:
 			cooldown_bar.visible = false
-		if rpl_container and rpl_icons.size() == 3:
+		if rpl_container and rpl_icons.size() >= slots_state.size():
 			var filled_count := 0
-			for i in 3:
+			for i in slots_state.size():
 				var ir: TextureRect = rpl_icons[i]
 				var st: int = slots_state[i]
 				if st >= 0 and st < _powerup_icons.size():
@@ -698,7 +771,18 @@ func _update_slot_display(label: Label, cooldown_bar: TextureProgressBar,
 					filled_count += 1
 				else:
 					ir.visible = false
+			# Icons beyond the current slot count (cold mode only uses 3 of the 4 built) stay hidden.
+			for i in range(slots_state.size(), rpl_icons.size()):
+				(rpl_icons[i] as TextureRect).visible = false
 			rpl_container.visible = filled_count > 0
+		var count_label: Label = _slot_a_rpl_count_label if rpl_container == _slot_a_rpl_container else _slot_b_rpl_count_label
+		if count_label:
+			var uses_left := AlienTechManager.powerup_replicator_hot_uses_remaining
+			if uses_left > 0:
+				count_label.text = "x%d" % uses_left
+				count_label.visible = true
+			else:
+				count_label.visible = false
 	else:
 		label.text = tech.get("slot_label", tech.get("name", "?"))
 		label.modulate = tech.get("color", Color.WHITE)
@@ -734,6 +818,8 @@ func freeze_timer():
 func _is_slot_dimmed(slot_index: int) -> bool:
 	var tech := AlienTechManager.slots[slot_index]
 	if tech.get("id", "") == AlienTechRegistry.PHASE_SHIFTER:
+		if AlienTechManager.is_tech_hot(AlienTechRegistry.PHASE_SHIFTER):
+			return false
 		return AlienTechManager.phase_shifter_recharging
 	if tech.get("id", "") == AlienTechRegistry.POWERUP_REPLICATOR:
 		var sel := AlienTechManager.powerup_replicator_selected

@@ -35,6 +35,11 @@ var _cooldowns: Array[float] = [0.0, 0.0]
 var _slot_assigned_order: Array[int] = [-1, -1]  # lower = older
 var _assignment_counter: int = 0
 
+# Hot/Fried state — 0 = normal, 1 = hot. A tech that's still HOT the next time
+# it survives a level transition gets fried (removed). Tracked per slot index
+# (not per tech id) so it travels with swap_slots() like everything else here.
+var _hot_streak: Array[int] = [0, 0]
+
 const INERTIA_DAMPENER_ACTIVE_DURATION:   float = 3.0
 const INERTIA_DAMPENER_COOLDOWN_DURATION: float = 8.0
 
@@ -65,8 +70,9 @@ var _live_unique_techs: Dictionary = {}
 
 # ─── Powerup Replicator state ────────────────────────────────────────────────
 
-var powerup_replicator_slots: Array[int] = [-1, -1, -1]  # -1 = empty
+var powerup_replicator_slots: Array[int] = [-1, -1, -1]  # -1 = empty; 4-wide during a hot batch
 var powerup_replicator_selected: int = 0                   # which slot is highlighted
+var powerup_replicator_hot_uses_remaining: int = 0          # >0 only mid hot-batch
 
 # ─── Phase Shifter ammo ──────────────────────────────────────────────────────
 
@@ -136,6 +142,7 @@ func assign_tech(tech_id: String, slot_index: int):
 	_cooldowns[slot_index] = 0.0
 	_slot_assigned_order[slot_index] = _assignment_counter
 	_assignment_counter += 1
+	_hot_streak[slot_index] = 0  # a freshly-picked tech always starts cold
 	_live_unique_techs[tech_id] = true
 	print("👽 Slot %s assigned: %s" % [_slot_letter(slot_index), tech["name"]])
 	tech_slots_changed.emit(slots[0], slots[1])
@@ -146,6 +153,7 @@ func clear_slot(slot_index: int):
 	slots[slot_index] = {}
 	_cooldowns[slot_index] = 0.0
 	_slot_assigned_order[slot_index] = -1
+	_hot_streak[slot_index] = 0
 	tech_slots_changed.emit(slots[0], slots[1])
 
 func has_tech(tech_id: String) -> bool:
@@ -156,6 +164,47 @@ func has_tech(tech_id: String) -> bool:
 
 func is_tech_active(tech_id: String) -> bool:
 	return has_tech(tech_id)
+
+# ─── Hot / Fried ─────────────────────────────────────────────────────────────
+
+func is_slot_hot(slot_index: int) -> bool:
+	if slot_index < 0 or slot_index >= MAX_SLOTS:
+		return false
+	return not slots[slot_index].is_empty() and _hot_streak[slot_index] == 1
+
+func is_tech_hot(tech_id: String) -> bool:
+	var idx := get_slot_index_for_tech(tech_id)
+	return idx != -1 and is_slot_hot(idx)
+
+## Used by SaveManager to restore hot state after assign_tech() (which always
+## resets a slot to cold, since normal reassignment should start fresh).
+func set_slot_hot(slot_index: int, hot: bool) -> void:
+	if slot_index < 0 or slot_index >= MAX_SLOTS or slots[slot_index].is_empty():
+		return
+	_hot_streak[slot_index] = 1 if hot else 0
+
+## Called once per real level transition (between-levels cutscene), before the
+## next level loads. A tech that was already HOT gets fried (removed); a tech
+## that was normal and still equipped becomes HOT for the level about to start.
+## Returns {hot: [tech dicts], fried: [tech dicts]} for the cutscene to display.
+func advance_level_transition() -> Dictionary:
+	var hot: Array[Dictionary] = []
+	var fried: Array[Dictionary] = []
+	for i in MAX_SLOTS:
+		if slots[i].is_empty():
+			continue
+		if _hot_streak[i] == 1:
+			var tech := slots[i]
+			fried.append(tech)
+			print("👽 AlienTechManager: %s got fried and was lost!" % tech.get("name", ""))
+			clear_slot(i)
+		else:
+			_hot_streak[i] = 1
+			hot.append(slots[i])
+			print("👽 AlienTechManager: %s is now HOT" % slots[i].get("name", ""))
+	if not hot.is_empty() or not fried.is_empty():
+		tech_slots_changed.emit(slots[0], slots[1])
+	return {"hot": hot, "fried": fried}
 
 # ─── Active tech firing ──────────────────────────────────────────────────────
 
@@ -170,10 +219,31 @@ func try_activate_slot(slot_index: int) -> bool:
 	if _cooldowns[slot_index] > 0.0:
 		print("👽 %s on cooldown: %.1fs remaining" % [tech["name"], _cooldowns[slot_index]])
 		return false
-	_cooldowns[slot_index] = _COOLDOWN_DURATIONS.get(tech["id"], 0.0)
+	_cooldowns[slot_index] = _effective_cooldown_max(slot_index, tech["id"])
 	tech_activated.emit(slot_index, tech["id"])
 	print("👽 Activated: %s (slot %s)" % [tech["name"], _slot_letter(slot_index)])
 	return true
+
+## The cooldown ceiling for a slot, adjusted for hot overrides. Shared by
+## try_activate_slot() (to seed the timer) and get_cooldown_ratio() (to
+## normalize it), so the two never disagree about what "full" means.
+func _effective_cooldown_max(slot_index: int, tech_id: String) -> float:
+	var base: float = _COOLDOWN_DURATIONS.get(tech_id, 0.0)
+	if not is_slot_hot(slot_index):
+		return base
+	match tech_id:
+		AlienTechRegistry.LATERAL_THRUST, AlienTechRegistry.TRANSPORTER, \
+		AlienTechRegistry.SHOCKWAVE, AlienTechRegistry.INERTIA_DAMPENER, \
+		AlienTechRegistry.BUMPER_MAGNET:
+			return 0.0  # hot: no cooldown
+		AlienTechRegistry.TIME_FREEZE:
+			# Hot: active duration doubled, post-active recovery halved.
+			return (TIME_FREEZE_ACTIVE_DURATION * 2.0) + (TIME_FREEZE_COOLDOWN_DURATION * 0.5)
+		AlienTechRegistry.DEFLECTOR_SHIELD:
+			# Hot: active duration unchanged (only radius grows), recovery halved.
+			return DEFLECTOR_SHIELD_ACTIVE_DURATION + (DEFLECTOR_SHIELD_COOLDOWN_DURATION * 0.5)
+		_:
+			return base
 
 func get_cooldown_ratio(slot_index: int) -> float:
 	if slot_index < 0 or slot_index >= MAX_SLOTS:
@@ -184,7 +254,7 @@ func get_cooldown_ratio(slot_index: int) -> float:
 	var tech_id = tech.get("id", "")
 	if _passive_bar_ratios.has(tech_id):
 		return 1.0 - _passive_bar_ratios[tech_id]
-	var max_cd = _COOLDOWN_DURATIONS.get(tech_id, 0.0)
+	var max_cd = _effective_cooldown_max(slot_index, tech_id)
 	if max_cd <= 0.0:
 		return 0.0
 	return _cooldowns[slot_index] / max_cd
@@ -210,6 +280,7 @@ func reset_run():
 	_cooldowns = [0.0, 0.0]
 	_slot_assigned_order = [-1, -1]
 	_assignment_counter = 0
+	_hot_streak = [0, 0]
 	_passive_bar_ratios.clear()
 	_live_unique_techs.clear()
 	phase_shifter_ammo = PHASE_SHIFTER_MAX_AMMO
@@ -217,11 +288,14 @@ func reset_run():
 	phase_shifter_recharge_timer = 0.0
 	powerup_replicator_slots = [-1, -1, -1]
 	powerup_replicator_selected = 0
+	powerup_replicator_hot_uses_remaining = 0
 	print("👽 AlienTechManager: Run reset")
 
 # ─── Phase Shifter ───────────────────────────────────────────────────────────
 
 func consume_phase_bullet() -> bool:
+	if is_tech_hot(AlienTechRegistry.PHASE_SHIFTER):
+		return true  # hot: unlimited ammo, no recharge
 	if phase_shifter_recharging or phase_shifter_ammo <= 0:
 		return false
 	phase_shifter_ammo -= 1
@@ -277,6 +351,9 @@ func swap_slots() -> void:
 	var temp_order := _slot_assigned_order[0]
 	_slot_assigned_order[0] = _slot_assigned_order[1]
 	_slot_assigned_order[1] = temp_order
+	var temp_hot := _hot_streak[0]
+	_hot_streak[0] = _hot_streak[1]
+	_hot_streak[1] = temp_hot
 	tech_slots_changed.emit(slots[0], slots[1])
 
 func _slot_letter(index: int) -> String:
@@ -286,9 +363,26 @@ func _slot_letter(index: int) -> String:
 		_: return "?"
 
 # ─── Powerup Replicator ──────────────────────────────────────────────────────
+#
+# Cold: each pickup stores one copy of that specific type into the next empty
+# of the (unused 4th) slot, cycle/long-press as usual.
+# Hot: a pickup ignores its own type and instead fills all 4 slots with one of
+# each powerup type — "wild" choices — and grants exactly 2 uses. Picking a
+# slot consumes it normally, but the moment the 2nd use of the batch is spent,
+# the whole carousel force-clears even if unclaimed options remain. A pickup
+# mid-batch restarts a fresh batch of 2 rather than stacking.
+
+const REPLICATOR_HOT_USES_PER_BATCH: int = 2
+const _REPLICATOR_ALL_TYPES: Array[int] = [0, 1, 2, 3]  # Shield, Air Reserve, Energy Freeze, Rapid Fire
 
 func store_replicated_powerup(powerup_type: int):
-	for i in 3:
+	if is_tech_hot(AlienTechRegistry.POWERUP_REPLICATOR):
+		powerup_replicator_slots = _REPLICATOR_ALL_TYPES.duplicate()
+		powerup_replicator_selected = 0
+		powerup_replicator_hot_uses_remaining = REPLICATOR_HOT_USES_PER_BATCH
+		powerup_replicator_changed.emit()
+		return
+	for i in powerup_replicator_slots.size():
 		if powerup_replicator_slots[i] < 0:
 			powerup_replicator_slots[i] = powerup_type
 			# If current selection is empty, point it at the new slot
@@ -296,11 +390,11 @@ func store_replicated_powerup(powerup_type: int):
 				powerup_replicator_selected = i
 			powerup_replicator_changed.emit()
 			return
-	# All 3 slots full — drop the powerup (player still got the effect)
+	# All slots full — drop the powerup (player still got the effect)
 
 func cycle_replicator_selection():
 	var filled: Array[int] = []
-	for i in 3:
+	for i in powerup_replicator_slots.size():
 		if powerup_replicator_slots[i] >= 0:
 			filled.append(i)
 	if filled.size() <= 1:
@@ -317,9 +411,20 @@ func consume_replicated_powerup() -> int:
 	if stored < 0:
 		return -1
 	powerup_replicator_slots[idx] = -1
+
+	if powerup_replicator_hot_uses_remaining > 0:
+		powerup_replicator_hot_uses_remaining -= 1
+		if powerup_replicator_hot_uses_remaining <= 0:
+			# Batch spent — clear everything, even options never picked, and
+			# drop back to the canonical 3-slot cold size until the next pickup.
+			powerup_replicator_slots = [-1, -1, -1]
+			powerup_replicator_selected = 0
+			powerup_replicator_changed.emit()
+			return stored
+
 	# Auto-select leftmost remaining filled slot
 	powerup_replicator_selected = 0
-	for i in 3:
+	for i in powerup_replicator_slots.size():
 		if powerup_replicator_slots[i] >= 0:
 			powerup_replicator_selected = i
 			break

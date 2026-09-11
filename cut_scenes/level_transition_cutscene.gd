@@ -11,6 +11,8 @@ const VP_H: float = 360.0
 const UFO_TRAVEL_X: float = VP_W * 0.55   # x where the UFO stops and splits
 const UFO_Y: float = VP_H * 0.50           # vertical position of the UFO
 
+signal _advance_requested
+
 var _bg: ColorRect
 var _ufo: Sprite2D
 var _ufo_left: Sprite2D
@@ -18,8 +20,19 @@ var _ufo_right: Sprite2D
 var _turtle: Sprite2D
 var _canvas: CanvasLayer
 var _level_label: Label
+var _effects_label: RichTextLabel
+var _press_key_label: Label
+var _waiting_for_input: bool = false
+
+# Alien Tech hot/fried transitions for the level we're leaving — computed once,
+# up front, before anything else changes state.
+var _hot_techs: Array[Dictionary] = []
+var _fried_techs: Array[Dictionary] = []
 
 func _ready() -> void:
+	var transition := AlienTechManager.advance_level_transition()
+	_hot_techs = transition.get("hot", [])
+	_fried_techs = transition.get("fried", [])
 	_build_scene()
 	_run.call_deferred()
 
@@ -69,13 +82,68 @@ func _build_scene() -> void:
 	_level_label.add_theme_color_override("font_color", Color.WHITE)
 	_canvas.add_child(_level_label)
 
+	_effects_label = RichTextLabel.new()
+	_effects_label.bbcode_enabled = true
+	_effects_label.fit_content = true
+	_effects_label.scroll_active = false
+	_effects_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	_effects_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_effects_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_effects_label.size = Vector2(VP_W - 60.0, 150.0)
+	_effects_label.position = Vector2(30.0, VP_H * 0.5 + 26.0)
+	_effects_label.modulate.a = 0.0
+	_effects_label.add_theme_font_override("normal_font", load("res://assets/fonts/BoldPixels.ttf"))
+	_effects_label.add_theme_font_size_override("normal_font_size", 14)
+	_effects_label.text = _build_tech_transition_text()
+	_canvas.add_child(_effects_label)
+
+	_press_key_label = Label.new()
+	_press_key_label.text = "Press any key to continue"
+	_press_key_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_press_key_label.size = Vector2(VP_W, 30.0)
+	_press_key_label.position = Vector2(0.0, VP_H - 46.0)
+	_press_key_label.modulate.a = 0.0
+	_press_key_label.add_theme_font_override("font", load("res://assets/fonts/BoldPixels.ttf"))
+	_press_key_label.add_theme_font_size_override("font_size", 16)
+	_press_key_label.add_theme_color_override("font_color", Color.WHITE)
+	_canvas.add_child(_press_key_label)
+
+func _unhandled_input(event: InputEvent) -> void:
+	if not _waiting_for_input:
+		return
+	var is_advance_input: bool = (
+		(event is InputEventKey and event.pressed and not event.echo)
+		or (event is InputEventMouseButton and event.pressed)
+		or (event is InputEventJoypadButton and event.pressed)
+		or (event is InputEventScreenTouch and event.pressed)
+	)
+	if is_advance_input:
+		_waiting_for_input = false
+		get_viewport().set_input_as_handled()
+		_advance_requested.emit()
+
 func _run() -> void:
 	await _fly_in()
 	await _split()
 	await get_tree().create_timer(0.6).timeout
 	await _plunge()
-	await get_tree().create_timer(0.3).timeout
+	# Give the player time to actually read the hot/fried tech callouts —
+	# otherwise fall straight through like before.
+	var has_tech_news := not _hot_techs.is_empty() or not _fried_techs.is_empty()
+	if has_tech_news:
+		await get_tree().create_timer(0.6).timeout  # let the callout text finish fading in first
+		_show_press_any_key_prompt()
+		_waiting_for_input = true
+		await _advance_requested
+	else:
+		await get_tree().create_timer(0.3).timeout
 	LevelManager.load_next_level()
+
+func _show_press_any_key_prompt() -> void:
+	_press_key_label.visible = true
+	var tween := create_tween().set_loops()
+	tween.tween_property(_press_key_label, "modulate:a", 1.0, 0.5).set_trans(Tween.TRANS_SINE)
+	tween.tween_property(_press_key_label, "modulate:a", 0.15, 0.5).set_trans(Tween.TRANS_SINE)
 
 func _fly_in() -> void:
 	var tween := create_tween()
@@ -148,6 +216,18 @@ func _spawn_break_particles(at: Vector2) -> void:
 	_canvas.add_child(p)
 	p.emitting = true
 
+func _build_tech_transition_text() -> String:
+	var lines: PackedStringArray = []
+	for tech in _hot_techs:
+		var hot_desc: String = tech.get("hot_description", "")
+		var line := "[color=#ffcc33]⚡ %s is now HOT![/color]" % tech.get("name", "")
+		if not hot_desc.is_empty():
+			line += "\n[color=#ffe9a8]%s[/color]" % hot_desc
+		lines.append(line)
+	for tech in _fried_techs:
+		lines.append("[color=#ff5c40]💀 %s got fried and was lost![/color]" % tech.get("name", ""))
+	return "\n\n".join(lines)
+
 func _show_level_title() -> void:
 	var tween := create_tween()
 	tween.set_parallel(true)
@@ -155,6 +235,9 @@ func _show_level_title() -> void:
 		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	tween.tween_property(_level_label, "scale", Vector2(1.0, 1.0), 0.3)\
 		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	if _effects_label and not _effects_label.text.is_empty():
+		tween.tween_property(_effects_label, "modulate:a", 1.0, 0.35)\
+			.set_delay(0.2).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
 func _plunge() -> void:
 	_show_level_title()

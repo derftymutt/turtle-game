@@ -33,6 +33,7 @@ var _definitions: Array[Dictionary] = [
 		"needs_input":    true,
 		"has_passive_bar": true,
 		"color":          Color(0.5, 1.0, 0.5),
+		"hot_description": "Click on, click off — no timer, no cooldown.",
 	},
 	{
 		"id":          BRAVADO,
@@ -41,6 +42,7 @@ var _definitions: Array[Dictionary] = [
 		"slot_label":  "Bravado",
 		"needs_input": false,
 		"color":       Color(1.0, 0.4, 0.2),
+		"hot_description": "1 second of invincibility every time you hit an enemy.",
 	},
 	{
 		"id":          LATERAL_THRUST,
@@ -49,6 +51,7 @@ var _definitions: Array[Dictionary] = [
 		"slot_label":  "Lateral Thrust",
 		"needs_input": true,
 		"color":       Color(0.4, 0.7, 1.0),
+		"hot_description": "No cooldown.",
 	},
 	{
 		"id":          TRANSPORTER,
@@ -57,6 +60,7 @@ var _definitions: Array[Dictionary] = [
 		"slot_label":  "Transporter",
 		"needs_input": true,
 		"color":       Color(0.6, 0.3, 1.0),
+		"hot_description": "No cooldown.",
 	},
 	{
 		"id":          SALIVA_NANOBOTS,
@@ -65,6 +69,7 @@ var _definitions: Array[Dictionary] = [
 		"slot_label":  "Saliva Nanobots",
 		"needs_input": false,
 		"color":       Color(0.3, 1.0, 0.5),
+		"hot_description": "Homing and damage doubled again.",
 	},
 	{
 		"id":            BUBBLE_SHIELD,
@@ -74,6 +79,7 @@ var _definitions: Array[Dictionary] = [
 		"needs_input":   false,
 		"has_passive_bar": true,
 		"color":         Color(0.3, 0.9, 1.0),
+		"hot_description": "Half the recharge time. Nearby enemies take damage when it triggers.",
 	},
 	{
 		"id":              DERMAL_REGEN,
@@ -83,6 +89,7 @@ var _definitions: Array[Dictionary] = [
 		"needs_input":     true,
 		"has_passive_bar": true,
 		"color":           Color(0.2, 1.0, 0.4),
+		"hot_description": "Instant, full heal — no channel needed.",
 	},
 	{
 		"id":              BUMPER_MAGNET,
@@ -92,6 +99,7 @@ var _definitions: Array[Dictionary] = [
 		"needs_input":     true,
 		"has_passive_bar": true,
 		"color":           Color(1.0, 0.75, 0.1),
+		"hot_description": "Attracts from much farther away, at super speed — damages enemies in its path. No cooldown.",
 	},
 	{
 		"id":          PHASE_SHIFTER,
@@ -100,6 +108,7 @@ var _definitions: Array[Dictionary] = [
 		"slot_label":  "Phase Shifter",
 		"needs_input": false,
 		"color":       Color(0.3, 0.9, 1.0),
+		"hot_description": "Unlimited phase bullets — no recharge.",
 	},
 	{
 		"id":          POWERUP_REPLICATOR,
@@ -108,6 +117,7 @@ var _definitions: Array[Dictionary] = [
 		"slot_label":  "Powerup Replicator",
 		"needs_input": true,
 		"color":       Color(1.0, 0.5, 0.9),
+		"hot_description": "Each pickup fills the carousel with all 4 powerups, wild — pick any 2.",
 	},
 	{
 		"id":              DEFLECTOR_SHIELD,
@@ -117,6 +127,7 @@ var _definitions: Array[Dictionary] = [
 		"needs_input":     true,
 		"has_passive_bar": true,
 		"color":           Color(0.3, 0.7, 1.0),
+		"hot_description": "Twice the radius, half the cooldown.",
 	},
 	{
 		"id":              TIME_FREEZE,
@@ -126,6 +137,7 @@ var _definitions: Array[Dictionary] = [
 		"needs_input":     true,
 		"has_passive_bar": true,
 		"color":           Color(0.5, 0.85, 1.0),
+		"hot_description": "Twice as long, half the cooldown.",
 	},
 	{
 		"id":          FLIPPER_VELCRO,
@@ -134,6 +146,7 @@ var _definitions: Array[Dictionary] = [
 		"slot_label":  "Flipper Velcro",
 		"needs_input": true,
 		"color":       Color(0.2, 1.0, 0.6),
+		"hot_description": "Can shoot while gripping. Releases at much higher speed.",
 	},
 	{
 		"id":              SHOCKWAVE,
@@ -143,6 +156,7 @@ var _definitions: Array[Dictionary] = [
 		"needs_input":     true,
 		"has_passive_bar": true,
 		"color":           Color(1.0, 0.55, 0.1),
+		"hot_description": "No cooldown, no self-stun — but costs a heart each use.",
 	},
 	{
 		"id":          THING_BRINGER,
@@ -151,6 +165,7 @@ var _definitions: Array[Dictionary] = [
 		"slot_label":  "Thing Bringer",
 		"needs_input": false,
 		"color":       Color(1.0, 0.85, 0.2),
+		"hot_description": "Twice the range and pull speed.",
 	},
 ]
 

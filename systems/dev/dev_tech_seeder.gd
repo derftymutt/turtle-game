@@ -23,6 +23,11 @@ class_name DevTechSeeder
 	"Time Freeze", "Flipper Velcro", "Shockwave", "Thing Bringer"
 ) var slot_b: int = 0
 
+## Force the seeded slot straight to HOT state, for testing hot effects without
+## grinding two real level completions.
+@export var slot_a_hot: bool = false
+@export var slot_b_hot: bool = false
+
 # Order must match the @export_enum options above (index 0 = "(none)")
 const _TECH_IDS: Array[String] = [
 	"",
@@ -50,7 +55,11 @@ func _ready() -> void:
 	var id_b: String = _TECH_IDS[slot_b]
 	if id_a != "":
 		AlienTechManager.assign_tech(id_a, 0)
-		print("🔧 DevTechSeeder: slot A → %s" % id_a)
+		if slot_a_hot:
+			AlienTechManager.set_slot_hot(0, true)
+		print("🔧 DevTechSeeder: slot A → %s%s" % [id_a, " (HOT)" if slot_a_hot else ""])
 	if id_b != "" and id_b != id_a:
 		AlienTechManager.assign_tech(id_b, 1)
-		print("🔧 DevTechSeeder: slot B → %s" % id_b)
+		if slot_b_hot:
+			AlienTechManager.set_slot_hot(1, true)
+		print("🔧 DevTechSeeder: slot B → %s%s" % [id_b, " (HOT)" if slot_b_hot else ""])
