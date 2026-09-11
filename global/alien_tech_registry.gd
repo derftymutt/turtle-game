@@ -173,7 +173,7 @@ var _definitions: Array[Dictionary] = [
 	{
 		"id":              GRAVITON_HARNESS,
 		"name":            "Graviton Harness",
-		"description":     "Activate to nullify the weight of a carried UFO part for 10s.\n5s cooldown.",
+		"description":     "Activate to nullify the weight of a carried UFO part for 5s.\n5s cooldown.",
 		"slot_label":      "Graviton Harness",
 		"needs_input":     true,
 		"has_passive_bar": true,

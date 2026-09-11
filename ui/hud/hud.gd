@@ -249,20 +249,10 @@ func _process(delta):
 		air_flash_timer = 0.0
 	
 	# Alien Tech cooldown bars
-	if slot_a_cooldown and slot_a_cooldown.visible:
-		slot_a_cooldown.value = _get_slot_bar_value(0)
-	if slot_b_cooldown and slot_b_cooldown.visible:
-		slot_b_cooldown.value = _get_slot_bar_value(1)
-	var dimmed_a := _is_slot_dimmed(0)
-	if slot_a_label:
-		slot_a_label.modulate.a = 0.5 if dimmed_a else 1.0
-	if slot_a_icon:
-		slot_a_icon.modulate.a = 0.5 if dimmed_a else 1.0
-	var dimmed_b := _is_slot_dimmed(1)
-	if slot_b_label:
-		slot_b_label.modulate.a = 0.5 if dimmed_b else 1.0
-	if slot_b_icon:
-		slot_b_icon.modulate.a = 0.5 if dimmed_b else 1.0
+	_apply_slot_cooldown_bar(slot_a_cooldown, 0)
+	_apply_slot_cooldown_bar(slot_b_cooldown, 1)
+	_apply_slot_label_state(slot_a_label, slot_a_icon, 0)
+	_apply_slot_label_state(slot_b_label, slot_b_icon, 1)
 
 	_update_hot_borders(delta)
 
@@ -803,6 +793,68 @@ func _on_phase_shifter_ammo_changed(_current: int, _max_ammo: int, _recharging: 
 
 func _on_powerup_replicator_changed():
 	_on_tech_slots_changed(AlienTechManager.slots[0], AlienTechManager.slots[1])
+
+const _COOLDOWN_BAR_MUTED := Color(0.55, 0.55, 0.55, 1.0)
+
+## Drives one slot's cooldown TextureProgressBar. Techs AlienTechManager
+## tracks as two-phase (see get_bar_phase()) get a full-color drain for their
+## active window, then a muted refill for the cooldown that snaps back to
+## full color the instant it's ready again. Only tint_progress (the fill) is
+## ever touched — tint_under (the background track) is left alone so it
+## always reads as its normal grey, never darkening toward black. Everything
+## else keeps the older single-bar behavior (_get_slot_bar_value), untinted.
+func _apply_slot_cooldown_bar(cooldown_bar: TextureProgressBar, slot_index: int) -> void:
+	if not cooldown_bar or not cooldown_bar.visible:
+		return
+	var phase_info := AlienTechManager.get_bar_phase(slot_index)
+	var phase: String = phase_info.get("phase", "none")
+	if phase == "none":
+		cooldown_bar.tint_progress = Color.WHITE
+		cooldown_bar.value = _get_slot_bar_value(slot_index)
+		return
+	cooldown_bar.value = phase_info.get("ratio", 0.0)
+	# Multiplying the fill's own baked-in color by a neutral grey darkens it
+	# without shifting its hue — a muted version of that same active color,
+	# not a flat generic grey.
+	cooldown_bar.tint_progress = _COOLDOWN_BAR_MUTED if phase == "cooldown" else Color.WHITE
+
+const _ACTIVE_BLINK_PERIOD_MSEC: int = 300  # one alpha flip every 300ms (600ms full cycle)
+const _ACTIVE_BLINK_LOW_ALPHA: float = 0.35
+
+## Drives one slot's label/icon opacity. Two-phase techs (see get_bar_phase())
+## blink the label while active — a clearer "this is live right now" signal
+## than the old flat dim — then grey both label and icon out while cooling
+## down, same as before. Everything else keeps the older _is_slot_dimmed()
+## behavior (dim whenever there's any outstanding cooldown at all).
+func _apply_slot_label_state(label: Label, icon: TextureRect, slot_index: int) -> void:
+	if not label and not icon:
+		return
+	var phase_info := AlienTechManager.get_bar_phase(slot_index)
+	var phase: String = phase_info.get("phase", "none")
+	if phase == "none":
+		var dimmed := _is_slot_dimmed(slot_index)
+		if label:
+			label.modulate.a = 0.5 if dimmed else 1.0
+		if icon:
+			icon.modulate.a = 0.5 if dimmed else 1.0
+		return
+	match phase:
+		"active":
+			var blink_on := int(Time.get_ticks_msec() / _ACTIVE_BLINK_PERIOD_MSEC) % 2 == 0
+			if label:
+				label.modulate.a = 1.0 if blink_on else _ACTIVE_BLINK_LOW_ALPHA
+			if icon:
+				icon.modulate.a = 1.0
+		"cooldown":
+			if label:
+				label.modulate.a = 0.5
+			if icon:
+				icon.modulate.a = 0.5
+		_:  # "ready"
+			if label:
+				label.modulate.a = 1.0
+			if icon:
+				icon.modulate.a = 1.0
 
 func _get_slot_bar_value(slot_index: int) -> float:
 	var tech := AlienTechManager.slots[slot_index]

@@ -49,7 +49,7 @@ const DEFLECTOR_SHIELD_COOLDOWN_DURATION: float = 10.0
 const TIME_FREEZE_ACTIVE_DURATION:   float = 5.0
 const TIME_FREEZE_COOLDOWN_DURATION: float = 10.0
 
-const GRAVITON_HARNESS_ACTIVE_DURATION:   float = 10.0
+const GRAVITON_HARNESS_ACTIVE_DURATION:   float = 5.0
 const GRAVITON_HARNESS_COOLDOWN_DURATION: float = 5.0
 
 const _COOLDOWN_DURATIONS: Dictionary = {
@@ -61,6 +61,18 @@ const _COOLDOWN_DURATIONS: Dictionary = {
 	AlienTechRegistry.TIME_FREEZE:      TIME_FREEZE_ACTIVE_DURATION + TIME_FREEZE_COOLDOWN_DURATION,
 	AlienTechRegistry.SHOCKWAVE:        30.0,
 	AlienTechRegistry.GRAVITON_HARNESS: GRAVITON_HARNESS_ACTIVE_DURATION + GRAVITON_HARNESS_COOLDOWN_DURATION,
+}
+
+# Techs whose HUD bar should read as two distinct phases — full-color drain
+# for the active window, then a greyed-out refill for the cooldown — rather
+# than one opaque bar covering the whole active+cooldown span. See
+# get_bar_phase(). Add an entry here (plus its own *_ACTIVE_DURATION /
+# *_COOLDOWN_DURATION consts) to give another tech the same treatment.
+const _TWO_PHASE_BAR_DURATIONS: Dictionary = {
+	AlienTechRegistry.INERTIA_DAMPENER: {"active": INERTIA_DAMPENER_ACTIVE_DURATION, "cooldown": INERTIA_DAMPENER_COOLDOWN_DURATION},
+	AlienTechRegistry.GRAVITON_HARNESS: {"active": GRAVITON_HARNESS_ACTIVE_DURATION, "cooldown": GRAVITON_HARNESS_COOLDOWN_DURATION},
+	AlienTechRegistry.DEFLECTOR_SHIELD: {"active": DEFLECTOR_SHIELD_ACTIVE_DURATION, "cooldown": DEFLECTOR_SHIELD_COOLDOWN_DURATION},
+	AlienTechRegistry.TIME_FREEZE:      {"active": TIME_FREEZE_ACTIVE_DURATION,      "cooldown": TIME_FREEZE_COOLDOWN_DURATION},
 }
 
 var _passive_bar_ratios: Dictionary = {}
@@ -262,6 +274,42 @@ func get_cooldown_ratio(slot_index: int) -> float:
 	if max_cd <= 0.0:
 		return 0.0
 	return _cooldowns[slot_index] / max_cd
+
+## Two-phase bar reading for techs listed in _TWO_PHASE_BAR_DURATIONS (an
+## "activate for N seconds, then M seconds before it can fire again" tech).
+## Derived purely from _cooldowns[slot_index], which already counts down
+## from (active + cooldown) to 0 — no per-frame bookkeeping needed elsewhere.
+## Returns {"phase": "active"|"cooldown"|"ready"|"none", "ratio": float}:
+##   "active":   still mid-effect. ratio 1.0 (just activated) → 0.0 (effect over).
+##   "cooldown": effect over, recharging. ratio 0.0 (just ended) → 1.0 (ready)
+##               — continuous with where "active" left off, no jump.
+##   "ready":    fully recovered (or hot, which has no cooldown at all).
+##   "none":     this tech isn't in _TWO_PHASE_BAR_DURATIONS; caller should
+##               fall back to the plain get_cooldown_ratio() bar.
+func get_bar_phase(slot_index: int) -> Dictionary:
+	if slot_index < 0 or slot_index >= MAX_SLOTS:
+		return {"phase": "none", "ratio": 0.0}
+	var tech_id: String = slots[slot_index].get("id", "")
+	if not _TWO_PHASE_BAR_DURATIONS.has(tech_id):
+		return {"phase": "none", "ratio": 0.0}
+	# A tech can override its own bar directly (e.g. hot Inertia Dampener's
+	# manual on/off toggle, via set_passive_bar) — respect that first, full
+	# color either way since it's not really a "cooldown" in that state.
+	if _passive_bar_ratios.has(tech_id):
+		return {"phase": "active", "ratio": _passive_bar_ratios[tech_id]}
+	if is_slot_hot(slot_index):
+		return {"phase": "ready", "ratio": 1.0}  # hot: no cooldown for these techs
+	var remaining: float = _cooldowns[slot_index]
+	if remaining <= 0.0:
+		return {"phase": "ready", "ratio": 1.0}
+	var durations: Dictionary = _TWO_PHASE_BAR_DURATIONS[tech_id]
+	var active_dur: float = durations["active"]
+	var cooldown_dur: float = durations["cooldown"]
+	if remaining > cooldown_dur:
+		var active_ratio: float = (remaining - cooldown_dur) / active_dur if active_dur > 0.0 else 0.0
+		return {"phase": "active", "ratio": clamp(active_ratio, 0.0, 1.0)}
+	var cooldown_ratio: float = 1.0 - (remaining / cooldown_dur) if cooldown_dur > 0.0 else 1.0
+	return {"phase": "cooldown", "ratio": clamp(cooldown_ratio, 0.0, 1.0)}
 
 func set_passive_bar(tech_id: String, ratio: float):
 	_passive_bar_ratios[tech_id] = clamp(ratio, 0.0, 1.0)
