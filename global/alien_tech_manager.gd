@@ -55,6 +55,9 @@ const GRAVITON_HARNESS_COOLDOWN_DURATION: float = 5.0
 const MAGNETIC_REPULSION_ACTIVE_DURATION:   float = 8.0
 const MAGNETIC_REPULSION_COOLDOWN_DURATION: float = 5.0
 
+const HYDRO_FUNNEL_ACTIVE_DURATION:   float = 10.0
+const HYDRO_FUNNEL_COOLDOWN_DURATION: float = 6.0
+
 const _COOLDOWN_DURATIONS: Dictionary = {
 	AlienTechRegistry.INERTIA_DAMPENER: INERTIA_DAMPENER_ACTIVE_DURATION + INERTIA_DAMPENER_COOLDOWN_DURATION,
 	AlienTechRegistry.LATERAL_THRUST:   5.0,
@@ -65,6 +68,7 @@ const _COOLDOWN_DURATIONS: Dictionary = {
 	AlienTechRegistry.SHOCKWAVE:        30.0,
 	AlienTechRegistry.GRAVITON_HARNESS: GRAVITON_HARNESS_ACTIVE_DURATION + GRAVITON_HARNESS_COOLDOWN_DURATION,
 	AlienTechRegistry.MAGNETIC_REPULSION: MAGNETIC_REPULSION_ACTIVE_DURATION + MAGNETIC_REPULSION_COOLDOWN_DURATION,
+	AlienTechRegistry.HYDRO_FUNNEL:      HYDRO_FUNNEL_ACTIVE_DURATION + HYDRO_FUNNEL_COOLDOWN_DURATION,
 }
 
 # Techs whose HUD bar should read as two distinct phases — full-color drain
@@ -78,6 +82,7 @@ const _TWO_PHASE_BAR_DURATIONS: Dictionary = {
 	AlienTechRegistry.DEFLECTOR_SHIELD: {"active": DEFLECTOR_SHIELD_ACTIVE_DURATION, "cooldown": DEFLECTOR_SHIELD_COOLDOWN_DURATION},
 	AlienTechRegistry.TIME_FREEZE:      {"active": TIME_FREEZE_ACTIVE_DURATION,      "cooldown": TIME_FREEZE_COOLDOWN_DURATION},
 	AlienTechRegistry.MAGNETIC_REPULSION: {"active": MAGNETIC_REPULSION_ACTIVE_DURATION, "cooldown": MAGNETIC_REPULSION_COOLDOWN_DURATION},
+	AlienTechRegistry.HYDRO_FUNNEL:      {"active": HYDRO_FUNNEL_ACTIVE_DURATION,      "cooldown": HYDRO_FUNNEL_COOLDOWN_DURATION},
 }
 
 # Techs whose HOT behavior is a manual on/off toggle (via set_passive_bar in
@@ -87,6 +92,7 @@ const _TWO_PHASE_BAR_DURATIONS: Dictionary = {
 # get_bar_phase()'s "off" phase.
 const _HOT_TOGGLE_TECHS: Array[String] = [
 	AlienTechRegistry.INERTIA_DAMPENER,
+	AlienTechRegistry.HYDRO_FUNNEL,
 ]
 
 var _passive_bar_ratios: Dictionary = {}
@@ -265,7 +271,7 @@ func _effective_cooldown_max(slot_index: int, tech_id: String) -> float:
 		AlienTechRegistry.LATERAL_THRUST, AlienTechRegistry.TRANSPORTER, \
 		AlienTechRegistry.SHOCKWAVE, AlienTechRegistry.INERTIA_DAMPENER, \
 		AlienTechRegistry.BUMPER_MAGNET, AlienTechRegistry.GRAVITON_HARNESS, \
-		AlienTechRegistry.MAGNETIC_REPULSION:
+		AlienTechRegistry.MAGNETIC_REPULSION, AlienTechRegistry.HYDRO_FUNNEL:
 			return 0.0  # hot: no cooldown
 		AlienTechRegistry.TIME_FREEZE:
 			# Hot: active duration doubled, post-active recovery halved.

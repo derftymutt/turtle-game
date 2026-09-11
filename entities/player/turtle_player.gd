@@ -214,6 +214,10 @@ const MAGNETIC_REPULSION_FORCE: float = 900.0
 var magnetic_repulsion_active: bool = false
 var magnetic_repulsion_timer: float = 0.0
 
+# Hydro Funnel — opens hidden OceanCurrent nodes (group "hydro_funnel_currents")
+var hydro_funnel_active: bool = false
+var hydro_funnel_timer: float = 0.0
+
 # Thing Bringer
 const THING_BRINGER_RADIUS: float = 30.0
 const THING_BRINGER_PULL_SPEED: float = 220.0
@@ -390,6 +394,12 @@ func _physics_process(delta):
 		if magnetic_repulsion_timer <= 0.0:
 			magnetic_repulsion_active = false
 
+	# Hot: a manual on/off toggle (no auto-timeout) — see _activate_hydro_funnel().
+	if hydro_funnel_active and not AlienTechManager.is_tech_hot(AlienTechRegistry.HYDRO_FUNNEL):
+		hydro_funnel_timer -= delta
+		if hydro_funnel_timer <= 0.0:
+			hydro_funnel_active = false
+
 	if lateral_thrust_active:
 		lateral_thrust_timer -= delta
 		if lateral_thrust_timer <= 0:
@@ -428,6 +438,9 @@ func _physics_process(delta):
 
 	if _is_magnetic_repulsion_active():
 		_update_magnetic_repulsion()
+
+	if AlienTechManager.has_tech(AlienTechRegistry.HYDRO_FUNNEL):
+		_update_hydro_funnel_currents(hydro_funnel_active)
 
 	if _bumper_magnet_active:
 		_update_bumper_magnet(delta)
@@ -1251,6 +1264,8 @@ func _on_alien_tech_activated(slot_index: int, tech_id: String):
 			_activate_graviton_harness()
 		AlienTechRegistry.MAGNETIC_REPULSION:
 			_activate_magnetic_repulsion()
+		AlienTechRegistry.HYDRO_FUNNEL:
+			_activate_hydro_funnel()
 
 func _activate_inertia_dampener():
 	if AlienTechManager.is_tech_hot(AlienTechRegistry.INERTIA_DAMPENER):
@@ -1290,6 +1305,34 @@ func _activate_magnetic_repulsion():
 ## activation is running, or the tech is hot (always active).
 func _is_magnetic_repulsion_active() -> bool:
 	return magnetic_repulsion_active or AlienTechManager.is_tech_hot(AlienTechRegistry.MAGNETIC_REPULSION)
+
+func _activate_hydro_funnel():
+	if AlienTechManager.is_tech_hot(AlienTechRegistry.HYDRO_FUNNEL):
+		# Hot: click on, click off — no timer, no cooldown (see _effective_cooldown_max).
+		hydro_funnel_active = not hydro_funnel_active
+		if hydro_funnel_active:
+			AlienTechManager.set_passive_bar(AlienTechRegistry.HYDRO_FUNNEL, 1.0)
+		else:
+			# Erase rather than zero the override — see the matching note in
+			# _activate_inertia_dampener() for why that distinction matters.
+			AlienTechManager.clear_passive_bar(AlienTechRegistry.HYDRO_FUNNEL)
+		return
+	hydro_funnel_active = true
+	hydro_funnel_timer = AlienTechManager.HYDRO_FUNNEL_ACTIVE_DURATION
+
+## Turns every OceanCurrent in the "hydro_funnel_currents" group on or off to
+## match. Each current independently decides whether it's actually allowed to
+## turn on right now (e.g. a hydro_funnel_hot_only one refuses unless Hydro
+## Funnel is HOT) — see OceanCurrent.turn_on()/turn_off() — so this just
+## mirrors the tech's own on/off state uniformly across the whole group.
+func _update_hydro_funnel_currents(should_be_active: bool) -> void:
+	for current in get_tree().get_nodes_in_group("hydro_funnel_currents"):
+		if not is_instance_valid(current):
+			continue
+		if should_be_active:
+			current.turn_on()
+		else:
+			current.turn_off()
 
 func _activate_lateral_thrust():
 	lateral_thrust_active = true

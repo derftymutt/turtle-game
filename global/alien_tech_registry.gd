@@ -24,6 +24,7 @@ const THING_BRINGER       := "thing_bringer"
 const GRAVITON_HARNESS    := "graviton_harness"
 const PLASMA_SPIT         := "plasma_spit"
 const MAGNETIC_REPULSION  := "magnetic_repulsion"
+const HYDRO_FUNNEL        := "hydro_funnel"
 
 # ─── Tech definitions ────────────────────────────────────────────────────────
 
@@ -198,6 +199,16 @@ var _definitions: Array[Dictionary] = [
 		"has_passive_bar": true,
 		"color":           Color(0.85, 0.4, 1.0),
 		"hot_description": "Always active — no cooldown. Much stronger repulsion — everything floats farther out.",
+	},
+	{
+		"id":              HYDRO_FUNNEL,
+		"name":            "Hydro Funnel",
+		"description":     "Activate for 10s: opens hidden ocean currents around the level to ride.\n6s cooldown.",
+		"slot_label":      "Hydro Funnel",
+		"needs_input":     true,
+		"has_passive_bar": true,
+		"color":           Color(0.3, 0.75, 1.0),
+		"hot_description": "Click on, click off — no timer, no cooldown. Any hot-only currents in the level open too.",
 	},
 ]
 

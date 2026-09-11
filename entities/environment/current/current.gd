@@ -44,6 +44,18 @@ class_name OceanCurrent
 ## Fade duration for appear / disappear transition
 @export var fade_duration: float = 0.5
 
+# ── Alien Tech: Hydro Funnel ──────────────────────────────────────────────────
+@export_group("Alien Tech: Hydro Funnel")
+## If true, this current starts completely hidden/inert (overriding
+## Visibility Cycle above — cycle_active is ignored) and only the Hydro
+## Funnel alien tech's turn_on()/turn_off() calls ever change it. See
+## AlienTechRegistry.HYDRO_FUNNEL.
+@export var hydro_funnel: bool = false
+## Only meaningful when hydro_funnel is also true. If set, this current stays
+## off for the whole run while Hydro Funnel is cold — it only ever turns on
+## once the tech goes HOT (an extra current exclusive to the hot version).
+@export var hydro_funnel_hot_only: bool = false
+
 # ── Visual / Particles ────────────────────────────────────────────────────────
 @export_group("Visual")
 ## Primary color of the current (bubbles, glow, arrows)
@@ -89,6 +101,8 @@ var _is_ready: bool = false
 
 func _ready() -> void:
 	add_to_group("ocean_currents")
+	if hydro_funnel:
+		add_to_group("hydro_funnel_currents")
 
 	_bubble_texture = _create_bubble_texture()
 	_build_collision_polygon()
@@ -102,7 +116,14 @@ func _ready() -> void:
 	# fires before the node is ready and gets silently ignored.
 	await get_tree().process_frame
 
-	if cycle_active:
+	if hydro_funnel:
+		# Tech-controlled: start fully inert regardless of Visibility Cycle
+		# settings above — only turn_on()/turn_off() (driven by TurtlePlayer's
+		# Hydro Funnel handling) ever change this from here on.
+		_state = _State.INACTIVE
+		modulate.a = 0.0
+		_disable_collision()
+	elif cycle_active:
 		_state = _State.INACTIVE
 		modulate.a = 0.0
 		_disable_collision()
@@ -128,7 +149,7 @@ func _physics_process(delta: float) -> void:
 			if is_instance_valid(body):
 				_apply_current_to(body)
 
-	if cycle_active and (_state == _State.ACTIVE or _state == _State.INACTIVE):
+	if cycle_active and not hydro_funnel and (_state == _State.ACTIVE or _state == _State.INACTIVE):
 		_cycle_timer -= delta
 		if _cycle_timer <= 0.0:
 			if _state == _State.ACTIVE:
@@ -332,6 +353,31 @@ func _begin_fade_out() -> void:
 		_disable_collision()
 		_set_emitters_emitting(false)
 	)
+
+
+# ── Alien Tech: Hydro Funnel control ──────────────────────────────────────────
+# Called every physics frame by TurtlePlayer while it owns the Hydro Funnel
+# tech (see _update_hydro_funnel_currents()) — idempotent, so a steady-state
+# call each frame is cheap and needs no edge-detection on the caller's side.
+
+## Fades this current in and enables it. No-op unless hydro_funnel is set, and
+## for a hydro_funnel_hot_only current, no-op unless Hydro Funnel is HOT.
+func turn_on() -> void:
+	if not hydro_funnel or not _is_ready:
+		return
+	if hydro_funnel_hot_only and not AlienTechManager.is_tech_hot(AlienTechRegistry.HYDRO_FUNNEL):
+		return
+	if _state == _State.ACTIVE or _state == _State.FADING_IN:
+		return
+	_begin_fade_in()
+
+## Fades this current out and disables it. No-op unless hydro_funnel is set.
+func turn_off() -> void:
+	if not hydro_funnel or not _is_ready:
+		return
+	if _state == _State.INACTIVE or _state == _State.FADING_OUT:
+		return
+	_begin_fade_out()
 
 
 func _enable_collision() -> void:
