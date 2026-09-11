@@ -119,6 +119,13 @@ var transporter_invincible_timer: float = 0.0
 var _transporter_windup: bool = false
 var _transporter_canceled: bool = false
 
+# Quantum Mirror — teleports to a mirrored position, invincible until it
+# teleports back. Cold mirrors X only; hot mirrors X and Y.
+var quantum_mirror_active: bool = false
+var quantum_mirror_timer: float = 0.0
+var _quantum_mirror_origin: Vector2 = Vector2.ZERO
+var _quantum_mirror_ghost: Sprite2D = null
+
 const CONTACT_IFRAME_DURATION: float = 0.75
 var _contact_iframes_active: bool = false
 var _contact_iframes_timer: float = 0.0
@@ -400,6 +407,13 @@ func _physics_process(delta):
 		if hydro_funnel_timer <= 0.0:
 			hydro_funnel_active = false
 
+	# Same cold/hot timing either way — hot only changes which axes mirror,
+	# not the duration — so this always counts down while active.
+	if quantum_mirror_active:
+		quantum_mirror_timer -= delta
+		if quantum_mirror_timer <= 0.0:
+			_return_from_quantum_mirror()
+
 	if lateral_thrust_active:
 		lateral_thrust_timer -= delta
 		if lateral_thrust_timer <= 0:
@@ -623,6 +637,9 @@ func _process(delta: float):
 	if _bubble_visual and _bubble_visual.visible:
 		var pulse := (sin(Time.get_ticks_msec() * 0.005) + 1.0) * 0.5
 		_bubble_visual.default_color = Color(0.5, 0.9, 1.0, 0.35 + pulse * 0.4)
+	if _quantum_mirror_ghost and is_instance_valid(_quantum_mirror_ghost):
+		var pulse := (sin(Time.get_ticks_msec() * 0.006) + 1.0) * 0.5
+		_quantum_mirror_ghost.modulate.a = lerpf(0.25, 0.45, pulse)
 	_update_float_energy_bar(delta)
 
 func _update_sprite_modulate():
@@ -637,6 +654,9 @@ func _update_sprite_modulate():
 	elif transporter_invincible:
 		var flash = (sin(Time.get_ticks_msec() * 0.06) + 1.0) * 0.5
 		sprite.modulate = Color(0.6, 0.3, 1.0).lerp(Color.WHITE, flash)
+	elif quantum_mirror_active:
+		var flash = (sin(Time.get_ticks_msec() * 0.05) + 1.0) * 0.5
+		sprite.modulate = Color(0.85, 0.3, 0.95).lerp(Color.WHITE, flash * 0.7)
 	elif _bravado_iframe_active:
 		var flash = (sin(Time.get_ticks_msec() * 0.08) + 1.0) * 0.5
 		sprite.modulate = Color(1.0, 0.4, 0.2).lerp(Color.WHITE, flash)
@@ -865,7 +885,7 @@ func take_damage(amount: float, use_iframes: bool = false):
 		return
 	if use_iframes and _contact_iframes_active:
 		return
-	if is_super_speed or is_super_speed_cooldown or shield_active or transporter_invincible or deflector_shield_active or _bravado_iframe_active:
+	if is_super_speed or is_super_speed_cooldown or shield_active or transporter_invincible or deflector_shield_active or _bravado_iframe_active or quantum_mirror_active:
 		return
 	# Shared grace window after any heart loss — this is what tames rapid /
 	# continuous sources with no i-frames of their own (drowning, shock, volleys).
@@ -1266,6 +1286,8 @@ func _on_alien_tech_activated(slot_index: int, tech_id: String):
 			_activate_magnetic_repulsion()
 		AlienTechRegistry.HYDRO_FUNNEL:
 			_activate_hydro_funnel()
+		AlienTechRegistry.QUANTUM_MIRROR:
+			_activate_quantum_mirror()
 
 func _activate_inertia_dampener():
 	if AlienTechManager.is_tech_hot(AlienTechRegistry.INERTIA_DAMPENER):
@@ -1333,6 +1355,76 @@ func _update_hydro_funnel_currents(should_be_active: bool) -> void:
 			current.turn_on()
 		else:
 			current.turn_off()
+
+func _activate_quantum_mirror():
+	_quantum_mirror_origin = global_position
+	_spawn_quantum_mirror_ghost()
+	var hot := AlienTechManager.is_tech_hot(AlienTechRegistry.QUANTUM_MIRROR)
+	global_position = _clamp_to_boundaries(_mirrored_position(global_position, hot))
+	linear_velocity *= 0.3
+	$SfxTeleport.play()
+	quantum_mirror_active = true
+	quantum_mirror_timer = AlienTechManager.QUANTUM_MIRROR_ACTIVE_DURATION
+	_play_teleport_pop()
+
+## Teleports back to where quantum_mirror was activated from and ends
+## invincibility — called when quantum_mirror_timer runs out (see
+## _physics_process). Not reachable while quantum_mirror_active is keeping
+## take_damage() from landing, so this is the only way the trip ends.
+func _return_from_quantum_mirror() -> void:
+	global_position = _clamp_to_boundaries(_quantum_mirror_origin)
+	linear_velocity *= 0.3
+	$SfxTeleport.play()
+	quantum_mirror_active = false
+	_clear_quantum_mirror_ghost()
+	_play_teleport_pop()
+
+## A translucent duplicate of the current sprite frame left behind at
+## _quantum_mirror_origin, so the player can see where they'll return to.
+## Cleared in _return_from_quantum_mirror(); its own alpha pulses gently in
+## _process() so it clearly reads as an intentional marker, not a glitch.
+func _spawn_quantum_mirror_ghost() -> void:
+	_clear_quantum_mirror_ghost()  # defensive — shouldn't already exist, cooldown gates re-activation
+	var sprite = $AnimatedSprite2D
+	if not sprite or not sprite.sprite_frames:
+		return
+	var ghost := Sprite2D.new()
+	ghost.texture = sprite.sprite_frames.get_frame_texture(sprite.animation, sprite.frame)
+	ghost.global_position = _quantum_mirror_origin
+	ghost.global_rotation = sprite.global_rotation  # always 0 — sprite stays axis-aligned
+	ghost.modulate = Color(0.85, 0.3, 0.95, 0.35)
+	ghost.z_index = 9  # under the live turtle (15) and motion trails (10)
+	get_parent().add_child(ghost)
+	_quantum_mirror_ghost = ghost
+
+func _clear_quantum_mirror_ghost() -> void:
+	if _quantum_mirror_ghost and is_instance_valid(_quantum_mirror_ghost):
+		_quantum_mirror_ghost.queue_free()
+	_quantum_mirror_ghost = null
+
+## Reflects `pos` across the play area's horizontal center (always) and,
+## when mirror_y is true (hot Quantum Mirror), its vertical center too —
+## the midpoint between the ocean surface and the floor boundary, so a
+## near-surface position and a near-floor position mirror each other.
+## Leaves an axis unchanged if its boundary data isn't available.
+func _mirrored_position(pos: Vector2, mirror_y: bool) -> Vector2:
+	var lim := _get_boundary_limits()
+	var mirrored := pos
+	if lim.min_x > -INF and lim.max_x < INF:
+		mirrored.x = lim.min_x + lim.max_x - pos.x
+	if mirror_y and ocean and lim.max_y < INF:
+		mirrored.y = ocean.surface_y + lim.max_y - pos.y
+	return mirrored
+
+## Shared arrival-pop tween for teleport-style effects. Transporter has its
+## own inline copy of this predating Quantum Mirror — left alone rather than
+## refactored, to avoid touching its already-working code for this change.
+func _play_teleport_pop() -> void:
+	var sprite = $AnimatedSprite2D
+	if sprite:
+		var tween = create_tween()
+		tween.tween_property(sprite, "scale", Vector2(1.35, 1.35), 0.07)
+		tween.tween_property(sprite, "scale", Vector2.ONE, 0.12)
 
 func _activate_lateral_thrust():
 	lateral_thrust_active = true

@@ -58,6 +58,9 @@ const MAGNETIC_REPULSION_COOLDOWN_DURATION: float = 5.0
 const HYDRO_FUNNEL_ACTIVE_DURATION:   float = 10.0
 const HYDRO_FUNNEL_COOLDOWN_DURATION: float = 6.0
 
+const QUANTUM_MIRROR_ACTIVE_DURATION:   float = 5.0
+const QUANTUM_MIRROR_COOLDOWN_DURATION: float = 5.0
+
 const _COOLDOWN_DURATIONS: Dictionary = {
 	AlienTechRegistry.INERTIA_DAMPENER: INERTIA_DAMPENER_ACTIVE_DURATION + INERTIA_DAMPENER_COOLDOWN_DURATION,
 	AlienTechRegistry.LATERAL_THRUST:   5.0,
@@ -69,6 +72,7 @@ const _COOLDOWN_DURATIONS: Dictionary = {
 	AlienTechRegistry.GRAVITON_HARNESS: GRAVITON_HARNESS_ACTIVE_DURATION + GRAVITON_HARNESS_COOLDOWN_DURATION,
 	AlienTechRegistry.MAGNETIC_REPULSION: MAGNETIC_REPULSION_ACTIVE_DURATION + MAGNETIC_REPULSION_COOLDOWN_DURATION,
 	AlienTechRegistry.HYDRO_FUNNEL:      HYDRO_FUNNEL_ACTIVE_DURATION + HYDRO_FUNNEL_COOLDOWN_DURATION,
+	AlienTechRegistry.QUANTUM_MIRROR:    QUANTUM_MIRROR_ACTIVE_DURATION + QUANTUM_MIRROR_COOLDOWN_DURATION,
 }
 
 # Techs whose HUD bar should read as two distinct phases — full-color drain
@@ -83,6 +87,7 @@ const _TWO_PHASE_BAR_DURATIONS: Dictionary = {
 	AlienTechRegistry.TIME_FREEZE:      {"active": TIME_FREEZE_ACTIVE_DURATION,      "cooldown": TIME_FREEZE_COOLDOWN_DURATION},
 	AlienTechRegistry.MAGNETIC_REPULSION: {"active": MAGNETIC_REPULSION_ACTIVE_DURATION, "cooldown": MAGNETIC_REPULSION_COOLDOWN_DURATION},
 	AlienTechRegistry.HYDRO_FUNNEL:      {"active": HYDRO_FUNNEL_ACTIVE_DURATION,      "cooldown": HYDRO_FUNNEL_COOLDOWN_DURATION},
+	AlienTechRegistry.QUANTUM_MIRROR:    {"active": QUANTUM_MIRROR_ACTIVE_DURATION,    "cooldown": QUANTUM_MIRROR_COOLDOWN_DURATION},
 }
 
 # Techs whose HOT behavior is a manual on/off toggle (via set_passive_bar in
@@ -323,11 +328,16 @@ func get_bar_phase(slot_index: int) -> Dictionary:
 	if is_slot_hot(slot_index):
 		if tech_id in _HOT_TOGGLE_TECHS:
 			return {"phase": "off", "ratio": 0.0}  # toggle-style hot tech, just not engaged
-		return {"phase": "ready", "ratio": 1.0}  # hot: always-on tech, no cooldown
+		if _effective_cooldown_max(slot_index, tech_id) <= 0.0:
+			return {"phase": "ready", "ratio": 1.0}  # hot: genuinely always-on, no cooldown at all
+		# Else: still has a real (if hot-adjusted) cooldown — e.g. Quantum
+		# Mirror keeps its full 5s/5s when hot, Deflector Shield/Time Freeze
+		# keep a shorter one — fall through to the same remaining-based math
+		# used cold, just with the hot-adjusted active/cooldown split.
 	var remaining: float = _cooldowns[slot_index]
 	if remaining <= 0.0:
 		return {"phase": "ready", "ratio": 1.0}
-	var durations: Dictionary = _TWO_PHASE_BAR_DURATIONS[tech_id]
+	var durations: Dictionary = _effective_two_phase_split(slot_index, tech_id)
 	var active_dur: float = durations["active"]
 	var cooldown_dur: float = durations["cooldown"]
 	if remaining > cooldown_dur:
@@ -335,6 +345,22 @@ func get_bar_phase(slot_index: int) -> Dictionary:
 		return {"phase": "active", "ratio": clamp(active_ratio, 0.0, 1.0)}
 	var cooldown_ratio: float = 1.0 - (remaining / cooldown_dur) if cooldown_dur > 0.0 else 1.0
 	return {"phase": "cooldown", "ratio": clamp(cooldown_ratio, 0.0, 1.0)}
+
+## The active/cooldown split get_bar_phase() should read _cooldowns[slot]
+## against — cold is always _TWO_PHASE_BAR_DURATIONS' own split, but a few
+## techs change that split (not just the total) when hot. Mirrors
+## _effective_cooldown_max()'s per-tech hot overrides — keep the two in sync.
+func _effective_two_phase_split(slot_index: int, tech_id: String) -> Dictionary:
+	var base: Dictionary = _TWO_PHASE_BAR_DURATIONS.get(tech_id, {"active": 0.0, "cooldown": 0.0})
+	if not is_slot_hot(slot_index):
+		return base
+	match tech_id:
+		AlienTechRegistry.TIME_FREEZE:
+			return {"active": TIME_FREEZE_ACTIVE_DURATION * 2.0, "cooldown": TIME_FREEZE_COOLDOWN_DURATION * 0.5}
+		AlienTechRegistry.DEFLECTOR_SHIELD:
+			return {"active": DEFLECTOR_SHIELD_ACTIVE_DURATION, "cooldown": DEFLECTOR_SHIELD_COOLDOWN_DURATION * 0.5}
+		_:
+			return base  # e.g. Quantum Mirror: hot keeps the cold split unchanged
 
 func set_passive_bar(tech_id: String, ratio: float):
 	_passive_bar_ratios[tech_id] = clamp(ratio, 0.0, 1.0)

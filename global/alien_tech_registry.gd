@@ -25,6 +25,7 @@ const GRAVITON_HARNESS    := "graviton_harness"
 const PLASMA_SPIT         := "plasma_spit"
 const MAGNETIC_REPULSION  := "magnetic_repulsion"
 const HYDRO_FUNNEL        := "hydro_funnel"
+const QUANTUM_MIRROR      := "quantum_mirror"
 
 # ─── Tech definitions ────────────────────────────────────────────────────────
 
@@ -209,6 +210,16 @@ var _definitions: Array[Dictionary] = [
 		"has_passive_bar": true,
 		"color":           Color(0.3, 0.75, 1.0),
 		"hot_description": "Click on, click off — no timer, no cooldown. Any hot-only currents in the level open too.",
+	},
+	{
+		"id":              QUANTUM_MIRROR,
+		"name":            "Quantum Mirror",
+		"description":     "Activate to instantly swap with your mirror position for 5s —\ninvincible the whole time. Returns automatically when it ends.\n5s cooldown.",
+		"slot_label":      "Quantum Mirror",
+		"needs_input":     true,
+		"has_passive_bar": true,
+		"color":           Color(0.85, 0.3, 0.95),
+		"hot_description": "Mirrors both axes — leap into the ocean depths (or back) instead of just side to side.",
 	},
 ]
 

@@ -434,8 +434,6 @@ position = Vector2(297, -94)
 
 [node name="DevTechSeeder2" type="Node" parent="." index="62" unique_id=649324248]
 script = ExtResource("32_4xp61")
-enabled = true
-slot_a = 19
 
 [editable path="OceanCurrent"]
 [editable path="SpaceDebrisGroup"]
