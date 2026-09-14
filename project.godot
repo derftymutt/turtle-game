@@ -47,13 +47,13 @@ window/stretch/scale_mode="integer"
 
 project/assembly_name="Turtle"
 
-[gui]
-
-theme/custom="res://theme/pixel_theme.tres"
-
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/godot_ai/plugin.cfg")
+
+[gui]
+
+theme/custom="res://theme/pixel_theme.tres"
 
 [input]
 
