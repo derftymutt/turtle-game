@@ -4,7 +4,7 @@
 [ext_resource type="FontFile" uid="uid://cv5rmfp2o8uts" path="res://assets/fonts/BoldPixels.ttf" id="2_1njj5"]
 [ext_resource type="PackedScene" uid="uid://cmdqgqfevkvly" path="res://ui/menus/guide_screen.tscn" id="2_qc8qn"]
 [ext_resource type="PackedScene" uid="uid://cpjcj7cy3ence" path="res://ui/menus/game_info_screen.tscn" id="3_ginfo"]
-[ext_resource type="AudioStream" uid="uid://d3mew6r6cccme" path="res://assets/sounds/sfx/theme_song.ogg" id="4_themesong"]
+[ext_resource type="AudioStream" uid="uid://cj25gke23vp2i" path="res://assets/sounds/sfx/theme_song.ogg" id="4_themesong"]
 
 [node name="MainMenu" type="CanvasLayer" unique_id=2017890914]
 script = ExtResource("1_5oih7")

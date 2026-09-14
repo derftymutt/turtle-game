@@ -142,13 +142,13 @@ func _static(tex: Texture2D, region: Rect2, display_size: Vector2) -> TextureRec
 	var atlas := AtlasTexture.new()
 	atlas.atlas = tex
 	atlas.region = region
-	var tr := TextureRect.new()
-	tr.texture = atlas
-	tr.custom_minimum_size = display_size
-	tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	tr.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	return tr
+	var rect := TextureRect.new()
+	rect.texture = atlas
+	rect.custom_minimum_size = display_size
+	rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	rect.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	return rect
 
 
 func _anim_sprite(tex: Texture2D, frame_size: Vector2, rects: Array, display_size: Vector2, speed: float) -> Control:
