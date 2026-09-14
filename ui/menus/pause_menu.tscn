@@ -82,6 +82,13 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 2
 
+[node name="SlotLInput" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLRow/SlotLTextContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1.0, 0.85, 0.3, 1)
+theme_override_font_sizes/font_size = 9
+text = "LB · Q"
+visible = false
+
 [node name="SlotLName" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLRow/SlotLTextContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 11
@@ -89,7 +96,26 @@ text = "— empty —"
 
 [node name="SlotLDesc" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLRow/SlotLTextContainer"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.72, 0.72, 0.72, 1)
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 9
+text = ""
+autowrap_mode = 3
+
+[node name="SlotLHotRow" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLRow/SlotLTextContainer"]
+layout_mode = 2
+theme_override_constants/separation = 0
+visible = false
+
+[node name="SlotLHotBadge" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLRow/SlotLTextContainer/SlotLHotRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1.0, 0.25, 0.25, 1)
+theme_override_font_sizes/font_size = 9
+text = "Hot!"
+
+[node name="SlotLHotDesc" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLRow/SlotLTextContainer/SlotLHotRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
 theme_override_font_sizes/font_size = 9
 text = ""
 autowrap_mode = 3
@@ -115,6 +141,13 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 2
 
+[node name="SlotRInput" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRRow/SlotRTextContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1.0, 0.85, 0.3, 1)
+theme_override_font_sizes/font_size = 9
+text = "RB · E"
+visible = false
+
 [node name="SlotRName" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRRow/SlotRTextContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 11
@@ -122,7 +155,26 @@ text = "— empty —"
 
 [node name="SlotRDesc" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRRow/SlotRTextContainer"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.72, 0.72, 0.72, 1)
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 9
+text = ""
+autowrap_mode = 3
+
+[node name="SlotRHotRow" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRRow/SlotRTextContainer"]
+layout_mode = 2
+theme_override_constants/separation = 0
+visible = false
+
+[node name="SlotRHotBadge" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRRow/SlotRTextContainer/SlotRHotRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1.0, 0.25, 0.25, 1)
+theme_override_font_sizes/font_size = 9
+text = "Hot!"
+
+[node name="SlotRHotDesc" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRRow/SlotRTextContainer/SlotRHotRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
 theme_override_font_sizes/font_size = 9
 text = ""
 autowrap_mode = 3

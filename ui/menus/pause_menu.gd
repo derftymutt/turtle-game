@@ -10,8 +10,23 @@ const _TECH := "Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoCon
 const _SFX_MENU_NAV    = preload("res://assets/sounds/sfx/menu nav_1.ogg")
 const _SFX_MENU_SELECT = preload("res://assets/sounds/sfx/menu select_1.ogg")
 
+# Same input-hint / status-line convention as the alien tech selection
+# screen, so the two read as one system.
+const _SLOT_INPUT_HINTS: Array[String] = ["LB · Q", "RB · E"]
+const _ALWAYS_ACTIVE_TEXT: String = "Always Active"
+const _INPUT_HINT_COLOR: Color = Color(1.0, 0.85, 0.3, 1.0)
+const _ALWAYS_ACTIVE_COLOR: Color = Color(0.55, 1.0, 0.6, 1.0)
+
+const _BLINK_PERIOD_MSEC: int = 300
+const _BLINK_LOW_ALPHA: float = 0.35
+
 var _sfx_nav:    AudioStreamPlayer
 var _sfx_select: AudioStreamPlayer
+
+# Whether each slot's input-hint line and "Hot!" badge should currently
+# blink (set on each display refresh, read every _process).
+var _slot_input_blinking: Array[bool] = [false, false]
+var _slot_hot_blinking: Array[bool] = [false, false]
 
 @onready var resume_button    = $Control/CenterContainer/PanelContainer/VBoxContainer/ResumeButton
 @onready var swap_tech_button = $Control/CenterContainer/PanelContainer/VBoxContainer/SwapTechButton
@@ -19,13 +34,21 @@ var _sfx_select: AudioStreamPlayer
 @onready var quit_button      = $Control/CenterContainer/PanelContainer/VBoxContainer/QuitButton
 @onready var guide_screen     = $GuideScreen
 
-@onready var slot_l_icon: TextureRect = $Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLRow/SlotLIcon
-@onready var slot_l_name: Label       = $Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLRow/SlotLTextContainer/SlotLName
-@onready var slot_l_desc: Label       = $Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLRow/SlotLTextContainer/SlotLDesc
+@onready var slot_l_icon:  TextureRect = $Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLRow/SlotLIcon
+@onready var slot_l_input: Label       = $Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLRow/SlotLTextContainer/SlotLInput
+@onready var slot_l_name:  Label       = $Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLRow/SlotLTextContainer/SlotLName
+@onready var slot_l_desc:  Label       = $Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLRow/SlotLTextContainer/SlotLDesc
+@onready var slot_l_hot_row:   VBoxContainer = $Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLRow/SlotLTextContainer/SlotLHotRow
+@onready var slot_l_hot_badge: Label         = $Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLRow/SlotLTextContainer/SlotLHotRow/SlotLHotBadge
+@onready var slot_l_hot_desc:  Label         = $Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLRow/SlotLTextContainer/SlotLHotRow/SlotLHotDesc
 
-@onready var slot_r_icon: TextureRect = $Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRRow/SlotRIcon
-@onready var slot_r_name: Label       = $Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRRow/SlotRTextContainer/SlotRName
-@onready var slot_r_desc: Label       = $Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRRow/SlotRTextContainer/SlotRDesc
+@onready var slot_r_icon:  TextureRect = $Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRRow/SlotRIcon
+@onready var slot_r_input: Label       = $Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRRow/SlotRTextContainer/SlotRInput
+@onready var slot_r_name:  Label       = $Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRRow/SlotRTextContainer/SlotRName
+@onready var slot_r_desc:  Label       = $Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRRow/SlotRTextContainer/SlotRDesc
+@onready var slot_r_hot_row:   VBoxContainer = $Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRRow/SlotRTextContainer/SlotRHotRow
+@onready var slot_r_hot_badge: Label         = $Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRRow/SlotRTextContainer/SlotRHotRow/SlotRHotBadge
+@onready var slot_r_hot_desc:  Label         = $Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRRow/SlotRTextContainer/SlotRHotRow/SlotRHotDesc
 
 func _ready():
 	add_to_group("pause_menu")
@@ -63,6 +86,20 @@ func _input(event):
 			_open()
 		get_viewport().set_input_as_handled()
 
+func _process(_delta: float) -> void:
+	if not visible:
+		return
+	var blink_on := int(Time.get_ticks_msec() / _BLINK_PERIOD_MSEC) % 2 == 0
+	var alpha := 1.0 if blink_on else _BLINK_LOW_ALPHA
+	if _slot_input_blinking[0]:
+		slot_l_input.modulate.a = alpha
+	if _slot_input_blinking[1]:
+		slot_r_input.modulate.a = alpha
+	if _slot_hot_blinking[0]:
+		slot_l_hot_badge.modulate.a = alpha
+	if _slot_hot_blinking[1]:
+		slot_r_hot_badge.modulate.a = alpha
+
 func _open():
 	get_tree().paused = true
 	visible = true
@@ -97,35 +134,61 @@ func _on_swap_tech_pressed():
 	_update_tech_display()
 
 func _update_tech_display():
-	_update_slot(0, AlienTechManager.slots[0], slot_l_icon, slot_l_name, slot_l_desc)
-	_update_slot(1, AlienTechManager.slots[1], slot_r_icon, slot_r_name, slot_r_desc)
+	_update_slot(0, AlienTechManager.slots[0], slot_l_icon, slot_l_input, slot_l_name, slot_l_desc, slot_l_hot_row, slot_l_hot_desc)
+	_update_slot(1, AlienTechManager.slots[1], slot_r_icon, slot_r_input, slot_r_name, slot_r_desc, slot_r_hot_row, slot_r_hot_desc)
 
-func _update_slot(slot_index: int, slot: Dictionary, icon: TextureRect, name_lbl: Label, desc_lbl: Label):
+func _update_slot(slot_index: int, slot: Dictionary, icon: TextureRect, input_lbl: Label, name_lbl: Label, desc_lbl: Label, hot_row: VBoxContainer, hot_desc: Label):
 	if slot.is_empty():
 		if icon:
 			icon.modulate = Color(0.4, 0.4, 0.4, 1.0)
+		if input_lbl:
+			input_lbl.visible = false
+			input_lbl.modulate.a = 1.0
+		_slot_input_blinking[slot_index] = false
 		if name_lbl:
 			name_lbl.text = "— empty —"
 			name_lbl.modulate = Color(0.5, 0.5, 0.5, 1.0)
 		if desc_lbl:
 			desc_lbl.text = ""
-	else:
-		var tech_color: Color = slot.get("color", Color.WHITE)
-		if icon:
-			icon.modulate = Color.WHITE
-		if name_lbl:
-			name_lbl.text = slot.get("name", "")
-			name_lbl.modulate = tech_color
-		if desc_lbl:
-			var desc_text: String = slot.get("description", "")
-			# Hot-effect text is a surprise discovered through play — only ever
-			# shown once the tech is actually hot, never as a spoiler up front.
-			if AlienTechManager.is_slot_hot(slot_index):
-				var hot_text: String = slot.get("hot_description", "")
-				if not hot_text.is_empty():
-					desc_text += "\n[HOT] %s" % hot_text
-			desc_lbl.text = desc_text
-			desc_lbl.modulate = Color(0.88, 0.88, 0.88, 1.0)
+		if hot_row:
+			hot_row.visible = false
+		_slot_hot_blinking[slot_index] = false
+		return
+
+	var tech_color: Color = slot.get("color", Color.WHITE)
+	var needs_input: bool = slot.get("needs_input", false)
+	if icon:
+		icon.modulate = Color.WHITE
+	if name_lbl:
+		name_lbl.text = slot.get("name", "")
+		name_lbl.modulate = tech_color
+	if input_lbl:
+		input_lbl.visible = true
+		_slot_input_blinking[slot_index] = true
+		if needs_input:
+			input_lbl.text = _SLOT_INPUT_HINTS[slot_index]
+			input_lbl.add_theme_color_override("font_color", _INPUT_HINT_COLOR)
+		else:
+			input_lbl.text = _ALWAYS_ACTIVE_TEXT
+			input_lbl.add_theme_color_override("font_color", _ALWAYS_ACTIVE_COLOR)
+	if desc_lbl:
+		desc_lbl.text = slot.get("description", "")
+		desc_lbl.modulate = Color(1.0, 1.0, 1.0, 1.0)
+
+	# Hot-effect text is a surprise discovered through play — only ever
+	# shown once the tech is actually hot, never as a spoiler up front.
+	var hot_text: String = ""
+	if AlienTechManager.is_slot_hot(slot_index):
+		hot_text = slot.get("hot_description", "")
+	if hot_row:
+		if hot_text.is_empty():
+			hot_row.visible = false
+			_slot_hot_blinking[slot_index] = false
+		else:
+			hot_row.visible = true
+			_slot_hot_blinking[slot_index] = true
+			if hot_desc:
+				hot_desc.text = hot_text
 
 func _show_save_prompt(action: Callable):
 	var dialog = ConfirmationDialog.new()

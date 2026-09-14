@@ -1,6 +1,8 @@
 [gd_scene format=3 uid="uid://atselect001"]
 
 [ext_resource type="Script" path="res://ui/alien_tech/alien_tech_selection_screen.gd" id="1_atselect"]
+[ext_resource type="Texture2D" uid="uid://b6kds15kk8tw4" path="res://ui/hud/sprites/tech_left_icon.png" id="2_lefticon"]
+[ext_resource type="Texture2D" uid="uid://c8tawqv3ivo5u" path="res://ui/hud/sprites/tech_right_icon.png" id="3_righticon"]
 
 [node name="AlienTechSelectionScreen" type="CanvasLayer" unique_id=300000001]
 process_mode = 3
@@ -14,66 +16,217 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="PanelContainer" type="PanelContainer" parent="Control" unique_id=300000003]
+[node name="CenterContainer" type="CenterContainer" parent="Control" unique_id=300000020]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -310.0
-offset_top = -130.0
-offset_right = 310.0
-offset_bottom = 130.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="Control/PanelContainer" unique_id=300000004]
+[node name="PanelContainer" type="PanelContainer" parent="Control/CenterContainer" unique_id=300000003]
 layout_mode = 2
-theme_override_constants/margin_left = 8
+
+[node name="MarginContainer" type="MarginContainer" parent="Control/CenterContainer/PanelContainer" unique_id=300000004]
+layout_mode = 2
+theme_override_constants/margin_left = 10
 theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 8
+theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 8
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Control/PanelContainer/MarginContainer" unique_id=300000005]
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/MarginContainer" unique_id=300000005]
+custom_minimum_size = Vector2(620, 0)
 layout_mode = 2
-theme_override_constants/separation = 6
+theme_override_constants/separation = 5
 
-[node name="TitleLabel" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer" unique_id=300000006]
+[node name="TitleLabel" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=300000006]
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
-text = "Alien Tech Acquired!"
+theme_override_font_sizes/font_size = 16
+text = "Alien Tech Found!"
 horizontal_alignment = 1
 
-[node name="InstructionsCenterContainer" type="CenterContainer" parent="Control/PanelContainer/MarginContainer/VBoxContainer" unique_id=300000010]
+[node name="TechNameLabel" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=300000021]
 layout_mode = 2
-visible = false
+theme_override_font_sizes/font_size = 26
+text = "Tech Name"
+horizontal_alignment = 1
 
-[node name="InstructionsLabel" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer/InstructionsCenterContainer" unique_id=300000012]
+[node name="HookLabel" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=300000022]
 layout_mode = 2
-custom_minimum_size = Vector2(420, 0)
-theme_override_font_sizes/font_size = 9
-text = "• You have slots for 2 techs- Left and Right\n• Active techs are triggered with the corresponding button (Left/Right Bumper or Q/E)\n• Passive techs are always engaged\n• Swap assigned tech slots in the Pause menu"
+theme_override_colors/font_color = Color(0.82, 0.82, 0.82, 1)
+theme_override_font_sizes/font_size = 13
+text = "Hook text goes here"
+horizontal_alignment = 1
 autowrap_mode = 3
 
-[node name="TutorialSeparator" type="HSeparator" parent="Control/PanelContainer/MarginContainer/VBoxContainer" unique_id=300000011]
+[node name="HSeparatorMid" type="HSeparator" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=300000023]
 layout_mode = 2
+
+[node name="TechInfoMargin" type="MarginContainer" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=300000024]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_right = 4
+
+[node name="TechInfoContainer" type="HBoxContainer" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin" unique_id=300000008]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="SlotLPanel" type="PanelContainer" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer" unique_id=300000030]
+custom_minimum_size = Vector2(295, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 2
+mouse_filter = 0
+mouse_default_cursor_shape = 2
+
+[node name="SlotLRow" type="HBoxContainer" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLPanel" unique_id=300000031]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 7
+
+[node name="SlotLIcon" type="TextureRect" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLPanel/SlotLRow" unique_id=300000032]
+custom_minimum_size = Vector2(14, 14)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("2_lefticon")
+stretch_mode = 5
+
+[node name="SlotLTextContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLPanel/SlotLRow" unique_id=300000033]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_constants/separation = 1
+
+[node name="SlotLInput" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLPanel/SlotLRow/SlotLTextContainer" unique_id=300000034]
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(1.0, 0.85, 0.3, 1)
+theme_override_font_sizes/font_size = 11
+text = "LB · Q"
 visible = false
 
-[node name="SubtitleLabel" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer" unique_id=300000007]
+[node name="SlotLName" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLPanel/SlotLRow/SlotLTextContainer" unique_id=300000035]
 layout_mode = 2
-theme_override_font_sizes/font_size = 11
-text = "Choose an upgrade:"
-horizontal_alignment = 1
+mouse_filter = 2
+theme_override_font_sizes/font_size = 14
+text = "— empty —"
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Control/PanelContainer/MarginContainer/VBoxContainer" unique_id=300000008]
+[node name="SlotLDesc" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLPanel/SlotLRow/SlotLTextContainer" unique_id=300000036]
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 12
+text = ""
+autowrap_mode = 3
+
+[node name="SlotLHotRow" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLPanel/SlotLRow/SlotLTextContainer" unique_id=300000100]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 0
+visible = false
+
+[node name="SlotLHotBadge" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLPanel/SlotLRow/SlotLTextContainer/SlotLHotRow" unique_id=300000101]
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(1.0, 0.25, 0.25, 1)
+theme_override_font_sizes/font_size = 12
+text = "Hot!"
+
+[node name="SlotLHotDesc" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLPanel/SlotLRow/SlotLTextContainer/SlotLHotRow" unique_id=300000102]
+layout_mode = 2
+mouse_filter = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 12
+text = ""
+autowrap_mode = 3
+
+[node name="SlotSeparator" type="VSeparator" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer" unique_id=300000037]
+layout_mode = 2
+modulate = Color(1, 1, 1, 0.25)
+
+[node name="SlotRPanel" type="PanelContainer" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer" unique_id=300000040]
+custom_minimum_size = Vector2(295, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 2
+mouse_filter = 0
+mouse_default_cursor_shape = 2
+
+[node name="SlotRRow" type="HBoxContainer" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRPanel" unique_id=300000041]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 7
+
+[node name="SlotRIcon" type="TextureRect" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRPanel/SlotRRow" unique_id=300000042]
+custom_minimum_size = Vector2(14, 14)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("3_righticon")
+stretch_mode = 5
+
+[node name="SlotRTextContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRPanel/SlotRRow" unique_id=300000043]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_constants/separation = 1
+
+[node name="SlotRInput" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRPanel/SlotRRow/SlotRTextContainer" unique_id=300000044]
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(1.0, 0.85, 0.3, 1)
+theme_override_font_sizes/font_size = 11
+text = "RB · E"
+visible = false
+
+[node name="SlotRName" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRPanel/SlotRRow/SlotRTextContainer" unique_id=300000045]
+layout_mode = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 14
+text = "— empty —"
+
+[node name="SlotRDesc" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRPanel/SlotRRow/SlotRTextContainer" unique_id=300000046]
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 12
+text = ""
+autowrap_mode = 3
+
+[node name="SlotRHotRow" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRPanel/SlotRRow/SlotRTextContainer" unique_id=300000110]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 0
+visible = false
+
+[node name="SlotRHotBadge" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRPanel/SlotRRow/SlotRTextContainer/SlotRHotRow" unique_id=300000111]
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(1.0, 0.25, 0.25, 1)
+theme_override_font_sizes/font_size = 12
+text = "Hot!"
+
+[node name="SlotRHotDesc" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRPanel/SlotRRow/SlotRTextContainer/SlotRHotRow" unique_id=300000112]
+layout_mode = 2
+mouse_filter = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 12
+text = ""
+autowrap_mode = 3
+
+[node name="HSeparatorBottom" type="HSeparator" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=300000050]
+layout_mode = 2
+
+[node name="ButtonsRow" type="HBoxContainer" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=300000009]
 layout_mode = 2
 theme_override_constants/separation = 8
 alignment = 1
 
-[node name="SlotLabel" type="Label" parent="Control/PanelContainer/MarginContainer/VBoxContainer" unique_id=300000009]
+[node name="SkipButton" type="Button" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonsRow" unique_id=300000061]
+custom_minimum_size = Vector2(90, 36)
 layout_mode = 2
-theme_override_font_sizes/font_size = 11
-text = ""
-visible = false
-horizontal_alignment = 1
+theme_override_font_sizes/font_size = 13
+text = "Skip"
