@@ -35,5 +35,5 @@ func _physics_process(delta: float) -> void:
 	if collision:
 		var body := collision.get_collider()
 		if body and body.is_in_group("player") and body.has_method("take_damage"):
-			body.take_damage(damage)
+			body.take_damage(damage, false, "shot down by a plane")
 		queue_free()

@@ -14,6 +14,7 @@ func _enemy_ready():
 	
 	# Optional: Slightly increased damage for tougher enemy
 	contact_damage = 20.0
+	death_label = "a super piranha"
 	
 	# Optional: Visual distinction (if using AnimatedSprite2D)
 	if sprite and sprite is AnimatedSprite2D:

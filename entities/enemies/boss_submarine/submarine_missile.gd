@@ -71,7 +71,7 @@ func _on_body_entered(body: Node) -> void:
 	# Damage the player
 	if body.is_in_group("player"):
 		if body.has_method("take_damage"):
-			body.take_damage(contact_damage)
+			body.take_damage(contact_damage, false, "killed by a submarine missile")
 			# Knock player back from missile
 			var knockback := linear_velocity.normalized() * 250.0
 			body.apply_central_impulse(knockback)

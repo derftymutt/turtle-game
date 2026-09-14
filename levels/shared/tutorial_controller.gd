@@ -25,9 +25,9 @@ func _ready() -> void:
 ## Called by the turtle when it dies. In the tutorial there's no fail state —
 ## just put the player back where they started, fully healed, with a moment of
 ## invulnerability so they aren't instantly re-hit.
-func on_player_died(final_score: int) -> void:
+func on_player_died(final_score: int, death_cause: String = "") -> void:
 	if not LevelManager.is_tutorial:
-		super.on_player_died(final_score)
+		super.on_player_died(final_score, death_cause)
 		return
 	_respawn_player()
 

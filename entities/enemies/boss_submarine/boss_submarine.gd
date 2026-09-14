@@ -113,6 +113,7 @@ func _enemy_ready() -> void:
 	current_health = max_health
 	contact_damage = 20.0
 	knockback_force = 500.0
+	death_label = "a submarine"
 
 	# The sub is invincible to everything EXCEPT super-speed hits.
 	# Bullets, normal contact, etc. will trigger the shake feedback

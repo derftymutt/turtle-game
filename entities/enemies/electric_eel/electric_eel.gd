@@ -59,6 +59,7 @@ func _enemy_ready():
 	max_health = 25.0
 	current_health = max_health
 	contact_damage = 10.0
+	death_label = "an electric eel"
 	
 	# Find references
 	ocean = get_tree().get_first_node_in_group("ocean")
@@ -499,7 +500,7 @@ class ShockedWall extends Node:
 		
 		# Damage
 		if player.has_method("take_damage"):
-			player.take_damage(shock_damage)
+			player.take_damage(shock_damage, false, "shocked by an electric eel")
 		
 		# Knockback (reduced for better feel)
 		var knockback_dir = (player.global_position - parent_wall.global_position).normalized()

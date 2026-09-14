@@ -18,6 +18,7 @@ const _ENEMY_DIE_SFX = preload("res://assets/sounds/sfx/dead enemy_1.ogg")
 # Damage dealing
 @export var contact_damage: float = 25.0
 @export var knockback_force: float = 300.0
+@export var death_label: String = "an enemy"  # e.g. "a crocodile" — used in the game over screen's cause of death
 
 # Visual feedback
 @export var damage_flash_duration: float = 0.3
@@ -153,7 +154,7 @@ func _on_damage_area_entered(body: Node2D):
 
 ## Deal damage and knockback to player
 func _deal_damage_to_player(player: Node2D):
-	player.take_damage(contact_damage)
+	player.take_damage(contact_damage, false, "killed by " + death_label)
 	
 	# Apply knockback
 	var knockback_dir = (player.global_position - global_position).normalized()

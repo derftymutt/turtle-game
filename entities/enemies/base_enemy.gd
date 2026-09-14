@@ -18,6 +18,7 @@ const _ENEMY_DIE_SFX = preload("res://assets/sounds/sfx/dead enemy_1.ogg")
 @export var contact_damage: float = 25.0
 @export var knockback_force: float = 300.0
 @export var contact_damage_cooldown: float = 1.5  # Seconds before this enemy can deal contact damage again
+@export var death_label: String = "an enemy"  # e.g. "a crab" — used in the game over screen's cause of death
 
 # Visual feedback
 @export var damage_flash_duration: float = 0.3
@@ -176,7 +177,7 @@ func _process(delta: float):
 func _deal_damage_to_player(player: Node2D):
 	if _hit_iframes_timer > 0.0:
 		return
-	player.take_damage(contact_damage, true)  # true = grant contact iframes
+	player.take_damage(contact_damage, true, "killed by " + death_label)  # true = grant contact iframes
 
 	# Start cooldown so this enemy doesn't fire again until it expires
 	_contact_damage_ready = false

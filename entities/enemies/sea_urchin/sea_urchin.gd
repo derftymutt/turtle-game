@@ -23,6 +23,7 @@ func _enemy_ready():
 	is_invincible = true
 	pass_through_player = true  # This is just a flag for documentation/future use
 	contact_damage= 15
+	death_label = "a sea urchin"
 	
 	# Physics setup - heavy and stationary
 	gravity_scale = 0.0

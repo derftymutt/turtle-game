@@ -40,6 +40,7 @@ func _enemy_ready() -> void:
 	max_health = 15.0
 	current_health = max_health
 	contact_damage = 12.0
+	death_label = "a submarine drone"
 	gravity_scale = 0.0
 	linear_damp = 3.0
 	angular_damp = 5.0

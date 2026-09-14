@@ -71,6 +71,7 @@ func _enemy_ready():
 	max_health = 30.0 if is_super else 20.0
 	current_health = max_health
 	contact_damage = 10.0
+	death_label = "a crab"
 	
 	# Find references
 	ocean = get_tree().get_first_node_in_group("ocean")

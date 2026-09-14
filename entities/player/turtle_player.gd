@@ -32,6 +32,7 @@ const MAX_HEARTS: int = 7
 const HEART_DAMAGE_IFRAME: float = 0.75
 var current_hearts: int = MAX_HEARTS
 var _heart_iframe_timer: float = 0.0
+var _last_damage_source: String = ""  # cause clause for the game over screen, e.g. "killed by a crab"
 
 # Super Speed System
 @export_group("Super Speed")
@@ -503,7 +504,7 @@ func _physics_process(delta):
 		if is_underwater:
 			var out_of_air = hud.drain_air(delta)
 			if out_of_air:
-				take_damage(10.0 * delta)
+				take_damage(10.0 * delta, false, "ran out of breath")
 		else:
 			hud.refill_air(delta)
 
@@ -880,7 +881,7 @@ func apply_flipper_force(direction: Vector2, force_multiplier: float = 5.0):
 # HEALTH
 # ---------------------------------------------------------------------------
 
-func take_damage(amount: float, use_iframes: bool = false):
+func take_damage(amount: float, use_iframes: bool = false, source: String = ""):
 	if _level_complete:
 		return
 	if use_iframes and _contact_iframes_active:
@@ -917,6 +918,8 @@ func take_damage(amount: float, use_iframes: bool = false):
 	# One damage event = one heart, regardless of `amount`.
 	current_hearts = max(0, current_hearts - 1)
 	_heart_iframe_timer = HEART_DAMAGE_IFRAME
+	if not source.is_empty():
+		_last_damage_source = source
 	$SfxDamage.play()
 
 	if hud:
@@ -961,11 +964,11 @@ func die():
 
 	var level = get_tree().get_first_node_in_group("level")
 	if level and level.has_method("on_player_died"):
-		level.on_player_died(final_score)
+		level.on_player_died(final_score, _last_damage_source)
 	else:
 		var game_over_screen = get_tree().get_first_node_in_group("game_over_screen")
 		if game_over_screen and game_over_screen.has_method("show_game_over"):
-			game_over_screen.show_game_over(final_score, GameManager.total_score)
+			game_over_screen.show_game_over(final_score, GameManager.total_score, _last_damage_source)
 		else:
 			push_warning("No GameOverScreen found!")
 			await get_tree().create_timer(2.0).timeout
@@ -2173,7 +2176,7 @@ func _activate_shockwave() -> void:
 		# Hot trade-off: no self-stun, but it costs a heart every use (still
 		# subject to the normal heart-damage iframe, which is what keeps this
 		# from being a truly free-spam full-screen nuke).
-		take_damage(1.0)
+		take_damage(1.0, false, "fried by your own shockwave")
 	else:
 		suspend_control(1.0)
 	_spawn_shockwave_visual()

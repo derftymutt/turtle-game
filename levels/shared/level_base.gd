@@ -37,14 +37,14 @@ func _ready():
 	print("📍 Level %d ready (%s)" % [level_number, scene_file_path])
 
 ## Called by turtle when player dies
-func on_player_died(final_score: int):
+func on_player_died(final_score: int, death_cause: String = ""):
 	GameManager.current_score = final_score
 
 	var level_name = LevelManager.get_current_level_name()
 	GameManager.update_high_score(level_name, final_score)
 
 	if game_over_screen:
-		game_over_screen.show_game_over(final_score, GameManager.total_score)
+		game_over_screen.show_game_over(final_score, GameManager.total_score, death_cause)
 	else:
 		push_warning("No GameOverScreen found! Restarting level...")
 		await get_tree().create_timer(2.0).timeout

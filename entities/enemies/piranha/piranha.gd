@@ -64,6 +64,7 @@ func _enemy_ready():
 	current_health = max_health
 	contact_damage = 15.0
 	knockback_force = 0.0
+	death_label = "a piranha"
 	
 	# Find references
 	ocean = get_tree().get_first_node_in_group("ocean")

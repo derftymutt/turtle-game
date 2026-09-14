@@ -46,6 +46,7 @@ func _enemy_ready():
 	# Health configuration
 	max_health = 40.0
 	current_health = max_health
+	death_label = "a crocodile"
 	
 	# Find scene references
 	ocean = get_tree().get_first_node_in_group("ocean")
@@ -194,7 +195,7 @@ func _on_player_lost(body: Node2D):
 
 func _deal_damage_to_player(player_node: Node2D):
 	"""Override BaseEnemyStatic to add bounce effect on contact"""
-	player_node.take_damage(contact_damage)
+	player_node.take_damage(contact_damage, false, "killed by " + death_label)
 	
 	if not player_node is RigidBody2D:
 		return

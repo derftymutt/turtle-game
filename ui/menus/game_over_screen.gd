@@ -14,6 +14,7 @@ var _sfx_select:      AudioStreamPlayer
 
 @onready var game_over_panel = $Control/CenterContainer/PanelContainer
 @onready var vbox_container = $Control/CenterContainer/PanelContainer/VBoxContainer
+@onready var game_over_label = $Control/CenterContainer/PanelContainer/VBoxContainer/GameOverLabel
 @onready var hint_label = $Control/CenterContainer/PanelContainer/VBoxContainer/HintLabel
 @onready var final_score_label = $Control/CenterContainer/PanelContainer/VBoxContainer/FinalScoreLabel
 @onready var total_score_label = $Control/CenterContainer/PanelContainer/VBoxContainer/TotalScoreLabel
@@ -103,9 +104,12 @@ func _ready():
 		quit_button.pressed.connect(_on_quit_pressed)
 		quit_button.focus_entered.connect(func(): _sfx_nav.play())
 
-func show_game_over(level_score: int, run_total: int):
+func show_game_over(level_score: int, run_total: int, death_cause: String = ""):
 	"""Display the game over screen with level score and cumulative run total"""
 	final_score = level_score
+
+	if game_over_label:
+		game_over_label.text = "Ouch, %s." % death_cause if not death_cause.is_empty() else "OUCH"
 
 	if hint_label:
 		hint_label.text = _pick_hint()
