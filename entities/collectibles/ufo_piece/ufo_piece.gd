@@ -7,10 +7,13 @@ class_name UFOPiece
 
 const _MAX_SPEED := 200.0
 
+const _PLAYER_SEPARATION_GRACE := 0.5  # see _restore_physics_after_drop()
+
 var is_carried: bool = false
 var carrier: Node2D = null
 var _drop_grace_timer: float = 0.0
 var _cached_limits: Dictionary = {}
+var _dropped_from: Node2D = null  # carrier at the moment of drop, for the collision exception below
 
 func _collectible_ready():
 	sink_speed = 0.0
@@ -107,6 +110,7 @@ func drop_piece(intentional: bool = false):
 	is_carried = false
 	collected = false  # Allow re-collection
 	GameManager.remove_carried_piece(self)
+	_dropped_from = carrier
 	carrier = null
 
 	if intentional:
@@ -129,6 +133,27 @@ func _restore_physics_after_drop() -> void:
 	collision_layer = 2
 	collision_mask = 1
 	apply_impulse(_safe_drop_impulse())
+
+	# The piece drops exactly on top of the player (carry position == player
+	# position), and "player body" shares the same physics layer as world
+	# geometry, so there's no bitmask that lets it collide with walls but not
+	# the carrier. Without this, two solid bodies spawning at zero distance
+	# (most reliably: an electric-shock drop, which happens at the carry
+	# point) can end up deeply interpenetrating — the physics engine has no
+	# clean separation direction and just fights itself every step, so the
+	# piece spins in place, glued to the player, immune to drop/deliver
+	# because it's still resolving that overlap. A temporary collision
+	# exception guarantees they can't get stuck on each other while they
+	# separate; walls are unaffected since exceptions are per-body, not layer-wide.
+	if is_instance_valid(_dropped_from):
+		var carrier_ref := _dropped_from
+		_dropped_from = null
+		add_collision_exception_with(carrier_ref)
+		get_tree().create_timer(_PLAYER_SEPARATION_GRACE).timeout.connect(
+			func():
+				if is_instance_valid(self) and is_instance_valid(carrier_ref):
+					remove_collision_exception_with(carrier_ref)
+		)
 
 func _get_play_area_limits() -> Dictionary:
 	# Small margin — just enough to keep the piece inside the wall geometry
