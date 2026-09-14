@@ -56,7 +56,9 @@ const HINTS: Array[String] = [
 	"Ocean currents weeeeeeeee!",
 	"Your name is Flip for a reason",
 	"The surface is invigorating",
-	"Don't we all sparkle yellow during a quick energy recharge?"
+	"Don't we all sparkle yellow during a quick energy recharge?",
+	"Alien tech's are unstable. They heat up and they fry.",
+	"You never know what you'll find in the trash."
 ]
 
 static var _shown_hint_indices: Array[int] = []

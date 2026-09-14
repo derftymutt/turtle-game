@@ -1558,6 +1558,23 @@ func _on_alien_tech_slots_changed_player(_slot_a: Dictionary, _slot_b: Dictionar
 			bubble_shield_hp = 1.0
 		if _bubble_visual:
 			_bubble_visual.visible = bubble_shield_hp > 0.0
+	else:
+		# Tech was swapped out (or fried) — bubble_shield_hp/_bubble_visual are
+		# only ever updated while the tech is equipped (see _process), so
+		# without this the ring keeps drawing around the turtle forever with
+		# a slot that no longer holds the tech.
+		bubble_shield_hp = 0.0
+		bubble_shield_regen_timer = 0.0
+		if _bubble_visual:
+			_bubble_visual.visible = false
+
+	# Magnetic Repulsion's active window is a plain countdown timer (see
+	# _physics_process) that has no idea the tech was unequipped mid-effect —
+	# stop it here so a swapped-out slot doesn't keep hovering nearby
+	# collectibles/UFO parts until that leftover timer happens to run out.
+	if not AlienTechManager.has_tech(AlienTechRegistry.MAGNETIC_REPULSION):
+		magnetic_repulsion_active = false
+		magnetic_repulsion_timer = 0.0
 
 # ---------------------------------------------------------------------------
 # BUBBLE SHIELD VISUAL

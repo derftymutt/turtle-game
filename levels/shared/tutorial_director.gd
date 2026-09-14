@@ -57,10 +57,10 @@ const FLIPPER_TEXT := "You also recover energy fast while TOUCHING pinball walls
 const FLIPPER_HINT_LEFT := "▶  Try the LEFT flipper: LT (or Left Shift)"
 const FLIPPER_HINT_RIGHT := "▶  Now the RIGHT flipper: RT (or Right Shift)"
 
-const DROP_NOW_TEXT := "UFO parts are heavy. You can drop them if you need to with X (or Space). Drop the part now (and then go pick it up!)."
+const DROP_NOW_TEXT := "UFO parts are heavy. You can drop them if you need to with X (or Space).\n\nDrop the part now (and then go pick it up!)."
 const DROP_NOW_HINT := "▶  Push X (or Space) to drop the part"
 
-const MEANIES_TEXT := "Look out for meanies! You can shoot most of them with your turtle spit — aim with the Right Stick (or I J K L)."
+const MEANIES_TEXT := "Look out for meanies! You can shoot most of them with your turtle spit.\n\nAim with the Right Stick (or I J K L)."
 
 const SHOOT_TEXT := "Try shooting turtle spit now."
 const SHOOT_HINT := "▶  Use the Right Stick to shoot turtle spit in any direction"
@@ -412,17 +412,22 @@ func _spawn_trash() -> void:
 	_sequence_done = false
 
 	# A drifting line of trash items sweeping in from the left (rewards a powerup).
+	# Slowed well below TrashSequence's own default (80px/s, tuned for normal
+	# gameplay) — this is the tutorial, so a first-time player needs enough
+	# time to actually track and shoot each item, not just watch it fly by.
 	_trash_seq = TRASH_SEQUENCE_SCENE.instantiate()
 	_trash_seq.spawn_side = "left"
+	_trash_seq.drift_speed = 35.0
 	scene.add_child(_trash_seq)
 	_trash_seq.sequence_completed.connect(func(_pos): _sequence_done = true)
 	_trash_seq.sequence_failed.connect(func(): _sequence_done = true)
 	_trash_seq.trigger_sequence(TrashSequence.PatternType.WAVE, 4, Powerup.PowerupType.RANDOM)
 
-	# A trash bag drifting in from the right.
+	# A trash bag drifting in from the right — already fairly slow, nudged
+	# down a bit further to match the sequence above.
 	_trash_bag = TRASH_CLUSTER_SCENE.instantiate()
 	_trash_bag.is_first_cluster = true
-	_trash_bag.drift_speed = -42.0
+	_trash_bag.drift_speed = -35.0
 	if _ocean:
 		_trash_bag.min_y = float(_ocean.surface_y) + 12.0
 	_trash_bag.max_y = 150.0

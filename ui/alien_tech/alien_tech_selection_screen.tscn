@@ -98,12 +98,27 @@ size_flags_horizontal = 3
 mouse_filter = 2
 theme_override_constants/separation = 1
 
-[node name="SlotLInput" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLPanel/SlotLRow/SlotLTextContainer" unique_id=300000034]
+[node name="SlotLInputRow" type="HBoxContainer" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLPanel/SlotLRow/SlotLTextContainer" unique_id=300000120]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="SlotLInput" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLPanel/SlotLRow/SlotLTextContainer/SlotLInputRow" unique_id=300000034]
 layout_mode = 2
 mouse_filter = 2
 theme_override_colors/font_color = Color(1.0, 0.85, 0.3, 1)
 theme_override_font_sizes/font_size = 11
 text = "LB · Q"
+visible = false
+
+[node name="SlotLReplaces" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLPanel/SlotLRow/SlotLTextContainer/SlotLInputRow" unique_id=300000121]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.75, 0.78, 0.85, 1)
+theme_override_font_sizes/font_size = 11
+horizontal_alignment = 2
+text = ""
 visible = false
 
 [node name="SlotLName" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLPanel/SlotLRow/SlotLTextContainer" unique_id=300000035]
@@ -173,12 +188,27 @@ size_flags_horizontal = 3
 mouse_filter = 2
 theme_override_constants/separation = 1
 
-[node name="SlotRInput" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRPanel/SlotRRow/SlotRTextContainer" unique_id=300000044]
+[node name="SlotRInputRow" type="HBoxContainer" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRPanel/SlotRRow/SlotRTextContainer" unique_id=300000122]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="SlotRInput" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRPanel/SlotRRow/SlotRTextContainer/SlotRInputRow" unique_id=300000044]
 layout_mode = 2
 mouse_filter = 2
 theme_override_colors/font_color = Color(1.0, 0.85, 0.3, 1)
 theme_override_font_sizes/font_size = 11
 text = "RB · E"
+visible = false
+
+[node name="SlotRReplaces" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRPanel/SlotRRow/SlotRTextContainer/SlotRInputRow" unique_id=300000123]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.75, 0.78, 0.85, 1)
+theme_override_font_sizes/font_size = 11
+horizontal_alignment = 2
+text = ""
 visible = false
 
 [node name="SlotRName" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRPanel/SlotRRow/SlotRTextContainer" unique_id=300000045]

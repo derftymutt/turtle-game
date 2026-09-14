@@ -12,6 +12,7 @@ class_name AlienTechSelectionScreen
 
 const _SFX_MENU_NAV    = preload("res://assets/sounds/sfx/menu nav_1.ogg")
 const _SFX_MENU_SELECT = preload("res://assets/sounds/sfx/menu select_1.ogg")
+const _TEXT_SHINE_SHADER = preload("res://ui/alien_tech/shaders/text_shine.gdshader")
 
 # Left/right slots are always triggered by the same physical inputs
 # regardless of which tech occupies them — lead with the gamepad button,
@@ -23,7 +24,6 @@ const _ALWAYS_ACTIVE_TEXT: String = "Always Active"
 const _INPUT_HINT_COLOR: Color = Color(1.0, 0.85, 0.3, 1.0)
 const _ALWAYS_ACTIVE_COLOR: Color = Color(0.55, 1.0, 0.6, 1.0)
 
-const _NAME_BLINK_PERIOD_MSEC: int = 800
 const _ACTIVE_BLINK_PERIOD_MSEC: int = 300
 const _ACTIVE_BLINK_LOW_ALPHA: float = 0.35
 
@@ -48,7 +48,8 @@ const _INPUT_ARM_TIMEOUT_SEC: float = 1.5
 @onready var skip_button: Button = $"Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonsRow/SkipButton"
 
 @onready var slot_l_panel: PanelContainer = $"Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLPanel"
-@onready var slot_l_input: Label          = $"Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLPanel/SlotLRow/SlotLTextContainer/SlotLInput"
+@onready var slot_l_input:    Label       = $"Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLPanel/SlotLRow/SlotLTextContainer/SlotLInputRow/SlotLInput"
+@onready var slot_l_replaces: Label       = $"Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLPanel/SlotLRow/SlotLTextContainer/SlotLInputRow/SlotLReplaces"
 @onready var slot_l_name:  Label          = $"Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLPanel/SlotLRow/SlotLTextContainer/SlotLName"
 @onready var slot_l_desc:  Label          = $"Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLPanel/SlotLRow/SlotLTextContainer/SlotLDesc"
 @onready var slot_l_hot_row:   VBoxContainer = $"Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLPanel/SlotLRow/SlotLTextContainer/SlotLHotRow"
@@ -56,7 +57,8 @@ const _INPUT_ARM_TIMEOUT_SEC: float = 1.5
 @onready var slot_l_hot_desc:  Label         = $"Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLPanel/SlotLRow/SlotLTextContainer/SlotLHotRow/SlotLHotDesc"
 
 @onready var slot_r_panel: PanelContainer = $"Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRPanel"
-@onready var slot_r_input: Label          = $"Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRPanel/SlotRRow/SlotRTextContainer/SlotRInput"
+@onready var slot_r_input:    Label       = $"Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRPanel/SlotRRow/SlotRTextContainer/SlotRInputRow/SlotRInput"
+@onready var slot_r_replaces: Label       = $"Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRPanel/SlotRRow/SlotRTextContainer/SlotRInputRow/SlotRReplaces"
 @onready var slot_r_name:  Label          = $"Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRPanel/SlotRRow/SlotRTextContainer/SlotRName"
 @onready var slot_r_desc:  Label          = $"Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRPanel/SlotRRow/SlotRTextContainer/SlotRDesc"
 @onready var slot_r_hot_row:   VBoxContainer = $"Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRPanel/SlotRRow/SlotRTextContainer/SlotRHotRow"
@@ -83,6 +85,13 @@ var _pulse_time: float = 0.0
 
 var _style_unfocused: StyleBoxFlat
 var _style_candidate: StyleBoxFlat
+
+# Drives the flashlight-style shine sweep on tech_name_label — see
+# text_shine.gdshader. band_left_x/band_right_x (the sweep's travel range)
+# are recomputed every frame in _process() from the label's own font metrics
+# rather than set once, so a layout pass landing a frame late never leaves
+# them stale.
+var _shine_material: ShaderMaterial
 
 # See _GUARDED_ACTIONS above.
 var _input_armed: bool = false
@@ -114,6 +123,10 @@ func _ready():
 	_style_candidate.set_content_margin_all(6)
 	_style_candidate.set_border_width_all(2)
 	_style_candidate.set_corner_radius_all(3)
+
+	_shine_material = ShaderMaterial.new()
+	_shine_material.shader = _TEXT_SHINE_SHADER
+	tech_name_label.material = _shine_material
 
 	for panel in [slot_l_panel, slot_r_panel]:
 		panel.add_theme_stylebox_override("panel", _style_unfocused)
@@ -149,8 +162,7 @@ func _process(delta: float) -> void:
 		if not any_guarded_action_held or _input_arm_elapsed >= _INPUT_ARM_TIMEOUT_SEC:
 			_input_armed = true
 
-	var blink_on := int(Time.get_ticks_msec() / _NAME_BLINK_PERIOD_MSEC) % 2 == 0
-	tech_name_label.modulate.a = 1.0 if blink_on else _ACTIVE_BLINK_LOW_ALPHA
+	_update_name_shine()
 
 	var active_blink_on := int(Time.get_ticks_msec() / _ACTIVE_BLINK_PERIOD_MSEC) % 2 == 0
 	var input_alpha := 1.0 if active_blink_on else _ACTIVE_BLINK_LOW_ALPHA
@@ -189,6 +201,24 @@ func _on_selection_ready(choices: Array):
 func _hide_screen():
 	visible = false
 	get_tree().paused = false
+
+
+## Feeds text_shine.gdshader the actual on-screen bounds of the found tech's
+## name (normalized 0..1 across the viewport, see the shader's own comment
+## for why) so its highlight sweeps across just the letters — TechNameLabel
+## is centered in a much wider, fixed-width panel, so its own get_global_rect()
+## alone would have the band crossing mostly empty padding.
+func _update_name_shine() -> void:
+	if _shine_material == null or tech_name_label.text == "":
+		return
+	var font := tech_name_label.get_theme_font("font")
+	var font_size := tech_name_label.get_theme_font_size("font_size")
+	var text_width := font.get_string_size(tech_name_label.text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+	var label_rect := tech_name_label.get_global_rect()
+	var text_left := label_rect.position.x + (label_rect.size.x - text_width) * 0.5
+	var vp_width := get_viewport().get_visible_rect().size.x
+	_shine_material.set_shader_parameter("band_left_uv", text_left / vp_width)
+	_shine_material.set_shader_parameter("band_right_uv", (text_left + text_width) / vp_width)
 
 
 func _build_offer_display(tech: Dictionary):
@@ -230,7 +260,8 @@ func _refresh_slots():
 
 
 func _render_slot(slot_index: int, tech: Dictionary, is_really_equipped: bool):
-	var input_lbl: Label = slot_l_input if slot_index == 0 else slot_r_input
+	var input_lbl:    Label = slot_l_input    if slot_index == 0 else slot_r_input
+	var replaces_lbl: Label = slot_l_replaces if slot_index == 0 else slot_r_replaces
 	var name_lbl:  Label = slot_l_name  if slot_index == 0 else slot_r_name
 	var desc_lbl:  Label = slot_l_desc  if slot_index == 0 else slot_r_desc
 	var hot_row:   VBoxContainer = slot_l_hot_row  if slot_index == 0 else slot_r_hot_row
@@ -240,6 +271,7 @@ func _render_slot(slot_index: int, tech: Dictionary, is_really_equipped: bool):
 		input_lbl.visible = false
 		_slot_blinking[slot_index] = false
 		input_lbl.modulate.a = 1.0
+		replaces_lbl.visible = false
 		name_lbl.text = "— empty —"
 		name_lbl.modulate = Color(0.5, 0.5, 0.5, 1.0)
 		desc_lbl.text = ""
@@ -260,6 +292,17 @@ func _render_slot(slot_index: int, tech: Dictionary, is_really_equipped: bool):
 	else:
 		input_lbl.text = _ALWAYS_ACTIVE_TEXT
 		input_lbl.add_theme_color_override("font_color", _ALWAYS_ACTIVE_COLOR)
+
+	# This is the preview slot (showing the not-yet-equipped found tech, see
+	# _refresh_slots()) and picking it would knock out a tech that's really
+	# equipped there right now — call that out on the same line as the input
+	# hint so a player with both slots full can see the trade-off up front.
+	var old_tech: Dictionary = AlienTechManager.slots[slot_index]
+	if not is_really_equipped and not old_tech.is_empty():
+		replaces_lbl.text = "Replaces %s" % old_tech.get("name", "")
+		replaces_lbl.visible = true
+	else:
+		replaces_lbl.visible = false
 
 	desc_lbl.text = tech.get("description", "")
 	desc_lbl.modulate = Color(1.0, 1.0, 1.0, 1.0)
