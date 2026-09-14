@@ -1809,8 +1809,7 @@ func _activate_time_freeze() -> void:
 func _freeze_world_bodies() -> void:
 	_time_frozen_bodies.clear()
 	var groups := ["enemies", "bullets", "plane_projectiles", "enemy_projectiles",
-				   "trash_clusters", "trash_cluster_pieces",
-				   "powerups", "air_bubbles"]
+				   "trash_clusters", "trash_cluster_pieces", "air_bubbles"]
 	for group in groups:
 		for node in get_tree().get_nodes_in_group(group):
 			if not is_instance_valid(node) or node.is_queued_for_deletion():
@@ -1865,6 +1864,28 @@ func _freeze_world_bodies() -> void:
 			trash.angular_velocity = 0.0
 			trash.is_time_frozen = true
 			trash.process_mode = Node.PROCESS_MODE_ALWAYS
+	# Powerups: reward powerups are children of the trash sequence spawner too
+	# (spawn_powerup() adds them under the same node trash items live under),
+	# so they have the exact same disabled-parent problem — handled the same way.
+	for node in get_tree().get_nodes_in_group("powerups"):
+		if not is_instance_valid(node) or node.is_queued_for_deletion():
+			continue
+		if node is RigidBody2D:
+			var pu := node as RigidBody2D
+			_time_frozen_bodies.append({
+				"body":         pu,
+				"lin_vel":      pu.linear_velocity,
+				"ang_vel":      pu.angular_velocity,
+				"was_frozen":   pu.freeze,
+				"process_mode": pu.process_mode,
+				"type":         "powerup_frozen",
+			})
+			pu.freeze = true
+			pu.linear_velocity = Vector2.ZERO
+			pu.angular_velocity = 0.0
+			pu.set_physics_process(false)
+			pu.set_process(false)
+			pu.process_mode = Node.PROCESS_MODE_ALWAYS
 
 func _unfreeze_world_bodies() -> void:
 	for entry in _time_frozen_bodies:
@@ -1891,6 +1912,15 @@ func _unfreeze_world_bodies() -> void:
 				body.set_process(true)
 			"spawner":
 				body.process_mode = entry["process_mode"]
+			"powerup_frozen":
+				var pu := body as RigidBody2D
+				pu.process_mode = entry["process_mode"]
+				pu.freeze = entry["was_frozen"]
+				if not entry["was_frozen"]:
+					pu.linear_velocity = entry["lin_vel"]
+					pu.angular_velocity = entry["ang_vel"]
+				pu.set_physics_process(true)
+				pu.set_process(true)
 	_time_frozen_bodies.clear()
 	time_freeze_active = false
 	AlienTechManager.time_freeze_active = false

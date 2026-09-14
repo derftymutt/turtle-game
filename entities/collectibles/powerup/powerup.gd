@@ -40,12 +40,24 @@ var visual_node: Node2D = null
 var on_floor: bool = false
 var floor_timer: float = 0.0
 
+# True while this powerup's process_mode was force-set to ALWAYS because it was
+# born (as a trash-sequence reward) while Time Freeze was active. Its parent
+# TrashSequenceSpawner is PROCESS_MODE_DISABLED during the freeze, and children
+# inherit that — which would silently pull this body out of physics simulation
+# entirely, so its Area2D could never detect the player. Reverted once the
+# freeze ends (see _physics_process).
+var _process_mode_forced_for_freeze: bool = false
+
 func _ready():
 	# Physics setup - sinks like valuable collectibles
 	gravity_scale = 0.2
 	linear_damp = 5.0
 	angular_damp = 3.0
 	mass = 0.5
+
+	if AlienTechManager.time_freeze_active:
+		process_mode = Node.PROCESS_MODE_ALWAYS
+		_process_mode_forced_for_freeze = true
 	
 	# Collision setup
 	# NOTE: Set in Inspector:
@@ -82,7 +94,20 @@ func _ready():
 func _physics_process(delta):
 	if collected or despawning:
 		return
-	
+
+	if _process_mode_forced_for_freeze:
+		if not AlienTechManager.time_freeze_active:
+			# Freeze ended — go back to respecting normal pause/scene rules.
+			process_mode = Node.PROCESS_MODE_INHERIT
+			_process_mode_forced_for_freeze = false
+		else:
+			# Still frozen: stay put like every other frozen object (no sink/sway/
+			# despawn-timer progress), but keep processing so this check — and the
+			# Area2D pickup below — keep working.
+			linear_velocity = Vector2.ZERO
+			angular_velocity = 0.0
+			return
+
 	# Check if on floor
 	var is_near_floor = global_position.y > 160
 	var is_mostly_still = linear_velocity.length() < 50

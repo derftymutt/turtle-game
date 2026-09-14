@@ -387,7 +387,13 @@ func relocate_from_parent():
 
 ## Override take_damage to trigger relocation and reset reproduction timer
 func take_damage(amount: float):
-	if is_invincible or current_state == State.RELOCATING:
+	# Relocating crabs are normally invincible mid-scuttle, but during Time Freeze
+	# their _physics_process (and thus _relocating_behavior/_finish_relocation) is
+	# paused, so they'd never leave RELOCATING and would become permanently
+	# invincible for the rest of the freeze. Since they're visibly frozen in place
+	# anyway, let them still take damage in that case.
+	var relocating_but_frozen = current_state == State.RELOCATING and AlienTechManager.time_freeze_active
+	if is_invincible or (current_state == State.RELOCATING and not relocating_but_frozen):
 		_play_invincible_feedback()
 		return
 	
