@@ -219,6 +219,33 @@ func phase_shift(duration: float) -> void:
 	set_deferred("collision_layer", original_layer)
 	set_deferred("collision_mask", original_mask)
 
+## Candidate deviations (degrees) to try when steering around an obstacle,
+## smallest deviation first and alternating sides, so the result stays as
+## close as possible to the original desired direction.
+const _STEER_PROBE_ANGLES: Array[float] = [0.0, 25.0, -25.0, 50.0, -50.0, 75.0, -75.0, 100.0, -100.0]
+
+## Samples a small fan of directions around `desired_direction` and returns
+## the first one (closest to desired) that isn't immediately blocked by a
+## wall/bumper/flipper, so a chasing enemy swims around an obstacle instead
+## of pushing straight into it and getting wedged. Falls back to
+## `desired_direction` unchanged if every sampled angle is blocked.
+func _steer_toward(desired_direction: Vector2, probe_distance: float) -> Vector2:
+	if desired_direction == Vector2.ZERO:
+		return desired_direction
+
+	var space_state = get_world_2d().direct_space_state
+	var query := PhysicsRayQueryParameters2D.create(global_position, global_position)
+	query.collision_mask = 1  # World_Player layer: walls, bumpers, flippers
+	query.exclude = [self]
+
+	for angle_deg in _STEER_PROBE_ANGLES:
+		var candidate := desired_direction.rotated(deg_to_rad(angle_deg))
+		query.to = global_position + candidate * probe_distance
+		if space_state.intersect_ray(query).is_empty():
+			return candidate
+
+	return desired_direction
+
 ## Override in child classes for custom death behavior
 func _play_die_sound() -> void:
 	# Attach to parent so the sound outlives queue_free on the enemy node

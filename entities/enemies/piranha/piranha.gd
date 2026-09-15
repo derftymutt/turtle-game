@@ -11,9 +11,13 @@ class_name Piranha
 @export var patrol_speed_multiplier: float = 0.6  # Slower when patrolling
 
 # Behavior settings
-@export var detection_range: float = 150.0
+@export var detection_range: float = 225.0
 @export var attack_distance: float = 20.0  # How close before "biting"
-@export var lose_interest_range: float = 200.0
+@export var lose_interest_range: float = 275.0
+
+# Chase steering - how far ahead to check when picking a swim direction while
+# actively pursuing, so we curve around a bumper/flipper instead of ramming it.
+@export var chase_steer_probe: float = 70.0
 
 # Ocean depth preferences
 @export var preferred_depth_min: float = 40.0  # Stays below this depth
@@ -164,27 +168,29 @@ func _patrol_behavior(delta: float):
 func _chase_behavior(_delta: float):
 	"""Aggressively pursue the player"""
 	var to_player = player.global_position - global_position
-	var direction = to_player.normalized()
-	
+	var desired_direction = to_player.normalized()
+	var steered_direction = _steer_toward(desired_direction, chase_steer_probe)
+
 	# Apply strong chase force
-	var force = direction * swim_force
+	var force = steered_direction * swim_force
 	apply_central_force(force)
-	
-	# Face the player
-	_face_direction(direction)
+
+	# Face the player, even while curving around an obstacle
+	_face_direction(desired_direction)
 
 func _attack_behavior(_delta: float):
 	"""Close-range aggressive movement (biting behavior)"""
 	# Similar to chase but even more aggressive
 	var to_player = player.global_position - global_position
-	var direction = to_player.normalized()
-	
+	var desired_direction = to_player.normalized()
+	var steered_direction = _steer_toward(desired_direction, chase_steer_probe * 0.5)
+
 	# Extra force for attack lunge
-	var force = direction * swim_force * 1.5
+	var force = steered_direction * swim_force * 1.5
 	apply_central_force(force)
-	
-	# Face the player
-	_face_direction(direction)
+
+	# Face the player, even while curving around an obstacle
+	_face_direction(desired_direction)
 
 func _wall_follow_behavior(_delta: float):
 	"""Follow the wall until we can move past it"""

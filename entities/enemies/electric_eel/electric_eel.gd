@@ -9,6 +9,10 @@ class_name ElectricEel
 @export var wall_detection_range: float = 300.0
 @export var player_influence_range: float = 250.0
 
+# Steering - how far ahead to check when swimming toward a wall or the
+# player, so we curve around a bumper/flipper instead of ramming it.
+@export var steer_probe_distance: float = 60.0
+
 # Shocking behavior
 @export var shock_telegraph_duration: float = 0.3
 @export var shock_duration: float = 1.0
@@ -116,22 +120,25 @@ func _seek_wall_behavior(_delta: float):
 	else:
 		# No walls found - patrol toward player slowly
 		var to_player = player.global_position - global_position
-		var direction = to_player.normalized()
+		var desired_direction = to_player.normalized()
+		var direction = _steer_toward(desired_direction, steer_probe_distance)
 		apply_central_force(direction * swim_speed * 0.5)
+		_face_direction(desired_direction)
 
 func _approach_wall_behavior(_delta: float):
 	"""Swim toward target wall"""
 	if not target_wall or not is_instance_valid(target_wall):
 		current_state = State.SEEKING_WALL
 		return
-	
+
 	var to_wall = target_wall.global_position - global_position
 	var distance = to_wall.length()
-	
+
 	if distance > shock_range:
-		var direction = to_wall.normalized()
+		var desired_direction = to_wall.normalized()
+		var direction = _steer_toward(desired_direction, steer_probe_distance)
 		apply_central_force(direction * swim_speed)
-		_face_direction(direction)
+		_face_direction(desired_direction)
 	else:
 		current_state = State.TELEGRAPHING
 		state_timer = shock_telegraph_duration
@@ -174,7 +181,10 @@ func _cooldown_behavior(_delta: float):
 	# Drift slowly toward player area
 	var to_player = player.global_position - global_position
 	if to_player.length() < player_influence_range:
-		apply_central_force(to_player.normalized() * swim_speed * 0.3)
+		var desired_direction = to_player.normalized()
+		var direction = _steer_toward(desired_direction, steer_probe_distance)
+		apply_central_force(direction * swim_speed * 0.3)
+		_face_direction(desired_direction)
 
 func _scan_for_walls():
 	"""Find all nearby walls and flippers that are inside the ocean"""
@@ -208,14 +218,16 @@ func _choose_best_wall() -> Node2D:
 		# Skip walls we just shocked
 		if wall in shocked_walls:
 			continue
-		
-		var score = 0.0
-		
-		# Prefer walls closer to player
+
+		# Only ever target a wall that's actually near the player - otherwise
+		# the eel fixates on some wall close to itself but irrelevant to the
+		# player, and camps there indefinitely no matter where the player is.
 		var player_distance = wall.global_position.distance_to(player.global_position)
-		if player_distance < player_influence_range:
-			score += (player_influence_range - player_distance) * 2.0
-		
+		if player_distance >= player_influence_range:
+			continue
+
+		var score = (player_influence_range - player_distance) * 2.0
+
 		# Slightly prefer closer walls
 		var eel_distance = global_position.distance_to(wall.global_position)
 		score += (wall_detection_range - eel_distance) * 0.5
