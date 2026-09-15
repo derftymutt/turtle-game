@@ -75,10 +75,13 @@ const FINISH_HINT := "▶  Press A / Enter to finish"
 const MOVE_ACTIONS: Array[StringName] = [&"move_up", &"move_down", &"move_left", &"move_right"]
 ## Generous: the turtle bobs ~0-20px around the waterline while resting there.
 const SURFACE_DEPTH := 24.0
-## Kept short on purpose: a player naturally lingers at the surface for well
-## under a second before diving back down, so a longer watch time meant the
-## beat could be missed entirely on a normal surface-and-dive.
-const SURFACE_WATCH_SECONDS := 0.4
+## Fixed delay from the moment the turtle first reaches the surface to the
+## flipper prompt interrupting them — runs regardless of what they do in the
+## meantime (dive back down, swim off, whatever), rather than requiring them
+## to stay put at the surface. A flat 1s gives them a moment to actually see
+## the fast-recharge sparkle before being pulled into the next beat, while
+## still short enough that a normal surface-and-dive can't slip past it.
+const SURFACE_WATCH_SECONDS := 1.0
 const DISMISS_ARM_DELAY := 0.45
 ## Energy fraction that counts as "into the red". A fraction rather than
 ## HUD.can_thrust() (energy < 15) because aggressive recovery means the hard
@@ -213,12 +216,11 @@ func _process(delta: float) -> void:
 				_step = Step.SURFACE_WATCH
 
 		Step.SURFACE_WATCH:
-			# Accumulate time near the surface; a brief bob below the threshold
-			# nibbles the timer back rather than resetting it.
-			if _depth() <= SURFACE_DEPTH:
-				_surface_time += delta
-			else:
-				_surface_time = maxf(0.0, _surface_time - delta)
+			# Flat countdown from the moment they touched the surface (see
+			# SURFACE_WATCH_SECONDS) — keeps ticking no matter what they do
+			# next, so diving straight back down can't dodge this beat the
+			# way it used to.
+			_surface_time += delta
 			if _surface_time >= SURFACE_WATCH_SECONDS:
 				_step = Step.FLIPPER_PAUSED
 				_flipped_left = false

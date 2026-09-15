@@ -7,7 +7,7 @@ extends Node
 # ─── Tech ID constants ───────────────────────────────────────────────────────
 
 const INERTIA_DAMPENER    := "inertia_dampener"
-const BRAVADO             := "bravado"
+const BRAVADO             := "bravado" ## rename to Warrior Song
 const LATERAL_THRUST      := "lateral_thrust"
 const TRANSPORTER         := "transporter"
 const SALIVA_NANOBOTS     := "saliva_nanobots"
@@ -17,10 +17,10 @@ const DERMAL_REGEN        := "dermal_regen"
 const PHASE_SHIFTER       := "phase_shifter"
 const POWERUP_REPLICATOR  := "powerup_replicator"
 const DEFLECTOR_SHIELD    := "deflector_shield"
-const TIME_FREEZE         := "time_freeze"
+const TIME_FREEZE         := "time_freeze"  ## rename to Chrono Stasis
 const FLIPPER_VELCRO      := "flipper_velcro"
-const SHOCKWAVE           := "shockwave"
-const THING_BRINGER       := "thing_bringer"
+const SHOCKWAVE           := "shockwave" ## rename to Disturbance Wave
+const THING_BRINGER       := "thing_bringer" 
 const GRAVITON_HARNESS    := "graviton_harness"
 const PLASMA_SPIT         := "plasma_spit"
 const MAGNETIC_REPULSION  := "magnetic_repulsion"

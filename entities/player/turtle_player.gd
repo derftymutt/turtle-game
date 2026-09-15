@@ -1331,6 +1331,12 @@ func _activate_magnetic_repulsion():
 func _is_magnetic_repulsion_active() -> bool:
 	return magnetic_repulsion_active or AlienTechManager.is_tech_hot(AlienTechRegistry.MAGNETIC_REPULSION)
 
+## Public wrapper around _is_magnetic_repulsion_active() for other entities
+## (e.g. BossSubmarine) that want to react to the tech without duplicating
+## its active-flag/timer/hot bookkeeping, which all lives on this instance.
+func is_magnetic_repulsion_in_effect() -> bool:
+	return _is_magnetic_repulsion_active()
+
 func _activate_hydro_funnel():
 	if AlienTechManager.is_tech_hot(AlienTechRegistry.HYDRO_FUNNEL):
 		# Hot: click on, click off — no timer, no cooldown (see _effective_cooldown_max).
@@ -2296,4 +2302,9 @@ func _update_magnetic_repulsion() -> void:
 				if dist_right < hover:
 					push.x -= (hover - maxf(dist_right, 0.0)) / hover * MAGNETIC_REPULSION_FORCE
 			if push != Vector2.ZERO:
+				# A body resting on the floor/wall falls asleep (Godot's default
+				# RigidBody2D behavior), and apply_central_force() on a sleeping
+				# body is silently dropped until something else wakes it — that's
+				# why only some pieces (the ones still moving) were responding.
+				rb.sleeping = false
 				rb.apply_central_force(push)

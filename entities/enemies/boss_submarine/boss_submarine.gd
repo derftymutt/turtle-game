@@ -78,6 +78,18 @@ signal health_changed(current: float, max_hp: float)
 ## Seconds the sub flashes invincible after a hit (prevents combo)
 @export var hit_invincibility_duration: float = 0.7
 
+# ── Magnetic Repulsion tie-in ─────────────────────────────────
+@export_group("Magnetic Repulsion")
+## How far above floor_patrol_y the sub gets nudged while the player's
+## Magnetic Repulsion is in effect — the same "hover off the sea floor"
+## behavior it gives collectibles, given to the boss so the tech has a
+## reason to matter in this fight.
+@export var magnetic_lift_cold: float = 12.0
+## Lift while the tech is hot (matches collectibles hovering higher when hot).
+@export var magnetic_lift_hot: float = 24.0
+## How fast the lift eases in/out (pixels/sec)
+@export var magnetic_lift_speed: float = 30.0
+
 # ─────────────────────────────────────────────────────────────
 # Internal state
 # ─────────────────────────────────────────────────────────────
@@ -94,6 +106,10 @@ var _drone_timer: float = 0.0
 
 # Hit-invincibility (separate from is_invincible — that blocks ALL damage)
 var _hit_invincible: bool = false
+
+# Current Magnetic Repulsion lift, eased toward _magnetic_lift_target() each
+# frame (see _process()/_update_magnetic_lift()).
+var _magnetic_lift: float = 0.0
 
 # Cached node references (set in _enemy_ready)
 var _missile_launch: Marker2D = null
@@ -158,6 +174,18 @@ func _physics_process(delta: float) -> void:
 	_tick_drone_timer(delta)
 	_prune_dead_drones()
 
+## Kept separate from _physics_process(): this AnimatableBody2D has
+## sync_to_physics enabled, which makes the physics step authoritative for
+## its transform — a transform write during _physics_process gets treated as
+## the "real" position and silently wins over (discards) whatever the patrol
+## tween wrote to global_position:x on the idle step in between physics
+## ticks, freezing the sub in place. Running the lift here instead, on the
+## same idle cadence as that tween, keeps both writes on equal footing.
+func _process(delta: float) -> void:
+	if _state == State.DYING:
+		return
+	_update_magnetic_lift(delta)
+
 # ─────────────────────────────────────────────────────────────
 # SUPER-SPEED HIT — called by the SuperSpeedHitArea signal
 # ─────────────────────────────────────────────────────────────
@@ -219,18 +247,20 @@ func _begin_move_phase() -> void:
 	_state = State.MOVING
 
 	var target_x := randf_range(patrol_min_x, patrol_max_x)
-	var target_pos := Vector2(target_x, floor_patrol_y)
-	var distance := global_position.distance_to(target_pos)
+	var distance := absf(target_x - global_position.x)
 	var travel_time := distance / move_speed
 
 	# Flip sprite and markers to face the direction of travel
 	_set_facing(target_x > global_position.x)
 
-	# Tween handles the actual movement; AnimatableBody2D works perfectly with tweens.
+	# Tween only X — Y is owned by _update_magnetic_lift() (see _process()).
+	# Tweening the whole global_position here used to freeze the lift mid-ease
+	# and bake in whatever partial height it had reached the moment travel
+	# started, so it could never catch up.
 	var tween := create_tween()
 	tween.set_ease(Tween.EASE_IN_OUT)
 	tween.set_trans(Tween.TRANS_SINE)
-	tween.tween_property(self, "global_position", target_pos, travel_time)
+	tween.tween_property(self, "global_position:x", target_x, travel_time)
 	await tween.finished
 
 	if _state == State.DYING or not is_instance_valid(self):
@@ -425,6 +455,24 @@ func _try_deploy_drone() -> void:
 		if not is_instance_valid(self) or _state == State.DYING:
 			return
 		_sprite.play("default")
+
+## Eases the sub above floor_patrol_y while Magnetic Repulsion is in effect,
+## same idea as the hover it gives collectibles. Runs every frame regardless
+## of state — the patrol tween (see _begin_move_phase()) only ever touches
+## global_position:x, so this always owns Y and reaches its full target even
+## while the sub is mid-patrol, instead of freezing until it arrives.
+func _update_magnetic_lift(delta: float) -> void:
+	var target := _magnetic_lift_target()
+	_magnetic_lift = move_toward(_magnetic_lift, target, magnetic_lift_speed * delta)
+	global_position.y = floor_patrol_y - _magnetic_lift
+
+func _magnetic_lift_target() -> float:
+	if AlienTechManager.is_tech_hot(AlienTechRegistry.MAGNETIC_REPULSION):
+		return magnetic_lift_hot
+	if is_instance_valid(_player) and _player.has_method("is_magnetic_repulsion_in_effect") \
+			and _player.is_magnetic_repulsion_in_effect():
+		return magnetic_lift_cold
+	return 0.0
 
 func _set_facing(facing_right: bool) -> void:
 	if _sprite:

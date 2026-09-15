@@ -30,7 +30,6 @@
 [ext_resource type="TileSet" uid="uid://dyl02kfc4a681" path="res://entities/environment/ocean_boundaries/ocean_wall.tres" id="29_wgvos"]
 [ext_resource type="PackedScene" uid="uid://c41fis6pd8gh2" path="res://systems/space_debris/space_debris_group.tscn" id="30_4xp61"]
 [ext_resource type="PackedScene" uid="uid://dq7r6j7ritsv7" path="res://entities/collectibles/powerup/powerup.tscn" id="31_4yoxl"]
-[ext_resource type="Script" uid="uid://d22ywt1ov84p1" path="res://systems/dev/dev_tech_seeder.gd" id="32_4xp61"]
 [ext_resource type="PackedScene" uid="uid://q614lo3kanxc" path="res://systems/space_debris/space_debris.tscn" id="32_6dcgf"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_tv8m3"]
@@ -236,7 +235,7 @@ position = Vector2(-200, -64)
 position = Vector2(-257, -137)
 
 [node name="UfoWorkshop4" parent="." index="33" unique_id=1724049936 instance=ExtResource("21_ngvhw")]
-position = Vector2(260, -111)
+position = Vector2(276, 89)
 
 [node name="ElectricEelSpawner" parent="." index="34" unique_id=1752833975 instance=ExtResource("19_cp3aq")]
 spawn_interval = 13.0
@@ -445,10 +444,7 @@ curve = SubResource("Curve2D_4xp61")
 [node name="Visuals" parent="HydroFunnel2" index="1" unique_id=2005124627]
 position = Vector2(297, -94)
 
-[node name="DevTechSeeder2" type="Node" parent="." index="63" unique_id=649324248]
-script = ExtResource("32_4xp61")
-
-[node name="HydroFunnel3" parent="." index="64" unique_id=38217051 instance=ExtResource("26_jqt73")]
+[node name="HydroFunnel3" parent="." index="63" unique_id=38217051 instance=ExtResource("26_jqt73")]
 propulsion_force = 1600.0
 centering_force = 800.0
 lateral_damping = 1.0

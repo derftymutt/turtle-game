@@ -353,11 +353,6 @@ debris_animation = &"shield"
 position = Vector2(176, -191)
 debris_animation = &"shield"
 
-[node name="DevTechSeeder" parent="." index="45" unique_id=500000002]
-enabled = true
-slot_a = 19
-slot_a_hot = true
-
 [node name="HydroFunnel" parent="." index="49" unique_id=1683655070 instance=ExtResource("23_cekp2")]
 propulsion_force = 1600.0
 centering_force = 200.0

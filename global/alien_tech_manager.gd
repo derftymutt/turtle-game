@@ -109,6 +109,21 @@ var time_freeze_active: bool = false
 # re-grows if that tech is later reacquired
 var _live_unique_techs: Dictionary = {}
 
+# Remembers only the single most recently lost-or-skipped tech id (fried,
+# replaced in a slot, taken by the death penalty, or explicitly skipped at
+# the selection screen), so the next offer avoids immediately re-giving the
+# player the thing they just gave up. One-slot memory is enough per the ask.
+var _last_lost_or_skipped_tech: String = ""
+
+func _record_lost_tech(tech_id: String) -> void:
+	if tech_id != "":
+		_last_lost_or_skipped_tech = tech_id
+
+## Called by the selection screen when the player explicitly declines the
+## offered tech, so it isn't immediately offered again next time.
+func record_skipped_tech(tech_id: String) -> void:
+	_record_lost_tech(tech_id)
+
 # ─── Powerup Replicator state ────────────────────────────────────────────────
 
 var powerup_replicator_slots: Array[int] = [-1, -1, -1]  # -1 = empty; 4-wide during a hot batch
@@ -167,7 +182,14 @@ func _trigger_selection():
 	for slot in slots:
 		if not slot.is_empty():
 			owned_ids.append(slot["id"])
-	var choices = AlienTechRegistry.get_random_choices(CHOICES_OFFERED, owned_ids)
+	var exclude_ids := owned_ids.duplicate()
+	if _last_lost_or_skipped_tech != "":
+		exclude_ids.append(_last_lost_or_skipped_tech)
+	var choices = AlienTechRegistry.get_random_choices(CHOICES_OFFERED, exclude_ids)
+	if choices.is_empty():
+		# Only the just-lost/skipped tech was excluding everything — fall back
+		# to allowing it rather than soft-locking tech offers.
+		choices = AlienTechRegistry.get_random_choices(CHOICES_OFFERED, owned_ids)
 	if choices.is_empty():
 		print("👽 No new techs available — player owns everything!")
 		return
@@ -179,6 +201,8 @@ func assign_tech(tech_id: String, slot_index: int):
 	var tech = AlienTechRegistry.get_tech(tech_id)
 	if tech.is_empty():
 		return
+	if not slots[slot_index].is_empty():
+		_record_lost_tech(slots[slot_index].get("id", ""))
 	slots[slot_index] = tech
 	_cooldowns[slot_index] = 0.0
 	_slot_assigned_order[slot_index] = _assignment_counter
@@ -191,6 +215,7 @@ func assign_tech(tech_id: String, slot_index: int):
 func clear_slot(slot_index: int):
 	if slot_index < 0 or slot_index >= MAX_SLOTS:
 		return
+	_record_lost_tech(slots[slot_index].get("id", ""))
 	slots[slot_index] = {}
 	_cooldowns[slot_index] = 0.0
 	_slot_assigned_order[slot_index] = -1
@@ -396,6 +421,7 @@ func reset_run():
 	_hot_streak = [0, 0]
 	_passive_bar_ratios.clear()
 	_live_unique_techs.clear()
+	_last_lost_or_skipped_tech = ""
 	phase_shifter_ammo = PHASE_SHIFTER_MAX_AMMO
 	phase_shifter_recharging = false
 	phase_shifter_recharge_timer = 0.0

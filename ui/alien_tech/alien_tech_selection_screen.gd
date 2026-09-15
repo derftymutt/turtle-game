@@ -382,6 +382,7 @@ func _confirm_skip():
 	add_child(dialog)
 	dialog.confirmed.connect(func():
 		dialog.queue_free()
+		AlienTechManager.record_skipped_tech(_pending_tech_id)
 		_close_screen()
 	)
 	dialog.canceled.connect(func():
