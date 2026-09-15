@@ -28,18 +28,18 @@ func _build_content():
 		return
 
 	content_container.add_child(_section_label("CONTROLS"))
-	content_container.add_child(_control_row("ACTION", "KEYBOARD", "CONTROLLER", true))
+	content_container.add_child(_control_row("ACTION", "CONTROLLER", "KEYBOARD", true))
 	content_container.add_child(HSeparator.new())
 
 	var controls := [
-		["Move",          "WASD",    "Left Stick"],
-		["Shoot",         "IJKL",    "Right Stick"],
-		["Tech Left",     "Q",       "L Bumper"],
-		["Tech Right",    "E",       "R Bumper"],
-		["Flipper Left",  "L Shift", "L Trigger"],
-		["Flipper Right", "R Shift", "R Trigger"],
-		["Drop UFO Piece","Space",   "X"],
-		["Pause",         "Escape",  "Start"],
+		["Move",          "Left Stick",  "WASD"],
+		["Shoot",         "Right Stick", "IJKL"],
+		["Flipper Left",  "L Trigger",   "L Shift"],
+		["Flipper Right", "R Trigger",   "R Shift"],
+		["Drop UFO Piece","X",           "Space"],
+		["Tech Left",     "L Bumper",    "Q"],
+		["Tech Right",    "R Bumper",    "E"],
+		["Pause",         "Start",       "Escape"],
 	]
 	for row: Array in controls:
 		content_container.add_child(_control_row(row[0], row[1], row[2], false))

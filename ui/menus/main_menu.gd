@@ -138,6 +138,14 @@ func _build_buttons(grab_focus: bool = true):
 	_wire_button_sounds(quit_button)
 	level_container.add_child(quit_button)
 
+	# === CONTROLLER RECOMMENDATION ===
+	var controller_label = Label.new()
+	controller_label.text = "Game controller recommended"
+	controller_label.add_theme_font_size_override("font_size", 10)
+	controller_label.add_theme_color_override("font_color", _NORMAL_GOLD)
+	controller_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	level_container.add_child(controller_label)
+
 	# Focus the first Button child (skip Labels)
 	if grab_focus:
 		for child in level_container.get_children():
