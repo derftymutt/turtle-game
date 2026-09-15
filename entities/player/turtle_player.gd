@@ -1208,10 +1208,14 @@ func apply_powerup(powerup_type: int):
 func activate_shield():
 	shield_active = true
 	shield_timer = shield_duration
+	if hud:
+		hud.set_hearts_blinking(true)
 	print("SHIELD ACTIVATED! Invincible for ", shield_duration, " seconds!")
 
 func deactivate_shield():
 	shield_active = false
+	if hud:
+		hud.set_hearts_blinking(false)
 	print("Shield expired")
 
 func activate_air_reserve():
@@ -1219,6 +1223,7 @@ func activate_air_reserve():
 		hud.max_air += air_reserve_bonus
 		hud.current_air = hud.max_air
 		hud.update_air(hud.current_air, hud.max_air)
+		hud.flash_air_bar()
 		print("AIR RESERVE! +", air_reserve_bonus, " max air! (new max: ", hud.max_air, ")")
 	else:
 		push_error("No HUD found! Can't apply air reserve.")
@@ -1228,10 +1233,13 @@ func activate_energy_freeze():
 	energy_freeze_timer = energy_freeze_duration
 	if hud:
 		hud.update_energy(hud.max_energy, hud.max_energy)
+		hud.set_energy_blinking(true)
 	print("ENERGY FREEZE! No energy drain for ", energy_freeze_duration, " seconds!")
 
 func deactivate_energy_freeze():
 	energy_freeze_active = false
+	if hud:
+		hud.set_energy_blinking(false)
 	print("Energy freeze expired")
 			
 func _flash(_color: Color, duration: float):

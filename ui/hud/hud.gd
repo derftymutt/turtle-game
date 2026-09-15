@@ -18,6 +18,7 @@ var air_container: Control
 var air_bar: TextureProgressBar
 var energy_container: Control
 var energy_bar: TextureProgressBar
+var energy_icon: TextureRect
 var super_speed_indicator: Label
 var hud_container: Control  # Container for flash effect
 var danger_overlay: ColorRect
@@ -123,6 +124,21 @@ var hud_layer_flash_speed: float = 5.0
 var energy_pulse_timer: float = 0.0  # NEW: For wall recovery pulse
 var energy_pulse_speed: float = 8.0  # NEW: How fast the pulse is
 
+# Powerup feedback: blinking/flashing the progress bar tied to the powerup that
+# was collected, so the player can see which system it affects.
+const HEARTS_BLINK_PERIOD_MSEC: int = 200
+const HEARTS_BLINK_LOW_ALPHA: float = 0.25
+var hearts_blinking: bool = false
+
+const ENERGY_BLINK_PERIOD_MSEC: int = 200
+const ENERGY_BLINK_LOW_ALPHA: float = 0.25
+var energy_blinking: bool = false
+
+const AIR_FLASH_PERIOD: float = 0.15
+const AIR_FLASH_COLOR := Color(1.0, 1.0, 0.4, 1.0)
+var _air_flash_remaining: float = 0.0
+var _air_flash_timer: float = 0.0
+
 func _ready():
 	add_to_group("hud")
 	
@@ -150,6 +166,8 @@ func _ready():
 	air_bar = find_child("AirBar")
 	energy_container = find_child("EnergyContainer")
 	energy_bar = find_child("EnergyBar")
+	if energy_container:
+		energy_icon = energy_container.get_node_or_null("TextureRect")
 	super_speed_indicator = find_child("SuperSpeedIndicator")
 	
 	# Debug: verify we found everything
@@ -296,6 +314,29 @@ func _process(delta):
 		energy_pulse_timer = 0.0
 		# Reset to normal color coding when not recovering from wall
 		update_energy(current_energy, max_energy)
+
+	# Powerup feedback overlays — applied last so they win over the color-coding
+	# above for the frame they're active.
+	if hearts_blinking and not _heart_labels.is_empty():
+		var blink_on := int(Time.get_ticks_msec() / HEARTS_BLINK_PERIOD_MSEC) % 2 == 0
+		var a := 1.0 if blink_on else HEARTS_BLINK_LOW_ALPHA
+		for l in _heart_labels:
+			l.modulate.a = a
+
+	if energy_blinking and energy_bar:
+		var blink_on := int(Time.get_ticks_msec() / ENERGY_BLINK_PERIOD_MSEC) % 2 == 0
+		var a := 1.0 if blink_on else ENERGY_BLINK_LOW_ALPHA
+		energy_bar.modulate.a = a
+		if energy_icon:
+			energy_icon.modulate.a = a
+
+	if _air_flash_remaining > 0.0 and air_bar:
+		_air_flash_remaining -= delta
+		_air_flash_timer += delta
+		var flash_on := int(_air_flash_timer / AIR_FLASH_PERIOD) % 2 == 0
+		air_bar.modulate = Color.WHITE if flash_on else AIR_FLASH_COLOR
+		if _air_flash_remaining <= 0.0:
+			_air_flash_timer = 0.0
 
 func _update_timer_display() -> void:
 	if not timer_label:
@@ -447,6 +488,13 @@ func update_hearts(current: int, hearts_max: int = 7) -> void:
 			HEART_FULL_COLOR if i < current else HEART_EMPTY_COLOR
 		)
 
+## Blink the heart icons for the duration of an active invincibility powerup
+func set_hearts_blinking(active: bool) -> void:
+	hearts_blinking = active
+	if not active:
+		for l in _heart_labels:
+			l.modulate.a = 1.0
+
 ## Update air display
 func update_air(air: float, max_a: float):
 	if not air_enabled:
@@ -494,6 +542,23 @@ func refill_air(delta: float):
 	
 	current_air = min(max_air, current_air + air_refill_rate * delta)
 	update_air(current_air, max_air)
+
+## Flash the air bar a few times — one-shot feedback for the (instant, no
+## duration) air reserve powerup.
+func flash_air_bar(duration: float = 1.0) -> void:
+	if not air_enabled:
+		return
+	_air_flash_remaining = duration
+	_air_flash_timer = 0.0
+
+## Blink the energy bar and its icon for the duration of an active energy powerup
+func set_energy_blinking(active: bool) -> void:
+	energy_blinking = active
+	if not active:
+		if energy_bar:
+			energy_bar.modulate.a = 1.0
+		if energy_icon:
+			energy_icon.modulate.a = 1.0
 
 ## Update energy display
 func update_energy(energy: float, max_en: float):
