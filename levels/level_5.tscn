@@ -23,6 +23,7 @@
 [ext_resource type="PackedScene" uid="uid://d2kw7hdpyp6d0" path="res://entities/enemies/sea_urchin/sea_urchin.tscn" id="21_mmy2b"]
 [ext_resource type="PackedScene" uid="uid://q614lo3kanxc" path="res://systems/space_debris/space_debris.tscn" id="22_mlk23"]
 [ext_resource type="PackedScene" uid="uid://ko8xdpxfr5ej" path="res://entities/environment/current/current.tscn" id="23_cekp2"]
+[ext_resource type="PackedScene" path="res://ui/menus/boss_intro_popup.tscn" id="24_bossintro"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_av2kh"]
 size = Vector2(8.000034, 1916.0011)
@@ -409,6 +410,8 @@ curve = SubResource("Curve2D_aacai")
 
 [node name="Visuals" parent="HydroFunnel4" index="1" unique_id=2005124627]
 position = Vector2(301, -21)
+
+[node name="BossIntroPopup" parent="." instance=ExtResource("24_bossintro")]
 
 [editable path="SpaceDebrisGroup"]
 [editable path="HydroFunnel"]
