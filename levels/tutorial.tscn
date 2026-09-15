@@ -155,9 +155,9 @@ anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
 offset_left = 24.0
-offset_top = -80.0
+offset_top = -100.0
 offset_right = -24.0
-offset_bottom = 76.0
+offset_bottom = 96.0
 
 [node name="Margin" type="MarginContainer" parent="TutorialUI/Prompt" index="0" unique_id=1955969009]
 layout_mode = 0
@@ -195,20 +195,43 @@ layout_mode = 2
 theme_override_constants/separation = 0
 alignment = 1
 
-[node name="Before" type="Label" parent="TutorialUI/Prompt/Margin/VBox/EnergyFastRow" index="0" unique_id=300000201]
+[node name="Inner" type="VBoxContainer" parent="TutorialUI/Prompt/Margin/VBox/EnergyFastRow" index="0" unique_id=599126735]
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
-text = "You recover energy "
+size_flags_horizontal = 3
+theme_override_constants/separation = 0
 
-[node name="Word" type="Label" parent="TutorialUI/Prompt/Margin/VBox/EnergyFastRow" index="1" unique_id=300000202]
+[node name="Before" type="Label" parent="TutorialUI/Prompt/Margin/VBox/EnergyFastRow/Inner" index="0" unique_id=300000201]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
-text = "FAST"
+text = "You recover energy slowly when not swimming.
+"
+horizontal_alignment = 1
+autowrap_mode = 2
 
-[node name="After" type="Label" parent="TutorialUI/Prompt/Margin/VBox/EnergyFastRow" index="2" unique_id=300000203]
+[node name="WordRow" type="HBoxContainer" parent="TutorialUI/Prompt/Margin/VBox/EnergyFastRow/Inner" index="1" unique_id=1222645670]
+layout_mode = 2
+theme_override_constants/separation = 0
+alignment = 1
+
+[node name="Lead" type="Label" parent="TutorialUI/Prompt/Margin/VBox/EnergyFastRow/Inner/WordRow" index="0" unique_id=1493015262]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
-text = " at the surface."
+text = "BUT- you can recover it "
+
+[node name="Word" type="Label" parent="TutorialUI/Prompt/Margin/VBox/EnergyFastRow/Inner/WordRow" index="1" unique_id=300000202]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "QUICKLY"
+
+[node name="After" type="Label" parent="TutorialUI/Prompt/Margin/VBox/EnergyFastRow/Inner/WordRow" index="2" unique_id=300000203]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = " as well."
+
+[node name="BottomSpacer" type="Label" parent="TutorialUI/Prompt/Margin/VBox/EnergyFastRow/Inner" index="2" unique_id=1732168414]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = " "
 
 [node name="EnergySparkleRow" type="HBoxContainer" parent="TutorialUI/Prompt/Margin/VBox" index="3" unique_id=300000220]
 visible = false
@@ -216,20 +239,32 @@ layout_mode = 2
 theme_override_constants/separation = 0
 alignment = 1
 
-[node name="Before" type="Label" parent="TutorialUI/Prompt/Margin/VBox/EnergySparkleRow" index="0" unique_id=300000221]
+[node name="Inner" type="VBoxContainer" parent="TutorialUI/Prompt/Margin/VBox/EnergySparkleRow" index="0" unique_id=1812899671]
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
-text = "Go to the surface. Note the fast energy recovery "
+size_flags_horizontal = 3
+theme_override_constants/separation = 0
 
-[node name="Word" type="Label" parent="TutorialUI/Prompt/Margin/VBox/EnergySparkleRow" index="1" unique_id=300000222]
+[node name="Before" type="Label" parent="TutorialUI/Prompt/Margin/VBox/EnergySparkleRow/Inner" index="0" unique_id=300000221]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
-text = "yellow sparkle"
+text = "Go to the surface. You will see the"
+horizontal_alignment = 1
+autowrap_mode = 2
 
-[node name="After" type="Label" parent="TutorialUI/Prompt/Margin/VBox/EnergySparkleRow" index="2" unique_id=300000223]
+[node name="WordRow" type="HBoxContainer" parent="TutorialUI/Prompt/Margin/VBox/EnergySparkleRow/Inner" index="1" unique_id=542242053]
+layout_mode = 2
+theme_override_constants/separation = 0
+alignment = 1
+
+[node name="Word" type="Label" parent="TutorialUI/Prompt/Margin/VBox/EnergySparkleRow/Inner/WordRow" index="0" unique_id=300000222]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
-text = "."
+text = "yellow sparkles"
+
+[node name="After" type="Label" parent="TutorialUI/Prompt/Margin/VBox/EnergySparkleRow/Inner/WordRow" index="1" unique_id=300000223]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = " of QUICK energy recovery."
 
 [node name="FlipperFastRow" type="HBoxContainer" parent="TutorialUI/Prompt/Margin/VBox" index="4" unique_id=300000230]
 visible = false
@@ -245,19 +280,23 @@ text = "You also recover energy "
 [node name="Word" type="Label" parent="TutorialUI/Prompt/Margin/VBox/FlipperFastRow" index="1" unique_id=300000232]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
-text = "FAST"
+text = "QUICKLY"
 
 [node name="FlipperBody" type="Label" parent="TutorialUI/Prompt/Margin/VBox" index="5" unique_id=300000240]
 visible = false
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
-text = "while TOUCHING pinball walls and flippers. THIS IS KEY!!\n\nPlus, flippers are a great way to get around — life is much easier when you use them. Try launching yourself deep into the ocean to reach the UFO part.\n\nFlip with the  LT / RT  triggers   (or Left Shift / Right Shift)."
+text = "while TOUCHING pinball walls and flippers. THIS IS KEY!!
+
+Plus, flippers are a great way to get around — life is much easier when you use them. Try launching yourself deep into the ocean to reach the UFO part.
+
+Flip with the  LT / RT  triggers   (or Left Shift / Right Shift)."
 horizontal_alignment = 1
 autowrap_mode = 2
 
 [node name="Hint" type="Label" parent="TutorialUI/Prompt/Margin/VBox" index="6" unique_id=91583155]
 layout_mode = 2
-theme_override_colors/font_color = Color(1.0, 0.85, 0.3, 1)
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
 theme_override_font_sizes/font_size = 12
 text = "▶  Swim with W A S D"
 horizontal_alignment = 1

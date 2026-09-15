@@ -43,31 +43,31 @@ const PIRANHA_SCENE := preload("res://entities/enemies/piranha/piranha.tscn")
 const TRASH_SEQUENCE_SCENE := preload("res://systems/trash_cleanup/trash_sequence.tscn")
 const TRASH_CLUSTER_SCENE := preload("res://entities/collectibles/trash_cluster/trash_cluster.tscn")
 
-const INTRO_TEXT := "You are Flip, UFO Repair Turtle. Your goal is to pick up UFO parts and bring them to your UFO Workshop. Give it a try!"
-const INTRO_HINT := "▶  Move with the Left Stick (or W A S D)"
+const INTRO_TEXT := "You are Flip, UFO Repair Turtle.\n\nYour goal is to pick up UFO parts and bring them to your UFO Workshop.\n\nGive it a try!"
+const INTRO_HINT := "▶  Swim with the Left Stick (or W A S D)"
 
 ## Reference copy of the wording — built as rich text in _show_energy_prompt()
 ## instead (same pattern as INTRO_TEXT/_show_intro()) so the icon/bar images
 ## can sit inline.
-const ENERGY_TEXT := "Swimming uses energy. A small bar directly above you shows your energy [turtle+bar icon]. A larger version is at the top-right of the screen.\n\nYou recover energy when not swimming. You recover energy FAST at the surface.\n\nGo to the surface now. Note the fast energy recovery yellow sparkle."
+const ENERGY_TEXT := "Swimming uses energy. A small bar above the turtle shows your energy. [turtle+bar icon]\nA large version is at the top right [icon+bar]\n\nYou recover energy slowly when not swimming.\n\nBUT- you can recover it QUICKLY [sparkle] as well.\n\n\nGo to the surface. You will see the yellow sparkles [sparkle] of QUICK energy recovery."
 
 ## Reference copy — built from FlipperFastRow + FlipperBody in
-## _show_flipper_prompt() instead, so the sparkle can land on "FAST" here too.
-const FLIPPER_TEXT := "You also recover energy fast while TOUCHING pinball walls and flippers. THIS IS KEY!!\n\nPlus, flippers are a great way to get around — life is much easier when you use them. Try launching yourself deep into the ocean to reach the UFO part.\n\nFlip with the LT / RT triggers (or Left Shift / Right Shift)."
+## _show_flipper_prompt() instead, so the sparkle can land on "QUICKLY" here too.
+const FLIPPER_TEXT := "You also recover energy QUICKLY [sparkle] while TOUCHING pinball walls and flippers. THIS IS KEY!!\n\nPlus, flippers are a great way to get around — life is much easier when you use them. Try launching yourself deep into the ocean to reach the UFO part.\n\nFlip with the LT / RT triggers (or Left Shift / Right Shift)."
 const FLIPPER_HINT_LEFT := "▶  Try the LEFT flipper: LT (or Left Shift)"
 const FLIPPER_HINT_RIGHT := "▶  Now the RIGHT flipper: RT (or Right Shift)"
 
 const DROP_NOW_TEXT := "UFO parts are heavy. You can drop them if you need to with X (or Space).\n\nDrop the part now (and then go pick it up!)."
 const DROP_NOW_HINT := "▶  Push X (or Space) to drop the part"
 
-const MEANIES_TEXT := "Look out for meanies! You can shoot most of them with your turtle spit.\n\nAim with the Right Stick (or I J K L)."
+const MEANIES_TEXT := "Look out for meanies! You can shoot most of them with your turtle spit.\nAim with the Right Stick (or I J K L)."
 
 const SHOOT_TEXT := "Try shooting turtle spit now."
 const SHOOT_HINT := "▶  Use the Right Stick to shoot turtle spit in any direction"
 
 const TRASH_TEXT := "You can also shoot trash you find floating by. Get it all and you'll get rewarded..."
 
-const FINAL_TEXT := "You're ready!\n\nDeliver UFO parts to complete each level.\n\nOh yeah... just don't forget to breathe!"
+const FINAL_TEXT := "You're ready!\nDeliver UFO parts to complete each level.\n\nOh yeah... just don't forget to breathe!"
 
 const CONTINUE_HINT := "▶  Press A / Enter to continue"
 const FINISH_HINT := "▶  Press A / Enter to finish"
@@ -108,9 +108,9 @@ const TRASH_SAFETY_SECONDS := 34.0
 @onready var _message: Label = $Prompt/Margin/VBox/Message
 @onready var _message_rich: RichTextLabel = $Prompt/Margin/VBox/MessageRich
 @onready var _energy_fast_row:     HBoxContainer = $Prompt/Margin/VBox/EnergyFastRow
-@onready var _energy_fast_word:    Label         = $Prompt/Margin/VBox/EnergyFastRow/Word
+@onready var _energy_fast_word:    Label         = $Prompt/Margin/VBox/EnergyFastRow/Inner/WordRow/Word
 @onready var _energy_sparkle_row:  HBoxContainer = $Prompt/Margin/VBox/EnergySparkleRow
-@onready var _energy_sparkle_word: Label         = $Prompt/Margin/VBox/EnergySparkleRow/Word
+@onready var _energy_sparkle_word: Label         = $Prompt/Margin/VBox/EnergySparkleRow/Inner/WordRow/Word
 @onready var _flipper_fast_row:    HBoxContainer = $Prompt/Margin/VBox/FlipperFastRow
 @onready var _flipper_fast_word:   Label         = $Prompt/Margin/VBox/FlipperFastRow/Word
 @onready var _flipper_body:        Label         = $Prompt/Margin/VBox/FlipperBody
@@ -548,11 +548,11 @@ func _show_intro() -> void:
 	_message_rich.visible = true
 	_message_rich.clear()
 	_message_rich.push_paragraph(HORIZONTAL_ALIGNMENT_CENTER)
-	_message_rich.append_text("You are Flip, UFO Repair Turtle. Your goal is to pick up UFO parts ")
+	_message_rich.append_text("You are Flip, UFO Repair Turtle.\n\nYour goal is to pick up UFO parts ")
 	_message_rich.add_image(PART_ICON, 14, 14, Color.WHITE, INLINE_ALIGNMENT_CENTER, PART_ICON_REGION)
 	_message_rich.append_text(" and bring them to your UFO Workshop ")
 	_message_rich.add_image(WORKSHOP_ICON, 17, 17, Color.WHITE, INLINE_ALIGNMENT_CENTER, WORKSHOP_ICON_REGION)
-	_message_rich.append_text(". Give it a try!")
+	_message_rich.append_text(".\n\nGive it a try!")
 	_message_rich.pop()
 	_hint.text = INTRO_HINT
 	_hint.visible = true
@@ -564,7 +564,7 @@ func _show_intro() -> void:
 
 ## The energy lesson. Built partly as rich text (for the inline icon/bar
 ## images) and partly as dedicated rows of plain Labels for the two sparkle
-## words ("FAST", "yellow sparkle") — each needs to be its own node so the
+## words ("QUICKLY", "yellow sparkles") — each needs to be its own node so the
 ## sparkle can be positioned exactly on top of it via get_global_rect(),
 ## which a substring inside a flowing RichTextLabel paragraph can't give us.
 func _show_energy_prompt() -> void:
@@ -578,12 +578,11 @@ func _show_energy_prompt() -> void:
 	_message_rich.push_paragraph(HORIZONTAL_ALIGNMENT_CENTER)
 	_message_rich.append_text("Swimming uses energy ")
 	_message_rich.add_image(ENERGY_ICON, ENERGY_ICON_SIZE.x, ENERGY_ICON_SIZE.y)
-	_message_rich.append_text(". A small bar directly above you shows your energy ")
+	_message_rich.append_text(". A small bar above the turtle shows your energy. ")
 	_message_rich.add_image(TURTLE_ENERGY_BAR_ICON, TURTLE_ENERGY_BAR_ICON_SIZE.x, TURTLE_ENERGY_BAR_ICON_SIZE.y)
-	_message_rich.append_text(". A larger version is at the top-right of the screen. ")
+	_message_rich.append_text("\nA large version is at the top right ")
 	_message_rich.add_image(ENERGY_ICON, ENERGY_ICON_SIZE.x, ENERGY_ICON_SIZE.y)
 	_message_rich.add_image(ENERGY_BAR_FILL, ENERGY_BAR_SIZE.x, ENERGY_BAR_SIZE.y)
-	_message_rich.append_text("\n\nYou recover energy when not swimming.")
 	_message_rich.pop()
 	_energy_fast_row.visible = true
 	_energy_sparkle_row.visible = true
@@ -598,7 +597,7 @@ func _show_energy_prompt() -> void:
 
 
 ## The flipper lesson's opening line, split the same way so the sparkle can
-## land on its "FAST" too. The rest of FLIPPER_TEXT (no sparkle needed)
+## land on its "QUICKLY" too. The rest of FLIPPER_TEXT (no sparkle needed)
 ## continues in FlipperBody, its own plain autowrap Label.
 func _show_flipper_prompt() -> void:
 	_prompt_wanted = true
