@@ -9,20 +9,20 @@ class_name DevTechSeeder
 
 @export_enum(
 	"(none)",
-	"Inertia Dampener", "Bravado", "Lateral Thrust", "Transporter",
+	"Inertia Dampener", "Warrior Song", "Lateral Thrust", "Transporter",
 	"Saliva Nanobots", "Bubble Shield", "Dermal Regenerator", "Bumper Magnet",
 	"Phase Shifter", "Powerup Replicator", "Deflector Shield",
-	"Time Freeze", "Flipper Velcro", "Shockwave", "Thing Bringer",
+	"Chrono Stasis", "Flipper Velcro", "Disturbance Wave", "Vacuum Grip",
 	"Graviton Harness", "Plasma Spit", "Magnetic Repulsion", "Hydro Funnel",
 	"Quantum Mirror"
 ) var slot_a: int = 0
 
 @export_enum(
 	"(none)",
-	"Inertia Dampener", "Bravado", "Lateral Thrust", "Transporter",
+	"Inertia Dampener", "Warrior Song", "Lateral Thrust", "Transporter",
 	"Saliva Nanobots", "Bubble Shield", "Dermal Regenerator", "Bumper Magnet",
 	"Phase Shifter", "Powerup Replicator", "Deflector Shield",
-	"Time Freeze", "Flipper Velcro", "Shockwave", "Thing Bringer",
+	"Chrono Stasis", "Flipper Velcro", "Disturbance Wave", "Vacuum Grip",
 	"Graviton Harness", "Plasma Spit", "Magnetic Repulsion", "Hydro Funnel",
 	"Quantum Mirror"
 ) var slot_b: int = 0

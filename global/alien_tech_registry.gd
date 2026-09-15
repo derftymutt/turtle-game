@@ -7,7 +7,7 @@ extends Node
 # ─── Tech ID constants ───────────────────────────────────────────────────────
 
 const INERTIA_DAMPENER    := "inertia_dampener"
-const BRAVADO             := "bravado" ## rename to Warrior Song
+const BRAVADO             := "bravado"
 const LATERAL_THRUST      := "lateral_thrust"
 const TRANSPORTER         := "transporter"
 const SALIVA_NANOBOTS     := "saliva_nanobots"
@@ -17,10 +17,10 @@ const DERMAL_REGEN        := "dermal_regen"
 const PHASE_SHIFTER       := "phase_shifter"
 const POWERUP_REPLICATOR  := "powerup_replicator"
 const DEFLECTOR_SHIELD    := "deflector_shield"
-const TIME_FREEZE         := "time_freeze"  ## rename to Chrono Stasis
+const TIME_FREEZE         := "time_freeze"
 const FLIPPER_VELCRO      := "flipper_velcro"
-const SHOCKWAVE           := "shockwave" ## rename to Disturbance Wave
-const THING_BRINGER       := "thing_bringer" 
+const SHOCKWAVE           := "shockwave"
+const THING_BRINGER       := "thing_bringer"
 const GRAVITON_HARNESS    := "graviton_harness"
 const PLASMA_SPIT         := "plasma_spit"
 const MAGNETIC_REPULSION  := "magnetic_repulsion"
@@ -43,10 +43,10 @@ var _definitions: Array[Dictionary] = [
 	},
 	{
 		"id":          BRAVADO,
-		"name":        "Bravado",
-		"description": "Hitting enemies restores energy.\nFight more, swim more.",
-		"hook":        "Fighting revs you up!",
-		"slot_label":  "Bravado",
+		"name":        "Warrior Song",
+		"description": "Gain energy for each enemy hit.",
+		"hook":        "Get pumped!",
+		"slot_label":  "Warrior Song",
 		"needs_input": false,
 		"color":       Color(1.0, 0.4, 0.2),
 		"hot_description": "1 second of invincibility every time you hit an enemy.",
@@ -147,10 +147,10 @@ var _definitions: Array[Dictionary] = [
 	},
 	{
 		"id":              TIME_FREEZE,
-		"name":            "Time Freeze",
+		"name":            "Chrono Stasis",
 		"description":     "Freeze all enemies, projectiles, and hazards. 5s active, 10s cooldown.",
 		"hook":            "Time stands still!",
-		"slot_label":      "Time Freeze",
+		"slot_label":      "Chrono Stasis",
 		"needs_input":     true,
 		"has_passive_bar": true,
 		"color":           Color(0.5, 0.85, 1.0),
@@ -168,10 +168,10 @@ var _definitions: Array[Dictionary] = [
 	},
 	{
 		"id":              SHOCKWAVE,
-		"name":            "Shockwave",
+		"name":            "Disturbance Wave",
 		"description":     "Blast a hit to all enemies on screen. Depletes all energy and shakes you up. 30s cooldown.",
 		"hook":            "Zap them all!",
-		"slot_label":      "Shockwave",
+		"slot_label":      "Disturbance Wave",
 		"needs_input":     true,
 		"has_passive_bar": true,
 		"color":           Color(1.0, 0.55, 0.1),
@@ -179,10 +179,10 @@ var _definitions: Array[Dictionary] = [
 	},
 	{
 		"id":          THING_BRINGER,
-		"name":        "Thing Bringer",
+		"name":        "Vacuum Grip",
 		"description": "Nearby collectibles are pulled toward you\nand auto-collected.",
 		"hook":        "Here kitty kitty!",
-		"slot_label":  "Thing Bringer",
+		"slot_label":  "Vacuum Grip",
 		"needs_input": false,
 		"color":       Color(1.0, 0.85, 0.2),
 		"hot_description": "Twice the range and pull speed.",
