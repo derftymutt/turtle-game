@@ -2166,6 +2166,8 @@ func _launch_from_flipper_velcro() -> void:
 
 	var flipper: FlipperBase = _flipper_velcro_target as FlipperBase
 
+	GameManager.mark_flipper_used()
+
 	# Trigger the full flipper animation (force-flip for 0.25s then returns to rest)
 	flipper.trigger_flip(0.25)
 	flipper.play_launch_sound()

@@ -27,6 +27,7 @@
 [ext_resource type="PackedScene" uid="uid://tpiece001" path="res://entities/collectibles/alien_tech_piece/alien_tech_piece.tscn" id="26_0fu15"]
 [ext_resource type="TileSet" uid="uid://dyl02kfc4a681" path="res://entities/environment/ocean_boundaries/ocean_wall.tres" id="26_4knja"]
 [ext_resource type="PackedScene" uid="uid://ko8xdpxfr5ej" path="res://entities/environment/current/current.tscn" id="27_4knja"]
+[ext_resource type="PackedScene" path="res://ui/menus/flipper_reminder_popup.tscn" id="28_flipreminder"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ryfpa"]
 friction = 0.1
@@ -443,6 +444,8 @@ curve = SubResource("Curve2D_4knja")
 
 [node name="Visuals" parent="HydroFunnel2" index="1" unique_id=2005124627]
 position = Vector2(251, -110)
+
+[node name="FlipperReminderPopup" parent="." index="42" unique_id=21372061 instance=ExtResource("28_flipreminder")]
 
 [editable path="SpaceDebrisGroup"]
 [editable path="HydroFunnel"]

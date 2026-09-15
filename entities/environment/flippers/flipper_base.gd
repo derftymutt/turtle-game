@@ -244,7 +244,10 @@ func hit_body(body: RigidBody2D, is_press_action: bool, was_cradle_release: bool
 	"""Exact same physics as original flipper"""
 	if not is_press_action and was_cradle_release:
 		return
-	
+
+	if body.is_in_group("player"):
+		GameManager.mark_flipper_used()
+
 	var to_body = body.global_position - global_position
 	var contact_distance = to_body.length()
 	var surface_velocity = contact_distance * angular_velocity

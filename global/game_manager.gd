@@ -29,6 +29,8 @@ var persisted_hearts: int = -1
 # Tutorial flags — reset each run
 var has_shown_tech_tutorial: bool = false
 var first_trash_cluster_spawned: bool = false
+var has_used_flipper: bool = false
+var has_shown_flipper_reminder: bool = false
 
 # High scores per level (persists between sessions if you add save/load)
 var high_scores: Dictionary = {
@@ -58,6 +60,9 @@ func _take_screenshot() -> void:
 	image.save_png(path)
 	print("📸 Screenshot saved: ", path)
 
+func mark_flipper_used() -> void:
+	has_used_flipper = true
+
 func update_high_score(level_name: String, score: int):
 	if score > high_scores.get(level_name, 0):
 		high_scores[level_name] = score
@@ -84,6 +89,8 @@ func reset_game():
 	clear_carried_pieces()
 	has_shown_tech_tutorial = false
 	first_trash_cluster_spawned = false
+	has_used_flipper = false
+	has_shown_flipper_reminder = false
 	LevelManager.reset_run()
 	AlienTechManager.reset_run()
 
