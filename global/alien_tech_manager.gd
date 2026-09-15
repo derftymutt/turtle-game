@@ -254,6 +254,19 @@ func set_slot_hot(slot_index: int, hot: bool) -> void:
 ## that was normal and still equipped becomes HOT for the level about to start.
 ## Returns {hot: [tech dicts], fried: [tech dicts]} for the cutscene to display.
 func advance_level_transition() -> Dictionary:
+	# If Chrono Stasis (Time Freeze) was still mid-activation when the level
+	# ended, its owning TurtlePlayer is about to be destroyed by the scene
+	# change without ever ticking time_freeze_timer down to 0 — the only place
+	# that normally calls _unfreeze_world_bodies() and clears this flag (see
+	# turtle_player.gd). Left set, it leaks into the next level as permanently
+	# "true": every newly spawned Powerup treats itself as born mid-freeze and
+	# stays force-frozen (near-zero sink), and the eel/piranha spawners refuse
+	# to spawn at all. This is the real level boundary, so force it off here
+	# whether or not the tech itself survives (hot) or gets fried below.
+	if time_freeze_active:
+		time_freeze_active = false
+		clear_passive_bar(AlienTechRegistry.TIME_FREEZE)
+
 	var hot: Array[Dictionary] = []
 	var fried: Array[Dictionary] = []
 	for i in MAX_SLOTS:
@@ -419,6 +432,7 @@ func reset_run():
 	_slot_assigned_order = [-1, -1]
 	_assignment_counter = 0
 	_hot_streak = [0, 0]
+	time_freeze_active = false
 	_passive_bar_ratios.clear()
 	_live_unique_techs.clear()
 	_last_lost_or_skipped_tech = ""
