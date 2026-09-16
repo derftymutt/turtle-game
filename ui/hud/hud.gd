@@ -11,7 +11,6 @@ signal low_air_warning_changed(is_warning: bool)
 var score_label: Label
 var ufo_pieces_label: Label
 var health_container: Control     # HBox from the scene; now holds the heart icons
-var _heart_labels: Array = []
 var boss_health_container: Control
 var boss_health_bar: TextureProgressBar
 var air_container: Control
@@ -25,11 +24,8 @@ var danger_overlay: ColorRect
 var sfx_low_air: AudioStreamPlayer
 var sfx_energy_charge: AudioStreamPlayer
 
-# Damage vignette — built at runtime (see _build_damage_vignette), not part of the base scene
-const DAMAGE_VIGNETTE_SHADER := preload("res://ui/hud/shaders/damage_vignette.gdshader")
-var damage_vignette: ColorRect = null
-var _damage_vignette_material: ShaderMaterial = null
-var _damage_vignette_tween: Tween = null
+# Damage vignette — built at runtime (see DamageVignette.build), not part of the base scene
+var _damage_vignette := DamageVignette.new()
 
 # Alien Tech displays
 var tech_piece_label:  Label       = null
@@ -59,8 +55,7 @@ var _hot_pulse_timer: float = 0.0
 
 # Game state
 var current_score: int = 0
-var current_hearts: int = 7
-var max_hearts: int = 7
+var _hearts := HeartsDisplay.new()
 var pieces_collected: int = 0
 var pieces_needed: int = 0
 
@@ -77,6 +72,7 @@ func get_current_score() -> int:
 @export var air_warning_threshold: float = 10.0
 var current_air: float = 30.0
 var air_warning: bool = false
+var _air := AirSystem.new()
 
 # Energy system (experimental - toggleable)
 @export_group("Energy System")
@@ -91,24 +87,18 @@ var air_warning: bool = false
 @export var desperation_threshold: float = 0.33
 @export var desperation_max_multiplier: float = 1.75
 var current_energy: float = 100.0
-var is_touching_wall: bool = false
 var wall_recovery_active: bool = false  # NEW: Track if we're actively recovering from wall
 var level_completing: bool = false  # Suppresses trash cluster spawn and sounds on final piece delivery
+var _energy := EnergySystem.new()
 
 # Timer system
 @export_group("Timer System")
 @export var timer_enabled: bool = true
 @export var level_time_limit: float = 180.0
-var timer_label: Label = null
-var time_remaining: float = 0.0
-var _timer_active: bool = false
-var _timer_expired: bool = false
-var _timer_flash_timer: float = 0.0
+var timer_system := TimerSystem.new()
 
-# Trash cluster score spawning
-const TRASH_CLUSTER_SCENE = preload("res://entities/collectibles/trash_cluster/trash_cluster.tscn")
-const CLUSTER_SCORE_THRESHOLDS: Array[int] = [200, 500, 800, 1200, 1600]
-var _cluster_threshold_index: int = 0
+# Trash cluster score + freebie-timer spawning
+var _trash_clusters := TrashClusterSpawner.new()
 
 # Time-based "freebie" trash clusters: a little goodie randomness so trash bags
 # still trickle in during low-scoring stretches. Any score-based cluster resets
@@ -119,31 +109,6 @@ var _cluster_threshold_index: int = 0
 @export var freebie_first_jitter: float = 8.0       # ...give or take this much
 @export var freebie_interval: float = 60.0          # then roughly this often after that...
 @export var freebie_interval_jitter: float = 15.0   # ...give or take this much
-var _freebie_elapsed: float = 0.0
-var _freebie_next_time: float = 0.0
-var _any_cluster_spawned: bool = false
-
-# Visual feedback
-var air_flash_timer: float = 0.0
-var air_flash_interval: float = 0.5
-var hud_layer_flash_speed: float = 5.0
-var energy_pulse_timer: float = 0.0  # NEW: For wall recovery pulse
-var energy_pulse_speed: float = 8.0  # NEW: How fast the pulse is
-
-# Powerup feedback: blinking/flashing the progress bar tied to the powerup that
-# was collected, so the player can see which system it affects.
-const HEARTS_BLINK_PERIOD_MSEC: int = 200
-const HEARTS_BLINK_LOW_ALPHA: float = 0.25
-var hearts_blinking: bool = false
-
-const ENERGY_BLINK_PERIOD_MSEC: int = 200
-const ENERGY_BLINK_LOW_ALPHA: float = 0.25
-var energy_blinking: bool = false
-
-const AIR_FLASH_PERIOD: float = 0.15
-const AIR_FLASH_COLOR := Color(1.0, 1.0, 0.4, 1.0)
-var _air_flash_remaining: float = 0.0
-var _air_flash_timer: float = 0.0
 
 func _ready():
 	add_to_group("hud")
@@ -151,11 +116,11 @@ func _ready():
 	sfx_low_air = find_child("SfxLowAir")
 	sfx_energy_charge = find_child("SfxEnergyCharge")
 	danger_overlay = find_child("DangerOverlay")
-	_build_damage_vignette()
+	_damage_vignette.build(self, danger_overlay)
 
 	# Find the main container
 	for child in get_children():
-		if child is Control and not child == danger_overlay and not child == damage_vignette:
+		if child is Control and not child == danger_overlay and not child == _damage_vignette.rect:
 			hud_container = child
 			break
 	
@@ -168,7 +133,7 @@ func _ready():
 	boss_health_container = find_child("BossHealthContainer")
 	boss_health_bar = find_child("BossHealthBar")
 	health_container = find_child("HealthContainer")
-	_build_hearts_display()
+	_hearts.build(health_container)
 	air_container = find_child("AirContainer")
 	air_bar = find_child("AirBar")
 	energy_container = find_child("EnergyContainer")
@@ -189,15 +154,9 @@ func _ready():
 	if not energy_bar:
 		push_warning("HUD: Could not find EnergyBar!")
 	
-	timer_label = find_child("TimerLabel")
-	if timer_label:
-		timer_label.visible = timer_enabled
-	if timer_enabled:
-		time_remaining = level_time_limit
-		_timer_active = true
-		_update_timer_display()
+	timer_system.start(find_child("TimerLabel"), level_time_limit, timer_enabled)
 
-	_schedule_next_freebie_cluster()
+	_trash_clusters.start(self)
 
 	# Apply black borders to all progress bars
 	_apply_bar_borders()
@@ -207,7 +166,7 @@ func _ready():
 	# Initialize displays
 	update_score(0)
 	update_ufo_pieces(0, 0)
-	update_hearts(max_hearts, max_hearts)
+	update_hearts(_hearts.max_hearts, _hearts.max_hearts)
 	update_air(max_air, max_air)
 	update_energy(max_energy, max_energy)
 	set_super_speed_active(false)
@@ -253,26 +212,10 @@ func _ready():
 	_refresh_tech_display()
 
 func _process(delta):
-	# Handle air warning flash - entire HUD layer pulses red
-	if air_warning and air_enabled and hud_container:
-		air_flash_timer += delta * hud_layer_flash_speed
-		var pulse = (sin(air_flash_timer) + 1.0) / 2.0
-		var warning_color = Color.WHITE.lerp(Color(1.0, 0.3, 0.3, 1.0), pulse)
-		hud_container.modulate = warning_color
+	# Air warning pulse (hud_container/danger_overlay tint) and the air bar's
+	# one-shot flash for the air-reserve powerup.
+	_air.process(self, delta)
 
-		if danger_overlay:
-			var screen_pulse = (sin(air_flash_timer) + 1.0) / 2.0
-			danger_overlay.color = Color(0.15, 0.0, 0.0, screen_pulse * 0.5)
-
-		if air_bar:
-			air_bar.modulate = Color.CYAN
-	else:
-		if hud_container:
-			hud_container.modulate = Color.WHITE
-		if danger_overlay:
-			danger_overlay.color = Color(0, 0, 0, 0)
-		air_flash_timer = 0.0
-	
 	# Alien Tech cooldown bars
 	_apply_slot_cooldown_bar(slot_a_cooldown, 0)
 	_apply_slot_cooldown_bar(slot_b_cooldown, 1)
@@ -282,116 +225,25 @@ func _process(delta):
 	_update_hot_borders(delta)
 
 	# Level timer countdown
-	if _timer_active:
-		time_remaining = max(0.0, time_remaining - delta)
-		if time_remaining <= 10.0:
-			_timer_flash_timer += delta * 6.0
-		_update_timer_display()
-		if time_remaining <= 0.0:
-			_timer_active = false
-			_timer_expired = true
-			time_expired.emit()
+	if timer_system.process(delta):
+		time_expired.emit()
 
-	# Freebie trash clusters (score-independent). _spawn_trash_cluster() reschedules
-	# the next one, so a score-based cluster spawning first pushes this back too.
-	if freebie_clusters_enabled and not level_completing:
-		_freebie_elapsed += delta
-		if _freebie_elapsed >= _freebie_next_time:
-			_spawn_trash_cluster()
+	# Freebie trash clusters (score-independent). A spawn (score-based or
+	# freebie) reschedules the next freebie, so a score-based cluster
+	# spawning first pushes this back too.
+	_trash_clusters.process_freebie(self, delta)
 
-	# Handle wall recovery visual feedback
-	if wall_recovery_active and energy_bar:
-		energy_pulse_timer += delta * energy_pulse_speed
-		
-		# Pulse between current color and bright cyan
-		var pulse = (sin(energy_pulse_timer) + 1.0) / 2.0
-		
-		# Get the base color (white/orange/red based on energy level)
-		var base_color = Color.WHITE
-		var energy_ratio = current_energy / max_energy
-		if energy_ratio <= 0.2:
-			base_color = Color.RED
-		elif energy_ratio <= 0.5:
-			base_color = Color.ORANGE
-		
-		# Pulse to bright cyan to indicate wall recovery
-		var recovery_color = base_color.lerp(Color.GOLD, pulse * 0.7)
-		energy_bar.modulate = recovery_color
-	else:
-		energy_pulse_timer = 0.0
-		# Reset to normal color coding when not recovering from wall
-		update_energy(current_energy, max_energy)
-
-	# Powerup feedback overlays — applied last so they win over the color-coding
-	# above for the frame they're active.
-	if hearts_blinking and not _heart_labels.is_empty():
-		var blink_on := int(Time.get_ticks_msec() / HEARTS_BLINK_PERIOD_MSEC) % 2 == 0
-		var a := 1.0 if blink_on else HEARTS_BLINK_LOW_ALPHA
-		for l in _heart_labels:
-			l.modulate.a = a
-
-	if energy_blinking and energy_bar:
-		var blink_on := int(Time.get_ticks_msec() / ENERGY_BLINK_PERIOD_MSEC) % 2 == 0
-		var a := 1.0 if blink_on else ENERGY_BLINK_LOW_ALPHA
-		energy_bar.modulate.a = a
-		if energy_icon:
-			energy_icon.modulate.a = a
-
-	if _air_flash_remaining > 0.0 and air_bar:
-		_air_flash_remaining -= delta
-		_air_flash_timer += delta
-		var flash_on := int(_air_flash_timer / AIR_FLASH_PERIOD) % 2 == 0
-		air_bar.modulate = Color.WHITE if flash_on else AIR_FLASH_COLOR
-		if _air_flash_remaining <= 0.0:
-			_air_flash_timer = 0.0
-
-func _update_timer_display() -> void:
-	if not timer_label:
-		return
-	var mins := int(time_remaining) / 60
-	var secs := int(time_remaining) % 60
-	timer_label.text = "%d:%02d" % [mins, secs]
-	if time_remaining > 30.0:
-		timer_label.modulate = Color.WHITE
-	elif time_remaining > 10.0:
-		timer_label.modulate = Color.YELLOW
-	else:
-		var pulse := (sin(_timer_flash_timer) + 1.0) / 2.0
-		timer_label.modulate = Color.WHITE.lerp(Color.RED, 0.5 + pulse * 0.5)
-
-## Full-screen radial vignette shown briefly when the player takes damage —
-## corners darken then fade back out. Built at runtime (like the heart icons
-## in _build_hearts_display) since it isn't part of the base scene. Inserted
-## right after DangerOverlay so it sits below the HUD text/icons (drawn later
-## in child order) but above the gameplay view underneath this CanvasLayer.
-func _build_damage_vignette() -> void:
-	damage_vignette = ColorRect.new()
-	damage_vignette.name = "DamageVignette"
-	damage_vignette.anchor_right = 1.0
-	damage_vignette.anchor_bottom = 1.0
-	damage_vignette.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	damage_vignette.color = Color.WHITE  # unused — the shader fully overrides COLOR
-	_damage_vignette_material = ShaderMaterial.new()
-	_damage_vignette_material.shader = DAMAGE_VIGNETTE_SHADER
-	damage_vignette.material = _damage_vignette_material
-	add_child(damage_vignette)
-	if danger_overlay:
-		move_child(damage_vignette, danger_overlay.get_index() + 1)
+	# Handle wall recovery visual feedback, then the powerup feedback overlays
+	# — applied last so they win over the color-coding above for the frame
+	# they're active.
+	_energy.process(self, delta)
+	_hearts.process()
 
 ## Trigger the damage vignette: corners snap to `peak` darkness, then fade
 ## back to fully transparent over `fade_time` seconds. Re-triggering while a
 ## fade is in progress (rapid hits) restarts from the peak.
 func flash_damage_vignette(peak: float = 0.85, fade_time: float = 0.85) -> void:
-	if not _damage_vignette_material:
-		return
-	if _damage_vignette_tween:
-		_damage_vignette_tween.kill()
-	_damage_vignette_material.set_shader_parameter("intensity", peak)
-	_damage_vignette_tween = create_tween()
-	_damage_vignette_tween.tween_method(
-		func(v): _damage_vignette_material.set_shader_parameter("intensity", v),
-		peak, 0.0, fade_time
-	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_damage_vignette.flash(peak, fade_time)
 
 ## Set all HUD labels to black text
 func _apply_label_colors() -> void:
@@ -435,248 +287,59 @@ func update_score(new_score: int):
 	GameManager.current_score = new_score
 	if score_label:
 		score_label.text = "%d" % current_score
-	# Only spawn a cluster when score is actually increasing past a milestone
-	if new_score > previous_score and _cluster_threshold_index < CLUSTER_SCORE_THRESHOLDS.size() and current_score >= CLUSTER_SCORE_THRESHOLDS[_cluster_threshold_index]:
-		_cluster_threshold_index += 1
-		_spawn_trash_cluster()
+	_trash_clusters.on_score_updated(self, new_score, previous_score)
 
 func add_score(points: int):
 	update_score(current_score + points)
 
-func _schedule_next_freebie_cluster() -> void:
-	_freebie_elapsed = 0.0
-	if _any_cluster_spawned:
-		_freebie_next_time = maxf(5.0, freebie_interval + randf_range(-freebie_interval_jitter, freebie_interval_jitter))
-	else:
-		_freebie_next_time = maxf(5.0, freebie_first_delay + randf_range(-freebie_first_jitter, freebie_first_jitter))
-
-func _spawn_trash_cluster():
-	if level_completing:
-		return
-	# Any cluster (score-based or freebie) pushes the next freebie out, so trash
-	# bags stay rare and freebies only fill quiet, low-scoring stretches.
-	_any_cluster_spawned = true
-	_schedule_next_freebie_cluster()
-	var scene = get_tree().current_scene
-	if not scene:
-		return
-	var cluster = TRASH_CLUSTER_SCENE.instantiate()
-	cluster.is_first_cluster = not GameManager.first_trash_cluster_spawned
-	GameManager.first_trash_cluster_spawned = true
-	var inv = get_viewport().get_canvas_transform().affine_inverse()
-	var screen_size = get_viewport().get_visible_rect().size
-	var spawn_y = screen_size.y * randf_range(0.3, 0.78)
-	cluster.max_y = (inv * Vector2(0.0, screen_size.y * 0.82)).y
-	if randf() > 0.5:
-		# Spawn from right, drift left
-		cluster.drift_speed = -38.0
-		scene.add_child(cluster)
-		cluster.global_position = inv * Vector2(screen_size.x + 55, spawn_y)
-	else:
-		# Spawn from left, drift right
-		cluster.drift_speed = 38.0
-		scene.add_child(cluster)
-		cluster.global_position = inv * Vector2(-55, spawn_y)
-	# Clamp spawn position and drift to the ocean band (below the surface)
-	var ocean = get_tree().get_first_node_in_group("ocean")
-	var min_world_y = -116.0  # 10px below default surface_y of -126
-	if ocean:
-		min_world_y = ocean.surface_y + 10.0
-	cluster.min_y = min_world_y
-	cluster.global_position.y = max(cluster.global_position.y, min_world_y)
-	print("👾 Trash cluster spawned at score %d" % current_score)
-
-## ── Heart health display ─────────────────────────────────────────────────────
-## Built programmatically with plain Label nodes ("♥") so the icon can be swapped
-## for a sprite later. Lives inside the scene's HealthContainer HBox; its old
-## fluid-bar children are hidden at build time.
-const HEART_FULL_COLOR := Color(0.30, 0.85, 0.35)
-const HEART_EMPTY_COLOR := Color(0.24, 0.24, 0.26)
-
-func _build_hearts_display() -> void:
-	if not health_container:
-		return
-
-	# Retire the old fluid health bar (TextureProgressBar + meter icon)
-	for child in health_container.get_children():
-		child.visible = false
-		child.queue_free()
-
-	health_container.add_theme_constant_override("separation", 1)
-
-	var heart_font: Font = load("res://assets/fonts/BoldPixels.ttf")
-	for i in max_hearts:
-		var l := Label.new()
-		l.text = "♥"  # ♥ BLACK HEART SUIT — swap this Label for a sprite later
-		if heart_font:
-			l.add_theme_font_override("font", heart_font)
-		l.add_theme_font_size_override("font_size", 22)
-		l.add_theme_color_override("font_color", HEART_FULL_COLOR)
-		l.add_theme_constant_override("outline_size", 4)
-		l.add_theme_color_override("font_outline_color", Color.BLACK)
-		health_container.add_child(l)
-		_heart_labels.append(l)
-
 ## Update the heart icons. `current` / `hearts_max` come from TurtlePlayer.
 func update_hearts(current: int, hearts_max: int = 7) -> void:
-	current_hearts = current
-	max_hearts = hearts_max
-	for i in _heart_labels.size():
-		var l: Label = _heart_labels[i]
-		l.visible = i < hearts_max
-		l.add_theme_color_override(
-			"font_color",
-			HEART_FULL_COLOR if i < current else HEART_EMPTY_COLOR
-		)
+	_hearts.update(current, hearts_max)
 
 ## Blink the heart icons for the duration of an active invincibility powerup
 func set_hearts_blinking(active: bool) -> void:
-	hearts_blinking = active
-	if not active:
-		for l in _heart_labels:
-			l.modulate.a = 1.0
+	_hearts.set_blinking(active)
 
 ## Update air display
 func update_air(air: float, max_a: float):
-	if not air_enabled:
-		return
-	
-	current_air = air
-	max_air = max_a
-	
-	if air_bar:
-		air_bar.max_value = max_a
-		air_bar.value = air
-		
-		# Warning state
-		if air <= air_warning_threshold:
-			if not air_warning:
-				air_warning = true
-				air_flash_timer = 0.0
-				if sfx_low_air:
-					sfx_low_air.play()
-				low_air_warning_changed.emit(true)
-		else:
-			var was_warning := air_warning
-			air_warning = false
-			if sfx_low_air and sfx_low_air.playing:
-				sfx_low_air.stop()
-			air_bar.modulate = Color.CYAN
-			if was_warning:
-				low_air_warning_changed.emit(false)
+	_air.update(self, air, max_a)
 
-## Drain air while underwater
+## Drain air while underwater. Returns true if out of air (for damage/warning)
 func drain_air(delta: float):
-	if not air_enabled:
-		return
-	
-	current_air = max(0.0, current_air - air_drain_rate * delta)
-	update_air(current_air, max_air)
-	
-	# Return true if out of air (for damage/warning)
-	return current_air <= 0.0
+	return _air.drain(self, delta)
 
 ## Refill air at surface
 func refill_air(delta: float):
-	if not air_enabled:
-		return
-	
-	current_air = min(max_air, current_air + air_refill_rate * delta)
-	update_air(current_air, max_air)
+	_air.refill(self, delta)
 
 ## Flash the air bar a few times — one-shot feedback for the (instant, no
 ## duration) air reserve powerup.
 func flash_air_bar(duration: float = 1.0) -> void:
-	if not air_enabled:
-		return
-	_air_flash_remaining = duration
-	_air_flash_timer = 0.0
+	_air.flash_bar(self, duration)
 
 ## Blink the energy bar and its icon for the duration of an active energy powerup
 func set_energy_blinking(active: bool) -> void:
-	energy_blinking = active
-	if not active:
-		if energy_bar:
-			energy_bar.modulate.a = 1.0
-		if energy_icon:
-			energy_icon.modulate.a = 1.0
+	_energy.set_blinking(self, active)
 
 ## Update energy display
 func update_energy(energy: float, max_en: float):
-	if not energy_enabled:
-		return
-	
-	current_energy = energy
-	max_energy = max_en
-	
-	if energy_bar:
-		energy_bar.max_value = max_en
-		energy_bar.value = energy
-		
-		# Only update color if NOT actively recovering from wall
-		# (wall recovery has its own pulsing color in _process)
-		if not wall_recovery_active:
-			# Color code energy bar
-			if energy / max_en > 0.5:
-				energy_bar.modulate = Color.WHITE
-			elif energy / max_en > 0.2:
-				energy_bar.modulate = Color.ORANGE
-			else:
-				energy_bar.modulate = Color.RED
+	_energy.update(self, energy, max_en)
 
 ## Try to use energy for a thrust
 func try_thrust() -> bool:
-	if not energy_enabled:
-		return true
-	
-	if current_energy >= energy_threshold:
-		current_energy -= energy_per_thrust
-		update_energy(current_energy, max_energy)
-		return true
-	else:
-		return false
+	return _energy.try_thrust(self)
 
 ## Recover energy over time
 func recover_energy(delta: float, touching_wall: bool = false):
-	if not energy_enabled:
-		return
-	
-	# Track if we're getting wall bonus
-	wall_recovery_active = touching_wall
-
-	var desperation_mult := 1.0
-	if desperation_enabled and max_hearts > 0:
-		var health_ratio := float(current_hearts) / float(max_hearts)
-		if health_ratio < desperation_threshold:
-			var t := 1.0 - (health_ratio / desperation_threshold)
-			desperation_mult = lerp(1.0, desperation_max_multiplier, t)
-
-	var recovery = energy_recovery_rate * desperation_mult * delta
-	if touching_wall:
-		recovery += energy_wall_bonus * delta
-	
-	current_energy = min(max_energy, current_energy + recovery)
-	update_energy(current_energy, max_energy)
-
-	# Sound: play while wall recovery is active, energy isn't full, and level isn't completing
-	if sfx_energy_charge:
-		var should_play = wall_recovery_active and current_energy < max_energy and not level_completing
-		if should_play and not sfx_energy_charge.playing:
-			sfx_energy_charge.play()
-		elif not should_play and sfx_energy_charge.playing:
-			sfx_energy_charge.stop()
+	_energy.recover(self, delta, touching_wall)
 
 ## Called by UFOWorkshop on final piece delivery — silences any active sounds immediately
 func begin_level_completion() -> void:
-	level_completing = true
-	if sfx_energy_charge and sfx_energy_charge.playing:
-		sfx_energy_charge.stop()
+	_energy.begin_level_completion(self)
 
 ## Check if player can thrust (has enough energy)
 func can_thrust() -> bool:
-	if not energy_enabled:
-		return true
-	return current_energy >= energy_threshold
+	return _energy.can_thrust(self)
 
 ## Update super speed indicator
 func set_super_speed_active(active: bool):
@@ -999,7 +662,7 @@ func _get_slot_bar_value(slot_index: int) -> float:
 	return 1.0 - AlienTechManager.get_cooldown_ratio(slot_index)
 
 func freeze_timer():
-	_timer_active = false
+	timer_system.freeze()
 
 func _is_slot_dimmed(slot_index: int) -> bool:
 	var tech := AlienTechManager.slots[slot_index]

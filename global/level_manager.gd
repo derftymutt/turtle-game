@@ -164,7 +164,7 @@ func complete_level():
 	# Compute per-level performance bonuses
 	var time_bonus: int = 0
 	if hud and hud.get("timer_enabled"):
-		time_bonus = int(floor(hud.time_remaining / hud.level_time_limit * MAX_TIME_BONUS))
+		time_bonus = int(floor(hud.timer_system.time_remaining / hud.level_time_limit * MAX_TIME_BONUS))
 	var first_try_bonus: int = FIRST_TRY_BONUS if attempt_count == 1 else 0
 
 	# Accumulate level score + per-level bonuses into run total

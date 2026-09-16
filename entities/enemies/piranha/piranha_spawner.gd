@@ -63,7 +63,7 @@ func _connect_to_hud() -> void:
 	if not hud.time_expired.is_connected(_on_time_expired):
 		hud.time_expired.connect(_on_time_expired)
 	# In case the timer already lapsed before this spawner wired up.
-	if "_timer_expired" in hud and hud._timer_expired:
+	if "timer_system" in hud and hud.timer_system.expired:
 		_on_time_expired()
 
 func _on_time_expired() -> void:
