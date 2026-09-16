@@ -134,26 +134,48 @@ func _restore_physics_after_drop() -> void:
 	collision_mask = 1
 	apply_impulse(_safe_drop_impulse())
 
-	# The piece drops exactly on top of the player (carry position == player
-	# position), and "player body" shares the same physics layer as world
-	# geometry, so there's no bitmask that lets it collide with walls but not
-	# the carrier. Without this, two solid bodies spawning at zero distance
-	# (most reliably: an electric-shock drop, which happens at the carry
-	# point) can end up deeply interpenetrating — the physics engine has no
-	# clean separation direction and just fights itself every step, so the
-	# piece spins in place, glued to the player, immune to drop/deliver
-	# because it's still resolving that overlap. A temporary collision
-	# exception guarantees they can't get stuck on each other while they
-	# separate; walls are unaffected since exceptions are per-body, not layer-wide.
-	if is_instance_valid(_dropped_from):
-		var carrier_ref := _dropped_from
-		_dropped_from = null
-		add_collision_exception_with(carrier_ref)
+	# The piece drops exactly at CarryPoint, which sits right at the edge of
+	# the player's own collision radius — so at drop time it isn't just the
+	# player that can be at zero separation, it's whatever the player happens
+	# to be pressed against too (a wall, bumper, or flipper). That's the
+	# common case here, not the exception: an electric eel's wall shock fires
+	# while the player is next to that wall, and this is a pinball-style game
+	# where the player is constantly flush against geometry. Two solid bodies
+	# spawning at zero distance have no clean separation direction, so the
+	# physics engine just fights the overlap every step — the piece spins in
+	# place, stuck, immune to drop/deliver until some unrelated knockback
+	# breaks the contact. Except every body actually overlapping right now
+	# (not just the carrier) so they can all separate cleanly; each exception
+	# is removed once they've had time to move apart.
+	var fallback_carrier := _dropped_from
+	_dropped_from = null
+	for body in _get_drop_overlap_bodies(fallback_carrier):
+		add_collision_exception_with(body)
 		get_tree().create_timer(_PLAYER_SEPARATION_GRACE).timeout.connect(
 			func():
-				if is_instance_valid(self) and is_instance_valid(carrier_ref):
-					remove_collision_exception_with(carrier_ref)
+				if is_instance_valid(self) and is_instance_valid(body):
+					remove_collision_exception_with(body)
 		)
+
+func _get_drop_overlap_bodies(fallback: Node2D) -> Array:
+	var shape_node := get_node_or_null("CollisionShape2D") as CollisionShape2D
+	if not shape_node or not shape_node.shape:
+		return [fallback] if is_instance_valid(fallback) else []
+
+	var query := PhysicsShapeQueryParameters2D.new()
+	query.shape = shape_node.shape
+	query.transform = shape_node.global_transform
+	query.exclude = [get_rid()]
+	query.collide_with_bodies = true
+	query.collide_with_areas = false
+	query.collision_mask = 0xFFFFFFFF
+
+	var bodies: Array = []
+	for result in get_world_2d().direct_space_state.intersect_shape(query, 8):
+		var collider = result.collider
+		if collider is PhysicsBody2D and collider not in bodies:
+			bodies.append(collider)
+	return bodies
 
 func _get_play_area_limits() -> Dictionary:
 	# Small margin — just enough to keep the piece inside the wall geometry

@@ -49,7 +49,7 @@ const INTRO_HINT := "▶  Swim with the Left Stick (or W A S D)"
 ## Reference copy of the wording — built as rich text in _show_energy_prompt()
 ## instead (same pattern as INTRO_TEXT/_show_intro()) so the icon/bar images
 ## can sit inline.
-const ENERGY_TEXT := "Swimming uses energy. A small bar above the turtle shows your energy. [turtle+bar icon]\nA large version is at the top right [icon+bar]\n\nYou recover energy slowly when not swimming.\n\nBUT- you can recover it QUICKLY [sparkle] as well.\n\n\nGo to the surface. You will see the yellow sparkles [sparkle] of QUICK energy recovery."
+const ENERGY_TEXT := "Swimming uses energy. A small bar above the turtle shows your energy. [turtle+bar icon]\nA large version is at the top right [icon+bar]\n\nYou recover energy slowly when not swimming.\n\nBUT- you can recover it QUICKLY [sparkle] as well.\n\n\nGo to the surface. (larger font)\n\nYou will see the yellow sparkles [sparkle] of QUICK energy recovery."
 
 ## Reference copy — built from FlipperFastRow + FlipperBody in
 ## _show_flipper_prompt() instead, so the sparkle can land on "QUICKLY" here too.

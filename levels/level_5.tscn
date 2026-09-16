@@ -373,6 +373,7 @@ propulsion_force = 1600.0
 centering_force = 200.0
 lateral_damping = 0.5
 exit_impulse = 600.0
+hydro_funnel = true
 show_debug_arrows = false
 
 [node name="Path2D" parent="HydroFunnel2" index="0" unique_id=1461068862]
@@ -411,7 +412,7 @@ curve = SubResource("Curve2D_aacai")
 [node name="Visuals" parent="HydroFunnel4" index="1" unique_id=2005124627]
 position = Vector2(301, -21)
 
-[node name="BossIntroPopup" parent="." instance=ExtResource("24_bossintro")]
+[node name="BossIntroPopup" parent="." index="53" unique_id=1650217290 instance=ExtResource("24_bossintro")]
 
 [editable path="SpaceDebrisGroup"]
 [editable path="HydroFunnel"]

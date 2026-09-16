@@ -246,8 +246,9 @@ theme_override_constants/separation = 0
 
 [node name="Before" type="Label" parent="TutorialUI/Prompt/Margin/VBox/EnergySparkleRow/Inner" index="0" unique_id=300000221]
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
-text = "Go to the surface. You will see the"
+theme_override_font_sizes/font_size = 20
+text = "Go to the surface.
+"
 horizontal_alignment = 1
 autowrap_mode = 2
 
@@ -256,12 +257,17 @@ layout_mode = 2
 theme_override_constants/separation = 0
 alignment = 1
 
-[node name="Word" type="Label" parent="TutorialUI/Prompt/Margin/VBox/EnergySparkleRow/Inner/WordRow" index="0" unique_id=300000222]
+[node name="Lead" type="Label" parent="TutorialUI/Prompt/Margin/VBox/EnergySparkleRow/Inner/WordRow" index="0" unique_id=1293090603]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "You will see the "
+
+[node name="Word" type="Label" parent="TutorialUI/Prompt/Margin/VBox/EnergySparkleRow/Inner/WordRow" index="1" unique_id=300000222]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 text = "yellow sparkles"
 
-[node name="After" type="Label" parent="TutorialUI/Prompt/Margin/VBox/EnergySparkleRow/Inner/WordRow" index="1" unique_id=300000223]
+[node name="After" type="Label" parent="TutorialUI/Prompt/Margin/VBox/EnergySparkleRow/Inner/WordRow" index="2" unique_id=300000223]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 text = " of QUICK energy recovery."
