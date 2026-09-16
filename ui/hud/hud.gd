@@ -25,6 +25,12 @@ var danger_overlay: ColorRect
 var sfx_low_air: AudioStreamPlayer
 var sfx_energy_charge: AudioStreamPlayer
 
+# Damage vignette — built at runtime (see _build_damage_vignette), not part of the base scene
+const DAMAGE_VIGNETTE_SHADER := preload("res://ui/hud/shaders/damage_vignette.gdshader")
+var damage_vignette: ColorRect = null
+var _damage_vignette_material: ShaderMaterial = null
+var _damage_vignette_tween: Tween = null
+
 # Alien Tech displays
 var tech_piece_label:  Label       = null
 var slot_a_label:      Label       = null
@@ -145,10 +151,11 @@ func _ready():
 	sfx_low_air = find_child("SfxLowAir")
 	sfx_energy_charge = find_child("SfxEnergyCharge")
 	danger_overlay = find_child("DangerOverlay")
+	_build_damage_vignette()
 
 	# Find the main container
 	for child in get_children():
-		if child is Control and not child == danger_overlay:
+		if child is Control and not child == danger_overlay and not child == damage_vignette:
 			hud_container = child
 			break
 	
@@ -351,6 +358,40 @@ func _update_timer_display() -> void:
 	else:
 		var pulse := (sin(_timer_flash_timer) + 1.0) / 2.0
 		timer_label.modulate = Color.WHITE.lerp(Color.RED, 0.5 + pulse * 0.5)
+
+## Full-screen radial vignette shown briefly when the player takes damage —
+## corners darken then fade back out. Built at runtime (like the heart icons
+## in _build_hearts_display) since it isn't part of the base scene. Inserted
+## right after DangerOverlay so it sits below the HUD text/icons (drawn later
+## in child order) but above the gameplay view underneath this CanvasLayer.
+func _build_damage_vignette() -> void:
+	damage_vignette = ColorRect.new()
+	damage_vignette.name = "DamageVignette"
+	damage_vignette.anchor_right = 1.0
+	damage_vignette.anchor_bottom = 1.0
+	damage_vignette.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	damage_vignette.color = Color.WHITE  # unused — the shader fully overrides COLOR
+	_damage_vignette_material = ShaderMaterial.new()
+	_damage_vignette_material.shader = DAMAGE_VIGNETTE_SHADER
+	damage_vignette.material = _damage_vignette_material
+	add_child(damage_vignette)
+	if danger_overlay:
+		move_child(damage_vignette, danger_overlay.get_index() + 1)
+
+## Trigger the damage vignette: corners snap to `peak` darkness, then fade
+## back to fully transparent over `fade_time` seconds. Re-triggering while a
+## fade is in progress (rapid hits) restarts from the peak.
+func flash_damage_vignette(peak: float = 0.85, fade_time: float = 0.85) -> void:
+	if not _damage_vignette_material:
+		return
+	if _damage_vignette_tween:
+		_damage_vignette_tween.kill()
+	_damage_vignette_material.set_shader_parameter("intensity", peak)
+	_damage_vignette_tween = create_tween()
+	_damage_vignette_tween.tween_method(
+		func(v): _damage_vignette_material.set_shader_parameter("intensity", v),
+		peak, 0.0, fade_time
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
 ## Set all HUD labels to black text
 func _apply_label_colors() -> void:

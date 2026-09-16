@@ -924,6 +924,7 @@ func take_damage(amount: float, use_iframes: bool = false, source: String = ""):
 
 	if hud:
 		hud.update_hearts(current_hearts, MAX_HEARTS)
+		hud.flash_damage_vignette()
 
 	# Drop piece(s) and check death BEFORE any await — these must fire immediately
 	# and must not be triggered multiple times from repeated per-frame damage.
