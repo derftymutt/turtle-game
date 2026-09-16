@@ -100,32 +100,10 @@ var control_suspended: bool = false
 var control_suspend_timer: float = 0.0
 
 # Alien Tech state
-var inertia_dampener_active: bool = false
-var inertia_dampener_timer: float = 0.0
-
-# Graviton Harness — nullifies carried UFO piece weight while active
-var graviton_harness_active: bool = false
-var graviton_harness_timer: float = 0.0
-
-var lateral_thrust_active: bool = false
-var lateral_thrust_timer: float = 0.0
-const LATERAL_THRUST_DURATION: float = 0.05
-const LATERAL_THRUST_FORCE: float = 600.0
-
-const TRANSPORTER_DISTANCE: float = 150.0
-const TRANSPORTER_INVINCIBLE_DURATION: float = 0.75
-const TRANSPORTER_WINDUP: float = 0.18
-var transporter_invincible: bool = false
-var transporter_invincible_timer: float = 0.0
-var _transporter_windup: bool = false
-var _transporter_canceled: bool = false
-
-# Quantum Mirror — teleports to a mirrored position, invincible until it
-# teleports back. Cold mirrors X only; hot mirrors X and Y.
-var quantum_mirror_active: bool = false
-var quantum_mirror_timer: float = 0.0
-var _quantum_mirror_origin: Vector2 = Vector2.ZERO
-var _quantum_mirror_ghost: Sprite2D = null
+# Extracted effects (see entities/player/alien_tech_effects/) for
+# dispatch-table techs — keyed by AlienTechRegistry id, one instance per
+# tech, created once in _ready() and kept for this node's lifetime.
+var _tech_effects: Dictionary = {}
 
 const CONTACT_IFRAME_DURATION: float = 0.75
 var _contact_iframes_active: bool = false
@@ -156,21 +134,6 @@ var _float_energy_sweep: Line2D = null
 var _float_energy_fg: Line2D = null
 var _sweep_phase: float = 0.0
 
-# Bumper Magnet
-const BUMPER_MAGNET_DURATION: float = 2.0
-const BUMPER_MAGNET_RADIUS: float = 30.0       # seek range beyond bumper surface
-const BUMPER_MAGNET_PULL_SPEED: float = 280.0  # approach speed while seeking
-const BUMPER_MAGNET_ORBIT_SPEED: float = 5.5   # radians/sec while orbiting
-const BUMPER_MAGNET_PLAYER_RADIUS: float = 7.0 # must match CircleShape2D radius
-
-var _bumper_magnet_active: bool = false
-var _bumper_magnet_timer: float = 0.0
-var _bumper_magnet_slot: int = -1
-var _bumper_magnet_attached: bool = false
-var _bumper_magnet_target: Node2D = null
-var _bumper_magnet_angle: float = 0.0
-var _bumper_magnet_attach_speed: float = 0.0
-
 # Flipper Velcro
 const FLIPPER_VELCRO_SLIDE_SPEED: float = 50.0
 const FLIPPER_VELCRO_PLAYER_OFFSET: float = 13.0  # capsule_radius(6) + player_radius(7)
@@ -185,52 +148,9 @@ var _flipper_velcro_target: Node2D = null   # always a FlipperBase at runtime
 var _flipper_velcro_t: float = 12.0         # px along arm_dir from pivot
 var _flipper_velcro_normal_side: float = 1.0  # which side of arm (+1 or -1)
 
-# Dermal Regenerator
-const DERMAL_REGEN_HEARTS: int = 2  # hearts restored by the Dermal Regenerator tech
-const DERMAL_REGEN_CHANNEL_DURATION: float = 1.0
-
-var _dermal_regen_active: bool = false
-var _dermal_regen_timer: float = 0.0
-var _dermal_regen_slot: int = -1
-var _dermal_regen_used: bool = false   # true after one successful heal per level
-
-# Deflector Shield
-const DEFLECTOR_SHIELD_DURATION: float = 5.0    # seconds active — tweak for feel
-const DEFLECTOR_SHIELD_RADIUS:   float = 35.0   # px repulsion radius — tweak for feel
-const DEFLECTOR_SHIELD_FORCE:    float = 1000.0 # repulsion force — tweak for feel
-
-var deflector_shield_active: bool = false
-var deflector_shield_timer:  float = 0.0
-var _deflector_area: Area2D = null
-var _deflector_visual: Line2D = null
-
-# Powerup Replicator
-var _using_replicator: bool = false  # guard to prevent recursive storage on replicator-use
-const REPLICATOR_LONG_PRESS: float = 0.5
-var _rpl_held_slot: int = -1
-var _rpl_press_timer: float = 0.0
-var _rpl_long_pressed: bool = false
-
-# Time Freeze
-var time_freeze_active: bool = false
-var _time_freeze_active_duration: float = 0.0  # set per-activation; doubled when hot
-
-# Magnetic Repulsion — keeps collectibles hovering off the floor/walls
-const MAGNETIC_REPULSION_HOVER: float = 14.0       # px kept clear of the boundary
-const MAGNETIC_REPULSION_HOVER_HOT: float = 30.0
-const MAGNETIC_REPULSION_FORCE: float = 900.0
-var magnetic_repulsion_active: bool = false
-var magnetic_repulsion_timer: float = 0.0
-
-# Hydro Funnel — opens hidden OceanCurrent nodes (group "hydro_funnel_currents")
-var hydro_funnel_active: bool = false
-var hydro_funnel_timer: float = 0.0
-
 # Thing Bringer
 const THING_BRINGER_RADIUS: float = 30.0
 const THING_BRINGER_PULL_SPEED: float = 220.0
-var time_freeze_timer: float = 0.0
-var _time_frozen_bodies: Array = []
 
 # ---------------------------------------------------------------------------
 # 8-DIRECTIONAL SPRITE SYSTEM
@@ -290,7 +210,6 @@ func _ready():
 
 	_setup_super_speed_area()
 	_setup_rest_particles()
-	_setup_deflector_area()
 	_setup_bubble_visual()
 	_setup_float_energy_bar()
 
@@ -300,6 +219,22 @@ func _ready():
 	# starts false on this fresh instance — clear any stale passive-bar
 	# override left behind by a previous instance so the HUD doesn't show a
 	# hot toggle-style tech as already active before it's actually been used.
+	_tech_effects[AlienTechRegistry.GRAVITON_HARNESS] = GravitonHarnessEffect.new()
+	_tech_effects[AlienTechRegistry.MAGNETIC_REPULSION] = MagneticRepulsionEffect.new()
+	_tech_effects[AlienTechRegistry.HYDRO_FUNNEL] = HydroFunnelEffect.new()
+	_tech_effects[AlienTechRegistry.INERTIA_DAMPENER] = InertiaDampenerEffect.new()
+	_tech_effects[AlienTechRegistry.LATERAL_THRUST] = LateralThrustEffect.new()
+	_tech_effects[AlienTechRegistry.TRANSPORTER] = TransporterEffect.new()
+	_tech_effects[AlienTechRegistry.QUANTUM_MIRROR] = QuantumMirrorEffect.new()
+	_tech_effects[AlienTechRegistry.SHOCKWAVE] = ShockwaveEffect.new()
+	_tech_effects[AlienTechRegistry.DERMAL_REGEN] = DermalRegenEffect.new()
+	_tech_effects[AlienTechRegistry.BUMPER_MAGNET] = BumperMagnetEffect.new()
+	_tech_effects[AlienTechRegistry.DEFLECTOR_SHIELD] = DeflectorShieldEffect.new()
+	_tech_effects[AlienTechRegistry.POWERUP_REPLICATOR] = PowerupReplicatorEffect.new()
+	_tech_effects[AlienTechRegistry.TIME_FREEZE] = TimeFreezeEffect.new()
+	for effect in _tech_effects.values():
+		(effect as AlienTechEffect).setup(self)
+
 	AlienTechManager.clear_all_passive_bars()
 	AlienTechManager.tech_activated.connect(_on_alien_tech_activated)
 	AlienTechManager.tech_slots_changed.connect(_on_alien_tech_slots_changed_player)
@@ -342,7 +277,7 @@ func _physics_process(delta):
 	# super speed system off for the duration of the attachment.
 	var current_speed = linear_velocity.length()
 	var was_super_speed = is_super_speed
-	if _bumper_magnet_attached or _flipper_velcro_latched:
+	if (_tech_effects[AlienTechRegistry.BUMPER_MAGNET] as BumperMagnetEffect).attached or _flipper_velcro_latched:
 		was_super_speed = false  # prevents cooldown from triggering on the way out
 		is_super_speed = false
 		is_super_speed_cooldown = false
@@ -384,46 +319,17 @@ func _physics_process(delta):
 		if rapid_fire_timer <= 0:
 			deactivate_rapid_fire()
 
-	# Hot: a manual on/off toggle (no auto-timeout) — see _activate_inertia_dampener().
-	if inertia_dampener_active and not AlienTechManager.is_tech_hot(AlienTechRegistry.INERTIA_DAMPENER):
-		inertia_dampener_timer -= delta
-		if inertia_dampener_timer <= 0.0:
-			inertia_dampener_active = false
+	_tech_effects[AlienTechRegistry.INERTIA_DAMPENER].physics_process(self, delta)
 
-	# Hot: always weightless, no timer needed — see _is_harness_weightless().
-	if graviton_harness_active and not AlienTechManager.is_tech_hot(AlienTechRegistry.GRAVITON_HARNESS):
-		graviton_harness_timer -= delta
-		if graviton_harness_timer <= 0.0:
-			graviton_harness_active = false
+	_tech_effects[AlienTechRegistry.GRAVITON_HARNESS].physics_process(self, delta)
 
-	# Hot: always active, no timer needed — see _is_magnetic_repulsion_active().
-	if magnetic_repulsion_active and not AlienTechManager.is_tech_hot(AlienTechRegistry.MAGNETIC_REPULSION):
-		magnetic_repulsion_timer -= delta
-		if magnetic_repulsion_timer <= 0.0:
-			magnetic_repulsion_active = false
+	_tech_effects[AlienTechRegistry.HYDRO_FUNNEL].physics_process(self, delta)
 
-	# Hot: a manual on/off toggle (no auto-timeout) — see _activate_hydro_funnel().
-	if hydro_funnel_active and not AlienTechManager.is_tech_hot(AlienTechRegistry.HYDRO_FUNNEL):
-		hydro_funnel_timer -= delta
-		if hydro_funnel_timer <= 0.0:
-			hydro_funnel_active = false
+	_tech_effects[AlienTechRegistry.QUANTUM_MIRROR].physics_process(self, delta)
 
-	# Same cold/hot timing either way — hot only changes which axes mirror,
-	# not the duration — so this always counts down while active.
-	if quantum_mirror_active:
-		quantum_mirror_timer -= delta
-		if quantum_mirror_timer <= 0.0:
-			_return_from_quantum_mirror()
+	_tech_effects[AlienTechRegistry.LATERAL_THRUST].physics_process(self, delta)
 
-	if lateral_thrust_active:
-		lateral_thrust_timer -= delta
-		if lateral_thrust_timer <= 0:
-			lateral_thrust_active = false
-
-	if transporter_invincible:
-		transporter_invincible_timer -= delta
-		if transporter_invincible_timer <= 0.0:
-			transporter_invincible = false
+	_tech_effects[AlienTechRegistry.TRANSPORTER].physics_process(self, delta)
 
 	if _bravado_iframe_active:
 		_bravado_iframe_timer -= delta
@@ -451,37 +357,18 @@ func _physics_process(delta):
 	if AlienTechManager.is_tech_active(AlienTechRegistry.THING_BRINGER):
 		_update_thing_bringer()
 
-	if _is_magnetic_repulsion_active():
-		_update_magnetic_repulsion()
+	_tech_effects[AlienTechRegistry.MAGNETIC_REPULSION].physics_process(self, delta)
 
-	if AlienTechManager.has_tech(AlienTechRegistry.HYDRO_FUNNEL):
-		_update_hydro_funnel_currents(hydro_funnel_active)
+	_tech_effects[AlienTechRegistry.BUMPER_MAGNET].physics_process(self, delta)
 
-	if _bumper_magnet_active:
-		_update_bumper_magnet(delta)
+	_tech_effects[AlienTechRegistry.DERMAL_REGEN].physics_process(self, delta)
 
-	if _dermal_regen_active:
-		_update_dermal_regen(delta)
+	_tech_effects[AlienTechRegistry.DEFLECTOR_SHIELD].physics_process(self, delta)
 
-	if deflector_shield_active:
-		deflector_shield_timer -= delta
-		var _ratio := deflector_shield_timer / DEFLECTOR_SHIELD_DURATION
-		AlienTechManager.set_passive_bar(AlienTechRegistry.DEFLECTOR_SHIELD, max(0.0, _ratio))
-		_repel_deflected_bodies(delta)
-		if deflector_shield_timer <= 0.0:
-			deflector_shield_active = false
-			AlienTechManager.clear_passive_bar(AlienTechRegistry.DEFLECTOR_SHIELD)
-			if _deflector_visual:
-				_deflector_visual.visible = false
-
-	if time_freeze_active:
-		time_freeze_timer -= delta
-		AlienTechManager.set_passive_bar(AlienTechRegistry.TIME_FREEZE, max(0.0, time_freeze_timer / _time_freeze_active_duration))
-		if time_freeze_timer <= 0.0:
-			_unfreeze_world_bodies()
+	_tech_effects[AlienTechRegistry.TIME_FREEZE].physics_process(self, delta)
 
 	# Ocean physics — suppressed while pinned to a bumper or flipper
-	if not _bumper_magnet_attached and not _flipper_velcro_latched:
+	if not (_tech_effects[AlienTechRegistry.BUMPER_MAGNET] as BumperMagnetEffect).attached and not _flipper_velcro_latched:
 		if ocean:
 			apply_ocean_effects(delta)
 		else:
@@ -509,7 +396,7 @@ func _physics_process(delta):
 			hud.refill_air(delta)
 
 		var at_surface: bool = depth <= 8  # wider than air threshold so idle surface float triggers fast recharge
-		hud.recover_energy(delta, (touching_walls.size() > 0 or at_surface) and not _bumper_magnet_attached)
+		hud.recover_energy(delta, (touching_walls.size() > 0 or at_surface) and not (_tech_effects[AlienTechRegistry.BUMPER_MAGNET] as BumperMagnetEffect).attached)
 
 	_update_rest_particles()
 
@@ -583,33 +470,16 @@ func _physics_process(delta):
 	for _slot_idx in [0, 1]:
 		var _action: String = "tech_slot_left" if _slot_idx == 0 else "tech_slot_right"
 		if _slot_idx == _rpl_slot:
-			# Replicator: tap = cycle selection, long-press = activate selected
-			if Input.is_action_just_pressed(_action):
-				_rpl_held_slot = _slot_idx
-				_rpl_press_timer = 0.0
-				_rpl_long_pressed = false
-			if _rpl_held_slot == _slot_idx:
-				if Input.is_action_pressed(_action):
-					_rpl_press_timer += delta
-					if not _rpl_long_pressed and _rpl_press_timer >= REPLICATOR_LONG_PRESS:
-						_rpl_long_pressed = true
-						_use_powerup_replicator()
-				if Input.is_action_just_released(_action):
-					if not _rpl_long_pressed:
-						AlienTechManager.cycle_replicator_selection()
-					_rpl_held_slot = -1
+			(_tech_effects[AlienTechRegistry.POWERUP_REPLICATOR] as PowerupReplicatorEffect).handle_input(self, _slot_idx, _action, delta)
 		else:
 			if _fv_slot != _slot_idx and Input.is_action_just_pressed(_action):
 				AlienTechManager.try_activate_slot(_slot_idx)
 
-	# Bumper magnet: release button → launch
-	if _bumper_magnet_active:
-		var magnet_action := "tech_slot_left" if _bumper_magnet_slot == 0 else "tech_slot_right"
-		if Input.is_action_just_released(magnet_action):
-			_launch_from_bumper()
+	var bumper_magnet := _tech_effects[AlienTechRegistry.BUMPER_MAGNET] as BumperMagnetEffect
+	bumper_magnet.check_release_launch(self)
 
 	# While attached the orbit function owns position/velocity — skip normal movement
-	if _bumper_magnet_attached:
+	if bumper_magnet.attached:
 		return
 
 	# Clamp velocity
@@ -632,30 +502,35 @@ func _process(delta: float):
 	if _bubble_flash_timer > 0.0:
 		_bubble_flash_timer -= delta
 	_update_sprite_modulate()
-	if deflector_shield_active and _deflector_visual:
-		var pulse := (sin(Time.get_ticks_msec() * 0.008) + 1.0) * 0.5
-		_deflector_visual.default_color = Color(0.3, 0.7, 1.0, 0.4 + pulse * 0.45)
+	(_tech_effects[AlienTechRegistry.DEFLECTOR_SHIELD] as DeflectorShieldEffect).update_visual_pulse()
 	if _bubble_visual and _bubble_visual.visible:
 		var pulse := (sin(Time.get_ticks_msec() * 0.005) + 1.0) * 0.5
 		_bubble_visual.default_color = Color(0.5, 0.9, 1.0, 0.35 + pulse * 0.4)
-	if _quantum_mirror_ghost and is_instance_valid(_quantum_mirror_ghost):
+	var mirror_ghost := (_tech_effects[AlienTechRegistry.QUANTUM_MIRROR] as QuantumMirrorEffect).ghost
+	if mirror_ghost and is_instance_valid(mirror_ghost):
 		var pulse := (sin(Time.get_ticks_msec() * 0.006) + 1.0) * 0.5
-		_quantum_mirror_ghost.modulate.a = lerpf(0.25, 0.45, pulse)
+		mirror_ghost.modulate.a = lerpf(0.25, 0.45, pulse)
 	_update_float_energy_bar(delta)
 
 func _update_sprite_modulate():
 	var sprite = $AnimatedSprite2D
 	if not sprite or not is_instance_valid(sprite):
 		return
+	var transporter := _tech_effects[AlienTechRegistry.TRANSPORTER] as TransporterEffect
+	var quantum_mirror := _tech_effects[AlienTechRegistry.QUANTUM_MIRROR] as QuantumMirrorEffect
+	var dermal_regen := _tech_effects[AlienTechRegistry.DERMAL_REGEN] as DermalRegenEffect
+	var bumper_magnet := _tech_effects[AlienTechRegistry.BUMPER_MAGNET] as BumperMagnetEffect
+	var deflector_shield := _tech_effects[AlienTechRegistry.DEFLECTOR_SHIELD] as DeflectorShieldEffect
+	var time_freeze := _tech_effects[AlienTechRegistry.TIME_FREEZE] as TimeFreezeEffect
 	if _health_restore_flash_timer > 0.0:
 		sprite.modulate = Color.GREEN
-	elif _transporter_windup:
+	elif transporter.windup:
 		var flash = (sin(Time.get_ticks_msec() * 0.25) + 1.0) * 0.5
 		sprite.modulate = Color(0.6, 0.3, 1.0).lerp(Color.WHITE, flash * 0.6)
-	elif transporter_invincible:
+	elif transporter.invincible:
 		var flash = (sin(Time.get_ticks_msec() * 0.06) + 1.0) * 0.5
 		sprite.modulate = Color(0.6, 0.3, 1.0).lerp(Color.WHITE, flash)
-	elif quantum_mirror_active:
+	elif quantum_mirror.active:
 		var flash = (sin(Time.get_ticks_msec() * 0.05) + 1.0) * 0.5
 		sprite.modulate = Color(0.85, 0.3, 0.95).lerp(Color.WHITE, flash * 0.7)
 	elif _bravado_iframe_active:
@@ -663,12 +538,12 @@ func _update_sprite_modulate():
 		sprite.modulate = Color(1.0, 0.4, 0.2).lerp(Color.WHITE, flash)
 	elif _bubble_flash_timer > 0.0:
 		sprite.modulate = Color(0.3, 0.9, 1.0)
-	elif _dermal_regen_active:
-		var progress := _dermal_regen_timer / DERMAL_REGEN_CHANNEL_DURATION
+	elif dermal_regen.active:
+		var progress := dermal_regen.progress()
 		var flash := (sin(Time.get_ticks_msec() * (0.06 + progress * 0.18)) + 1.0) * 0.5
 		sprite.modulate = Color(0.1, 0.9, 0.3).lerp(Color(0.7, 1.0, 0.7), flash)
-	elif _bumper_magnet_active:
-		if _bumper_magnet_attached:
+	elif bumper_magnet.active:
+		if bumper_magnet.attached:
 			# Slow amber pulse while orbiting
 			var flash := (sin(Time.get_ticks_msec() * 0.04) + 1.0) * 0.5
 			sprite.modulate = Color(1.0, 0.6, 0.0).lerp(Color(1.0, 1.0, 0.2), flash)
@@ -679,10 +554,10 @@ func _update_sprite_modulate():
 	elif _flipper_velcro_latched:
 		var flash := (sin(Time.get_ticks_msec() * 0.06) + 1.0) * 0.5
 		sprite.modulate = Color(0.2, 1.0, 0.6).lerp(Color(0.6, 1.0, 0.85), flash)
-	elif deflector_shield_active:
+	elif deflector_shield.active:
 		var flash := (sin(Time.get_ticks_msec() * 0.04) + 1.0) * 0.5
 		sprite.modulate = Color(0.3, 0.7, 1.0).lerp(Color.WHITE, flash * 0.5)
-	elif time_freeze_active:
+	elif time_freeze.active:
 		var flash := (sin(Time.get_ticks_msec() * 0.05) + 1.0) * 0.5
 		sprite.modulate = Color(0.5, 0.85, 1.0).lerp(Color.WHITE, flash * 0.4)
 	elif shield_active or energy_freeze_active or rapid_fire_active:
@@ -707,21 +582,22 @@ func _update_sprite_modulate():
 func apply_ocean_effects(_delta: float):
 	"""Apply depth-based buoyancy and water drag"""
 	# Lateral Thrust: suppress all ocean forces during dash window
-	if lateral_thrust_active:
+	if (_tech_effects[AlienTechRegistry.LATERAL_THRUST] as LateralThrustEffect).active:
 		return
 
 	var depth = ocean.get_depth(global_position)
+	var dampener := _tech_effects[AlienTechRegistry.INERTIA_DAMPENER] as InertiaDampenerEffect
 
 	# Inertia Dampener in air: skip gravity calculation entirely and treat air
 	# as shallow ocean so the turtle can swim freely above the surface.
-	if inertia_dampener_active and depth <= 0:
+	if dampener.active and depth <= 0:
 		apply_central_force(Vector2(0, -ocean.shallow_buoyancy * mass))
 		linear_velocity *= ocean.water_drag
 		linear_damp = 1.0
 		return
 
 	# Inertia Dampener underwater: clamp depth to shallow zone so deep buoyancy never fires
-	if inertia_dampener_active:
+	if dampener.active:
 		depth = min(depth, ocean.shallow_depth - 1.0)
 
 	var buoyancy_force = ocean.calculate_buoyancy_force(depth, mass)
@@ -751,7 +627,7 @@ func apply_thrust(direction: Vector2):
 	var kick_direction = -direction if GameSettings.thrust_inverted else direction
 
 	# No upward thrust in air (dampener converts air to shallow ocean, so allow all directions)
-	if ocean and ocean.get_depth(global_position) <= 0 and kick_direction.y < 0 and not inertia_dampener_active:
+	if ocean and ocean.get_depth(global_position) <= 0 and kick_direction.y < 0 and not (_tech_effects[AlienTechRegistry.INERTIA_DAMPENER] as InertiaDampenerEffect).active:
 		return
 
 	if hud and not energy_freeze_active and not hud.try_thrust():
@@ -768,7 +644,7 @@ func apply_thrust(direction: Vector2):
 
 	# Thrust strength
 	var thrust_strength: float
-	if GameManager.is_carrying_piece and not _is_harness_weightless():
+	if GameManager.is_carrying_piece and not (_tech_effects[AlienTechRegistry.GRAVITON_HARNESS] as GravitonHarnessEffect).is_weightless(self):
 		thrust_strength = horizontal_thrust_with_piece
 		if kick_direction.y < 0:
 			thrust_strength = upward_thrust_with_piece
@@ -886,7 +762,7 @@ func take_damage(amount: float, use_iframes: bool = false, source: String = ""):
 		return
 	if use_iframes and _contact_iframes_active:
 		return
-	if is_super_speed or is_super_speed_cooldown or shield_active or transporter_invincible or deflector_shield_active or _bravado_iframe_active or quantum_mirror_active:
+	if is_super_speed or is_super_speed_cooldown or shield_active or (_tech_effects[AlienTechRegistry.TRANSPORTER] as TransporterEffect).invincible or (_tech_effects[AlienTechRegistry.DEFLECTOR_SHIELD] as DeflectorShieldEffect).active or _bravado_iframe_active or (_tech_effects[AlienTechRegistry.QUANTUM_MIRROR] as QuantumMirrorEffect).active:
 		return
 	# Shared grace window after any heart loss — this is what tames rapid /
 	# continuous sources with no i-frames of their own (drowning, shock, volleys).
@@ -906,12 +782,9 @@ func take_damage(amount: float, use_iframes: bool = false, source: String = ""):
 		return  # Shield absorbed — transporter windup NOT canceled
 
 	# Real damage lands — cancel active techs that need aborting
-	if _transporter_windup:
-		_transporter_canceled = true
-	if _bumper_magnet_active:
-		_cancel_bumper_magnet()
-	if _dermal_regen_active:
-		_cancel_dermal_regen()
+	_tech_effects[AlienTechRegistry.TRANSPORTER].cancel_on_damage(self)
+	_tech_effects[AlienTechRegistry.DERMAL_REGEN].cancel_on_damage(self)
+	_tech_effects[AlienTechRegistry.BUMPER_MAGNET].cancel_on_damage(self)
 	if _flipper_velcro_latched:
 		_cancel_flipper_velcro()
 
@@ -1197,7 +1070,7 @@ func _create_super_speed_burst():
 
 func apply_powerup(powerup_type: int):
 	print("APPLYING POWERUP TYPE: ", powerup_type)
-	if AlienTechManager.has_tech(AlienTechRegistry.POWERUP_REPLICATOR) and not _using_replicator:
+	if AlienTechManager.has_tech(AlienTechRegistry.POWERUP_REPLICATOR) and not (_tech_effects[AlienTechRegistry.POWERUP_REPLICATOR] as PowerupReplicatorEffect).using_replicator:
 		AlienTechManager.store_replicated_powerup(powerup_type)
 	match powerup_type:
 		0:  activate_shield()
@@ -1273,152 +1146,20 @@ func deactivate_rapid_fire():
 # ---------------------------------------------------------------------------
 
 func _on_alien_tech_activated(slot_index: int, tech_id: String):
-	match tech_id:
-		AlienTechRegistry.INERTIA_DAMPENER:
-			_activate_inertia_dampener()
-		AlienTechRegistry.LATERAL_THRUST:
-			_activate_lateral_thrust()
-		AlienTechRegistry.TRANSPORTER:
-			_activate_transporter()
-		AlienTechRegistry.BUMPER_MAGNET:
-			_start_bumper_magnet(slot_index)
-		AlienTechRegistry.DERMAL_REGEN:
-			_start_dermal_regen(slot_index)
-		AlienTechRegistry.DEFLECTOR_SHIELD:
-			_activate_deflector_shield()
-		AlienTechRegistry.POWERUP_REPLICATOR:
-			_use_powerup_replicator()
-		AlienTechRegistry.TIME_FREEZE:
-			_activate_time_freeze()
-		AlienTechRegistry.SHOCKWAVE:
-			_activate_shockwave()
-		AlienTechRegistry.GRAVITON_HARNESS:
-			_activate_graviton_harness()
-		AlienTechRegistry.MAGNETIC_REPULSION:
-			_activate_magnetic_repulsion()
-		AlienTechRegistry.HYDRO_FUNNEL:
-			_activate_hydro_funnel()
-		AlienTechRegistry.QUANTUM_MIRROR:
-			_activate_quantum_mirror()
+	if _tech_effects.has(tech_id):
+		_tech_effects[tech_id].activate(self, slot_index)
 
-func _activate_inertia_dampener():
-	if AlienTechManager.is_tech_hot(AlienTechRegistry.INERTIA_DAMPENER):
-		# Hot: click on, click off — no timer, no cooldown (see _get_effective_cooldown).
-		inertia_dampener_active = not inertia_dampener_active
-		if inertia_dampener_active:
-			AlienTechManager.set_passive_bar(AlienTechRegistry.INERTIA_DAMPENER, 1.0)
-		else:
-			# Erase the override entirely rather than setting it to 0.0 — a
-			# present-but-zero entry still reads as get_bar_phase()'s
-			# "active" (see _passive_bar_ratios.has(tech_id) there), which
-			# kept the label blinking forever after the first toggle-on.
-			# Clearing it falls through to the hot "ready" branch instead.
-			AlienTechManager.clear_passive_bar(AlienTechRegistry.INERTIA_DAMPENER)
-		return
-	inertia_dampener_active = true
-	inertia_dampener_timer = AlienTechManager.INERTIA_DAMPENER_ACTIVE_DURATION
-
-func _activate_graviton_harness():
-	# Hot is always weightless via _is_harness_weightless() regardless of this
-	# timer, so a press while hot (no cooldown gating it) is a harmless no-op.
-	graviton_harness_active = true
-	graviton_harness_timer = AlienTechManager.GRAVITON_HARNESS_ACTIVE_DURATION
-
-## True whenever a carried UFO piece's weight should be ignored: the cold
-## timed activation is running, or the tech is hot (always active).
-func _is_harness_weightless() -> bool:
-	return graviton_harness_active or AlienTechManager.is_tech_hot(AlienTechRegistry.GRAVITON_HARNESS)
-
-func _activate_magnetic_repulsion():
-	# Hot is always active via _is_magnetic_repulsion_active() regardless of
-	# this timer, so a press while hot (no cooldown gating it) is a harmless no-op.
-	magnetic_repulsion_active = true
-	magnetic_repulsion_timer = AlienTechManager.MAGNETIC_REPULSION_ACTIVE_DURATION
-
-## True whenever the floor/wall repulsion should be running: the cold timed
-## activation is running, or the tech is hot (always active).
-func _is_magnetic_repulsion_active() -> bool:
-	return magnetic_repulsion_active or AlienTechManager.is_tech_hot(AlienTechRegistry.MAGNETIC_REPULSION)
-
-## Public wrapper around _is_magnetic_repulsion_active() for other entities
-## (e.g. BossSubmarine) that want to react to the tech without duplicating
-## its active-flag/timer/hot bookkeeping, which all lives on this instance.
+## Public wrapper for other entities (e.g. BossSubmarine) that want to react
+## to the tech without duplicating its active-flag/timer/hot bookkeeping,
+## which all lives on the effect object.
 func is_magnetic_repulsion_in_effect() -> bool:
-	return _is_magnetic_repulsion_active()
+	return (_tech_effects[AlienTechRegistry.MAGNETIC_REPULSION] as MagneticRepulsionEffect).is_active_effect()
 
-func _activate_hydro_funnel():
-	if AlienTechManager.is_tech_hot(AlienTechRegistry.HYDRO_FUNNEL):
-		# Hot: click on, click off — no timer, no cooldown (see _effective_cooldown_max).
-		hydro_funnel_active = not hydro_funnel_active
-		if hydro_funnel_active:
-			AlienTechManager.set_passive_bar(AlienTechRegistry.HYDRO_FUNNEL, 1.0)
-		else:
-			# Erase rather than zero the override — see the matching note in
-			# _activate_inertia_dampener() for why that distinction matters.
-			AlienTechManager.clear_passive_bar(AlienTechRegistry.HYDRO_FUNNEL)
-		return
-	hydro_funnel_active = true
-	hydro_funnel_timer = AlienTechManager.HYDRO_FUNNEL_ACTIVE_DURATION
-
-## Turns every OceanCurrent in the "hydro_funnel_currents" group on or off to
-## match. Each current independently decides whether it's actually allowed to
-## turn on right now (e.g. a hydro_funnel_hot_only one refuses unless Hydro
-## Funnel is HOT) — see OceanCurrent.turn_on()/turn_off() — so this just
-## mirrors the tech's own on/off state uniformly across the whole group.
-func _update_hydro_funnel_currents(should_be_active: bool) -> void:
-	for current in get_tree().get_nodes_in_group("hydro_funnel_currents"):
-		if not is_instance_valid(current):
-			continue
-		if should_be_active:
-			current.turn_on()
-		else:
-			current.turn_off()
-
-func _activate_quantum_mirror():
-	_quantum_mirror_origin = global_position
-	_spawn_quantum_mirror_ghost()
-	var hot := AlienTechManager.is_tech_hot(AlienTechRegistry.QUANTUM_MIRROR)
-	global_position = _clamp_to_boundaries(_mirrored_position(global_position, hot))
-	linear_velocity *= 0.3
-	$SfxTeleport.play()
-	quantum_mirror_active = true
-	quantum_mirror_timer = AlienTechManager.QUANTUM_MIRROR_ACTIVE_DURATION
-	_play_teleport_pop()
-
-## Teleports back to where quantum_mirror was activated from and ends
-## invincibility — called when quantum_mirror_timer runs out (see
-## _physics_process). Not reachable while quantum_mirror_active is keeping
-## take_damage() from landing, so this is the only way the trip ends.
-func _return_from_quantum_mirror() -> void:
-	global_position = _clamp_to_boundaries(_quantum_mirror_origin)
-	linear_velocity *= 0.3
-	$SfxTeleport.play()
-	quantum_mirror_active = false
-	_clear_quantum_mirror_ghost()
-	_play_teleport_pop()
-
-## A translucent duplicate of the current sprite frame left behind at
-## _quantum_mirror_origin, so the player can see where they'll return to.
-## Cleared in _return_from_quantum_mirror(); its own alpha pulses gently in
-## _process() so it clearly reads as an intentional marker, not a glitch.
-func _spawn_quantum_mirror_ghost() -> void:
-	_clear_quantum_mirror_ghost()  # defensive — shouldn't already exist, cooldown gates re-activation
-	var sprite = $AnimatedSprite2D
-	if not sprite or not sprite.sprite_frames:
-		return
-	var ghost := Sprite2D.new()
-	ghost.texture = sprite.sprite_frames.get_frame_texture(sprite.animation, sprite.frame)
-	ghost.global_position = _quantum_mirror_origin
-	ghost.global_rotation = sprite.global_rotation  # always 0 — sprite stays axis-aligned
-	ghost.modulate = Color(0.85, 0.3, 0.95, 0.35)
-	ghost.z_index = 9  # under the live turtle (15) and motion trails (10)
-	get_parent().add_child(ghost)
-	_quantum_mirror_ghost = ghost
-
-func _clear_quantum_mirror_ghost() -> void:
-	if _quantum_mirror_ghost and is_instance_valid(_quantum_mirror_ghost):
-		_quantum_mirror_ghost.queue_free()
-	_quantum_mirror_ghost = null
+## Public wrapper for CircularBumper, which needs to know whether this
+## player is currently magnetically attached to it specifically, to
+## suppress its normal hit response while the player orbits it.
+func is_magnet_attached_to(bumper) -> bool:
+	return (_tech_effects[AlienTechRegistry.BUMPER_MAGNET] as BumperMagnetEffect).is_attached_to(bumper)
 
 ## Reflects `pos` across the play area's horizontal center (always) and,
 ## when mirror_y is true (hot Quantum Mirror), its vertical center too —
@@ -1438,76 +1179,6 @@ func _mirrored_position(pos: Vector2, mirror_y: bool) -> Vector2:
 ## own inline copy of this predating Quantum Mirror — left alone rather than
 ## refactored, to avoid touching its already-working code for this change.
 func _play_teleport_pop() -> void:
-	var sprite = $AnimatedSprite2D
-	if sprite:
-		var tween = create_tween()
-		tween.tween_property(sprite, "scale", Vector2(1.35, 1.35), 0.07)
-		tween.tween_property(sprite, "scale", Vector2.ONE, 0.12)
-
-func _activate_lateral_thrust():
-	lateral_thrust_active = true
-	lateral_thrust_timer = LATERAL_THRUST_DURATION
-
-	# Determine left or right purely from horizontal input, then facing, then velocity.
-	var h_input := Input.get_axis("move_left", "move_right")
-	var thrust_sign: float
-
-	if abs(h_input) > 0.1:
-		thrust_sign = sign(h_input)
-		if GameSettings.thrust_inverted:
-			thrust_sign = -thrust_sign
-	else:
-		# Derive from facing direction suffix ("e"/"ne"/"se" → right, rest → left)
-		var facing_vec = _direction_suffix_to_vector(facing_direction)
-		if facing_vec.x != 0.0:
-			thrust_sign = sign(facing_vec.x)
-		elif linear_velocity.x != 0.0:
-			thrust_sign = sign(linear_velocity.x)
-		else:
-			thrust_sign = 1.0  # default right if no signal
-
-	linear_velocity = Vector2.ZERO
-	apply_central_impulse(Vector2(thrust_sign * LATERAL_THRUST_FORCE, 0.0))
-	_flash(Color.WHITE, 0.2)
-
-func _activate_transporter():
-	# Direction priority: active input > current velocity > facing direction
-	var movement_input = Vector2(
-		Input.get_axis("move_left", "move_right"),
-		Input.get_axis("move_up", "move_down")
-	)
-	var dir: Vector2
-	if movement_input.length() > 0.1:
-		dir = movement_input.normalized()
-		if GameSettings.thrust_inverted:
-			dir = -dir
-	elif linear_velocity.length() > 30.0:
-		dir = linear_velocity.normalized()
-	else:
-		dir = _direction_suffix_to_vector(facing_direction)
-
-	# Windup: brief visual telegraph — player is vulnerable during this window
-	_transporter_windup = true
-	_transporter_canceled = false
-	await get_tree().create_timer(TRANSPORTER_WINDUP).timeout
-	if not is_inside_tree():
-		return
-	_transporter_windup = false
-
-	if _transporter_canceled:
-		_transporter_canceled = false
-		return
-
-	# Teleport: ignore all regular geometry, clamp to world boundaries.
-	# If there's no room (already at the edge), the clamp lands us at the wall — player's problem.
-	var raw_target = global_position + dir * TRANSPORTER_DISTANCE
-	global_position = _clamp_to_boundaries(raw_target)
-	$SfxTeleport.play()
-	linear_velocity *= 0.3
-	transporter_invincible = true
-	transporter_invincible_timer = TRANSPORTER_INVINCIBLE_DURATION
-
-	# Scale pop on arrival
 	var sprite = $AnimatedSprite2D
 	if sprite:
 		var tween = create_tween()
@@ -1569,8 +1240,6 @@ func _clamp_to_boundaries(target_pos: Vector2) -> Vector2:
 	)
 
 func _on_alien_tech_slots_changed_player(_slot_a: Dictionary, _slot_b: Dictionary):
-	_rpl_held_slot = -1
-	_rpl_long_pressed = false
 	if AlienTechManager.is_tech_active(AlienTechRegistry.BUBBLE_SHIELD):
 		if bubble_shield_hp == 0.0 and bubble_shield_regen_timer <= 0.0:
 			bubble_shield_hp = 1.0
@@ -1586,13 +1255,8 @@ func _on_alien_tech_slots_changed_player(_slot_a: Dictionary, _slot_b: Dictionar
 		if _bubble_visual:
 			_bubble_visual.visible = false
 
-	# Magnetic Repulsion's active window is a plain countdown timer (see
-	# _physics_process) that has no idea the tech was unequipped mid-effect —
-	# stop it here so a swapped-out slot doesn't keep hovering nearby
-	# collectibles/UFO parts until that leftover timer happens to run out.
-	if not AlienTechManager.has_tech(AlienTechRegistry.MAGNETIC_REPULSION):
-		magnetic_repulsion_active = false
-		magnetic_repulsion_timer = 0.0
+	for effect in _tech_effects.values():
+		(effect as AlienTechEffect).on_slots_changed(self)
 
 # ---------------------------------------------------------------------------
 # BUBBLE SHIELD VISUAL
@@ -1692,255 +1356,6 @@ func _update_float_energy_bar(delta: float) -> void:
 	else:
 		_sweep_phase = 0.0
 
-# ---------------------------------------------------------------------------
-# DEFLECTOR SHIELD
-# ---------------------------------------------------------------------------
-
-func _setup_deflector_area() -> void:
-	_deflector_area = Area2D.new()
-	_deflector_area.name = "DeflectorArea"
-	_deflector_area.collision_layer = 0
-	_deflector_area.collision_mask = 4 | 8 | 64  # Layer 3 (enemies) + Layer 4 (player bullets) + Layer 7 (enemy bullets)
-	_deflector_area.monitoring = true
-	_deflector_area.monitorable = false
-
-	var _col := CollisionShape2D.new()
-	var _circle := CircleShape2D.new()
-	_circle.radius = DEFLECTOR_SHIELD_RADIUS
-	_col.shape = _circle
-	_deflector_area.add_child(_col)
-	add_child(_deflector_area)
-
-	_deflector_area.body_entered.connect(_on_deflector_body_entered)
-
-	# Visual ring — a closed Line2D circle
-	_deflector_visual = Line2D.new()
-	_deflector_visual.name = "DeflectorVisual"
-	var _pts: PackedVector2Array = []
-	var _segs := 36
-	for i in range(_segs + 1):
-		var a := i * TAU / _segs
-		_pts.append(Vector2(cos(a), sin(a)) * DEFLECTOR_SHIELD_RADIUS)
-	_deflector_visual.points = _pts
-	_deflector_visual.default_color = Color(0.3, 0.7, 1.0, 0.7)
-	_deflector_visual.width = 1.5
-	_deflector_visual.z_as_relative = false
-	_deflector_visual.z_index = 12
-	_deflector_visual.visible = false
-	add_child(_deflector_visual)
-
-func _activate_deflector_shield() -> void:
-	var hot := AlienTechManager.is_tech_hot(AlienTechRegistry.DEFLECTOR_SHIELD)
-	_resize_deflector_shield(DEFLECTOR_SHIELD_RADIUS * (2.0 if hot else 1.0))
-	deflector_shield_active = true
-	deflector_shield_timer = DEFLECTOR_SHIELD_DURATION
-	if _deflector_visual:
-		_deflector_visual.visible = true
-
-## Rebuilds the deflector's collision shape and visual ring at the given radius.
-## Called on every activation (not just setup) so hot's doubled radius applies
-## even though the Area2D was created once at spawn.
-func _resize_deflector_shield(radius: float) -> void:
-	if _deflector_area:
-		var col := _deflector_area.get_child(0) as CollisionShape2D
-		if col and col.shape is CircleShape2D:
-			(col.shape as CircleShape2D).radius = radius
-	if _deflector_visual:
-		var pts: PackedVector2Array = []
-		var segs := 36
-		for i in range(segs + 1):
-			var a := i * TAU / segs
-			pts.append(Vector2(cos(a), sin(a)) * radius)
-		_deflector_visual.points = pts
-
-func _on_deflector_body_entered(body: Node2D) -> void:
-	if not deflector_shield_active:
-		return
-	if body == self or body.is_in_group("player"):
-		return
-	if body.is_in_group("submarine_boss"):
-		return
-	var dir := (body.global_position - global_position)
-	if dir == Vector2.ZERO:
-		dir = Vector2.RIGHT
-	else:
-		dir = dir.normalized()
-	if body is RigidBody2D:
-		(body as RigidBody2D).apply_central_impulse(dir * 500.0)
-	elif body is CharacterBody2D:
-		var cb := body as CharacterBody2D
-		cb.velocity = dir * max(cb.velocity.length(), 250.0)
-	elif body is AnimatableBody2D:
-		# Immediate positional kick on entry — no physics forces on AnimatableBody2D
-		body.global_position += dir * 12.0
-
-func _repel_deflected_bodies(delta: float) -> void:
-	if not _deflector_area:
-		return
-	for body in _deflector_area.get_overlapping_bodies():
-		if body == self or body.is_in_group("player"):
-			continue
-		if body.is_in_group("submarine_boss"):
-			continue
-		var dir := (body.global_position - global_position)
-		if dir == Vector2.ZERO:
-			dir = Vector2.RIGHT
-		else:
-			dir = dir.normalized()
-		if body is RigidBody2D:
-			(body as RigidBody2D).apply_central_force(dir * DEFLECTOR_SHIELD_FORCE)
-		elif body is CharacterBody2D:
-			var cb := body as CharacterBody2D
-			cb.velocity = dir * max(cb.velocity.length(), DEFLECTOR_SHIELD_FORCE * 0.4)
-		elif body is AnimatableBody2D:
-			# AnimatableBody2D (e.g. Crocodile) has no physics forces — push via position
-			body.global_position += dir * DEFLECTOR_SHIELD_FORCE * 0.3 * delta
-
-# ---------------------------------------------------------------------------
-# POWERUP REPLICATOR
-# ---------------------------------------------------------------------------
-
-func _use_powerup_replicator() -> void:
-	var stored := AlienTechManager.consume_replicated_powerup()
-	if stored >= 0:
-		_using_replicator = true
-		apply_powerup(stored)
-		_using_replicator = false
-
-# ---------------------------------------------------------------------------
-# TIME FREEZE
-# ---------------------------------------------------------------------------
-
-func _activate_time_freeze() -> void:
-	time_freeze_active = true
-	AlienTechManager.time_freeze_active = true
-	var hot := AlienTechManager.is_tech_hot(AlienTechRegistry.TIME_FREEZE)
-	_time_freeze_active_duration = AlienTechManager.TIME_FREEZE_ACTIVE_DURATION * (2.0 if hot else 1.0)
-	time_freeze_timer = _time_freeze_active_duration
-	_freeze_world_bodies()
-	AlienTechManager.set_passive_bar(AlienTechRegistry.TIME_FREEZE, 1.0)
-	_flash(Color(0.5, 0.9, 1.0), 0.3)
-
-func _freeze_world_bodies() -> void:
-	_time_frozen_bodies.clear()
-	var groups := ["enemies", "bullets", "plane_projectiles", "enemy_projectiles",
-				   "trash_clusters", "trash_cluster_pieces", "air_bubbles"]
-	for group in groups:
-		for node in get_tree().get_nodes_in_group(group):
-			if not is_instance_valid(node) or node.is_queued_for_deletion():
-				continue
-			if node is RigidBody2D:
-				var rb := node as RigidBody2D
-				_time_frozen_bodies.append({
-					"body":       rb,
-					"lin_vel":    rb.linear_velocity,
-					"ang_vel":    rb.angular_velocity,
-					"was_frozen": rb.freeze,
-					"type":       "rigid",
-				})
-				rb.freeze = true
-				rb.set_physics_process(false)
-				rb.set_process(false)
-			elif node is AnimatableBody2D:
-				_time_frozen_bodies.append({
-					"body": node,
-					"type": "animatable",
-				})
-				node.set_physics_process(false)
-				node.set_process(false)
-	# Pause all spawners FIRST. process_mode=DISABLED propagates to children,
-	# which would include trash items — we handle that below.
-	var spawner_groups := ["spawners", "trash_spawners"]
-	for group in spawner_groups:
-		for node in get_tree().get_nodes_in_group(group):
-			if not is_instance_valid(node) or node.is_queued_for_deletion():
-				continue
-			_time_frozen_bodies.append({"body": node, "type": "spawner", "process_mode": node.process_mode})
-			node.process_mode = Node.PROCESS_MODE_DISABLED
-	# Trash items: their parent spawner is now DISABLED, which would remove them
-	# from the physics simulation via inheritance. Override with PROCESS_MODE_ALWAYS
-	# so their physics body stays live and bullets can still hit them.
-	# is_time_frozen flag zeroes velocity each frame so they appear frozen.
-	# Spawners are appended before trash items so unfreeze restores spawners first,
-	# letting INHERIT correctly flow back when trash items are restored.
-	for node in get_tree().get_nodes_in_group("trash_items"):
-		if not is_instance_valid(node) or node.is_queued_for_deletion():
-			continue
-		if node is TrashItem:
-			var trash := node as TrashItem
-			_time_frozen_bodies.append({
-				"body":         trash,
-				"lin_vel":      trash.linear_velocity,
-				"ang_vel":      trash.angular_velocity,
-				"process_mode": trash.process_mode,
-				"type":         "trash_frozen",
-			})
-			trash.linear_velocity = Vector2.ZERO
-			trash.angular_velocity = 0.0
-			trash.is_time_frozen = true
-			trash.process_mode = Node.PROCESS_MODE_ALWAYS
-	# Powerups: reward powerups are children of the trash sequence spawner too
-	# (spawn_powerup() adds them under the same node trash items live under),
-	# so they have the exact same disabled-parent problem — handled the same way.
-	for node in get_tree().get_nodes_in_group("powerups"):
-		if not is_instance_valid(node) or node.is_queued_for_deletion():
-			continue
-		if node is RigidBody2D:
-			var pu := node as RigidBody2D
-			_time_frozen_bodies.append({
-				"body":         pu,
-				"lin_vel":      pu.linear_velocity,
-				"ang_vel":      pu.angular_velocity,
-				"was_frozen":   pu.freeze,
-				"process_mode": pu.process_mode,
-				"type":         "powerup_frozen",
-			})
-			pu.freeze = true
-			pu.linear_velocity = Vector2.ZERO
-			pu.angular_velocity = 0.0
-			pu.set_physics_process(false)
-			pu.set_process(false)
-			pu.process_mode = Node.PROCESS_MODE_ALWAYS
-
-func _unfreeze_world_bodies() -> void:
-	for entry in _time_frozen_bodies:
-		var body = entry["body"]
-		if not is_instance_valid(body) or body.is_queued_for_deletion():
-			continue
-		match entry["type"]:
-			"rigid":
-				var rb := body as RigidBody2D
-				rb.freeze = entry["was_frozen"]
-				if not entry["was_frozen"]:
-					rb.linear_velocity = entry["lin_vel"]
-					rb.angular_velocity = entry["ang_vel"]
-				rb.set_physics_process(true)
-				rb.set_process(true)
-			"trash_frozen":
-				var trash := body as TrashItem
-				trash.is_time_frozen = false
-				trash.process_mode = entry["process_mode"]
-				trash.linear_velocity = entry["lin_vel"]
-				trash.angular_velocity = entry["ang_vel"]
-			"animatable":
-				body.set_physics_process(true)
-				body.set_process(true)
-			"spawner":
-				body.process_mode = entry["process_mode"]
-			"powerup_frozen":
-				var pu := body as RigidBody2D
-				pu.process_mode = entry["process_mode"]
-				pu.freeze = entry["was_frozen"]
-				if not entry["was_frozen"]:
-					pu.linear_velocity = entry["lin_vel"]
-					pu.angular_velocity = entry["ang_vel"]
-				pu.set_physics_process(true)
-				pu.set_process(true)
-	_time_frozen_bodies.clear()
-	time_freeze_active = false
-	AlienTechManager.time_freeze_active = false
-	AlienTechManager.clear_passive_bar(AlienTechRegistry.TIME_FREEZE)
-
 func _direction_suffix_to_vector(suffix: String) -> Vector2:
 	match suffix:
 		"e":  return Vector2.RIGHT
@@ -1962,150 +1377,6 @@ func suspend_control(duration: float):
 	control_suspended = true
 	control_suspend_timer = duration
 	print("Player: Control suspended for ", duration, "s!")
-
-# ---------------------------------------------------------------------------
-# BUMPER MAGNET
-# ---------------------------------------------------------------------------
-
-func _start_bumper_magnet(slot: int) -> void:
-	_bumper_magnet_active = true
-	_bumper_magnet_timer = BUMPER_MAGNET_DURATION
-	_bumper_magnet_slot = slot
-	_bumper_magnet_attached = false
-	_bumper_magnet_target = null
-	_bumper_magnet_attach_speed = linear_velocity.length()
-
-func _update_bumper_magnet(delta: float) -> void:
-	_bumper_magnet_timer -= delta
-	AlienTechManager.set_passive_bar(
-		AlienTechRegistry.BUMPER_MAGNET,
-		_bumper_magnet_timer / BUMPER_MAGNET_DURATION
-	)
-	if _bumper_magnet_timer <= 0.0:
-		_launch_from_bumper()
-		return
-	if _bumper_magnet_attached:
-		_update_magnet_orbit(delta)
-	else:
-		_update_magnet_seek()
-
-func _update_magnet_seek() -> void:
-	var hot := AlienTechManager.is_tech_hot(AlienTechRegistry.BUMPER_MAGNET)
-	var seek_radius := BUMPER_MAGNET_RADIUS * (3.0 if hot else 1.0)
-	# Hot's pull speed is deliberately pushed past super_speed_threshold — the
-	# existing super-speed system (is_super_speed check + SuperSpeedArea) then
-	# damages any enemy the player collides with while seeking, for free.
-	var pull_speed := BUMPER_MAGNET_PULL_SPEED * (2.0 if hot else 1.0)
-
-	var nearest: CircularBumper = null
-	var nearest_dist: float = INF
-	for node in get_tree().get_nodes_in_group("bumpers"):
-		if not node is CircularBumper:
-			continue
-		var bumper := node as CircularBumper
-		# Distance from player surface to bumper surface
-		var dist_to_surface := global_position.distance_to(bumper.global_position) - bumper.radius - BUMPER_MAGNET_PLAYER_RADIUS
-		if dist_to_surface < seek_radius and dist_to_surface < nearest_dist:
-			nearest = bumper
-			nearest_dist = dist_to_surface
-
-	if nearest == null:
-		return
-
-	var dir_outward := (global_position - nearest.global_position)
-	if dir_outward == Vector2.ZERO:
-		dir_outward = Vector2.RIGHT
-	else:
-		dir_outward = dir_outward.normalized()
-	var contact_point := nearest.global_position + dir_outward * (nearest.radius + BUMPER_MAGNET_PLAYER_RADIUS)
-
-	if nearest_dist <= 2.0:
-		_attach_to_bumper(nearest)
-	else:
-		linear_velocity = (contact_point - global_position).normalized() * pull_speed
-
-func _attach_to_bumper(bumper: CircularBumper) -> void:
-	_bumper_magnet_target = bumper
-	_bumper_magnet_attached = true
-	_bumper_magnet_angle = (global_position - bumper.global_position).angle()
-	linear_velocity = Vector2.ZERO
-	global_position = bumper.global_position + Vector2(cos(_bumper_magnet_angle), sin(_bumper_magnet_angle)) * (bumper.radius + BUMPER_MAGNET_PLAYER_RADIUS)
-
-func _update_magnet_orbit(delta: float) -> void:
-	if not is_instance_valid(_bumper_magnet_target):
-		_cancel_bumper_magnet()
-		return
-	var bumper := _bumper_magnet_target as CircularBumper
-	var stick := Vector2(
-		Input.get_axis("move_left", "move_right"),
-		Input.get_axis("move_up", "move_down")
-	)
-	if GameSettings.thrust_inverted:
-		stick = -stick
-	# Clockwise tangent at current angle: project stick onto it so "right stick"
-	# always feels like moving right on screen regardless of attachment position.
-	var tangent_cw := Vector2(-sin(_bumper_magnet_angle), cos(_bumper_magnet_angle))
-	_bumper_magnet_angle += stick.dot(tangent_cw) * BUMPER_MAGNET_ORBIT_SPEED * delta
-	global_position = bumper.global_position + Vector2(cos(_bumper_magnet_angle), sin(_bumper_magnet_angle)) * (bumper.radius + BUMPER_MAGNET_PLAYER_RADIUS)
-	linear_velocity = Vector2.ZERO
-
-func _launch_from_bumper() -> void:
-	if _bumper_magnet_attached and is_instance_valid(_bumper_magnet_target) and _bumper_magnet_target is CircularBumper:
-		(_bumper_magnet_target as CircularBumper).apply_launch_force(self, _bumper_magnet_attach_speed)
-	_cancel_bumper_magnet()
-
-func _cancel_bumper_magnet() -> void:
-	_bumper_magnet_active = false
-	_bumper_magnet_attached = false
-	_bumper_magnet_target = null
-	_bumper_magnet_slot = -1
-	AlienTechManager.clear_passive_bar(AlienTechRegistry.BUMPER_MAGNET)
-
-# ---------------------------------------------------------------------------
-# DERMAL REGENERATOR
-# ---------------------------------------------------------------------------
-
-func _start_dermal_regen(slot: int) -> void:
-	if _dermal_regen_used:
-		return
-	if AlienTechManager.is_tech_hot(AlienTechRegistry.DERMAL_REGEN):
-		# Hot: instant, full heal — no channel, so nothing to interrupt.
-		restore_hearts(MAX_HEARTS)
-		_dermal_regen_used = true
-		AlienTechManager.set_passive_bar(AlienTechRegistry.DERMAL_REGEN, 0.0)
-		return
-	_dermal_regen_active = true
-	_dermal_regen_timer = 0.0
-	_dermal_regen_slot = slot
-
-func _update_dermal_regen(delta: float) -> void:
-	var action := "tech_slot_left" if _dermal_regen_slot == 0 else "tech_slot_right"
-	if not Input.is_action_pressed(action):
-		_cancel_dermal_regen()
-		return
-	_dermal_regen_timer += delta
-	AlienTechManager.set_passive_bar(
-		AlienTechRegistry.DERMAL_REGEN,
-		_dermal_regen_timer / DERMAL_REGEN_CHANNEL_DURATION
-	)
-	if _dermal_regen_timer >= DERMAL_REGEN_CHANNEL_DURATION:
-		_complete_dermal_regen()
-
-func _complete_dermal_regen() -> void:
-	restore_hearts(DERMAL_REGEN_HEARTS)
-	_dermal_regen_used = true
-	# Leave passive bar at 0.0 (spent) so HUD shows bar-empty + dimmed label
-	# until the player re-spawns or the level resets.
-	AlienTechManager.set_passive_bar(AlienTechRegistry.DERMAL_REGEN, 0.0)
-	_dermal_regen_active = false
-	_dermal_regen_timer = 0.0
-	_dermal_regen_slot = -1
-
-func _cancel_dermal_regen() -> void:
-	AlienTechManager.clear_passive_bar(AlienTechRegistry.DERMAL_REGEN)
-	_dermal_regen_active = false
-	_dermal_regen_timer = 0.0
-	_dermal_regen_slot = -1
 
 # ---------------------------------------------------------------------------
 # FLIPPER VELCRO
@@ -2208,48 +1479,6 @@ func _cancel_flipper_velcro() -> void:
 	_flipper_velcro_t = 12.0
 
 # ---------------------------------------------------------------------------
-# SHOCKWAVE
-# ---------------------------------------------------------------------------
-
-func _activate_shockwave() -> void:
-	var hot := AlienTechManager.is_tech_hot(AlienTechRegistry.SHOCKWAVE)
-	for enemy in get_tree().get_nodes_in_group("enemies"):
-		if is_instance_valid(enemy) and not enemy.is_queued_for_deletion() and enemy.has_method("take_damage"):
-			enemy.take_damage(10.0)
-	if hud:
-		hud.current_energy = 0.0
-		hud.update_energy(0.0, hud.max_energy)
-	if hot:
-		# Hot trade-off: no self-stun, but it costs a heart every use (still
-		# subject to the normal heart-damage iframe, which is what keeps this
-		# from being a truly free-spam full-screen nuke).
-		take_damage(1.0, false, "fried by your own shockwave")
-	else:
-		suspend_control(1.0)
-	_spawn_shockwave_visual()
-	_flash(Color(1.0, 0.55, 0.1), 0.2)
-
-func _spawn_shockwave_visual() -> void:
-	var ring := Line2D.new()
-	var segs := 32
-	var pts: PackedVector2Array = []
-	for i in range(segs + 1):
-		var a := i * TAU / segs
-		pts.append(Vector2(cos(a), sin(a)))
-	ring.points = pts
-	ring.default_color = Color(1.0, 0.55, 0.1, 0.85)
-	ring.width = 2.5
-	ring.z_as_relative = false
-	ring.z_index = 18
-	get_parent().add_child(ring)
-	ring.global_position = global_position
-	var tween := create_tween()
-	tween.set_parallel(true)
-	tween.tween_property(ring, "scale", Vector2.ONE * 400.0, 0.5)
-	tween.tween_property(ring, "modulate:a", 0.0, 0.5)
-	tween.finished.connect(ring.queue_free)
-
-# ---------------------------------------------------------------------------
 # THING BRINGER
 # ---------------------------------------------------------------------------
 
@@ -2273,49 +1502,3 @@ func _update_thing_bringer() -> void:
 		if dist > radius or dist < 1.0:
 			continue
 		rb.linear_velocity = to_player.normalized() * pull_speed
-
-# ---------------------------------------------------------------------------
-# MAGNETIC REPULSION
-# ---------------------------------------------------------------------------
-
-## Pushes powerups, UFO parts, trash cluster pieces, and alien tech pieces
-## away from the ocean floor and the left/right/bottom play-area walls so
-## they hover a short distance clear of them instead of resting flush
-## against the boundary. Reuses the same boundary geometry the turtle itself
-## is clamped to (see _get_boundary_limits()).
-func _update_magnetic_repulsion() -> void:
-	var hot := AlienTechManager.is_tech_hot(AlienTechRegistry.MAGNETIC_REPULSION)
-	var hover := MAGNETIC_REPULSION_HOVER_HOT if hot else MAGNETIC_REPULSION_HOVER
-	var lim := _get_boundary_limits()
-	for group in ["collectibles", "trash_cluster_pieces"]:
-		for node in get_tree().get_nodes_in_group(group):
-			if not is_instance_valid(node) or node.is_queued_for_deletion():
-				continue
-			if not node is RigidBody2D:
-				continue
-			var rb := node as RigidBody2D
-			if rb.freeze:
-				continue
-			# A carried UFO piece isn't in the world for this purpose.
-			if node is UFOPiece and (node as UFOPiece).is_carried:
-				continue
-			var push := Vector2.ZERO
-			if lim.max_y < INF:
-				var dist_floor: float = lim.max_y - rb.global_position.y
-				if dist_floor < hover:
-					push.y -= (hover - maxf(dist_floor, 0.0)) / hover * MAGNETIC_REPULSION_FORCE
-			if lim.min_x > -INF:
-				var dist_left: float = rb.global_position.x - lim.min_x
-				if dist_left < hover:
-					push.x += (hover - maxf(dist_left, 0.0)) / hover * MAGNETIC_REPULSION_FORCE
-			if lim.max_x < INF:
-				var dist_right: float = lim.max_x - rb.global_position.x
-				if dist_right < hover:
-					push.x -= (hover - maxf(dist_right, 0.0)) / hover * MAGNETIC_REPULSION_FORCE
-			if push != Vector2.ZERO:
-				# A body resting on the floor/wall falls asleep (Godot's default
-				# RigidBody2D behavior), and apply_central_force() on a sleeping
-				# body is silently dropped until something else wakes it — that's
-				# why only some pieces (the ones still moving) were responding.
-				rb.sleeping = false
-				rb.apply_central_force(push)

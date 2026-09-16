@@ -190,7 +190,7 @@ var _sfx_bumper: AudioStreamPlayer
 func _on_body_hit(body: Node2D) -> void:
 	if body.is_in_group("player") and body is RigidBody2D:
 		# Suppress hit response while player is magnetically orbiting this bumper
-		if body.get("_bumper_magnet_attached") and body.get("_bumper_magnet_target") == self:
+		if body.has_method("is_magnet_attached_to") and body.is_magnet_attached_to(self):
 			return
 		_apply_bumper_force(body)
 		_play_hit_animation()
