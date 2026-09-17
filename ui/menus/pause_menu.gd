@@ -28,11 +28,16 @@ var _sfx_select: AudioStreamPlayer
 var _slot_input_blinking: Array[bool] = [false, false]
 var _slot_hot_blinking: Array[bool] = [false, false]
 
-@onready var resume_button    = $Control/CenterContainer/PanelContainer/VBoxContainer/ResumeButton
-@onready var swap_tech_button = $Control/CenterContainer/PanelContainer/VBoxContainer/SwapTechButton
-@onready var options_button   = $Control/CenterContainer/PanelContainer/VBoxContainer/OptionsButton
-@onready var quit_button      = $Control/CenterContainer/PanelContainer/VBoxContainer/QuitButton
+@onready var resume_button    = $Control/CenterContainer/PanelContainer/VBoxContainer/OptionsColumn/ResumeButton
+@onready var swap_tech_button = $Control/CenterContainer/PanelContainer/VBoxContainer/OptionsColumn/SwapTechButton
+@onready var options_button   = $Control/CenterContainer/PanelContainer/VBoxContainer/OptionsColumn/OptionsButton
+@onready var quit_button      = $Control/CenterContainer/PanelContainer/VBoxContainer/OptionsColumn/QuitButton
 @onready var guide_screen     = $GuideScreen
+@onready var _control: Control = $Control
+
+# Plain-text options marked by a sliding turtle indicator + green text
+# shine, same look as the main menu (see ui/shared/turtle_option_list.gd).
+var _option_list: TurtleOptionList
 
 @onready var slot_l_icon:  TextureRect = $Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLRow/SlotLIcon
 @onready var slot_l_input: Label       = $Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLRow/SlotLTextContainer/SlotLInput
@@ -64,19 +69,27 @@ func _ready():
 	_sfx_select.volume_db = -10.0
 	add_child(_sfx_select)
 
+	_option_list = TurtleOptionList.new()
+	add_child(_option_list)
+	_option_list.attach(_control)
+
 	if resume_button:
 		resume_button.pressed.connect(_on_resume_pressed)
 		resume_button.focus_entered.connect(func(): _sfx_nav.play())
+		_option_list.wire_option(resume_button)
 	if swap_tech_button:
 		swap_tech_button.pressed.connect(_on_swap_tech_pressed)
 		swap_tech_button.focus_entered.connect(func(): _sfx_nav.play())
+		_option_list.wire_option(swap_tech_button)
 	if options_button:
 		options_button.pressed.connect(_on_options_pressed)
 		options_button.focus_entered.connect(func(): _sfx_nav.play())
+		_option_list.wire_option(options_button)
 	if quit_button:
 		quit_button.text = "Quit to Menu"
 		quit_button.pressed.connect(_on_quit_pressed)
 		quit_button.focus_entered.connect(func(): _sfx_nav.play())
+		_option_list.wire_option(quit_button)
 
 func _input(event):
 	if event.is_action_pressed("pause"):
@@ -104,6 +117,14 @@ func _open():
 	get_tree().paused = true
 	visible = true
 	_update_tech_display()
+	# This CanvasLayer's Control subtree doesn't get a real layout pass while
+	# visible=false, so a button's get_global_rect() is still stale for a
+	# frame or two after it flips true — wait for layout to actually settle
+	# before positioning the turtle indicator against it (same class of fix
+	# as main_menu.gd's _reveal_options; two frames here since one proved
+	# borderline once the panel gained its own border/margin stylebox).
+	await get_tree().process_frame
+	await get_tree().process_frame
 	if resume_button:
 		resume_button.grab_focus()
 
@@ -123,6 +144,8 @@ func _on_options_pressed():
 	if guide_screen and guide_screen.has_method("show_guide"):
 		guide_screen.show_guide(func():
 			visible = true
+			await get_tree().process_frame
+			await get_tree().process_frame
 			if resume_button:
 				resume_button.grab_focus()
 		)

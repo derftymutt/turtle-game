@@ -2,9 +2,29 @@
 
 [ext_resource type="Script" uid="uid://cilbj74x1typ6" path="res://ui/menus/game_over_screen.gd" id="1_iwahs"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gameoverpanel"]
+bg_color = Color(0.03, 0.1654902, 0.415, 0.7)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.4, 1.0, 0.45, 1.0)
+content_margin_left = 8.0
+content_margin_top = 14.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+
 [node name="GameOverScreen" type="CanvasLayer" unique_id=616926431]
 process_mode = 3
 script = ExtResource("1_iwahs")
+
+[node name="Overlay" type="ColorRect" parent="." unique_id=1225046070]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0.3019608, 1, 0.5)
 
 [node name="Control" type="Control" parent="." unique_id=1225046069]
 layout_mode = 3
@@ -30,6 +50,7 @@ grow_vertical = 2
 
 [node name="PanelContainer" type="PanelContainer" parent="Control/CenterContainer" unique_id=1496196]
 layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_gameoverpanel")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer" unique_id=1660065690]
 custom_minimum_size = Vector2(340, 0)
@@ -39,6 +60,7 @@ alignment = 1
 
 [node name="GameOverLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer" unique_id=709398221]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.05, 0.08, 1)
 theme_override_font_sizes/font_size = 24
 text = "OUCH"
 horizontal_alignment = 1
@@ -63,6 +85,7 @@ horizontal_alignment = 1
 
 [node name="HintLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer" unique_id=823741092]
 layout_mode = 2
+theme_override_colors/font_color = Color(1.0, 0.85, 0.0, 1)
 theme_override_font_sizes/font_size = 12
 horizontal_alignment = 1
 autowrap_mode = 3
@@ -73,16 +96,22 @@ theme_override_font_sizes/font_size = 15
 text = "Continues: 0"
 horizontal_alignment = 1
 
-[node name="ContinueButton" type="Button" parent="Control/CenterContainer/PanelContainer/VBoxContainer" unique_id=390383220]
-custom_minimum_size = Vector2(140, 32)
+[node name="OptionsColumn" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer" unique_id=390383219]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 8
+
+[node name="ContinueButton" type="Button" parent="Control/CenterContainer/PanelContainer/VBoxContainer/OptionsColumn" unique_id=390383220]
+custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 text = "Continue"
 
-[node name="MenuButton" type="Button" parent="Control/CenterContainer/PanelContainer/VBoxContainer" unique_id=467809130]
+[node name="MenuButton" type="Button" parent="Control/CenterContainer/PanelContainer/VBoxContainer/OptionsColumn" unique_id=467809130]
+custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 text = "Main Menu"
 
-[node name="QuitButton" type="Button" parent="Control/CenterContainer/PanelContainer/VBoxContainer" unique_id=1031823826]
-custom_minimum_size = Vector2(140, 32)
+[node name="QuitButton" type="Button" parent="Control/CenterContainer/PanelContainer/VBoxContainer/OptionsColumn" unique_id=1031823826]
+custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 text = "Quit"

@@ -14,15 +14,21 @@ var _sfx_select:      AudioStreamPlayer
 
 @onready var game_over_panel = $Control/CenterContainer/PanelContainer
 @onready var vbox_container = $Control/CenterContainer/PanelContainer/VBoxContainer
+@onready var options_column = $Control/CenterContainer/PanelContainer/VBoxContainer/OptionsColumn
 @onready var game_over_label = $Control/CenterContainer/PanelContainer/VBoxContainer/GameOverLabel
 @onready var death_cause_label = $Control/CenterContainer/PanelContainer/VBoxContainer/DeathCauseLabel
 @onready var hint_label = $Control/CenterContainer/PanelContainer/VBoxContainer/HintLabel
 @onready var final_score_label = $Control/CenterContainer/PanelContainer/VBoxContainer/FinalScoreLabel
 @onready var total_score_label = $Control/CenterContainer/PanelContainer/VBoxContainer/TotalScoreLabel
 @onready var attempts_label = $Control/CenterContainer/PanelContainer/VBoxContainer/AttemptsLabel
-@onready var continue_button = $Control/CenterContainer/PanelContainer/VBoxContainer/ContinueButton
-@onready var menu_button = $Control/CenterContainer/PanelContainer/VBoxContainer/MenuButton
-@onready var quit_button = $Control/CenterContainer/PanelContainer/VBoxContainer/QuitButton
+@onready var continue_button = $Control/CenterContainer/PanelContainer/VBoxContainer/OptionsColumn/ContinueButton
+@onready var menu_button = $Control/CenterContainer/PanelContainer/VBoxContainer/OptionsColumn/MenuButton
+@onready var quit_button = $Control/CenterContainer/PanelContainer/VBoxContainer/OptionsColumn/QuitButton
+@onready var _control: Control = $Control
+
+# Plain-text options marked by a sliding turtle indicator + green text
+# shine, same look as the main menu (see ui/shared/turtle_option_list.gd).
+var _option_list: TurtleOptionList
 
 var final_score: int = 0
 
@@ -95,15 +101,22 @@ func _ready():
 	_sfx_select.volume_db = 0.0
 	add_child(_sfx_select)
 
+	_option_list = TurtleOptionList.new()
+	add_child(_option_list)
+	_option_list.attach(_control)
+
 	if continue_button:
 		continue_button.pressed.connect(_on_continue_button_pressed)
 		continue_button.focus_entered.connect(func(): _sfx_nav.play())
+		_option_list.wire_option(continue_button)
 	if menu_button:
 		menu_button.pressed.connect(_on_menu_pressed)
 		menu_button.focus_entered.connect(func(): _sfx_nav.play())
+		_option_list.wire_option(menu_button)
 	if quit_button:
 		quit_button.pressed.connect(_on_quit_pressed)
 		quit_button.focus_entered.connect(func(): _sfx_nav.play())
+		_option_list.wire_option(quit_button)
 
 func show_game_over(level_score: int, run_total: int, death_cause: String = ""):
 	"""Display the game over screen with level score and cumulative run total"""
@@ -117,7 +130,7 @@ func show_game_over(level_score: int, run_total: int, death_cause: String = ""):
 			death_cause_label.visible = false
 		else:
 			death_cause_label.visible = true
-			death_cause_label.text = "%s%s." % [death_cause[0].to_upper(), death_cause.substr(1)]
+			death_cause_label.text = "☠ %s%s. ☠" % [death_cause[0].to_upper(), death_cause.substr(1)]
 
 	if hint_label:
 		hint_label.text = _pick_hint()
@@ -134,19 +147,29 @@ func show_game_over(level_score: int, run_total: int, death_cause: String = ""):
 		attempts_label.text = "Continues this run: %d" % c if c > 0 else ""
 
 	var lost_tech := AlienTechManager.remove_oldest_tech()
-	if not lost_tech.is_empty() and vbox_container and continue_button:
+	if not lost_tech.is_empty() and vbox_container and options_column:
 		var tech_lost_label := Label.new()
 		tech_lost_label.text = "%s alien tech lost" % lost_tech
 		tech_lost_label.modulate = Color(1.0, 0.45, 0.2)
 		tech_lost_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		vbox_container.add_child(tech_lost_label)
-		vbox_container.move_child(tech_lost_label, continue_button.get_index())
+		# OptionsColumn (not continue_button) is now the direct vbox_container
+		# child that sits where the buttons used to — the buttons themselves
+		# live one level deeper inside it.
+		vbox_container.move_child(tech_lost_label, options_column.get_index())
 
 	visible = true
 	get_tree().paused = true
 	if _sfx_game_over:
 		_sfx_game_over.play()
 
+	# This CanvasLayer's Control subtree doesn't get a real layout pass while
+	# visible=false, so a button's get_global_rect() is still stale for a
+	# frame or two after it flips true — wait for layout to actually settle
+	# before positioning the turtle indicator against it (same fix as
+	# pause_menu.gd's _open()).
+	await get_tree().process_frame
+	await get_tree().process_frame
 	if continue_button:
 		continue_button.grab_focus()
 

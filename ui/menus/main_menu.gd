@@ -28,6 +28,14 @@ const _TITLE_DROP_START_OFFSET: float = 220.0
 const _TITLE_DROP_DURATION: float = 1.6
 const _TITLE_WIGGLE_START_DEGREES: float = -5.0
 
+# The elastic curve's visible settle reads as "done" well before the tween
+# itself actually finishes — the tail end is a string of imperceptible
+# sub-pixel oscillations. Reveal the options on their own shorter timer
+# instead of waiting on the tween's real completion, so they don't lag
+# behind what the eye already reads as settled. Tune independently of
+# _TITLE_DROP_DURATION to taste.
+const _OPTIONS_REVEAL_DELAY: float = 1.1
+
 const _OPTIONS_FADE_DURATION: float = 0.5
 const _INDICATOR_MOVE_DURATION: float = 0.15
 const _INDICATOR_GAP: float = 6.0
@@ -144,7 +152,8 @@ func _animate_title_intro() -> void:
 	tween.set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
 	tween.tween_property(title_label, "position:y", rest_y, _TITLE_DROP_DURATION)
 	tween.parallel().tween_property(title_label, "rotation_degrees", 0.0, _TITLE_DROP_DURATION)
-	tween.tween_callback(_reveal_options)
+
+	get_tree().create_timer(_OPTIONS_REVEAL_DELAY).timeout.connect(_reveal_options)
 
 
 ## Fades in the selectable options once the title has settled, then brings in
