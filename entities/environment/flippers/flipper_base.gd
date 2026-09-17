@@ -16,7 +16,7 @@ const _SFX_FLIPPER_LAUNCH = preload("res://assets/sounds/sfx/flipper launch_1.og
 @export var flip_input: String = "flipper_left"
 @export var collision_rotation_scale: float = 0.85  # Scale collision rotation (e.g., 0.9 = 10% less rotation)
 @export var overswing_enabled: bool = false
-@export var overswing_degrees: float = 15.0
+@export var overswing_degrees: float = 25.0
 @export var overswing_decay_speed: float = 12.0
 
 var is_flipping: bool = false
