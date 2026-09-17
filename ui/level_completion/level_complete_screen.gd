@@ -4,19 +4,28 @@ class_name LevelCompleteScreen
 
 ## Simple overlay screen shown when a level is completed
 
-@onready var title_label: Label = $CenterContainer/VBoxContainer/TitleLabel
-@onready var score_label: Label = $CenterContainer/VBoxContainer/StatsContainer/ScoreLabel
-@onready var time_bonus_label: Label = $CenterContainer/VBoxContainer/StatsContainer/TimeBonusLabel
-@onready var first_try_label: Label = $CenterContainer/VBoxContainer/StatsContainer/FirstTryLabel
-@onready var variety_label: Label = $CenterContainer/VBoxContainer/StatsContainer/VarietyLabel
-@onready var total_score_label: Label = $CenterContainer/VBoxContainer/StatsContainer/TotalScoreLabel
-@onready var attempts_label: Label = $CenterContainer/VBoxContainer/StatsContainer/AttemptsLabel
-@onready var next_level_button: Button = $CenterContainer/VBoxContainer/NextLevelButton
+@onready var title_label: Label = $Control/CenterContainer/PanelContainer/VBoxContainer/TitleLabel
+@onready var score_label: Label = $Control/CenterContainer/PanelContainer/VBoxContainer/StatsContainer/ScoreLabel
+@onready var time_bonus_label: Label = $Control/CenterContainer/PanelContainer/VBoxContainer/StatsContainer/TimeBonusLabel
+@onready var first_try_label: Label = $Control/CenterContainer/PanelContainer/VBoxContainer/StatsContainer/FirstTryLabel
+@onready var variety_label: Label = $Control/CenterContainer/PanelContainer/VBoxContainer/StatsContainer/VarietyLabel
+@onready var total_score_label: Label = $Control/CenterContainer/PanelContainer/VBoxContainer/StatsContainer/TotalScoreLabel
+@onready var attempts_label: Label = $Control/CenterContainer/PanelContainer/VBoxContainer/StatsContainer/AttemptsLabel
+@onready var next_level_button: Button = $Control/CenterContainer/PanelContainer/VBoxContainer/OptionsColumn/NextLevelButton
 @onready var sfx_beat: AudioStreamPlayer = $SfxBeat
+@onready var _control: Control = $Control
+
+# Plain-text options marked by a sliding turtle indicator + green text
+# shine, same look as the main menu (see ui/shared/turtle_option_list.gd).
+var _option_list: TurtleOptionList
 
 func _ready():
 	hide()
+	_option_list = TurtleOptionList.new()
+	add_child(_option_list)
+	_option_list.attach(_control)
 	next_level_button.pressed.connect(_on_next_level_pressed)
+	_option_list.wire_option(next_level_button)
 
 func show_completion(
 	level_number: int,
@@ -68,6 +77,13 @@ func show_completion(
 	if sfx_beat:
 		sfx_beat.play()
 	_play_entrance_animation()
+	# This CanvasLayer's Control subtree doesn't get a real layout pass while
+	# hidden, so the button's get_global_rect() is still stale for a frame or
+	# two after it's shown — wait for layout to actually settle before
+	# positioning the turtle indicator against it (same fix as
+	# pause_menu.gd's _open()).
+	await get_tree().process_frame
+	await get_tree().process_frame
 	next_level_button.grab_focus()
 
 func _on_next_level_pressed():
@@ -75,7 +91,7 @@ func _on_next_level_pressed():
 	get_tree().change_scene_to_file("res://cut_scenes/level_transition_cutscene.tscn")
 
 func _play_entrance_animation():
-	var container = $CenterContainer/VBoxContainer
+	var container = $Control/CenterContainer/PanelContainer
 	if not container:
 		return
 

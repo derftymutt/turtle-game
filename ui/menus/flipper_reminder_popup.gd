@@ -9,7 +9,7 @@ class_name FlipperReminderPopup
 const _BLINK_PERIOD_MSEC: float = 500.0
 const _BLINK_LOW_ALPHA: float = 0.25
 
-@onready var _hint_label: Label = $Control/CenterContainer/VBoxContainer/FlipperHintLabel
+@onready var _hint_label: Label = $Control/CenterContainer/PanelContainer/VBoxContainer/FlipperHintLabel
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS

@@ -2,6 +2,18 @@
 
 [ext_resource type="Script" path="res://ui/menus/flipper_reminder_popup.gd" id="1_flipreminder"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_flipreminderpanel"]
+bg_color = Color(0.03, 0.1654902, 0.415, 0.7)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.4, 1.0, 0.45, 1.0)
+content_margin_left = 16.0
+content_margin_top = 14.0
+content_margin_right = 16.0
+content_margin_bottom = 14.0
+
 [node name="FlipperReminderPopup" type="CanvasLayer"]
 process_mode = 3
 script = ExtResource("1_flipreminder")
@@ -12,7 +24,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0, 0, 0.75)
+color = Color(0, 0.3019608, 1, 0.5)
 
 [node name="Control" type="Control" parent="."]
 layout_mode = 3
@@ -30,13 +42,17 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Control/CenterContainer"]
+[node name="PanelContainer" type="PanelContainer" parent="Control/CenterContainer"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_flipreminderpanel")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer"]
 custom_minimum_size = Vector2(560, 0)
 layout_mode = 2
 theme_override_constants/separation = 18
 alignment = 1
 
-[node name="HeaderLabel" type="Label" parent="Control/CenterContainer/VBoxContainer"]
+[node name="HeaderLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1.0, 1.0, 1.0, 1)
 theme_override_font_sizes/font_size = 18
@@ -44,7 +60,7 @@ text = "Friendly Reminder!"
 horizontal_alignment = 1
 autowrap_mode = 3
 
-[node name="BodyLabel" type="Label" parent="Control/CenterContainer/VBoxContainer"]
+[node name="BodyLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.55, 1.0, 0.6, 1)
 theme_override_font_sizes/font_size = 14
@@ -52,7 +68,7 @@ text = "The pinball flippers are key to success. It's very tiring to only swim."
 horizontal_alignment = 1
 autowrap_mode = 3
 
-[node name="FlipperHintLabel" type="Label" parent="Control/CenterContainer/VBoxContainer"]
+[node name="FlipperHintLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1.0, 0.9, 0.1, 1)
 theme_override_font_sizes/font_size = 14
@@ -60,8 +76,9 @@ text = "Use flippers with LT / RT (Left/Right Shift)"
 horizontal_alignment = 1
 autowrap_mode = 3
 
-[node name="HintLabel" type="Label" parent="Control/CenterContainer/VBoxContainer"]
+[node name="HintLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
+theme_override_colors/font_color = Color(1.0, 0.85, 0.0, 1)
 theme_override_font_sizes/font_size = 11
 text = "Press any button to continue"
 horizontal_alignment = 1

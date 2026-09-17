@@ -2,76 +2,107 @@
 
 [ext_resource type="Script" uid="uid://c2kxo8gmu2l2d" path="res://ui/level_completion/level_complete_screen.gd" id="1_ba1n4"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_levelcompletepanel"]
+bg_color = Color(0.03, 0.1654902, 0.415, 0.7)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.4, 1.0, 0.45, 1.0)
+content_margin_left = 8.0
+content_margin_top = 14.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+
 [node name="LevelCompleteScreen" type="CanvasLayer" unique_id=1103608067 groups=["level_complete_screen"]]
 process_mode = 3
 script = ExtResource("1_ba1n4")
 
-[node name="ColorRect" type="ColorRect" parent="." unique_id=401096989]
+[node name="Overlay" type="ColorRect" parent="." unique_id=401096989]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0, 0, 0.7)
+color = Color(0, 0.3019608, 1, 0.5)
 
-[node name="CenterContainer" type="CenterContainer" parent="." unique_id=1384805189]
+[node name="Control" type="Control" parent="." unique_id=401096990]
+layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer" unique_id=2018101306]
+[node name="CenterContainer" type="CenterContainer" parent="Control" unique_id=1384805189]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="Control/CenterContainer" unique_id=1384805190]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_levelcompletepanel")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer" unique_id=2018101306]
 layout_mode = 2
 theme_override_constants/separation = 5
 
-[node name="TitleLabel" type="Label" parent="CenterContainer/VBoxContainer" unique_id=355901358]
+[node name="TitleLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer" unique_id=355901358]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.84313726, 0, 1)
 theme_override_font_sizes/font_size = 26
 text = "Level Complete!"
+horizontal_alignment = 1
 
-[node name="StatsContainer" type="VBoxContainer" parent="CenterContainer/VBoxContainer" unique_id=1130477405]
+[node name="StatsContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer" unique_id=1130477405]
 layout_mode = 2
 theme_override_constants/separation = 3
 
-[node name="ScoreLabel" type="Label" parent="CenterContainer/VBoxContainer/StatsContainer" unique_id=1566740752]
+[node name="ScoreLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/StatsContainer" unique_id=1566740752]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 text = "Level Score: 0"
 horizontal_alignment = 1
 
-[node name="TimeBonusLabel" type="Label" parent="CenterContainer/VBoxContainer/StatsContainer" unique_id=1858406777]
+[node name="TimeBonusLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/StatsContainer" unique_id=1858406777]
 layout_mode = 2
 theme_override_font_sizes/font_size = 11
 text = "Time Bonus: +0"
 horizontal_alignment = 1
 
-[node name="FirstTryLabel" type="Label" parent="CenterContainer/VBoxContainer/StatsContainer" unique_id=1054888483]
+[node name="FirstTryLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/StatsContainer" unique_id=1054888483]
 layout_mode = 2
 theme_override_font_sizes/font_size = 11
 horizontal_alignment = 1
 
-[node name="VarietyLabel" type="Label" parent="CenterContainer/VBoxContainer/StatsContainer" unique_id=1427700177]
+[node name="VarietyLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/StatsContainer" unique_id=1427700177]
 layout_mode = 2
 theme_override_font_sizes/font_size = 11
 text = "Tech Variety: 0 unique"
 horizontal_alignment = 1
 
-[node name="TotalScoreLabel" type="Label" parent="CenterContainer/VBoxContainer/StatsContainer" unique_id=1007070329]
+[node name="TotalScoreLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/StatsContainer" unique_id=1007070329]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 text = "Total Score: 0"
 horizontal_alignment = 1
 
-[node name="AttemptsLabel" type="Label" parent="CenterContainer/VBoxContainer/StatsContainer" unique_id=298461723]
+[node name="AttemptsLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/StatsContainer" unique_id=298461723]
 layout_mode = 2
 theme_override_font_sizes/font_size = 11
 text = "Continues: 0"
 horizontal_alignment = 1
 
-[node name="NextLevelButton" type="Button" parent="CenterContainer/VBoxContainer" unique_id=763402362]
-custom_minimum_size = Vector2(160, 34)
+[node name="OptionsColumn" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer" unique_id=763402361]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 8
+
+[node name="NextLevelButton" type="Button" parent="Control/CenterContainer/PanelContainer/VBoxContainer/OptionsColumn" unique_id=763402362]
+custom_minimum_size = Vector2(0, 34)
 layout_mode = 2
 text = "Next Level"
 
