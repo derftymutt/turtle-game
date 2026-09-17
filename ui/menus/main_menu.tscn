@@ -5,6 +5,12 @@
 [ext_resource type="PackedScene" uid="uid://cmdqgqfevkvly" path="res://ui/menus/guide_screen.tscn" id="2_qc8qn"]
 [ext_resource type="PackedScene" uid="uid://cpjcj7cy3ence" path="res://ui/menus/game_info_screen.tscn" id="3_ginfo"]
 [ext_resource type="AudioStream" uid="uid://cj25gke23vp2i" path="res://assets/sounds/sfx/theme_song.ogg" id="4_themesong"]
+[ext_resource type="Texture2D" uid="uid://b1k0cgwrgpiy6" path="res://entities/player/sprites/turtle_idle.png" id="5_turtleicon"]
+[ext_resource type="PackedScene" uid="uid://cwtrripple0v1" path="res://entities/environment/water_ripple/water_ripple_overlay.tscn" id="6_wripl"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_turtleicon"]
+atlas = ExtResource("5_turtleicon")
+region = Rect2(48, 0, 24, 24)
 
 [node name="MainMenu" type="CanvasLayer" unique_id=2017890914]
 script = ExtResource("1_5oih7")
@@ -51,14 +57,24 @@ text = "Turtle Plunge"
 horizontal_alignment = 1
 
 [node name="ButtonCenter" type="CenterContainer" parent="Control/VBoxContainer" unique_id=1740028052]
+visible = false
+modulate = Color(1, 1, 1, 0)
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_vertical = 3
 
 [node name="LevelContainer" type="VBoxContainer" parent="Control/VBoxContainer/ButtonCenter" unique_id=1613674440]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 3
 alignment = 1
+
+[node name="TurtleIndicator" type="TextureRect" parent="Control" unique_id=1740028060]
+visible = false
+modulate = Color(1, 1, 1, 0)
+mouse_filter = 2
+texture = SubResource("AtlasTexture_turtleicon")
+size = Vector2(26, 26)
+expand_mode = 1
+stretch_mode = 5
 
 [node name="SfxTheme" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("4_themesong")
@@ -70,3 +86,18 @@ visible = false
 
 [node name="GameInfoScreen" parent="." unique_id=493138188 instance=ExtResource("3_ginfo")]
 visible = false
+
+[node name="WaterRippleOverlay" parent="." unique_id=1740028061 instance=ExtResource("6_wripl")]
+layer = 2
+enabled = false
+interval_min = 2.5
+interval_max = 4.5
+sweep_duration = 3.4
+first_delay = 1.5
+amp_pixels = 0.9
+band_width = 1.3
+wobble_freq = 11.0
+wobble_speed = 1.5
+lens_strength = 0.1
+glint = 0.0
+chroma = 0.2

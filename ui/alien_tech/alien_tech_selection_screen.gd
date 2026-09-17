@@ -219,6 +219,7 @@ func _update_name_shine() -> void:
 	var vp_width := get_viewport().get_visible_rect().size.x
 	_shine_material.set_shader_parameter("band_left_uv", text_left / vp_width)
 	_shine_material.set_shader_parameter("band_right_uv", (text_left + text_width) / vp_width)
+	_shine_material.set_shader_parameter("shine_time", Time.get_ticks_msec() / 1000.0)
 
 
 func _build_offer_display(tech: Dictionary):
