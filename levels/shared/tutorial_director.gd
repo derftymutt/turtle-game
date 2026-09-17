@@ -44,33 +44,33 @@ const TRASH_SEQUENCE_SCENE := preload("res://systems/trash_cleanup/trash_sequenc
 const TRASH_CLUSTER_SCENE := preload("res://entities/collectibles/trash_cluster/trash_cluster.tscn")
 
 const INTRO_TEXT := "You are Flip, UFO Repair Turtle.\n\nYour goal is to pick up UFO parts and bring them to your UFO Workshop.\n\nGive it a try!"
-const INTRO_HINT := "▶  Swim with the Left Stick (or W A S D)"
+const INTRO_HINT := "\n▶  Swim with the Left Stick (or W A S D)"
 
 ## Reference copy of the wording — built as rich text in _show_energy_prompt()
 ## instead (same pattern as INTRO_TEXT/_show_intro()) so the icon/bar images
 ## can sit inline.
-const ENERGY_TEXT := "Swimming uses energy. A small bar above the turtle shows your energy. [turtle+bar icon]\nA large version is at the top right [icon+bar]\n\nYou recover energy slowly when not swimming.\n\nBUT- you can recover it QUICKLY [sparkle] as well.\n\n\nGo to the surface. (larger font)\n\nYou will see the yellow sparkles [sparkle] of QUICK energy recovery."
+const ENERGY_TEXT := "Swimming uses energy, which is tracked by a small bar above you. [turtle+bar icon]\nA large version is at the top right [icon+bar]\n\nYou recover energy slowly when not swimming.\n\nBUT- you can recover it QUICKLY [sparkle] as well.\n\n\nGo to the surface. (larger font)\n\nYou will see the yellow sparkles [sparkle] of QUICK energy recovery."
 
 ## Reference copy — built from FlipperFastRow + FlipperBody in
 ## _show_flipper_prompt() instead, so the sparkle can land on "QUICKLY" here too.
 const FLIPPER_TEXT := "You also recover energy QUICKLY [sparkle] while TOUCHING pinball walls and flippers. THIS IS KEY!!\n\nPlus, flippers are a great way to get around — life is much easier when you use them. Try launching yourself deep into the ocean to reach the UFO part.\n\nFlip with the LT / RT triggers (or Left Shift / Right Shift)."
-const FLIPPER_HINT_LEFT := "▶  Try the LEFT flipper: LT (or Left Shift)"
-const FLIPPER_HINT_RIGHT := "▶  Now the RIGHT flipper: RT (or Right Shift)"
+const FLIPPER_HINT_LEFT := "\n▶  Try the LEFT flipper: LT (or Left Shift)"
+const FLIPPER_HINT_RIGHT := "\n▶  Now the RIGHT flipper: RT (or Right Shift)"
 
 const DROP_NOW_TEXT := "UFO parts are heavy. You can drop them if you need to with X (or Space).\n\nDrop the part now (and then go pick it up!)."
-const DROP_NOW_HINT := "▶  Push X (or Space) to drop the part"
+const DROP_NOW_HINT := "\n▶  Push X (or Space) to drop the part"
 
 const MEANIES_TEXT := "Look out for meanies! You can shoot most of them with your turtle spit.\nAim with the Right Stick (or I J K L)."
 
 const SHOOT_TEXT := "Try shooting turtle spit now."
-const SHOOT_HINT := "▶  Use the Right Stick to shoot turtle spit in any direction"
+const SHOOT_HINT := "\n▶  Use the Right Stick to shoot turtle spit in any direction"
 
 const TRASH_TEXT := "You can also shoot trash you find floating by. Get it all and you'll get rewarded..."
 
 const FINAL_TEXT := "You're ready!\nDeliver UFO parts to complete each level.\n\nOh yeah... just don't forget to breathe!"
 
-const CONTINUE_HINT := "▶  Press A / Enter to continue"
-const FINISH_HINT := "▶  Press A / Enter to finish"
+const CONTINUE_HINT := "\n▶  Press A / Enter to continue"
+const FINISH_HINT := "\n▶  Press A / Enter to finish"
 
 const MOVE_ACTIONS: Array[StringName] = [&"move_up", &"move_down", &"move_left", &"move_right"]
 ## Generous: the turtle bobs ~0-20px around the waterline while resting there.
@@ -578,7 +578,7 @@ func _show_energy_prompt() -> void:
 	_message_rich.push_paragraph(HORIZONTAL_ALIGNMENT_CENTER)
 	_message_rich.append_text("Swimming uses energy ")
 	_message_rich.add_image(ENERGY_ICON, ENERGY_ICON_SIZE.x, ENERGY_ICON_SIZE.y)
-	_message_rich.append_text(". A small bar above the turtle shows your energy. ")
+	_message_rich.append_text(", which is tracked by a small bar above you. ")
 	_message_rich.add_image(TURTLE_ENERGY_BAR_ICON, TURTLE_ENERGY_BAR_ICON_SIZE.x, TURTLE_ENERGY_BAR_ICON_SIZE.y)
 	_message_rich.append_text("\nA large version is at the top right ")
 	_message_rich.add_image(ENERGY_ICON, ENERGY_ICON_SIZE.x, ENERGY_ICON_SIZE.y)

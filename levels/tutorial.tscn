@@ -157,7 +157,7 @@ anchor_bottom = 0.5
 offset_left = 24.0
 offset_top = -100.0
 offset_right = -24.0
-offset_bottom = 96.0
+offset_bottom = 160.0
 
 [node name="Margin" type="MarginContainer" parent="TutorialUI/Prompt" index="0" unique_id=1955969009]
 layout_mode = 0
@@ -216,7 +216,7 @@ alignment = 1
 [node name="Lead" type="Label" parent="TutorialUI/Prompt/Margin/VBox/EnergyFastRow/Inner/WordRow" index="0" unique_id=1493015262]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
-text = "BUT- you can recover it "
+text = "BUT- you can recover energy "
 
 [node name="Word" type="Label" parent="TutorialUI/Prompt/Margin/VBox/EnergyFastRow/Inner/WordRow" index="1" unique_id=300000202]
 layout_mode = 2
@@ -303,8 +303,9 @@ autowrap_mode = 2
 [node name="Hint" type="Label" parent="TutorialUI/Prompt/Margin/VBox" index="6" unique_id=91583155]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
-theme_override_font_sizes/font_size = 12
-text = "▶  Swim with W A S D"
+theme_override_font_sizes/font_size = 16
+text = "
+▶  Swim with W A S D"
 horizontal_alignment = 1
 
 [node name="PinballElements" type="Node2D" parent="." index="20" unique_id=1928819697]
