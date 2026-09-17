@@ -113,8 +113,14 @@ func drop_piece(intentional: bool = false):
 	_dropped_from = carrier
 	carrier = null
 
-	if intentional:
-		_drop_grace_timer = 2.0
+	# Intentional drops get a long grace period so the player doesn't
+	# instantly re-collect what they just chose to let go of. Involuntary
+	# (damage) drops still need a brief one — matching the separation window
+	# below — so a pull effect like Vacuum Grip (Thing Bringer), which scans
+	# "collectibles" every physics frame and has no other reason to skip a
+	# piece sitting right next to the player, can't immediately snap it back
+	# into the player before it's had a chance to separate.
+	_drop_grace_timer = 2.0 if intentional else _PLAYER_SEPARATION_GRACE
 
 	# Disable manual _process() following
 	set_process(false)

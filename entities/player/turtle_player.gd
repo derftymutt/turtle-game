@@ -1491,8 +1491,12 @@ func _update_thing_bringer() -> void:
 			continue
 		if not node is RigidBody2D:
 			continue
-		# Don't pull a UFO piece the player just intentionally dropped
-		if node is UFOPiece and (node as UFOPiece)._drop_grace_timer > 0.0:
+		# Don't pull a UFO piece the player is currently carrying, or one
+		# recently dropped (intentionally or via damage) — otherwise this
+		# yanks a just-dropped piece straight back into the player every
+		# frame, before it's had a chance to separate, leaving it stuck
+		# rattling inside the player's body, uncarried and undeliverable.
+		if node is UFOPiece and ((node as UFOPiece).is_carried or (node as UFOPiece)._drop_grace_timer > 0.0):
 			continue
 		var rb := node as RigidBody2D
 		if rb.freeze:
