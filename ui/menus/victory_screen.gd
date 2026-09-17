@@ -10,8 +10,13 @@ extends CanvasLayer
 @onready var best_time_label:     Label  = $Control/CenterContainer/PanelContainer/VBoxContainer/BestTimeLabel
 @onready var new_best_time_label: Label  = $Control/CenterContainer/PanelContainer/VBoxContainer/NewBestTimeLabel
 @onready var alien_techs_label:  Label  = $Control/CenterContainer/PanelContainer/VBoxContainer/AlienTechsLabel
-@onready var play_again_button:  Button = $Control/CenterContainer/PanelContainer/VBoxContainer/PlayAgainButton
-@onready var main_menu_button:   Button = $Control/CenterContainer/PanelContainer/VBoxContainer/MainMenuButton
+@onready var play_again_button:  Button = $Control/CenterContainer/PanelContainer/VBoxContainer/OptionsColumn/PlayAgainButton
+@onready var main_menu_button:   Button = $Control/CenterContainer/PanelContainer/VBoxContainer/OptionsColumn/MainMenuButton
+@onready var _control: Control = $Control
+
+# Plain-text options marked by a sliding turtle indicator + green text
+# shine, same look as the main menu (see ui/shared/turtle_option_list.gd).
+var _option_list: TurtleOptionList
 
 func _format_ms(ms: int) -> String:
 	var total_sec := ms / 1000
@@ -39,7 +44,12 @@ func _ready():
 
 	# The run save is no longer useful — clear it
 	SaveManager.delete_save()
-	GameManager.reset_game()
+	# Run state (equipped techs, hearts, etc.) is deliberately NOT reset here —
+	# this screen now shows as an overlay on top of the still-alive, paused
+	# level so the player can see exactly how they finished (techs equipped,
+	# health, etc.). Resetting now would visibly clear that state on the HUD
+	# behind this screen. See _on_play_again_pressed()/_on_main_menu_pressed(),
+	# which reset only once the player is actually leaving this screen.
 
 	# Populate labels
 	if final_score_label:
@@ -74,13 +84,29 @@ func _ready():
 	if new_best_time_label:
 		new_best_time_label.visible = is_new_best_time
 
+	_option_list = TurtleOptionList.new()
+	add_child(_option_list)
+	_option_list.attach(_control)
+
 	play_again_button.pressed.connect(_on_play_again_pressed)
 	main_menu_button.pressed.connect(_on_main_menu_pressed)
+	_option_list.wire_option(play_again_button)
+	_option_list.wire_option(main_menu_button)
+
+	# Belt-and-suspenders: this scene is freshly loaded via
+	# change_scene_to_file() so its layout is normally already valid by the
+	# time _ready() runs, but every other screen using TurtleOptionList
+	# needed a settle frame before its first grab_focus() — cheap to match.
+	await get_tree().process_frame
+	await get_tree().process_frame
 	play_again_button.grab_focus()
 
 func _on_play_again_pressed():
-	# reset_game() was already called in _ready(); just start level 1
+	get_tree().paused = false
+	GameManager.reset_game()
 	LevelManager.load_level(1)
 
 func _on_main_menu_pressed():
+	get_tree().paused = false
+	GameManager.reset_game()
 	GameManager.load_main_menu()

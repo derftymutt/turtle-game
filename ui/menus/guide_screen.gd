@@ -1,22 +1,38 @@
 extends CanvasLayer
 class_name GuideScreen
 
-@onready var content_container: VBoxContainer = $Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ContentContainer
-@onready var back_button: Button = $Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonContainer/BackButton
+@onready var content_container: VBoxContainer = $Control/CenterContainer/MarginContainer/VBoxContainer/ContentContainer
+@onready var back_button: Button = $Control/CenterContainer/MarginContainer/VBoxContainer/OptionsColumn/BackButton
+@onready var _control: Control = $Control
 
 var invert_thrust_checkbox: CheckBox
 var _back_callback: Callable
 
+# Plain-text options marked by a sliding turtle indicator + green text
+# shine, same look as the main menu (see ui/shared/turtle_option_list.gd).
+var _option_list: TurtleOptionList
+
 func _ready():
 	visible = false
 	add_to_group("guide_screen")
+	_option_list = TurtleOptionList.new()
+	add_child(_option_list)
+	_option_list.attach(_control)
 	if back_button:
 		back_button.pressed.connect(_on_back_pressed)
+		_option_list.wire_option(back_button)
 	_build_content()
 
 func show_guide(back_callback: Callable = Callable()):
 	_back_callback = back_callback
 	visible = true
+	# This CanvasLayer's Control subtree doesn't get a real layout pass while
+	# hidden, so the button's get_global_rect() is still stale for a frame or
+	# two after it's shown — wait for layout to actually settle before
+	# positioning the turtle indicator against it (same fix as
+	# pause_menu.gd's _open()).
+	await get_tree().process_frame
+	await get_tree().process_frame
 	if back_button:
 		back_button.grab_focus()
 

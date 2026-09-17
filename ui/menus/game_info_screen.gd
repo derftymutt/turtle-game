@@ -4,8 +4,13 @@ class_name GameInfoScreen
 const _SFX_MENU_SELECT = preload("res://assets/sounds/sfx/menu select_1.ogg")
 var _sfx_select: AudioStreamPlayer
 
-@onready var content_container: VBoxContainer = $Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ContentContainer
-@onready var start_button: Button = $Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonContainer/StartButton
+@onready var content_container: VBoxContainer = $Control/CenterContainer/MarginContainer/VBoxContainer/ContentContainer
+@onready var start_button: Button = $Control/CenterContainer/MarginContainer/VBoxContainer/OptionsColumn/StartButton
+@onready var _control: Control = $Control
+
+# Plain-text options marked by a sliding turtle indicator + green text
+# shine, same look as the main menu (see ui/shared/turtle_option_list.gd).
+var _option_list: TurtleOptionList
 
 func _ready():
 	visible = false
@@ -16,12 +21,32 @@ func _ready():
 	_sfx_select.volume_db = -10.0
 	add_child(_sfx_select)
 
+	_option_list = TurtleOptionList.new()
+	add_child(_option_list)
+	_option_list.attach(_control)
+
 	if start_button:
 		start_button.pressed.connect(_on_start_pressed)
+		_option_list.wire_option(start_button)
+		# wire_option() defaults every option to white — override back to
+		# yellow after it, so the green shine still ripples on top via the
+		# shader's own color mix, just over a yellow base instead of white.
+		var yellow := Color(1.0, 0.85, 0.0)
+		start_button.add_theme_color_override("font_color", yellow)
+		start_button.add_theme_color_override("font_focus_color", yellow)
+		start_button.add_theme_color_override("font_hover_color", yellow)
+		start_button.add_theme_color_override("font_pressed_color", yellow)
 	_build_content()
 
 func show_screen():
 	visible = true
+	# This CanvasLayer's Control subtree doesn't get a real layout pass while
+	# hidden, so the button's get_global_rect() is still stale for a frame or
+	# two after it's shown — wait for layout to actually settle before
+	# positioning the turtle indicator against it (same fix as
+	# pause_menu.gd's _open()).
+	await get_tree().process_frame
+	await get_tree().process_frame
 	if start_button:
 		start_button.grab_focus()
 

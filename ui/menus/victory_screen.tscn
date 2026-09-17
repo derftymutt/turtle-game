@@ -2,16 +2,29 @@
 
 [ext_resource type="Script" uid="uid://cx3m8p5dwn1ky" path="res://ui/menus/victory_screen.gd" id="1_victory"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_victorypanel"]
+bg_color = Color(0.03, 0.1654902, 0.415, 0.7)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.4, 1.0, 0.45, 1.0)
+content_margin_left = 8.0
+content_margin_top = 14.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+
 [node name="VictoryScreen" type="CanvasLayer"]
+process_mode = 3
 script = ExtResource("1_victory")
 
-[node name="ColorRect" type="ColorRect" parent="."]
+[node name="Overlay" type="ColorRect" parent="."]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.04, 0.08, 0.2, 1)
+color = Color(0, 0.3019608, 1, 0.5)
 
 [node name="Control" type="Control" parent="."]
 layout_mode = 3
@@ -23,20 +36,15 @@ grow_vertical = 2
 
 [node name="CenterContainer" type="CenterContainer" parent="Control"]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -170.0
-offset_top = -160.0
-offset_right = 170.0
-offset_bottom = 160.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
 [node name="PanelContainer" type="PanelContainer" parent="Control/CenterContainer"]
 layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_victorypanel")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer"]
 custom_minimum_size = Vector2(300, 0)
@@ -109,12 +117,17 @@ text = "NEW BEST TIME!"
 horizontal_alignment = 1
 visible = false
 
-[node name="PlayAgainButton" type="Button" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
-custom_minimum_size = Vector2(140, 30)
+[node name="OptionsColumn" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 5
+
+[node name="PlayAgainButton" type="Button" parent="Control/CenterContainer/PanelContainer/VBoxContainer/OptionsColumn"]
+custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
 text = "Play Again"
 
-[node name="MainMenuButton" type="Button" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
-custom_minimum_size = Vector2(140, 30)
+[node name="MainMenuButton" type="Button" parent="Control/CenterContainer/PanelContainer/VBoxContainer/OptionsColumn"]
+custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
 text = "Main Menu"

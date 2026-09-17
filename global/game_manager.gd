@@ -76,11 +76,16 @@ func load_main_menu():
 	clear_carried_pieces()
 	get_tree().change_scene_to_file("res://ui/menus/main_menu.tscn")
 
+## Shows the victory screen as an overlay on top of the still-alive, paused
+## final level (rather than replacing the scene) so the player can see the
+## frozen gameplay behind it — equipped techs, remaining health, etc. Run
+## state is deliberately left untouched here; see victory_screen.gd's
+## _on_play_again_pressed()/_on_main_menu_pressed(), which reset it only once
+## the player actually leaves this screen.
 func load_victory_screen():
-	current_score = 0
-	clear_carried_pieces()
-	get_tree().paused = false
-	get_tree().change_scene_to_file("res://ui/menus/victory_screen.tscn")
+	get_tree().paused = true
+	var victory := preload("res://ui/menus/victory_screen.tscn").instantiate()
+	get_tree().current_scene.add_child(victory)
 
 func reset_game():
 	current_score = 0
