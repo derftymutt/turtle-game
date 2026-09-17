@@ -67,6 +67,16 @@ func attach(parent_control: Control) -> void:
 	_shine_material.set_shader_parameter("shine_color", Vector3(_SHINE_GREEN.r, _SHINE_GREEN.g, _SHINE_GREEN.b))
 
 
+## For menus where a wired option isn't always the thing with focus (e.g.
+## alien_tech_selection_screen.gd's Skip button, alongside its two
+## separately-focus-managed tech slot panels) — hides the indicator when
+## focus is on something outside this list entirely, instead of it sitting
+## at its last position looking like a stray sprite.
+func set_indicator_visible(v: bool) -> void:
+	if _turtle_indicator:
+		_turtle_indicator.visible = v
+
+
 ## Builds a new flat, borderless Button styled as a plain-text option and
 ## adds it to `container`. For menus that build their option list in script
 ## (see main_menu.gd's _add_selectable_option).

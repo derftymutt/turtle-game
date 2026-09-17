@@ -31,6 +31,20 @@ const _CANDIDATE_PULSE_PERIOD_SEC: float = 1.0
 const _CANDIDATE_BORDER_ALPHA_RANGE := Vector2(0.5, 1.0)
 const _CANDIDATE_BG_ALPHA_RANGE := Vector2(0.03, 0.12)
 
+# "Alien tech" gets its own living, faintly otherworldly card instead of the
+# other menus' static blue — the border hue slowly drifts through a
+# violet-to-hot-pink range, and the background (a deeper purple, not pink —
+# see _MENU_BG_BASE_COLOR) gently pulses in brightness on its own, mostly-dark
+# range, out of phase with the border so the two never feel mechanically
+# locked together.
+const _MENU_BORDER_HUE_MIN: float = 0.80
+const _MENU_BORDER_HUE_MAX: float = 0.93
+const _MENU_BORDER_HUE_PERIOD_SEC: float = 3.5
+const _MENU_BORDER_SATURATION: float = 0.7
+const _MENU_BG_BASE_COLOR := Color(0.16, 0.04, 0.26, 0.75)
+const _MENU_BG_BRIGHTNESS_RANGE := Vector2(0.85, 1.05)
+const _MENU_BG_PULSE_PERIOD_SEC: float = 5.0
+
 # The player is very often still holding a direction (swimming toward the
 # piece, usually downward) the instant this screen steals focus — left
 # unguarded, that stale held input reads as an immediate "navigate to Skip"
@@ -41,11 +55,21 @@ const _CANDIDATE_BG_ALPHA_RANGE := Vector2(0.03, 0.12)
 const _GUARDED_ACTIONS: Array[String] = ["ui_left", "ui_right", "ui_up", "ui_down", "ui_accept"]
 const _INPUT_ARM_TIMEOUT_SEC: float = 1.5
 
+@onready var outer_panel:     PanelContainer = $"Control/CenterContainer/PanelContainer"
 @onready var title_label:     Label = $"Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TitleLabel"
 @onready var tech_name_label: Label = $"Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechNameLabel"
 @onready var hook_label:      Label = $"Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/HookLabel"
 
-@onready var skip_button: Button = $"Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonsRow/SkipButton"
+@onready var skip_panel: PanelContainer = $"Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonsRow/SkipPanel"
+@onready var skip_label: Label = $"Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonsRow/SkipPanel/SkipRow/SkipLabel"
+
+# Skip is styled as a third slot-like panel (same _style_unfocused/
+# _style_candidate pulsing border as the two tech slots, see _ready() and
+# _apply_candidate_style()) rather than a plain button, so this menu reads as
+# one consistent set of three bordered options instead of two bordered boxes
+# plus an unrelated-looking button.
+var _skip_shine_material: ShaderMaterial
+var _skip_shine_start_msec: int = 0
 
 @onready var slot_l_panel: PanelContainer = $"Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLPanel"
 @onready var slot_l_input:    Label       = $"Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLPanel/SlotLRow/SlotLTextContainer/SlotLInputRow/SlotLInput"
@@ -86,6 +110,11 @@ var _pulse_time: float = 0.0
 var _style_unfocused: StyleBoxFlat
 var _style_candidate: StyleBoxFlat
 
+# Drives the outer card's living pink glow/breathing — see
+# _update_menu_flair() and the _MENU_* constants above.
+var _menu_style: StyleBoxFlat
+var _menu_flair_time: float = 0.0
+
 # Drives the flashlight-style shine sweep on tech_name_label — see
 # text_shine.gdshader. band_left_x/band_right_x (the sweep's travel range)
 # are recomputed every frame in _process() from the label's own font metrics
@@ -124,6 +153,12 @@ func _ready():
 	_style_candidate.set_border_width_all(2)
 	_style_candidate.set_corner_radius_all(3)
 
+	_menu_style = StyleBoxFlat.new()
+	_menu_style.set_border_width_all(2)
+	_menu_style.bg_color = _MENU_BG_BASE_COLOR
+	_menu_style.border_color = Color.from_hsv(_MENU_BORDER_HUE_MIN, _MENU_BORDER_SATURATION, 1.0)
+	outer_panel.add_theme_stylebox_override("panel", _menu_style)
+
 	_shine_material = ShaderMaterial.new()
 	_shine_material.shader = _TEXT_SHINE_SHADER
 	tech_name_label.material = _shine_material
@@ -138,12 +173,17 @@ func _ready():
 	slot_r_panel.gui_input.connect(_on_slot_gui_input.bind(1))
 	slot_l_panel.focus_neighbor_right = slot_l_panel.get_path_to(slot_r_panel)
 	slot_r_panel.focus_neighbor_left = slot_r_panel.get_path_to(slot_l_panel)
-	slot_r_panel.focus_neighbor_right = slot_r_panel.get_path_to(skip_button)
+	slot_r_panel.focus_neighbor_right = slot_r_panel.get_path_to(skip_panel)
 
-	skip_button.focus_neighbor_left = skip_button.get_path_to(slot_r_panel)
-	skip_button.pressed.connect(_on_skip_pressed)
-	skip_button.focus_entered.connect(_on_skip_focused)
-	skip_button.mouse_entered.connect(func(): skip_button.grab_focus())
+	_skip_shine_material = ShaderMaterial.new()
+	_skip_shine_material.shader = _TEXT_SHINE_SHADER
+	_skip_shine_material.set_shader_parameter("shine_color", Vector3(0.4, 1.0, 0.45))
+
+	skip_panel.add_theme_stylebox_override("panel", _style_unfocused)
+	skip_panel.focus_neighbor_left = skip_panel.get_path_to(slot_r_panel)
+	skip_panel.focus_entered.connect(_on_skip_focused)
+	skip_panel.gui_input.connect(_on_skip_gui_input)
+	skip_panel.mouse_entered.connect(func(): skip_panel.grab_focus())
 
 	AlienTechManager.selection_ready.connect(_on_selection_ready)
 
@@ -163,6 +203,8 @@ func _process(delta: float) -> void:
 			_input_armed = true
 
 	_update_name_shine()
+	_update_skip_shine()
+	_update_menu_flair(delta)
 
 	var active_blink_on := int(Time.get_ticks_msec() / _ACTIVE_BLINK_PERIOD_MSEC) % 2 == 0
 	var input_alpha := 1.0 if active_blink_on else _ACTIVE_BLINK_LOW_ALPHA
@@ -175,12 +217,15 @@ func _process(delta: float) -> void:
 	if _slot_hot_blinking[1]:
 		slot_r_hot_badge.modulate.a = input_alpha
 
-	if _candidate_slot != -1:
-		_pulse_time += delta
-		var t := fmod(_pulse_time, _CANDIDATE_PULSE_PERIOD_SEC) / _CANDIDATE_PULSE_PERIOD_SEC
-		var pulse := (sin(t * TAU) + 1.0) * 0.5
-		_style_candidate.border_color = Color(0.4, 1.0, 0.4, lerpf(_CANDIDATE_BORDER_ALPHA_RANGE.x, _CANDIDATE_BORDER_ALPHA_RANGE.y, pulse))
-		_style_candidate.bg_color = Color(0.4, 1.0, 0.4, lerpf(_CANDIDATE_BG_ALPHA_RANGE.x, _CANDIDATE_BG_ALPHA_RANGE.y, pulse))
+	# Skip is now a third slot-like panel using this same _style_candidate
+	# object when it's the focused one (_candidate_slot == -1), so the pulse
+	# always has exactly one live user — no need to gate this on a specific
+	# _candidate_slot value anymore.
+	_pulse_time += delta
+	var t := fmod(_pulse_time, _CANDIDATE_PULSE_PERIOD_SEC) / _CANDIDATE_PULSE_PERIOD_SEC
+	var pulse := (sin(t * TAU) + 1.0) * 0.5
+	_style_candidate.border_color = Color(0.4, 1.0, 0.4, lerpf(_CANDIDATE_BORDER_ALPHA_RANGE.x, _CANDIDATE_BORDER_ALPHA_RANGE.y, pulse))
+	_style_candidate.bg_color = Color(0.4, 1.0, 0.4, lerpf(_CANDIDATE_BG_ALPHA_RANGE.x, _CANDIDATE_BG_ALPHA_RANGE.y, pulse))
 
 
 func _on_selection_ready(choices: Array):
@@ -192,6 +237,7 @@ func _on_selection_ready(choices: Array):
 	get_tree().paused = true
 	_input_armed = false
 	_input_arm_elapsed = 0.0
+	_menu_flair_time = 0.0
 	if _candidate_slot == 1:
 		slot_r_panel.grab_focus()
 	else:
@@ -220,6 +266,47 @@ func _update_name_shine() -> void:
 	_shine_material.set_shader_parameter("band_left_uv", text_left / vp_width)
 	_shine_material.set_shader_parameter("band_right_uv", (text_left + text_width) / vp_width)
 	_shine_material.set_shader_parameter("shine_time", Time.get_ticks_msec() / 1000.0)
+
+
+## Same technique as _update_name_shine(), but only while Skip is actually
+## the focused/candidate option (_candidate_slot == -1) — skip_label doesn't
+## carry the shine material at all otherwise, see _on_skip_focused()/
+## _on_slot_focused().
+func _update_skip_shine() -> void:
+	if _candidate_slot != -1 or skip_label.material == null:
+		return
+	var font := skip_label.get_theme_font("font")
+	var font_size := skip_label.get_theme_font_size("font_size")
+	var text_width := font.get_string_size(skip_label.text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+	var label_rect := skip_label.get_global_rect()
+	var vp_width := get_viewport().get_visible_rect().size.x
+	_skip_shine_material.set_shader_parameter("band_left_uv", label_rect.position.x / vp_width)
+	_skip_shine_material.set_shader_parameter("band_right_uv", (label_rect.position.x + text_width) / vp_width)
+	_skip_shine_material.set_shader_parameter("shine_time", (Time.get_ticks_msec() - _skip_shine_start_msec) / 1000.0)
+
+
+## Gives the outer card a slow, living shimmer instead of a static color —
+## the border hue drifts through a violet-to-pink range, and the background
+## pulses in brightness on its own out-of-phase cycle so nothing feels
+## mechanically synced. Purely cosmetic, unrelated to the (separate) green
+## candidate pulse on whichever slot/Skip currently has focus.
+func _update_menu_flair(delta: float) -> void:
+	_menu_flair_time += delta
+
+	var hue_t := (sin(_menu_flair_time * TAU / _MENU_BORDER_HUE_PERIOD_SEC) + 1.0) * 0.5
+	var hue := lerpf(_MENU_BORDER_HUE_MIN, _MENU_BORDER_HUE_MAX, hue_t)
+	_menu_style.border_color = Color.from_hsv(hue, _MENU_BORDER_SATURATION, 1.0)
+
+	# Phase-shifted from the border cycle above so the background never
+	# breathes in lockstep with it.
+	var bright_t := (sin(_menu_flair_time * TAU / _MENU_BG_PULSE_PERIOD_SEC + 2.0) + 1.0) * 0.5
+	var brightness := lerpf(_MENU_BG_BRIGHTNESS_RANGE.x, _MENU_BG_BRIGHTNESS_RANGE.y, bright_t)
+	_menu_style.bg_color = Color(
+		_MENU_BG_BASE_COLOR.r * brightness,
+		_MENU_BG_BASE_COLOR.g * brightness,
+		_MENU_BG_BASE_COLOR.b * brightness,
+		_MENU_BG_BASE_COLOR.a
+	)
 
 
 func _build_offer_display(tech: Dictionary):
@@ -325,6 +412,7 @@ func _render_slot(slot_index: int, tech: Dictionary, is_really_equipped: bool):
 func _apply_candidate_style():
 	slot_l_panel.add_theme_stylebox_override("panel", _style_candidate if _candidate_slot == 0 else _style_unfocused)
 	slot_r_panel.add_theme_stylebox_override("panel", _style_candidate if _candidate_slot == 1 else _style_unfocused)
+	skip_panel.add_theme_stylebox_override("panel", _style_candidate if _candidate_slot == -1 else _style_unfocused)
 
 
 func _on_slot_focused(slot_index: int):
@@ -333,13 +421,17 @@ func _on_slot_focused(slot_index: int):
 	_pulse_time = 0.0
 	_refresh_slots()
 	_apply_candidate_style()
+	skip_label.material = null
 
 
 func _on_skip_focused():
 	_sfx_nav.play()
 	_candidate_slot = -1
+	_pulse_time = 0.0
 	_refresh_slots()
 	_apply_candidate_style()
+	_skip_shine_start_msec = Time.get_ticks_msec()
+	skip_label.material = _skip_shine_material
 
 
 # ─── Equip / Skip ─────────────────────────────────────────────────────────────
@@ -351,6 +443,15 @@ func _on_slot_gui_input(event: InputEvent, slot_index: int):
 		is_click = mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT
 	if is_click or event.is_action_pressed("ui_accept"):
 		_equip_into(slot_index)
+
+
+func _on_skip_gui_input(event: InputEvent) -> void:
+	var is_click := false
+	if event is InputEventMouseButton:
+		var mb := event as InputEventMouseButton
+		is_click = mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT
+	if is_click or event.is_action_pressed("ui_accept"):
+		_on_skip_pressed()
 
 
 func _equip_into(slot_index: int):

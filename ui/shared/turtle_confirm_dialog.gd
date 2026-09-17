@@ -43,6 +43,15 @@ var _previous_focus: Control = null
 
 func show_dialog(message: String, options: Array, title: String = "") -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	# This dialog is always add_child()'d onto whatever menu is opening it, so
+	# it's a CanvasLayer nested inside that menu's own CanvasLayer. Nested
+	# CanvasLayers composite purely by `layer` number, globally, regardless of
+	# tree nesting — leaving this at the default (1), the same as every menu
+	# that might spawn it, means which one wins is undefined (it happened to
+	# render on top for pause_menu/game_over/main_menu but landed *underneath*
+	# alien_tech_selection_screen). Force it above anything else in the game.
+	layer = 10
+	_options = options
 	# Freeing this dialog's own focused button (in _choose(), below) leaves
 	# the viewport with no focus owner at all — nothing restores it
 	# automatically, so whichever button opened this dialog would silently
@@ -59,7 +68,6 @@ func show_dialog(message: String, options: Array, title: String = "") -> void:
 	# (not _unhandled_input()) is required for that priority to matter, since
 	# _unhandled_input only ever sees events no _input() already consumed.
 	process_priority = -1000
-	_options = options
 
 	_sfx_nav = AudioStreamPlayer.new()
 	_sfx_nav.stream = _SFX_MENU_NAV
