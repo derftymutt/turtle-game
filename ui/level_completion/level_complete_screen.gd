@@ -33,7 +33,7 @@ func show_completion(
 		title_label.text = "Level %d Complete!" % level_number
 
 	if score_label:
-		score_label.text = "Level Score: %d" % level_score
+		score_label.text = "Level Score: %s" % FormatUtil.comma_int(level_score)
 
 	if time_bonus_label:
 		time_bonus_label.text = "Time Bonus: +%d" % time_bonus
@@ -53,7 +53,7 @@ func show_completion(
 		variety_label.modulate = Color.MEDIUM_PURPLE
 
 	if total_score_label:
-		total_score_label.text = "Total Score: %d" % run_total
+		total_score_label.text = "Total Score: %s" % FormatUtil.comma_int(run_total)
 
 	if attempts_label:
 		if level_continues == 0:

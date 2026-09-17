@@ -123,10 +123,10 @@ func show_game_over(level_score: int, run_total: int, death_cause: String = ""):
 		hint_label.text = _pick_hint()
 
 	if final_score_label:
-		final_score_label.text = "Level Score: %d" % level_score
+		final_score_label.text = "Level Score: %s" % FormatUtil.comma_int(level_score)
 
 	if total_score_label:
-		total_score_label.text = "Run Total: %d" % run_total
+		total_score_label.text = "Run Total: %s" % FormatUtil.comma_int(run_total)
 		total_score_label.visible = run_total > 0
 
 	if attempts_label:

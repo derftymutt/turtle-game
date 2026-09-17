@@ -60,7 +60,7 @@ func _build_buttons(grab_focus: bool = true):
 		var records_label := Label.new()
 		var records_text := ""
 		if best_victory > 0:
-			records_text += "Best Score: %d" % best_victory
+			records_text += "Best Score: %s" % FormatUtil.comma_int(best_victory)
 		if best_time_ms > 0:
 			if records_text != "":
 				records_text += "   "

@@ -43,7 +43,7 @@ func _ready():
 
 	# Populate labels
 	if final_score_label:
-		final_score_label.text = "Final Score: %d" % final_score
+		final_score_label.text = "Final Score: %s" % FormatUtil.comma_int(final_score)
 
 	if attempts_label:
 		if total_continues == 0:
@@ -61,7 +61,7 @@ func _ready():
 		success_time_label.text = "Successful Time: %s" % _format_ms(success_ms)
 
 	if best_score_label:
-		best_score_label.text = "Best Victory: %d" % new_best
+		best_score_label.text = "Best Victory: %s" % FormatUtil.comma_int(new_best)
 		best_score_label.visible = true
 
 	if new_best_label:
