@@ -63,6 +63,8 @@ const _INPUT_ARM_TIMEOUT_SEC: float = 1.5
 @onready var skip_panel: PanelContainer = $"Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonsRow/SkipPanel"
 @onready var skip_label: Label = $"Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonsRow/SkipPanel/SkipRow/SkipLabel"
 
+@onready var help_panel: PanelContainer = $"Control/CenterContainer/PanelContainer/HelpMargin/HelpPanel"
+
 # Skip is styled as a third slot-like panel (same _style_unfocused/
 # _style_candidate pulsing border as the two tech slots, see _ready() and
 # _apply_candidate_style()) rather than a plain button, so this menu reads as
@@ -94,9 +96,12 @@ var _sfx_select: AudioStreamPlayer
 
 var _pending_tech_id: String = ""
 
-# Which slot currently previews the found tech: 0 (left), 1 (right), or -1
-# when Skip has focus and neither slot should preview it.
+# Which slot currently previews the found tech: 0 (left), 1 (right), -1 when
+# Skip has focus, or _HELP_CANDIDATE when Help has focus — the last two both
+# mean neither slot should preview it.
 var _candidate_slot: int = 0
+
+const _HELP_CANDIDATE: int = -2
 
 # Whether each slot currently needs a blinking input hint (set on each
 # display refresh, read every _process so the blink itself costs no lookups).
@@ -184,6 +189,14 @@ func _ready():
 	skip_panel.focus_entered.connect(_on_skip_focused)
 	skip_panel.gui_input.connect(_on_skip_gui_input)
 	skip_panel.mouse_entered.connect(func(): skip_panel.grab_focus())
+
+	help_panel.add_theme_stylebox_override("panel", _style_unfocused)
+	help_panel.focus_entered.connect(_on_help_focused)
+	help_panel.gui_input.connect(_on_help_gui_input)
+	help_panel.mouse_entered.connect(func(): help_panel.grab_focus())
+	help_panel.focus_neighbor_bottom = help_panel.get_path_to(slot_l_panel)
+	slot_l_panel.focus_neighbor_top = slot_l_panel.get_path_to(help_panel)
+	slot_r_panel.focus_neighbor_top = slot_r_panel.get_path_to(help_panel)
 
 	AlienTechManager.selection_ready.connect(_on_selection_ready)
 
@@ -413,6 +426,7 @@ func _apply_candidate_style():
 	slot_l_panel.add_theme_stylebox_override("panel", _style_candidate if _candidate_slot == 0 else _style_unfocused)
 	slot_r_panel.add_theme_stylebox_override("panel", _style_candidate if _candidate_slot == 1 else _style_unfocused)
 	skip_panel.add_theme_stylebox_override("panel", _style_candidate if _candidate_slot == -1 else _style_unfocused)
+	help_panel.add_theme_stylebox_override("panel", _style_candidate if _candidate_slot == _HELP_CANDIDATE else _style_unfocused)
 
 
 func _on_slot_focused(slot_index: int):
@@ -434,6 +448,15 @@ func _on_skip_focused():
 	skip_label.material = _skip_shine_material
 
 
+func _on_help_focused():
+	_sfx_nav.play()
+	_candidate_slot = _HELP_CANDIDATE
+	_pulse_time = 0.0
+	_refresh_slots()
+	_apply_candidate_style()
+	skip_label.material = null
+
+
 # ─── Equip / Skip ─────────────────────────────────────────────────────────────
 
 func _on_slot_gui_input(event: InputEvent, slot_index: int):
@@ -452,6 +475,23 @@ func _on_skip_gui_input(event: InputEvent) -> void:
 		is_click = mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT
 	if is_click or event.is_action_pressed("ui_accept"):
 		_on_skip_pressed()
+
+
+func _on_help_gui_input(event: InputEvent) -> void:
+	var is_click := false
+	if event is InputEventMouseButton:
+		var mb := event as InputEventMouseButton
+		is_click = mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT
+	if is_click or event.is_action_pressed("ui_accept"):
+		_show_help_dialog()
+
+
+func _show_help_dialog():
+	if _sfx_select:
+		_sfx_select.play()
+	var dialog := AlienTechHelpDialog.new()
+	add_child(dialog)
+	dialog.show_dialog()
 
 
 func _equip_into(slot_index: int):

@@ -301,3 +301,24 @@ mouse_filter = 2
 size_flags_vertical = 4
 theme_override_font_sizes/font_size = 13
 text = "Skip"
+
+[node name="HelpMargin" type="MarginContainer" parent="Control/CenterContainer/PanelContainer" unique_id=300000099]
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 0
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 10
+
+[node name="HelpPanel" type="PanelContainer" parent="Control/CenterContainer/PanelContainer/HelpMargin" unique_id=300000097]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+focus_mode = 2
+mouse_filter = 0
+mouse_default_cursor_shape = 2
+
+[node name="HelpLabel" type="Label" parent="Control/CenterContainer/PanelContainer/HelpMargin/HelpPanel" unique_id=300000098]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "?"
+horizontal_alignment = 1
+vertical_alignment = 1
