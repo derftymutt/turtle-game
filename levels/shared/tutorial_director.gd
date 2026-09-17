@@ -49,7 +49,7 @@ const INTRO_HINT := "\n▶  Swim with the Left Stick (or W A S D)"
 ## Reference copy of the wording — built as rich text in _show_energy_prompt()
 ## instead (same pattern as INTRO_TEXT/_show_intro()) so the icon/bar images
 ## can sit inline.
-const ENERGY_TEXT := "Swimming uses energy, which is tracked by a small bar above you. [turtle+bar icon]\nA large version is at the top right [icon+bar]\n\nYou recover energy slowly when not swimming.\n\nBUT- you can recover it QUICKLY [sparkle] as well.\n\n\nGo to the surface. (larger font)\n\nYou will see the yellow sparkles [sparkle] of QUICK energy recovery."
+const ENERGY_TEXT := "Tired? Swimming uses energy, which is tracked by a small bar above you. [turtle+bar icon]\nA large version is at the top right [icon+bar]\n\nYou recover energy slowly when not swimming.\n\nBUT- you can recover it QUICKLY [sparkle] as well.\n\n\nGo to the surface. (larger font)\n\nYou will see the yellow sparkles [sparkle] of QUICK energy recovery."
 
 ## Reference copy — built from FlipperFastRow + FlipperBody in
 ## _show_flipper_prompt() instead, so the sparkle can land on "QUICKLY" here too.
@@ -81,12 +81,17 @@ const SURFACE_DEPTH := 24.0
 ## to stay put at the surface. A flat 1s gives them a moment to actually see
 ## the fast-recharge sparkle before being pulled into the next beat, while
 ## still short enough that a normal surface-and-dive can't slip past it.
-const SURFACE_WATCH_SECONDS := 1.0
+const SURFACE_WATCH_SECONDS := 1.5
 const DISMISS_ARM_DELAY := 0.45
 ## Energy fraction that counts as "into the red". A fraction rather than
 ## HUD.can_thrust() (energy < 15) because aggressive recovery means the hard
 ## floor is rarely reached in normal swimming.
 const ENERGY_LOW_FRACTION := 0.22
+## Same flat-delay idea as SURFACE_WATCH_SECONDS: once energy first dips into
+## the red, wait this long before interrupting with the lesson, so the player
+## actually feels being low on energy for a beat (sluggish, can't thrust much)
+## instead of getting yanked into a menu the instant it happens.
+const ENERGY_DEPLETED_WATCH_SECONDS := 2.0
 
 ## Same blinking-gold treatment as the alien tech selection / pause menu
 ## input hints, so a control prompt reads the same everywhere in the game.
@@ -145,6 +150,7 @@ var _turtle: Node2D = null
 var _ocean: Node = null
 var _pinball: Node2D = null
 var _surface_time := 0.0
+var _energy_depleted_time := 0.0
 var _arm_timer := 0.0
 var _dismiss_down_last := false
 var _dismiss_held_at_pause := false
@@ -200,9 +206,15 @@ func _process(delta: float) -> void:
 				_step = Step.TO_ENERGY
 
 		Step.TO_ENERGY:
-			if _energy_depleted():
-				_step = Step.ENERGY_PAUSED
-				_pause_with_energy_prompt()
+			# Flat delay once energy first dips into the red (see
+			# ENERGY_DEPLETED_WATCH_SECONDS) — same "keeps ticking regardless
+			# of what they do next" idea as SURFACE_WATCH, so they get a beat
+			# to actually feel low-energy swimming before the lesson interrupts.
+			if _energy_depleted_time > 0.0 or _energy_depleted():
+				_energy_depleted_time += delta
+				if _energy_depleted_time >= ENERGY_DEPLETED_WATCH_SECONDS:
+					_step = Step.ENERGY_PAUSED
+					_pause_with_energy_prompt()
 
 		Step.ENERGY_PAUSED:
 			if _dismiss_ready(delta):
@@ -576,7 +588,7 @@ func _show_energy_prompt() -> void:
 	_message_rich.visible = true
 	_message_rich.clear()
 	_message_rich.push_paragraph(HORIZONTAL_ALIGNMENT_CENTER)
-	_message_rich.append_text("Swimming uses energy ")
+	_message_rich.append_text("Tired? Swimming uses energy ")
 	_message_rich.add_image(ENERGY_ICON, ENERGY_ICON_SIZE.x, ENERGY_ICON_SIZE.y)
 	_message_rich.append_text(", which is tracked by a small bar above you. ")
 	_message_rich.add_image(TURTLE_ENERGY_BAR_ICON, TURTLE_ENERGY_BAR_ICON_SIZE.x, TURTLE_ENERGY_BAR_ICON_SIZE.y)
