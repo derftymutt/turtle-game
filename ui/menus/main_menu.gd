@@ -394,19 +394,22 @@ func _on_new_game_pressed():
 
 func _confirm_overwrite_save():
 	var level = SaveManager.get_save_level()
-	var dialog = ConfirmationDialog.new()
-	dialog.title = "Start New Game?"
-	dialog.dialog_text = "Your saved progress at Level %d will be lost." % level
-	dialog.ok_button_text = "New Game"
-	dialog.cancel_button_text = "Cancel"
+	var dialog := TurtleConfirmDialog.new()
 	add_child(dialog)
-	dialog.confirmed.connect(func():
+	# A multi-line lambda nested inside an array/dict literal confuses
+	# GDScript's indentation parser ("unindent doesn't match" at the dict's
+	# closing brace) — define it as a plain local first instead.
+	var do_new_game := func():
 		SaveManager.delete_save()
-		dialog.queue_free()
 		_start_new_game()
+	dialog.show_dialog(
+		"Your saved progress at Level %d will be lost." % level,
+		[
+			{"text": "New Game", "callback": do_new_game},
+			{"text": "Cancel", "is_cancel": true},
+		],
+		"Start New Game?"
 	)
-	dialog.canceled.connect(func(): dialog.queue_free())
-	dialog.popup_centered()
 
 
 func _start_new_game():

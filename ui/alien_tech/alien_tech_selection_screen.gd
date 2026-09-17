@@ -375,21 +375,21 @@ func _confirm_skip():
 		return
 	var tech = AlienTechRegistry.get_tech(_pending_tech_id)
 	var tech_name: String = tech.get("name", "this tech")
-	var dialog = ConfirmationDialog.new()
-	dialog.dialog_text = "Are you sure you don't wanna equip %s?" % tech_name
-	dialog.ok_button_text = "Skip It"
-	dialog.cancel_button_text = "Keep Looking"
-	dialog.process_mode = Node.PROCESS_MODE_ALWAYS
+	var dialog := TurtleConfirmDialog.new()
 	add_child(dialog)
-	dialog.confirmed.connect(func():
-		dialog.queue_free()
+	# A multi-line lambda nested inside an array/dict literal confuses
+	# GDScript's indentation parser ("unindent doesn't match" at the dict's
+	# closing brace) — define it as a plain local first instead.
+	var do_skip := func():
 		AlienTechManager.record_skipped_tech(_pending_tech_id)
 		_close_screen()
+	dialog.show_dialog(
+		"Are you sure you don't wanna equip %s?" % tech_name,
+		[
+			{"text": "Skip It", "callback": do_skip},
+			{"text": "Keep Looking", "is_cancel": true},
+		]
 	)
-	dialog.canceled.connect(func():
-		dialog.queue_free()
-	)
-	dialog.popup_centered()
 
 
 func _close_screen():

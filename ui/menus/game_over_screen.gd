@@ -174,28 +174,23 @@ func show_game_over(level_score: int, run_total: int, death_cause: String = ""):
 		continue_button.grab_focus()
 
 func _show_save_prompt(action: Callable):
-	var dialog = ConfirmationDialog.new()
-	dialog.title = "Save Progress?"
-	dialog.dialog_text = "Save and resume at Level %d later?" % LevelManager.current_level_number
-	dialog.ok_button_text = "Save"
-	dialog.cancel_button_text = "Cancel"
-	dialog.process_mode = Node.PROCESS_MODE_ALWAYS
+	var dialog := TurtleConfirmDialog.new()
 	add_child(dialog)
-	dialog.add_button("Don't Save", false, "no_save")
-	dialog.confirmed.connect(func():
+	# A multi-line lambda nested inside an array/dict literal confuses
+	# GDScript's indentation parser ("unindent doesn't match" at the dict's
+	# closing brace) — define it as a plain local first instead.
+	var do_save := func():
 		SaveManager.save_game()
-		dialog.queue_free()
 		action.call()
+	dialog.show_dialog(
+		"Save and resume at Level %d later?" % LevelManager.current_level_number,
+		[
+			{"text": "Save", "callback": do_save},
+			{"text": "Don't Save", "callback": action},
+			{"text": "Cancel", "is_cancel": true},
+		],
+		"Save Progress?"
 	)
-	dialog.canceled.connect(func():
-		dialog.queue_free()
-	)
-	dialog.custom_action.connect(func(action_name: StringName):
-		if action_name == "no_save":
-			dialog.queue_free()
-			action.call()
-	)
-	dialog.popup_centered()
 
 func _on_continue_button_pressed():
 	if _sfx_select:
