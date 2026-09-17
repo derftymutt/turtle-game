@@ -15,6 +15,7 @@
 [ext_resource type="PackedScene" uid="uid://4het8fdlmvgj" path="res://entities/environment/flippers/flipper_left_down.tscn" id="27_flpl"]
 [ext_resource type="PackedScene" uid="uid://b5olvcks1vnwn" path="res://entities/environment/flippers/flipper_right_down.tscn" id="28_flpr"]
 [ext_resource type="PackedScene" uid="uid://8edo3etakc1a" path="res://entities/environment/walls/dead_wall/dead_wall.tscn" id="29_dwal"]
+[ext_resource type="Texture2D" uid="uid://b1k0cgwrgpiy6" path="res://entities/player/sprites/turtle_idle.png" id="30_turtleicon"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ntdhj"]
 texture = ExtResource("25_0fu15")
@@ -37,6 +38,18 @@ size = Vector2(8.000166, 759.0005)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_4knja"]
 size = Vector2(8.000183, 768.00024)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tutorialprompt"]
+bg_color = Color(0.03, 0.1654902, 0.415, 0.7)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.4, 1.0, 0.45, 1.0)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hinticon"]
+atlas = ExtResource("30_turtleicon")
+region = Rect2(48, 0, 24, 24)
 
 [node name="Tutorial" unique_id=519430445 instance=ExtResource("1_lrvbd")]
 script = ExtResource("2_jfmsd")
@@ -158,6 +171,7 @@ offset_left = 24.0
 offset_top = -100.0
 offset_right = -24.0
 offset_bottom = 160.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_tutorialprompt")
 
 [node name="Margin" type="MarginContainer" parent="TutorialUI/Prompt" index="0" unique_id=1955969009]
 layout_mode = 0
@@ -300,13 +314,26 @@ Flip with the  LT / RT  triggers   (or Left Shift / Right Shift)."
 horizontal_alignment = 1
 autowrap_mode = 2
 
-[node name="Hint" type="Label" parent="TutorialUI/Prompt/Margin/VBox" index="6" unique_id=91583155]
+[node name="HintRow" type="HBoxContainer" parent="TutorialUI/Prompt/Margin/VBox" index="6" unique_id=300000250]
+layout_mode = 2
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="HintIcon" type="TextureRect" parent="TutorialUI/Prompt/Margin/VBox/HintRow" index="0" unique_id=300000251]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+size_flags_vertical = 4
+texture = SubResource("AtlasTexture_hinticon")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Hint" type="Label" parent="TutorialUI/Prompt/Margin/VBox/HintRow" index="1" unique_id=91583155]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
 theme_override_font_sizes/font_size = 16
-text = "
-▶  Swim with W A S D"
+text = "Swim with W A S D"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="PinballElements" type="Node2D" parent="." index="20" unique_id=1928819697]
 visible = false

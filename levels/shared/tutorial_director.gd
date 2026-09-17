@@ -44,7 +44,7 @@ const TRASH_SEQUENCE_SCENE := preload("res://systems/trash_cleanup/trash_sequenc
 const TRASH_CLUSTER_SCENE := preload("res://entities/collectibles/trash_cluster/trash_cluster.tscn")
 
 const INTRO_TEXT := "You are Flip, UFO Repair Turtle.\n\nYour goal is to pick up UFO parts and bring them to your UFO Workshop.\n\nGive it a try!"
-const INTRO_HINT := "\n▶  Swim with the Left Stick (or W A S D)"
+const INTRO_HINT := "Swim with the Left Stick (or W A S D)"
 
 ## Reference copy of the wording — built as rich text in _show_energy_prompt()
 ## instead (same pattern as INTRO_TEXT/_show_intro()) so the icon/bar images
@@ -54,23 +54,23 @@ const ENERGY_TEXT := "Tired? Swimming uses energy, which is tracked by a small b
 ## Reference copy — built from FlipperFastRow + FlipperBody in
 ## _show_flipper_prompt() instead, so the sparkle can land on "QUICKLY" here too.
 const FLIPPER_TEXT := "You also recover energy QUICKLY [sparkle] while TOUCHING pinball walls and flippers. THIS IS KEY!!\n\nPlus, flippers are a great way to get around — life is much easier when you use them. Try launching yourself deep into the ocean to reach the UFO part.\n\nFlip with the LT / RT triggers (or Left Shift / Right Shift)."
-const FLIPPER_HINT_LEFT := "\n▶  Try the LEFT flipper: LT (or Left Shift)"
-const FLIPPER_HINT_RIGHT := "\n▶  Now the RIGHT flipper: RT (or Right Shift)"
+const FLIPPER_HINT_LEFT := "Try the LEFT flipper: LT (or Left Shift)"
+const FLIPPER_HINT_RIGHT := "Now the RIGHT flipper: RT (or Right Shift)"
 
 const DROP_NOW_TEXT := "UFO parts are heavy. You can drop them if you need to with X (or Space).\n\nDrop the part now (and then go pick it up!)."
-const DROP_NOW_HINT := "\n▶  Push X (or Space) to drop the part"
+const DROP_NOW_HINT := "Push X (or Space) to drop the part"
 
 const MEANIES_TEXT := "Look out for meanies! You can shoot most of them with your turtle spit.\nAim with the Right Stick (or I J K L)."
 
 const SHOOT_TEXT := "Try shooting turtle spit now."
-const SHOOT_HINT := "\n▶  Use the Right Stick to shoot turtle spit in any direction"
+const SHOOT_HINT := "Use the Right Stick to shoot turtle spit in any direction"
 
 const TRASH_TEXT := "You can also shoot trash you find floating by. Get it all and you'll get rewarded..."
 
 const FINAL_TEXT := "You're ready!\nDeliver UFO parts to complete each level.\n\nOh yeah... just don't forget to breathe!"
 
-const CONTINUE_HINT := "\n▶  Press A / Enter to continue"
-const FINISH_HINT := "\n▶  Press A / Enter to finish"
+const CONTINUE_HINT := "Press A / Enter to continue"
+const FINISH_HINT := "Press A / Enter to finish"
 
 const MOVE_ACTIONS: Array[StringName] = [&"move_up", &"move_down", &"move_left", &"move_right"]
 ## Generous: the turtle bobs ~0-20px around the waterline while resting there.
@@ -119,7 +119,11 @@ const TRASH_SAFETY_SECONDS := 34.0
 @onready var _flipper_fast_row:    HBoxContainer = $Prompt/Margin/VBox/FlipperFastRow
 @onready var _flipper_fast_word:   Label         = $Prompt/Margin/VBox/FlipperFastRow/Word
 @onready var _flipper_body:        Label         = $Prompt/Margin/VBox/FlipperBody
-@onready var _hint: Label = $Prompt/Margin/VBox/Hint
+@onready var _hint: Label = $Prompt/Margin/VBox/HintRow/Hint
+## The turtle-icon+text row as a whole — blinked together (see _process()) so
+## the icon reads as part of the same "this line is actionable" prompt
+## instead of just sitting there while the text pulses on its own.
+@onready var _hint_row: HBoxContainer = $Prompt/Margin/VBox/HintRow
 
 # Inline icons for the intro prompt (first frame of each sprite sheet).
 const PART_ICON := preload("res://entities/collectibles/ufo_piece/sprites/ufo_piece_grey.png")
@@ -191,9 +195,9 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	if _hint.visible:
+	if _hint_row.visible:
 		var blink_on := int(Time.get_ticks_msec() / HINT_BLINK_PERIOD_MSEC) % 2 == 0
-		_hint.modulate.a = 1.0 if blink_on else HINT_BLINK_LOW_ALPHA
+		_hint_row.modulate.a = 1.0 if blink_on else HINT_BLINK_LOW_ALPHA
 
 	if _hud == null or _turtle == null:
 		_resolve_refs()
@@ -542,7 +546,7 @@ func _show_prompt(text: String, hint: String = "") -> void:
 	_message.visible = true
 	_message.text = text
 	_hint.text = hint
-	_hint.visible = hint != ""
+	_hint_row.visible = hint != ""
 	_prompt.modulate.a = 0.0
 	_prompt.visible = true
 	_prompt_tween = create_tween()
@@ -567,7 +571,7 @@ func _show_intro() -> void:
 	_message_rich.append_text(".\n\nGive it a try!")
 	_message_rich.pop()
 	_hint.text = INTRO_HINT
-	_hint.visible = true
+	_hint_row.visible = true
 	_prompt.modulate.a = 0.0
 	_prompt.visible = true
 	_prompt_tween = create_tween()
@@ -599,7 +603,7 @@ func _show_energy_prompt() -> void:
 	_energy_fast_row.visible = true
 	_energy_sparkle_row.visible = true
 	_hint.text = CONTINUE_HINT
-	_hint.visible = true
+	_hint_row.visible = true
 	_prompt.modulate.a = 0.0
 	_prompt.visible = true
 	_prompt_tween = create_tween()
@@ -621,7 +625,7 @@ func _show_flipper_prompt() -> void:
 	_flipper_fast_row.visible = true
 	_flipper_body.visible = true
 	_hint.text = FLIPPER_HINT_LEFT
-	_hint.visible = true
+	_hint_row.visible = true
 	_prompt.modulate.a = 0.0
 	_prompt.visible = true
 	_prompt_tween = create_tween()
@@ -718,7 +722,7 @@ func _hide_all_sparkles() -> void:
 ## Swap just the hint line without re-fading the whole prompt.
 func _set_hint(text: String) -> void:
 	_hint.text = text
-	_hint.visible = text != ""
+	_hint_row.visible = text != ""
 
 
 # ── Pinball reveal ───────────────────────────────────────────────────────
