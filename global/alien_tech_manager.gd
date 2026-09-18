@@ -69,6 +69,8 @@ const STIM_SHOT_COOLDOWN_DURATION: float = 8.0
 
 const MULTI_LANCE_COOLDOWN_DURATION: float = 3.0
 
+const DERMAL_REGEN_COOLDOWN_DURATION: float = 30.0
+
 const _COOLDOWN_DURATIONS: Dictionary = {
 	AlienTechRegistry.INERTIA_DAMPENER: INERTIA_DAMPENER_ACTIVE_DURATION + INERTIA_DAMPENER_COOLDOWN_DURATION,
 	AlienTechRegistry.LATERAL_THRUST:   5.0,
@@ -84,6 +86,7 @@ const _COOLDOWN_DURATIONS: Dictionary = {
 	AlienTechRegistry.ION_EXCITER:       ION_EXCITER_ACTIVE_DURATION + ION_EXCITER_COOLDOWN_DURATION,
 	AlienTechRegistry.STIM_SHOT:      STIM_SHOT_ACTIVE_DURATION + STIM_SHOT_COOLDOWN_DURATION,
 	AlienTechRegistry.MULTI_LANCE:    MULTI_LANCE_COOLDOWN_DURATION,
+	AlienTechRegistry.DERMAL_REGEN:   DERMAL_REGEN_COOLDOWN_DURATION,
 }
 
 # Techs whose cooldown doesn't start draining on press: try_activate_slot()
@@ -92,6 +95,7 @@ const _COOLDOWN_DURATIONS: Dictionary = {
 # i.e. the cooldown runs from the END of the action, not its start.
 const _HOLD_COOLDOWN_TECHS: Array[String] = [
 	AlienTechRegistry.MULTI_LANCE,
+	AlienTechRegistry.DERMAL_REGEN,  # only runs if the heal lands — a cancelled channel releases with 0
 ]
 
 # Per slot index (not tech id) so it travels with swap_slots().

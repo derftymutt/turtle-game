@@ -1417,6 +1417,10 @@ func suspend_control(duration: float):
 	control_suspend_timer = duration
 	print("Player: Control suspended for ", duration, "s!")
 
+func end_control_suspension():
+	"""Cut a stun short (e.g. Dermal Regenerator's channel ending early)"""
+	control_suspend_timer = 0.0
+
 # ---------------------------------------------------------------------------
 # FLIPPER VELCRO
 # ---------------------------------------------------------------------------

@@ -98,13 +98,13 @@ var _definitions: Array[Dictionary] = [
 	{
 		"id":              DERMAL_REGEN,
 		"name":            "Dermal Regenerator",
-		"description":     "Hold tech button to heal. One use per level.\nTaking damage during activation time cancels it.",
+		"description":     "Heals 2 hearts (after a good shocking). 30s cooldown.",
 		"hook":            "Lacerations be gone!",
 		"slot_label":      "Dermal Regenerator",
 		"needs_input":     true,
 		"has_passive_bar": true,
 		"color":           Color(0.2, 1.0, 0.4),
-		"hot_description": "Instant, full heal — no activation time needed.",
+		"hot_description": "Full heal.",
 	},
 	{
 		"id":              BUMPER_MAGNET,
