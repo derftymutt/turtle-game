@@ -108,8 +108,12 @@ size = Vector2(14, 14)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_3f2u0"]
 size = Vector2(14, 14)
 
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_slick"]
+friction = 0.1
+
 [node name="Powerup" type="RigidBody2D" unique_id=99663413]
 collision_layer = 2
+physics_material_override = SubResource("PhysicsMaterial_slick")
 script = ExtResource("1_ieaf5")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1580218334]
