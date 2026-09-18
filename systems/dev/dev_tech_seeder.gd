@@ -14,7 +14,7 @@ class_name DevTechSeeder
 	"Phase Shifter", "Powerup Replicator", "Deflector Shield",
 	"Chrono Stasis", "Flipper Velcro", "Disturbance Wave", "Vacuum Grip",
 	"Graviton Harness", "Plasma Spit", "Magnetic Repulsion", "Hydro Funnel",
-	"Quantum Mirror"
+	"Quantum Mirror", "Ion Exciter"
 ) var slot_a: int = 0
 
 @export_enum(
@@ -24,7 +24,7 @@ class_name DevTechSeeder
 	"Phase Shifter", "Powerup Replicator", "Deflector Shield",
 	"Chrono Stasis", "Flipper Velcro", "Disturbance Wave", "Vacuum Grip",
 	"Graviton Harness", "Plasma Spit", "Magnetic Repulsion", "Hydro Funnel",
-	"Quantum Mirror"
+	"Quantum Mirror", "Ion Exciter"
 ) var slot_b: int = 0
 
 ## Force the seeded slot straight to HOT state, for testing hot effects without
@@ -55,6 +55,7 @@ const _TECH_IDS: Array[String] = [
 	AlienTechRegistry.MAGNETIC_REPULSION,
 	AlienTechRegistry.HYDRO_FUNNEL,
 	AlienTechRegistry.QUANTUM_MIRROR,
+	AlienTechRegistry.ION_EXCITER,
 ]
 
 func _ready() -> void:

@@ -264,6 +264,9 @@ func hit_body(body: RigidBody2D, is_press_action: bool, was_cradle_release: bool
 	
 	impulse_strength = clamp(impulse_strength, flip_force * 0.5, flip_force * 3.0)
 	
+	if body.has_method("is_ion_exciter_active") and body.is_ion_exciter_active():
+		impulse_strength *= 2.0
+
 	body.linear_velocity += tangent * impulse_strength
 	if _sfx_launch:
 		_sfx_launch.play()

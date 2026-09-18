@@ -208,6 +208,8 @@ func _apply_bumper_force(body: RigidBody2D) -> void:
 	var collision_normal := (body.global_position - global_position).normalized()
 	var current_speed := body.linear_velocity.length()
 	var bounce_force: float = clamp(current_speed * bounce_multiplier, min_bounce_force, max_bounce_force)
+	if body.has_method("is_ion_exciter_active") and body.is_ion_exciter_active():
+		bounce_force *= 2.0
 	body.linear_velocity = collision_normal * bounce_force
 	## Small random angle variation keeps repeated hits from feeling mechanical.
 	body.linear_velocity = body.linear_velocity.rotated(randf_range(-0.1, 0.1))
@@ -278,6 +280,8 @@ func apply_launch_force(body: RigidBody2D, speed_override: float = -1.0) -> void
 	var collision_normal := (body.global_position - global_position).normalized()
 	var effective_speed := speed_override if speed_override > 0.0 else min_bounce_force / bounce_multiplier
 	var bounce_force: float = clamp(effective_speed * bounce_multiplier, min_bounce_force, max_bounce_force)
+	if body.has_method("is_ion_exciter_active") and body.is_ion_exciter_active():
+		bounce_force *= 2.0
 	body.linear_velocity = collision_normal * (bounce_force + 100.0)
 	body.linear_velocity = body.linear_velocity.rotated(randf_range(-0.1, 0.1))
 	_play_hit_animation()

@@ -232,6 +232,7 @@ func _ready():
 	_tech_effects[AlienTechRegistry.DEFLECTOR_SHIELD] = DeflectorShieldEffect.new()
 	_tech_effects[AlienTechRegistry.POWERUP_REPLICATOR] = PowerupReplicatorEffect.new()
 	_tech_effects[AlienTechRegistry.TIME_FREEZE] = TimeFreezeEffect.new()
+	_tech_effects[AlienTechRegistry.ION_EXCITER] = IonExciterEffect.new()
 	for effect in _tech_effects.values():
 		(effect as AlienTechEffect).setup(self)
 
@@ -366,6 +367,8 @@ func _physics_process(delta):
 	_tech_effects[AlienTechRegistry.DEFLECTOR_SHIELD].physics_process(self, delta)
 
 	_tech_effects[AlienTechRegistry.TIME_FREEZE].physics_process(self, delta)
+
+	_tech_effects[AlienTechRegistry.ION_EXCITER].physics_process(self, delta)
 
 	# Ocean physics — suppressed while pinned to a bumper or flipper
 	if not (_tech_effects[AlienTechRegistry.BUMPER_MAGNET] as BumperMagnetEffect).attached and not _flipper_velcro_latched:
@@ -1160,6 +1163,11 @@ func is_magnetic_repulsion_in_effect() -> bool:
 ## suppress its normal hit response while the player orbits it.
 func is_magnet_attached_to(bumper) -> bool:
 	return (_tech_effects[AlienTechRegistry.BUMPER_MAGNET] as BumperMagnetEffect).is_attached_to(bumper)
+
+## Public wrapper for FlipperBase and CircularBumper, which need to know
+## whether to double the launch speed they impart to this player.
+func is_ion_exciter_active() -> bool:
+	return (_tech_effects[AlienTechRegistry.ION_EXCITER] as IonExciterEffect).active
 
 ## Reflects `pos` across the play area's horizontal center (always) and,
 ## when mirror_y is true (hot Quantum Mirror), its vertical center too —

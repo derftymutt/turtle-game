@@ -26,6 +26,7 @@ const PLASMA_SPIT         := "plasma_spit"
 const MAGNETIC_REPULSION  := "magnetic_repulsion"
 const HYDRO_FUNNEL        := "hydro_funnel"
 const QUANTUM_MIRROR      := "quantum_mirror"
+const ION_EXCITER         := "ion_exciter"
 
 # ─── Tech definitions ────────────────────────────────────────────────────────
 
@@ -240,6 +241,17 @@ var _definitions: Array[Dictionary] = [
 		"has_passive_bar": true,
 		"color":           Color(0.85, 0.3, 0.95),
 		"hot_description": "Mirrors both axes — reflect into the ocean depths (or back) instead of just side to side.",
+	},
+	{
+		"id":              ION_EXCITER,
+		"name":            "Ion Exciter",
+		"description":     "Doubles launch speed from flippers and bumpers. 8s active, 5s cooldown.",
+		"hook":            "Turbocharged bounce!",
+		"slot_label":      "Ion Exciter",
+		"needs_input":     true,
+		"has_passive_bar": true,
+		"color":           Color(0.9, 0.9, 0.2),
+		"hot_description": "Click on, click off — no timer, no cooldown.",
 	},
 ]
 

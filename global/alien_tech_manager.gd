@@ -61,6 +61,9 @@ const HYDRO_FUNNEL_COOLDOWN_DURATION: float = 6.0
 const QUANTUM_MIRROR_ACTIVE_DURATION:   float = 5.0
 const QUANTUM_MIRROR_COOLDOWN_DURATION: float = 5.0
 
+const ION_EXCITER_ACTIVE_DURATION:   float = 8.0
+const ION_EXCITER_COOLDOWN_DURATION: float = 5.0
+
 const _COOLDOWN_DURATIONS: Dictionary = {
 	AlienTechRegistry.INERTIA_DAMPENER: INERTIA_DAMPENER_ACTIVE_DURATION + INERTIA_DAMPENER_COOLDOWN_DURATION,
 	AlienTechRegistry.LATERAL_THRUST:   5.0,
@@ -73,6 +76,7 @@ const _COOLDOWN_DURATIONS: Dictionary = {
 	AlienTechRegistry.MAGNETIC_REPULSION: MAGNETIC_REPULSION_ACTIVE_DURATION + MAGNETIC_REPULSION_COOLDOWN_DURATION,
 	AlienTechRegistry.HYDRO_FUNNEL:      HYDRO_FUNNEL_ACTIVE_DURATION + HYDRO_FUNNEL_COOLDOWN_DURATION,
 	AlienTechRegistry.QUANTUM_MIRROR:    QUANTUM_MIRROR_ACTIVE_DURATION + QUANTUM_MIRROR_COOLDOWN_DURATION,
+	AlienTechRegistry.ION_EXCITER:       ION_EXCITER_ACTIVE_DURATION + ION_EXCITER_COOLDOWN_DURATION,
 }
 
 # Techs whose HUD bar should read as two distinct phases — full-color drain
@@ -88,6 +92,7 @@ const _TWO_PHASE_BAR_DURATIONS: Dictionary = {
 	AlienTechRegistry.MAGNETIC_REPULSION: {"active": MAGNETIC_REPULSION_ACTIVE_DURATION, "cooldown": MAGNETIC_REPULSION_COOLDOWN_DURATION},
 	AlienTechRegistry.HYDRO_FUNNEL:      {"active": HYDRO_FUNNEL_ACTIVE_DURATION,      "cooldown": HYDRO_FUNNEL_COOLDOWN_DURATION},
 	AlienTechRegistry.QUANTUM_MIRROR:    {"active": QUANTUM_MIRROR_ACTIVE_DURATION,    "cooldown": QUANTUM_MIRROR_COOLDOWN_DURATION},
+	AlienTechRegistry.ION_EXCITER:       {"active": ION_EXCITER_ACTIVE_DURATION,       "cooldown": ION_EXCITER_COOLDOWN_DURATION},
 }
 
 # Techs whose HOT behavior is a manual on/off toggle (via set_passive_bar in
@@ -98,6 +103,7 @@ const _TWO_PHASE_BAR_DURATIONS: Dictionary = {
 const _HOT_TOGGLE_TECHS: Array[String] = [
 	AlienTechRegistry.INERTIA_DAMPENER,
 	AlienTechRegistry.HYDRO_FUNNEL,
+	AlienTechRegistry.ION_EXCITER,
 ]
 
 var _passive_bar_ratios: Dictionary = {}
@@ -314,7 +320,8 @@ func _effective_cooldown_max(slot_index: int, tech_id: String) -> float:
 		AlienTechRegistry.LATERAL_THRUST, AlienTechRegistry.TRANSPORTER, \
 		AlienTechRegistry.SHOCKWAVE, AlienTechRegistry.INERTIA_DAMPENER, \
 		AlienTechRegistry.BUMPER_MAGNET, AlienTechRegistry.GRAVITON_HARNESS, \
-		AlienTechRegistry.MAGNETIC_REPULSION, AlienTechRegistry.HYDRO_FUNNEL:
+		AlienTechRegistry.MAGNETIC_REPULSION, AlienTechRegistry.HYDRO_FUNNEL, \
+		AlienTechRegistry.ION_EXCITER:
 			return 0.0  # hot: no cooldown
 		AlienTechRegistry.TIME_FREEZE:
 			# Hot: active duration doubled, post-active recovery halved.
