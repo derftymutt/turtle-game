@@ -235,6 +235,7 @@ func _ready():
 	_tech_effects[AlienTechRegistry.ION_EXCITER] = IonExciterEffect.new()
 	_tech_effects[AlienTechRegistry.STIM_SHOT] = StimShotEffect.new()
 	_tech_effects[AlienTechRegistry.MULTI_LANCE] = MultiLanceEffect.new()
+	_tech_effects[AlienTechRegistry.URCHIN_TRANSMOGRIFY] = UrchinTransmogrifyEffect.new()
 	for effect in _tech_effects.values():
 		(effect as AlienTechEffect).setup(self)
 
@@ -381,6 +382,8 @@ func _physics_process(delta):
 	_tech_effects[AlienTechRegistry.TIME_FREEZE].physics_process(self, delta)
 
 	_tech_effects[AlienTechRegistry.ION_EXCITER].physics_process(self, delta)
+
+	_tech_effects[AlienTechRegistry.URCHIN_TRANSMOGRIFY].physics_process(self, delta)
 
 	multi_lance.physics_process(self, delta)
 

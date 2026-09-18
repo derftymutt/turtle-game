@@ -13,12 +13,18 @@ class_name SeaUrchin
 @export var lock_position: bool = true
 @export var position_lock_strength: float = 100.0
 
+# Urchin Transmogrify: which CircularBumper.SizePreset this urchin becomes.
+# Only small and medium have bumper art.
+@export_enum("Small:0", "Medium:1") var bumper_size: int = 0
+
 # Internal state
 var starting_position: Vector2
 var bob_offset: float = 0.0
 var rotation_offset: float = 0.0
 
 func _enemy_ready():
+	add_to_group("sea_urchins")
+
 	# Sea urchins are invincible and pass-through!
 	is_invincible = true
 	pass_through_player = true  # This is just a flag for documentation/future use
@@ -81,3 +87,14 @@ func apply_position_locking():
 	
 	# Dampen movement
 	linear_velocity *= 0.8
+
+## Urchin Transmogrify: stand this urchin down while a bumper takes its place.
+## DISABLED process mode (which cascades to DamageArea) takes the body and its
+## damage area out of the physics space and stops _process(), so nothing can
+## hurt the turtle or be hit. _contact_players is cleared because a turtle
+## overlapping at the moment of the swap would otherwise stay in it.
+func set_transmogrified(on: bool) -> void:
+	visible = not on
+	process_mode = Node.PROCESS_MODE_DISABLED if on else Node.PROCESS_MODE_INHERIT
+	if on:
+		_contact_players.clear()

@@ -29,6 +29,7 @@ const QUANTUM_MIRROR      := "quantum_mirror"
 const ION_EXCITER         := "ion_exciter"
 const STIM_SHOT           := "stim_shot"
 const MULTI_LANCE         := "multi_lance"
+const URCHIN_TRANSMOGRIFY := "urchin_transmogrify"
 
 # ─── Tech definitions ────────────────────────────────────────────────────────
 
@@ -275,6 +276,17 @@ var _definitions: Array[Dictionary] = [
 		"needs_input":     true,
 		"color":           Color(0.3, 1.0, 0.85),
 		"hot_description": "Now with Sky Hook. Grab the sky itself! Half the cooldown.",
+	},
+	{
+		"id":              URCHIN_TRANSMOGRIFY,
+		"name":            "Urchin Transmogrify",
+		"description":     "Transform urchins into bumpers. 10s active, 5s cooldown.",
+		"hook":            "Sorry urchins... it's temporary!",
+		"slot_label":      "Urchin Transmogrify",
+		"needs_input":     true,
+		"has_passive_bar": true,
+		"color":           Color(0.95, 0.45, 0.85),
+		"hot_description": "Click on/off.",
 	},
 ]
 
