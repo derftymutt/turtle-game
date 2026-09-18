@@ -246,8 +246,8 @@ var _definitions: Array[Dictionary] = [
 	{
 		"id":              ION_EXCITER,
 		"name":            "Ion Exciter",
-		"description":     "Doubles launch speed from flippers and bumpers. 8s active, 5s cooldown.",
-		"hook":            "Turbocharged bounce!",
+		"description":     "Double launch speed from flippers and bumpers. 8s active, 5s cooldown.",
+		"hook":            "Zip zap zoom!",
 		"slot_label":      "Ion Exciter",
 		"needs_input":     true,
 		"has_passive_bar": true,
@@ -255,7 +255,7 @@ var _definitions: Array[Dictionary] = [
 		"hot_description": "Click on, click off — no timer, no cooldown.",
 	},
 	{
-		"id":              STIM_SHOT,
+		"id":               STIM_SHOT,
 		"name":            "Stim Shot",
 		"description":     "Do everything faster. Including breathe. 6s active, 8s cooldown.",
 		"hook":            "The good stuff!",
