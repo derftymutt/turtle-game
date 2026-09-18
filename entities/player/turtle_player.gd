@@ -233,6 +233,7 @@ func _ready():
 	_tech_effects[AlienTechRegistry.POWERUP_REPLICATOR] = PowerupReplicatorEffect.new()
 	_tech_effects[AlienTechRegistry.TIME_FREEZE] = TimeFreezeEffect.new()
 	_tech_effects[AlienTechRegistry.ION_EXCITER] = IonExciterEffect.new()
+	_tech_effects[AlienTechRegistry.STIM_SHOT] = StimShotEffect.new()
 	for effect in _tech_effects.values():
 		(effect as AlienTechEffect).setup(self)
 
@@ -258,15 +259,20 @@ func _ready():
 # ---------------------------------------------------------------------------
 
 func _physics_process(delta):
+	# Stim Shot: read once up front — its scale_factor (1.0 when inactive)
+	# speeds up the turtle's own cooldown recovery, animation, and ocean drag
+	# response without touching thrust_strength or bullet_speed.
+	var stim_shot := _tech_effects[AlienTechRegistry.STIM_SHOT] as StimShotEffect
+
 	# Update cooldown timers
 	if not can_thrust:
-		thrust_timer -= delta
+		thrust_timer -= delta * stim_shot.scale_factor
 		if thrust_timer <= 0:
 			can_thrust = true
 			is_player_controlling_rotation = false
 
 	if not can_shoot:
-		shoot_timer -= delta
+		shoot_timer -= delta * stim_shot.scale_factor
 		if shoot_timer <= 0:
 			can_shoot = true
 			is_player_controlling_rotation = false
@@ -370,6 +376,8 @@ func _physics_process(delta):
 
 	_tech_effects[AlienTechRegistry.ION_EXCITER].physics_process(self, delta)
 
+	stim_shot.physics_process(self, delta)
+
 	# Ocean physics — suppressed while pinned to a bumper or flipper
 	if not (_tech_effects[AlienTechRegistry.BUMPER_MAGNET] as BumperMagnetEffect).attached and not _flipper_velcro_latched:
 		if ocean:
@@ -383,6 +391,7 @@ func _physics_process(delta):
 	var animated_sprite = $AnimatedSprite2D
 	if animated_sprite:
 		animated_sprite.rotation = -rotation
+		animated_sprite.speed_scale = stim_shot.scale_factor
 
 	# HUD systems
 	if hud:
@@ -392,14 +401,21 @@ func _physics_process(delta):
 		_is_underwater = is_underwater
 
 		if is_underwater:
-			var out_of_air = hud.drain_air(delta)
+			# Stim Shot's balancing cost: air drains at air_drain_scale
+			# (3x) while active — see StimShotEffect.AIR_DRAIN_MULT.
+			var out_of_air = hud.drain_air(delta * stim_shot.air_drain_scale)
 			if out_of_air:
 				take_damage(10.0 * delta, false, "ran out of breath")
 		else:
 			hud.refill_air(delta)
 
 		var at_surface: bool = depth <= 8  # wider than air threshold so idle surface float triggers fast recharge
-		hud.recover_energy(delta, (touching_walls.size() > 0 or at_surface) and not (_tech_effects[AlienTechRegistry.BUMPER_MAGNET] as BumperMagnetEffect).attached)
+		# Stim Shot drains energy faster on its own (more thrusts fit in the
+		# same real second, each still costing its normal try_thrust() price).
+		# energy_recovery_scale outpaces scale_factor on purpose — see
+		# StimShotEffect's ENERGY_RECOVERY_BOOST — so the tech is actually
+		# sustainable away from walls, not just break-even.
+		hud.recover_energy(delta * stim_shot.energy_recovery_scale, (touching_walls.size() > 0 or at_surface) and not (_tech_effects[AlienTechRegistry.BUMPER_MAGNET] as BumperMagnetEffect).attached)
 
 	_update_rest_particles()
 
@@ -590,12 +606,18 @@ func apply_ocean_effects(_delta: float):
 
 	var depth = ocean.get_depth(global_position)
 	var dampener := _tech_effects[AlienTechRegistry.INERTIA_DAMPENER] as InertiaDampenerEffect
+	# Stim Shot: drag is a flat per-tick multiply that has no idea the
+	# turtle is on a faster clock — raising it to scale_factor's power keeps
+	# the decay-per-turtle-second the same as at 1x. Buoyancy is scaled the
+	# same way since it's also an ambient force integrated by the engine's
+	# own fixed tick rather than our local clock. See stim_shot_effect.gd.
+	var time_scale: float = (_tech_effects[AlienTechRegistry.STIM_SHOT] as StimShotEffect).scale_factor
 
 	# Inertia Dampener in air: skip gravity calculation entirely and treat air
 	# as shallow ocean so the turtle can swim freely above the surface.
 	if dampener.active and depth <= 0:
-		apply_central_force(Vector2(0, -ocean.shallow_buoyancy * mass))
-		linear_velocity *= ocean.water_drag
+		apply_central_force(Vector2(0, -ocean.shallow_buoyancy * mass * time_scale))
+		linear_velocity *= pow(ocean.water_drag, time_scale)
 		linear_damp = 1.0
 		return
 
@@ -603,15 +625,15 @@ func apply_ocean_effects(_delta: float):
 	if dampener.active:
 		depth = min(depth, ocean.shallow_depth - 1.0)
 
-	var buoyancy_force = ocean.calculate_buoyancy_force(depth, mass)
+	var buoyancy_force = ocean.calculate_buoyancy_force(depth, mass) * time_scale
 	apply_central_force(Vector2(0, -buoyancy_force))
 
 	if depth > 0:
-		linear_velocity *= ocean.water_drag
+		linear_velocity *= pow(ocean.water_drag, time_scale)
 		var depth_factor = clamp(depth / 100.0, 0.0, 1.0)
 		linear_damp = lerp(1.0, 2.0, depth_factor)
 	else:
-		linear_velocity *= ocean.air_drag
+		linear_velocity *= pow(ocean.air_drag, time_scale)
 		linear_damp = 1.2
 
 # ---------------------------------------------------------------------------

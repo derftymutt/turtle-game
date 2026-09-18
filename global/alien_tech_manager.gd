@@ -64,6 +64,9 @@ const QUANTUM_MIRROR_COOLDOWN_DURATION: float = 5.0
 const ION_EXCITER_ACTIVE_DURATION:   float = 8.0
 const ION_EXCITER_COOLDOWN_DURATION: float = 5.0
 
+const STIM_SHOT_ACTIVE_DURATION:   float = 6.0
+const STIM_SHOT_COOLDOWN_DURATION: float = 8.0
+
 const _COOLDOWN_DURATIONS: Dictionary = {
 	AlienTechRegistry.INERTIA_DAMPENER: INERTIA_DAMPENER_ACTIVE_DURATION + INERTIA_DAMPENER_COOLDOWN_DURATION,
 	AlienTechRegistry.LATERAL_THRUST:   5.0,
@@ -77,6 +80,7 @@ const _COOLDOWN_DURATIONS: Dictionary = {
 	AlienTechRegistry.HYDRO_FUNNEL:      HYDRO_FUNNEL_ACTIVE_DURATION + HYDRO_FUNNEL_COOLDOWN_DURATION,
 	AlienTechRegistry.QUANTUM_MIRROR:    QUANTUM_MIRROR_ACTIVE_DURATION + QUANTUM_MIRROR_COOLDOWN_DURATION,
 	AlienTechRegistry.ION_EXCITER:       ION_EXCITER_ACTIVE_DURATION + ION_EXCITER_COOLDOWN_DURATION,
+	AlienTechRegistry.STIM_SHOT:      STIM_SHOT_ACTIVE_DURATION + STIM_SHOT_COOLDOWN_DURATION,
 }
 
 # Techs whose HUD bar should read as two distinct phases — full-color drain
@@ -93,6 +97,7 @@ const _TWO_PHASE_BAR_DURATIONS: Dictionary = {
 	AlienTechRegistry.HYDRO_FUNNEL:      {"active": HYDRO_FUNNEL_ACTIVE_DURATION,      "cooldown": HYDRO_FUNNEL_COOLDOWN_DURATION},
 	AlienTechRegistry.QUANTUM_MIRROR:    {"active": QUANTUM_MIRROR_ACTIVE_DURATION,    "cooldown": QUANTUM_MIRROR_COOLDOWN_DURATION},
 	AlienTechRegistry.ION_EXCITER:       {"active": ION_EXCITER_ACTIVE_DURATION,       "cooldown": ION_EXCITER_COOLDOWN_DURATION},
+	AlienTechRegistry.STIM_SHOT:      {"active": STIM_SHOT_ACTIVE_DURATION,      "cooldown": STIM_SHOT_COOLDOWN_DURATION},
 }
 
 # Techs whose HOT behavior is a manual on/off toggle (via set_passive_bar in
@@ -329,6 +334,10 @@ func _effective_cooldown_max(slot_index: int, tech_id: String) -> float:
 		AlienTechRegistry.DEFLECTOR_SHIELD:
 			# Hot: active duration unchanged (only radius grows), recovery halved.
 			return DEFLECTOR_SHIELD_ACTIVE_DURATION + (DEFLECTOR_SHIELD_COOLDOWN_DURATION * 0.5)
+		AlienTechRegistry.STIM_SHOT:
+			# Hot: active duration doubled, post-active recovery halved (scale itself
+			# is bumped separately in StimShotEffect.activate()).
+			return (STIM_SHOT_ACTIVE_DURATION * 2.0) + (STIM_SHOT_COOLDOWN_DURATION * 0.5)
 		_:
 			return base
 
@@ -404,6 +413,8 @@ func _effective_two_phase_split(slot_index: int, tech_id: String) -> Dictionary:
 			return {"active": TIME_FREEZE_ACTIVE_DURATION * 2.0, "cooldown": TIME_FREEZE_COOLDOWN_DURATION * 0.5}
 		AlienTechRegistry.DEFLECTOR_SHIELD:
 			return {"active": DEFLECTOR_SHIELD_ACTIVE_DURATION, "cooldown": DEFLECTOR_SHIELD_COOLDOWN_DURATION * 0.5}
+		AlienTechRegistry.STIM_SHOT:
+			return {"active": STIM_SHOT_ACTIVE_DURATION * 2.0, "cooldown": STIM_SHOT_COOLDOWN_DURATION * 0.5}
 		_:
 			return base  # e.g. Quantum Mirror: hot keeps the cold split unchanged
 

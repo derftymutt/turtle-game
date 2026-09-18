@@ -27,6 +27,7 @@ const MAGNETIC_REPULSION  := "magnetic_repulsion"
 const HYDRO_FUNNEL        := "hydro_funnel"
 const QUANTUM_MIRROR      := "quantum_mirror"
 const ION_EXCITER         := "ion_exciter"
+const STIM_SHOT           := "stim_shot"
 
 # ─── Tech definitions ────────────────────────────────────────────────────────
 
@@ -252,6 +253,17 @@ var _definitions: Array[Dictionary] = [
 		"has_passive_bar": true,
 		"color":           Color(0.9, 0.9, 0.2),
 		"hot_description": "Click on, click off — no timer, no cooldown.",
+	},
+	{
+		"id":              STIM_SHOT,
+		"name":            "Stim Shot",
+		"description":     "Do everything faster. Including breathe. 6s active, 8s cooldown.",
+		"hook":            "The good stuff!",
+		"slot_label":      "Stim Shot",
+		"needs_input":     true,
+		"has_passive_bar": true,
+		"color":           Color(1.0, 0.7, 0.2),
+		"hot_description": "Longer, faster, more often.",
 	},
 ]
 
