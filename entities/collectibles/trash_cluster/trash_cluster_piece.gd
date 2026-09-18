@@ -87,7 +87,7 @@ func _destroy():
 	if is_destroyed:
 		return
 	is_destroyed = true
-	freeze = true
+	set_deferred("freeze", true)  # from a bullet's collision callback — see BaseCollectible.collect()
 	var sfx := AudioStreamPlayer.new()
 	sfx.stream = _SFX_SHOOT_TRASH
 	sfx.volume_db = -10.0

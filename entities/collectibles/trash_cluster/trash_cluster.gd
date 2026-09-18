@@ -138,7 +138,7 @@ func _break_apart():
 	if is_destroyed:
 		return
 	is_destroyed = true
-	freeze = true
+	set_deferred("freeze", true)  # from a bullet's collision callback — see BaseCollectible.collect()
 
 	var sfx := AudioStreamPlayer.new()
 	sfx.stream = _SFX_TRASH_BAG_OPENS
@@ -169,34 +169,46 @@ func _break_apart():
 		else:
 			piece_count = 4
 
+	# Everything spawned here is a physics body. This runs from a bullet's
+	# collision callback, where Godot refuses to add bodies, so it's deferred
+	# (see BaseCollectible.collect() for the same rule).
 	if piece_count == 0:
-		if is_instance_valid(parent_node):
-			var tech = tech_scene.instantiate()
-			parent_node.add_child(tech)
-			tech.global_position = break_pos
-			tech.apply_central_impulse(Vector2(randf_range(-60, 60), -120))
+		_spawn_tech_piece.call_deferred(parent_node, tech_scene, break_pos)
 	else:
-		# Shared destruction counter via closure capture
-		var remaining = {"count": piece_count}
-
-		for i in range(piece_count):
-			var piece = _SMALL_PIECE_SCENE.instantiate()
-			parent_node.add_child(piece)
-			piece.global_position = break_pos
-
-			# Scatter in evenly-spaced directions with a bit of random jitter
-			var angle = (float(i) / float(piece_count)) * TAU + randf_range(-0.35, 0.35)
-			piece.apply_central_impulse(Vector2.from_angle(angle) * randf_range(90, 200))
-
-			piece.all_destroyed_callback = func(pos: Vector2):
-				remaining.count -= 1
-				if remaining.count <= 0 and is_instance_valid(parent_node):
-					var tech = tech_scene.instantiate()
-					parent_node.add_child(tech)
-					tech.global_position = pos
-					tech.apply_central_impulse(Vector2(randf_range(-60, 60), -120))
+		_spawn_pieces.call_deferred(parent_node, break_pos, piece_count)
 
 	_play_break_effect()
+
+## Static so the pieces' completion callback below doesn't hold on to this
+## (soon-freed) cluster.
+static func _spawn_tech_piece(parent_node: Node, tech_scene: PackedScene, pos: Vector2) -> void:
+	if not is_instance_valid(parent_node):
+		return
+	var tech = tech_scene.instantiate()
+	parent_node.add_child(tech)
+	tech.global_position = pos
+	tech.apply_central_impulse(Vector2(randf_range(-60, 60), -120))
+
+static func _spawn_pieces(parent_node: Node, break_pos: Vector2, piece_count: int) -> void:
+	if not is_instance_valid(parent_node):
+		return
+	# Shared destruction counter via closure capture
+	var remaining = {"count": piece_count}
+
+	for i in range(piece_count):
+		var piece = _SMALL_PIECE_SCENE.instantiate()
+		parent_node.add_child(piece)
+		piece.global_position = break_pos
+
+		# Scatter in evenly-spaced directions with a bit of random jitter
+		var angle = (float(i) / float(piece_count)) * TAU + randf_range(-0.35, 0.35)
+		piece.apply_central_impulse(Vector2.from_angle(angle) * randf_range(90, 200))
+
+		piece.all_destroyed_callback = func(pos: Vector2):
+			remaining.count -= 1
+			if remaining.count <= 0:
+				_spawn_tech_piece.call_deferred(parent_node, _TECH_PIECE_SCENE, pos)
+
 
 func _play_break_effect():
 	var tween = create_tween()

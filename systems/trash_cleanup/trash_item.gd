@@ -156,7 +156,7 @@ func destroy_trash():
 	sfx.finished.connect(sfx.queue_free)
 	add_score(points)
 	GameManager.spawn_floating_score(global_position, points)
-	freeze = true
+	set_deferred("freeze", true)  # from a bullet's collision callback — see BaseCollectible.collect()
 	trash_destroyed.emit(self)
 	play_destruction_effect()
 

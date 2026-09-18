@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://bvs4q7r2tnxp1"]
 
-[ext_resource type="Script" uid="uid://cx3m8p5dwn1ky" path="res://ui/menus/victory_screen.gd" id="1_victory"]
+[ext_resource type="Script" uid="uid://kduh6etyrlqg" path="res://ui/menus/victory_screen.gd" id="1_victory"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_victorypanel"]
 bg_color = Color(0.03, 0.1654902, 0.415, 0.7)
@@ -71,51 +71,36 @@ theme_override_font_sizes/font_size = 13
 text = "Total Attempts: 0"
 horizontal_alignment = 1
 
+[node name="TimeLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Time: 0:00"
+horizontal_alignment = 1
+
 [node name="AlienTechsLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 12
 text = "Alien Techs: 0"
 horizontal_alignment = 1
 
-[node name="TotalTimeLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
+[node name="RecordsSeparator" type="HSeparator" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 12
-text = "Total Time: 0:00"
-horizontal_alignment = 1
 
-[node name="SuccessTimeLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
+[node name="BestScoreLabel" type="RichTextLabel" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 12
-text = "Successful Time: 0:00"
-horizontal_alignment = 1
+theme_override_font_sizes/normal_font_size = 12
+bbcode_enabled = true
+text = "[center]Best Victory: 0[/center]"
+fit_content = true
+scroll_active = false
 
-[node name="BestScoreLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
+[node name="BestTimeLabel" type="RichTextLabel" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 12
-text = "Best Victory: 0"
-horizontal_alignment = 1
-
-[node name="BestTimeLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 12
-text = "Best Time: 0:00"
-horizontal_alignment = 1
-
-[node name="NewBestLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.85, 0, 1)
-theme_override_font_sizes/font_size = 13
-text = "NEW BEST!"
-horizontal_alignment = 1
-visible = false
-
-[node name="NewBestTimeLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.4, 1, 0.6, 1)
-theme_override_font_sizes/font_size = 13
-text = "NEW BEST TIME!"
-horizontal_alignment = 1
-visible = false
+theme_override_font_sizes/normal_font_size = 12
+bbcode_enabled = true
+text = "[center]Best Time: 0:00[/center]"
+fit_content = true
+scroll_active = false
 
 [node name="OptionsColumn" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2

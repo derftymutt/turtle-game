@@ -128,7 +128,11 @@ func _apply_animation() -> void:
 	if debris_animation == &"" or visual_node == null:
 		return
 	if visual_node is AnimatedSprite2D:
-		(visual_node as AnimatedSprite2D).play(debris_animation)
+		var animated := visual_node as AnimatedSprite2D
+		if animated.sprite_frames == null or not animated.sprite_frames.has_animation(debris_animation):
+			push_warning("SpaceDebris '%s': no animation named '%s'" % [name, debris_animation])
+			return
+		animated.play(debris_animation)
 
 
 func _apply_texture() -> void:
@@ -189,7 +193,7 @@ func take_lance_hit() -> void:
 
 func _get_shot() -> void:
 	is_destroyed = true
-	freeze = true
+	set_deferred("freeze", true)  # from a bullet's collision callback — see BaseCollectible.collect()
 	var sfx := AudioStreamPlayer.new()
 	sfx.stream = _SFX_SHOOT_TRASH
 	sfx.volume_db = -10.0

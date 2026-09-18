@@ -408,11 +408,11 @@ powerup_scene = ExtResource("24_0fu15")
 
 [node name="SpaceDebris" parent="SpaceDebrisGroup2" index="0" unique_id=1950655699 instance=ExtResource("24_ntdhj")]
 position = Vector2(82, -195)
-debris_animation = &"wild"
+debris_animation = &"random"
 
 [node name="SpaceDebris2" parent="SpaceDebrisGroup2" index="1" unique_id=1430032598 instance=ExtResource("24_ntdhj")]
 position = Vector2(149, -196)
-debris_animation = &"wild"
+debris_animation = &"random"
 
 [node name="AlienTechPiece" parent="." index="36" unique_id=100000001 instance=ExtResource("26_0fu15")]
 position = Vector2(0, 82)

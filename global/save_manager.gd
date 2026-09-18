@@ -27,7 +27,6 @@ func save_game():
 		"tech_hot_1":          AlienTechManager.is_slot_hot(1),
 		"continue_count":      LevelManager.continue_count,
 		"total_time_ms":       LevelManager.total_time_ms,
-		"successful_time_ms":  LevelManager.successful_time_ms,
 		"persisted_hearts":    GameManager.persisted_hearts,
 	}
 	var file = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
@@ -71,7 +70,6 @@ func apply_save():
 		AlienTechManager.set_slot_hot(1, data.get("tech_hot_1", false))
 	LevelManager.current_level_number = data.get("level_number", 1)
 	LevelManager.total_time_ms = data.get("total_time_ms", 0)
-	LevelManager.successful_time_ms = data.get("successful_time_ms", 0)
 	GameManager.persisted_hearts = int(data.get("persisted_hearts", -1))
 	print("📂 Restored: Level %d, Total Score %d, Continues %d" % [
 		LevelManager.current_level_number, GameManager.total_score,

@@ -17,14 +17,21 @@ const _SFX_BEAT_LEVEL = preload("res://assets/sounds/sfx/beat level_1.ogg")
 @export var selection_weight: float = 1.0
 
 # Visual feedback
-@export var idle_color: Color = Color(0.3, 0.6, 1.0, 0.8)  # Blue glow
+@export var idle_color: Color = Color(1.0, 1.0, 1.0, 1.0)  # Blue glow
 @export var active_color: Color = Color(1.0, 0.8, 0.0, 1.0)  # Gold when player nearby
 @export var pulse_speed: float = 2.0
 @export var pulse_amount: float = 0.2
 
 # Node references (set up in scene editor)
 @onready var delivery_area: Area2D = $DeliveryArea
-@onready var sprite: Node2D = $Sprite2D  # or AnimatedSprite2D
+@onready var sprite: Node2D = _find_sprite()
+
+func _find_sprite() -> Node2D:
+	for node_name in ["Sprite2D", "AnimatedSprite2D"]:
+		var found := get_node_or_null(node_name) as Node2D
+		if found:
+			return found
+	return null
 
 # Internal state
 var is_player_nearby_with_piece: bool = false

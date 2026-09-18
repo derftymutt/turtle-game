@@ -27,7 +27,6 @@ const TUTORIAL_SCENE: String = "res://levels/tutorial.tscn"
 # Time tracking (wall-clock milliseconds)
 var _attempt_start_time_ms: int = 0
 var total_time_ms: int = 0       # All attempts including failures
-var successful_time_ms: int = 0  # Only successful attempts
 
 # Level scene registry
 var level_scenes: Dictionary = {
@@ -73,7 +72,6 @@ func reset_run():
 	flora_hidden_budget = -1
 	_attempt_start_time_ms = 0
 	total_time_ms = 0
-	successful_time_ms = 0
 
 func is_boss_level(level_number: int = -1) -> bool:
 	"""Returns true if the given level (or current level) is a boss level"""
@@ -145,7 +143,6 @@ func complete_level():
 	if _attempt_start_time_ms > 0:
 		var elapsed := Time.get_ticks_msec() - _attempt_start_time_ms
 		total_time_ms += elapsed
-		successful_time_ms += elapsed
 		_attempt_start_time_ms = 0
 
 	# Carry the player's exact heart count forward into the next level
@@ -253,7 +250,7 @@ func restart_current_level():
 	"""Called when the player presses Continue after dying."""
 	attempt_count += 1
 	continue_count += 1
-	# Failed attempt counts toward total time only
+	# Failed attempts count toward total time too
 	if _attempt_start_time_ms > 0:
 		total_time_ms += Time.get_ticks_msec() - _attempt_start_time_ms
 		_attempt_start_time_ms = 0

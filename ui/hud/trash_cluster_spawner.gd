@@ -48,8 +48,13 @@ func process_freebie(hud, delta: float) -> void:
 	if _freebie_elapsed >= _freebie_next_time:
 		spawn(hud)
 
+## Deferred: a score change can come from a bullet's collision callback, where
+## Godot refuses to add a physics body (the cluster is a RigidBody2D).
 func spawn(hud) -> void:
-	if hud.level_completing:
+	_spawn_now.call_deferred(hud)
+
+func _spawn_now(hud) -> void:
+	if not is_instance_valid(hud) or hud.level_completing:
 		return
 	# Any cluster (score-based or freebie) pushes the next freebie out, so trash
 	# bags stay rare and freebies only fill quiet, low-scoring stretches.

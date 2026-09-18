@@ -221,8 +221,10 @@ func spawn_powerup(position: Vector2):
 		return
 	
 	var powerup = powerup_scene.instantiate()
-	get_parent().add_child(powerup)
-	powerup.global_position = position
+	# Deferred: this runs from a bullet's collision callback (the last trash item
+	# being shot), where Godot refuses to add a physics body.
+	get_parent().add_child.call_deferred(powerup)
+	powerup.set_deferred("global_position", position)  # queued after the add, so it's in the tree by then
 	powerup.powerup_type = powerup_type
 	
 	var powerup_sprite = powerup.get_node_or_null("AnimatedSprite2D")

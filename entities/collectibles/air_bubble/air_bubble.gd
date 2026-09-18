@@ -136,7 +136,10 @@ func collect(collector):
 
 	collected = true
 	$SfxCollect.play()
-	freeze = true
+	# Deferred: collect() runs from the pickup Area2D's body_entered signal,
+	# mid physics-query-flush, where Godot refuses to change `freeze` (see
+	# BaseCollectible.collect()).
+	set_deferred("freeze", true)
 	
 	# Find HUD and restore air
 	var hud = get_tree().get_first_node_in_group("hud")
@@ -196,7 +199,7 @@ func pop_from_bullet():
 	
 	collected = true
 	despawning = true
-	freeze = true
+	set_deferred("freeze", true)  # called from a bullet's collision callback — see collect()
 	
 	# Same satisfying pop animation as surface pop
 	var tween = create_tween()

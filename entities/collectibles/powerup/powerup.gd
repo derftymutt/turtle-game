@@ -166,7 +166,7 @@ func collect(collector):
 	
 	collected = true
 	$SfxCollect.play()
-	freeze = true
+	set_deferred("freeze", true)  # from the pickup Area2D's body_entered — see BaseCollectible.collect()
 
 	# Resolve RANDOM to an actual powerup type at collection time
 	var resolved_type = powerup_type

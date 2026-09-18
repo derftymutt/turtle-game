@@ -133,9 +133,11 @@ func spawn_powerup(spawn_position: Vector2) -> void:
 
 	# Add to the level root (not as a child of this group) so it persists
 	# even if the group node is removed or restructured.
-	get_tree().get_first_node_in_group("level").add_child(powerup)
+	# Deferred: this runs from a bullet's collision callback (the last piece
+	# being shot), where Godot refuses to add a physics body.
+	get_tree().get_first_node_in_group("level").add_child.call_deferred(powerup)
 
-	powerup.global_position = spawn_position
+	powerup.set_deferred("global_position", spawn_position)  # queued after the add, so it's in the tree by then
 	powerup.powerup_type = powerup_type
 
 	# The powerup.gd already handles falling via gravity_scale,
