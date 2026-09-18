@@ -65,7 +65,7 @@ const HINTS: Array[String] = [
 	"Your name is Flip for a reason",
 	"The surface is invigorating",
 	"Don't we all sparkle yellow during a quick energy recharge?",
-	"Alien tech's are unstable. They heat up and they fry.",
+	"Alien tech's are unstable. They heat up and then fry.",
 	"You never know what you'll find in the trash."
 ]
 

@@ -92,7 +92,7 @@ const _TRASHBAG_FRAME_A_REGION := Rect2(0.0, 0.0, 24.0, 24.0)
 const _TRASHBAG_FRAME_B_REGION := Rect2(24.0, 0.0, 24.0, 24.0)
 const _TRASHBAG_FRAME_INTERVAL: float = 1.0 / 3.0  # matches trash_cluster.tscn's SpriteFrames (2 frames, speed 3.0)
 const _TRASHBAG_DRIFT_SPEED: float = -38.0          # same value as TrashCluster.drift_speed's default
-const _TRASHBAG_PAUSE_DELAY: float = 0.8            # beat of stillness once the intro lands, before it drifts through
+const _TRASHBAG_PAUSE_DELAY: float = 0.3            # beat of stillness once the intro lands, before it drifts through
 
 const _CONTROLLER_LABEL_TOP_GAP: float = 14.0
 const _RECORDS_TO_OPTIONS_GAP: float = 14.0

@@ -4,8 +4,8 @@ class_name GameInfoScreen
 const _SFX_MENU_SELECT = preload("res://assets/sounds/sfx/menu select_1.ogg")
 var _sfx_select: AudioStreamPlayer
 
-@onready var content_container: VBoxContainer = $Control/CenterContainer/MarginContainer/VBoxContainer/ContentContainer
-@onready var start_button: Button = $Control/CenterContainer/MarginContainer/VBoxContainer/OptionsColumn/StartButton
+@onready var content_container: VBoxContainer = $Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ContentContainer
+@onready var start_button: Button = $Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/OptionsColumn/StartButton
 @onready var _control: Control = $Control
 
 # Plain-text options marked by a sliding turtle indicator + green text
@@ -134,7 +134,7 @@ func _on_start_pressed():
 func _label(text: String) -> Label:
 	var l := Label.new()
 	l.text = text
-	l.add_theme_font_size_override("font_size", 13)
+	l.add_theme_font_size_override("font_size", 15)
 	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -144,7 +144,7 @@ func _label(text: String) -> Label:
 func _label_inline(text: String) -> Label:
 	var l := Label.new()
 	l.text = text
-	l.add_theme_font_size_override("font_size", 13)
+	l.add_theme_font_size_override("font_size", 15)
 	l.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	return l
 
