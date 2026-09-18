@@ -36,18 +36,63 @@ const _TITLE_WIGGLE_START_DEGREES: float = -5.0
 # _TITLE_DROP_DURATION to taste.
 const _OPTIONS_REVEAL_DELAY: float = 1.1
 
+# The turtle's bounce (see _BOUNCE_LEG_*_DURATION below) takes noticeably
+# longer than the options' own fade-in, so kicking both off at the same
+# moment leaves the turtle arriving well after the options have already
+# settled. Starting the bounce this much earlier instead brings its landing
+# in right after the options finish fading, so the whole entrance reads as
+# one coordinated beat rather than two staggered ones.
+const _BOUNCE_HEAD_START: float = 0.4
+
 const _OPTIONS_FADE_DURATION: float = 0.5
 const _INDICATOR_MOVE_DURATION: float = 0.15
 const _INDICATOR_GAP: float = 6.0
 const _OPTION_FONT_SIZE: int = 18
 
-# First-reveal-only: the turtle indicator waits for the option text to be
-# well into its own fade-in before it scoots into place — sliding it at the
-# same time as the fade starts left it arriving while still mostly
-# transparent, so the scoot itself was barely visible.
-const _INDICATOR_REVEAL_DELAY: float = 0.3
-const _INDICATOR_REVEAL_DURATION: float = 0.4
-const _INDICATOR_REVEAL_OFFSET := Vector2(-18.0, -18.0)
+# First-reveal-only entrance: rather than the normal short focus-triggered
+# slide (which starts right next to the option and is easy to miss), the
+# turtle flies in from off the top-left corner and ricochets off the right
+# wall and the bottom wall — like a pinball — before settling into place
+# beside the first option. It travels far enough on its own to read clearly
+# without needing to wait on the options' fade, so it starts immediately
+# alongside it rather than delayed. See _bounce_indicator_in().
+const _BOUNCE_LEG_1_DURATION: float = 0.34
+const _BOUNCE_LEG_2_DURATION: float = 0.3
+const _BOUNCE_LEG_3_DURATION: float = 0.38
+const _BOUNCE_SQUASH_SCALE := Vector2(1.35, 0.65)
+
+# Borrows the in-game super speed look (see TurtlePlayer._apply_super_speed_visuals
+# / _spawn_motion_trail in entities/player/turtle_player.gd) for the bounce
+# flight, so it reads as "the turtle going super speed" rather than a plain
+# slide. _SUPER_SPEED_COLOR mirrors turtle_player.gd's super_speed_color
+# export default — keep the two in sync if that's ever retuned.
+#
+# TurtlePlayer's trail spawns on a fixed *time* interval, which reads as
+# continuous there because the player's speed per frame is small relative to
+# its sprite. The bounce covers the whole screen in a fraction of a second,
+# so a time interval leaves visible gaps — spawn on distance traveled
+# instead (see _advance_bounce_trail()), which keeps spacing constant
+# regardless of how fast a given leg is moving.
+const _SUPER_SPEED_COLOR := Color(0.778, 1.504, 0.0)
+const _BOUNCE_TRAIL_SPACING: float = 6.0
+const _BOUNCE_TRAIL_FADE_DURATION: float = 0.25
+const _BOUNCE_COLOR_FADE_DURATION: float = 0.25
+
+# A trash bag drifts through the bottom third of the screen once the three
+# intro beats (title, options, turtle bounce) have all landed, using the
+# same drift speed and the same three-sine-wave "organic ocean current" path
+# as TrashCluster's own ambient drift (see _physics_process() in
+# entities/collectibles/trash_cluster/trash_cluster.gd) — just replayed on a
+# plain TextureRect in _process() instead of a RigidBody2D, since the menu
+# has no physics world of its own. Menu-only decoration: no hit detection,
+# no breaking apart, it just floats across and frees itself off the far edge.
+const _TRASHBAG_SPRITE = preload("res://entities/collectibles/trash_cluster/sprites/trash_cluster.png")
+const _TRASHBAG_FRAME_SIZE := Vector2(24.0, 24.0)
+const _TRASHBAG_FRAME_A_REGION := Rect2(0.0, 0.0, 24.0, 24.0)
+const _TRASHBAG_FRAME_B_REGION := Rect2(24.0, 0.0, 24.0, 24.0)
+const _TRASHBAG_FRAME_INTERVAL: float = 1.0 / 3.0  # matches trash_cluster.tscn's SpriteFrames (2 frames, speed 3.0)
+const _TRASHBAG_DRIFT_SPEED: float = -38.0          # same value as TrashCluster.drift_speed's default
+const _TRASHBAG_PAUSE_DELAY: float = 0.8            # beat of stillness once the intro lands, before it drifts through
 
 const _CONTROLLER_LABEL_TOP_GAP: float = 14.0
 const _RECORDS_TO_OPTIONS_GAP: float = 14.0
@@ -74,6 +119,22 @@ var _indicator_tween: Tween
 var _suppress_indicator_slide: bool = false
 var _turtle_idle_texture: Texture2D
 var _turtle_shoot_texture: Texture2D
+
+# Drives the super-speed trail spawning during the entrance bounce — see
+# _bounce_indicator_in() and _advance_bounce_trail().
+var _bounce_active: bool = false
+var _bounce_trail_last_pos: Vector2
+
+# Drives the post-intro trash bag drift — see _spawn_trashbag() and
+# _advance_trashbag().
+var _trashbag: TextureRect = null
+var _trashbag_age: float = 0.0
+var _trashbag_wave_phase: float = 0.0
+var _trashbag_base_y: float = 0.0
+var _trashbag_flap_timer: float = 0.0
+var _trashbag_flap_on_a: bool = true
+var _trashbag_frame_a: Texture2D
+var _trashbag_frame_b: Texture2D
 
 # Holds only the selectable options (Continue/Start/Tutorial/Options/Quit),
 # separate from level_container's other children (records label, dev grid,
@@ -105,6 +166,9 @@ func _ready():
 	_turtle_shoot_texture = AtlasTexture.new()
 	_turtle_shoot_texture.atlas = _TURTLE_SHOOT_SPRITE
 	_turtle_shoot_texture.region = _TURTLE_SHOOT_REGION
+	# Centers the squash/stretch pulse used on each wall bounce (see
+	# _squash_indicator()) on the sprite instead of its top-left corner.
+	turtle_indicator.pivot_offset = turtle_indicator.size * 0.5
 
 	guide_screen = get_tree().get_first_node_in_group("guide_screen")
 	game_info_screen = get_tree().get_first_node_in_group("game_info_screen")
@@ -117,9 +181,13 @@ func _ready():
 	_animate_title_intro()
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	if _shine_target and is_instance_valid(_shine_target):
 		_update_option_shine(_shine_target)
+	if _bounce_active:
+		_advance_bounce_trail()
+	if _trashbag and is_instance_valid(_trashbag):
+		_advance_trashbag(delta)
 
 
 func _format_ms(ms: int) -> String:
@@ -138,6 +206,7 @@ func _format_ms(ms: int) -> String:
 ## comes to rest.
 func _animate_title_intro() -> void:
 	if not title_label:
+		_start_indicator_bounce()
 		_reveal_options()
 		return
 
@@ -153,12 +222,16 @@ func _animate_title_intro() -> void:
 	tween.tween_property(title_label, "position:y", rest_y, _TITLE_DROP_DURATION)
 	tween.parallel().tween_property(title_label, "rotation_degrees", 0.0, _TITLE_DROP_DURATION)
 
+	get_tree().create_timer(_OPTIONS_REVEAL_DELAY - _BOUNCE_HEAD_START).timeout.connect(_start_indicator_bounce)
 	get_tree().create_timer(_OPTIONS_REVEAL_DELAY).timeout.connect(_reveal_options)
 
 
-## Fades in the selectable options once the title has settled, then brings in
-## the subtle water ripple overlay behind them.
-func _reveal_options() -> void:
+## Gets the turtle moving toward its resting spot ahead of the options' own
+## fade-in — see _BOUNCE_HEAD_START. Makes button_center visible early (still
+## at modulate:a = 0, so nothing is shown yet) purely so its layout — and the
+## first option's rect the bounce targets — is actually computed; the real
+## reveal still happens on its own timing in _reveal_options().
+func _start_indicator_bounce() -> void:
 	button_center.visible = true
 	turtle_indicator.visible = true
 
@@ -168,22 +241,28 @@ func _reveal_options() -> void:
 	# itself out before reading a rect to place the indicator against.
 	await get_tree().process_frame
 
-	var first_option: Button = null
-	for child in _options_column.get_children():
-		if child is Button:
-			first_option = child
-			break
-
-	create_tween().tween_property(button_center, "modulate:a", 1.0, _OPTIONS_FADE_DURATION)
-
+	var first_option := _first_option()
 	if first_option:
 		# Grab focus (arms nav/shine) without letting it trigger the normal
-		# instant slide — _scoot_indicator_in drives the first-reveal motion
+		# instant slide — _bounce_indicator_in drives the first-reveal motion
 		# on its own timing instead, see its comment for why.
 		_suppress_indicator_slide = true
 		first_option.grab_focus()
 		_suppress_indicator_slide = false
-		_scoot_indicator_in(first_option)
+		_bounce_indicator_in(first_option)
+
+
+func _first_option() -> Button:
+	for child in _options_column.get_children():
+		if child is Button:
+			return child
+	return null
+
+
+## Fades in the selectable options once the title has settled, then brings in
+## the subtle water ripple overlay behind them.
+func _reveal_options() -> void:
+	create_tween().tween_property(button_center, "modulate:a", 1.0, _OPTIONS_FADE_DURATION)
 
 	if water_ripple:
 		water_ripple.enabled = true
@@ -257,27 +336,178 @@ func _move_indicator_to(target: Control) -> void:
 	_indicator_tween.tween_callback(func(): turtle_indicator.texture = _turtle_idle_texture)
 
 
-## First-reveal-only entrance: holds the indicator offset from its target and
-## fully transparent until the option text has had a moment to fade in on
-## its own, then scoots it into place — see _INDICATOR_REVEAL_DELAY's comment
-## for why this can't just piggyback on the normal focus-triggered slide.
-func _scoot_indicator_in(target: Control) -> void:
+## First-reveal-only entrance: sends the turtle in from off the top-left
+## corner of the screen and lets it ricochet off the right wall and then the
+## bottom wall — like a pinball — before rising into its resting spot beside
+## `target`. Fully opaque and visible for the whole flight (unlike the old
+## fade-in-place scoot) since it now travels far enough to read on its own.
+func _bounce_indicator_in(target: Control) -> void:
 	var target_pos := _indicator_target_pos(target)
-	turtle_indicator.position = target_pos + _INDICATOR_REVEAL_OFFSET
-	turtle_indicator.modulate.a = 0.0
+	var vp_size := get_viewport().get_visible_rect().size
+	var right_wall_x: float = vp_size.x - turtle_indicator.size.x
+	var bottom_wall_y: float = vp_size.y - turtle_indicator.size.y
+
+	var start_pos := Vector2(-turtle_indicator.size.x, -turtle_indicator.size.y)
+	var bounce_1 := Vector2(right_wall_x, vp_size.y * 0.12)   # off the right wall, high up
+	var bounce_2 := Vector2(vp_size.x * 0.25, bottom_wall_y)  # off the bottom wall, back toward center
+
+	turtle_indicator.position = start_pos
+	turtle_indicator.rotation = 0.0
+	turtle_indicator.scale = Vector2.ONE
+	turtle_indicator.modulate = _SUPER_SPEED_COLOR
+	turtle_indicator.texture = _turtle_shoot_texture
+
+	_bounce_active = true
+	_bounce_trail_last_pos = start_pos
 
 	if _indicator_tween:
 		_indicator_tween.kill()
 	_indicator_tween = create_tween()
-	# tween_interval() only holds up the NEXT sequential step — set_parallel(true)
-	# right after it would instead make that next step start alongside the
-	# interval (i.e. also at t=0), silently skipping the delay entirely. Chain
-	# .parallel() onto the second property tween instead, so only it rides
-	# alongside the first (which itself still waits out the interval).
-	_indicator_tween.tween_interval(_INDICATOR_REVEAL_DELAY)
-	_indicator_tween.tween_property(turtle_indicator, "modulate:a", 1.0, _INDICATOR_REVEAL_DURATION)
-	_indicator_tween.parallel().tween_property(turtle_indicator, "position", target_pos, _INDICATOR_REVEAL_DURATION) \
+	_indicator_tween.tween_property(turtle_indicator, "position", bounce_1, _BOUNCE_LEG_1_DURATION) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	_indicator_tween.tween_callback(_squash_indicator)
+	_indicator_tween.tween_property(turtle_indicator, "position", bounce_2, _BOUNCE_LEG_2_DURATION) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	_indicator_tween.tween_callback(_squash_indicator)
+	_indicator_tween.tween_property(turtle_indicator, "position", target_pos, _BOUNCE_LEG_3_DURATION) \
 		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_indicator_tween.tween_callback(func():
+		turtle_indicator.texture = _turtle_idle_texture
+		_bounce_active = false)
+	_indicator_tween.tween_property(turtle_indicator, "modulate", Color.WHITE, _BOUNCE_COLOR_FADE_DURATION)
+	_indicator_tween.tween_callback(_schedule_trashbag_drift)
+
+
+## Quick squash-and-stretch pulse played at each wall bounce for a bit of
+## pinball impact "juice." Runs on its own tween in parallel with
+## _bounce_indicator_in's position sequence rather than inside it, since it
+## shouldn't hold up the next leg starting.
+func _squash_indicator() -> void:
+	var squash := create_tween()
+	squash.tween_property(turtle_indicator, "scale", _BOUNCE_SQUASH_SCALE, 0.06)
+	squash.tween_property(turtle_indicator, "scale", Vector2.ONE, 0.14) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+
+## Leaves a fading afterimage behind the indicator each trail tick during the
+## entrance bounce — the same "motion trail" technique TurtlePlayer uses for
+## its super speed dash (see _spawn_motion_trail() in turtle_player.gd),
+## adapted to a UI TextureRect. z_index keeps trails behind the live sprite
+## without needing to fuss with sibling order.
+## Fills in the gap between last frame's indicator position and this frame's
+## with evenly-spaced afterimages (_BOUNCE_TRAIL_SPACING apart) instead of
+## spawning one per frame — see the constant's comment for why a fixed time
+## interval leaves gaps at this speed.
+func _advance_bounce_trail() -> void:
+	var current_pos := turtle_indicator.position
+	var dist := current_pos.distance_to(_bounce_trail_last_pos)
+	if dist > 0.0:
+		var steps := maxi(1, int(ceil(dist / _BOUNCE_TRAIL_SPACING)))
+		for i in range(1, steps + 1):
+			_spawn_indicator_trail(_bounce_trail_last_pos.lerp(current_pos, float(i) / steps))
+	_bounce_trail_last_pos = current_pos
+
+
+func _spawn_indicator_trail(pos: Vector2) -> void:
+	var trail := TextureRect.new()
+	trail.texture = turtle_indicator.texture
+	trail.size = turtle_indicator.size
+	trail.pivot_offset = turtle_indicator.pivot_offset
+	trail.expand_mode = turtle_indicator.expand_mode
+	trail.stretch_mode = turtle_indicator.stretch_mode
+	trail.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	trail.position = pos
+	trail.scale = turtle_indicator.scale
+	trail.rotation = turtle_indicator.rotation
+	var trail_color := _SUPER_SPEED_COLOR
+	trail_color.a = 0.8
+	trail.modulate = trail_color
+
+	# A negative z_index would tuck it behind the ColorRect background too
+	# (z_index compares across the whole CanvasLayer, not just siblings) —
+	# insert it as Control's child right below TurtleIndicator instead, so it
+	# stays behind the live sprite while still painting above the background.
+	var parent := turtle_indicator.get_parent()
+	parent.add_child(trail)
+	parent.move_child(trail, turtle_indicator.get_index())
+
+	var tween := create_tween()
+	tween.tween_property(trail, "modulate:a", 0.0, _BOUNCE_TRAIL_FADE_DURATION)
+	tween.tween_callback(trail.queue_free)
+
+
+# ─── Post-intro trash bag drift ────────────────────────────────────────────────
+
+## Called once the turtle bounce (and its color fade) has fully landed —
+## waits one more beat of stillness before the trash bag drifts through, so
+## the three intro beats and this fourth one read as separate moments rather
+## than piling on top of each other.
+func _schedule_trashbag_drift() -> void:
+	get_tree().create_timer(_TRASHBAG_PAUSE_DELAY).timeout.connect(_spawn_trashbag)
+
+
+## Sends a trash bag drifting through the bottom third of the screen, using
+## the same drift speed and per-frame "organic ocean current" wave math as
+## TrashCluster's own ambient drift (see _physics_process() in
+## entities/collectibles/trash_cluster/trash_cluster.gd) — just applied to a
+## plain TextureRect's position each frame (via _advance_trashbag()) instead
+## of a RigidBody2D's linear_velocity, since the menu has no physics world.
+func _spawn_trashbag() -> void:
+	_trashbag_frame_a = AtlasTexture.new()
+	_trashbag_frame_a.atlas = _TRASHBAG_SPRITE
+	_trashbag_frame_a.region = _TRASHBAG_FRAME_A_REGION
+	_trashbag_frame_b = AtlasTexture.new()
+	_trashbag_frame_b.atlas = _TRASHBAG_SPRITE
+	_trashbag_frame_b.region = _TRASHBAG_FRAME_B_REGION
+
+	var bag := TextureRect.new()
+	bag.texture = _trashbag_frame_a
+	bag.size = _TRASHBAG_FRAME_SIZE
+	bag.expand_mode = 1     # EXPAND_IGNORE_SIZE
+	bag.stretch_mode = 5    # STRETCH_KEEP_ASPECT_CENTERED
+	bag.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	var vp_size := get_viewport().get_visible_rect().size
+	# Drift speed is negative (see TrashCluster.drift_speed) so it enters
+	# from the right and travels left; the wave adds at most ~±31px of its
+	# own on top of this baseline.
+	_trashbag_base_y = vp_size.y - 120.0
+	_trashbag_age = 0.0
+	_trashbag_wave_phase = randf() * TAU
+	_trashbag_flap_timer = 0.0
+	_trashbag_flap_on_a = true
+	bag.position = Vector2(vp_size.x + _TRASHBAG_FRAME_SIZE.x, _trashbag_base_y)
+
+	# The bottom third overlaps the lower menu text (Quit, the controller
+	# hint) — insert as Control's very first child so it drifts behind the
+	# title/options/turtle instead of drawing over them.
+	var parent := turtle_indicator.get_parent()
+	parent.add_child(bag)
+	parent.move_child(bag, 0)
+	_trashbag = bag
+
+
+## Advances the trash bag's drift by one frame — see _spawn_trashbag() for
+## why this mirrors TrashCluster._physics_process()'s wave math exactly.
+func _advance_trashbag(delta: float) -> void:
+	_trashbag_age += delta
+	var t := _trashbag_age + _trashbag_wave_phase
+
+	var wave_y := sin(t * 0.35) * 18.0 + sin(t * 1.05) * 9.0 + sin(t * 2.6) * 4.0
+	var wave_x := sin(t * 0.55 + 1.2) * 4.0 + sin(t * 1.7) * 2.0
+
+	_trashbag.position.x += (_TRASHBAG_DRIFT_SPEED + wave_x) * delta
+	_trashbag.position.y = _trashbag_base_y + wave_y
+
+	_trashbag_flap_timer += delta
+	if _trashbag_flap_timer >= _TRASHBAG_FRAME_INTERVAL:
+		_trashbag_flap_timer = 0.0
+		_trashbag_flap_on_a = not _trashbag_flap_on_a
+		_trashbag.texture = _trashbag_frame_a if _trashbag_flap_on_a else _trashbag_frame_b
+
+	if _trashbag.position.x < -_TRASHBAG_FRAME_SIZE.x:
+		_trashbag.queue_free()
+		_trashbag = null
 
 
 ## Feeds text_shine.gdshader the actual on-screen bounds of the focused
