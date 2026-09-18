@@ -65,7 +65,7 @@ var _definitions: Array[Dictionary] = [
 	{
 		"id":          TRANSPORTER,
 		"name":        "Transporter",
-		"description": "Teleport in the direction of your momentum. Brief invincibility on landing. 8s cooldown.",
+		"description": "Teleport in the direction of your momentum. Brief shock and invincibility on landing. 8s cooldown.",
 		"hook":        "Where'd they go?!",
 		"slot_label":  "Transporter",
 		"needs_input": true,

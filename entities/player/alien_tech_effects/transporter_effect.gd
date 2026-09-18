@@ -5,6 +5,14 @@ class_name TransporterEffect
 ## grants short invincibility. A hit during the windup cancels the teleport
 ## (see cancel_on_damage()) without landing damage on it separately.
 ##
+## Arrival also shocks the player for the same duration as the invincibility
+## window (the same suspend_control() stun Disturbance Wave gives itself on a
+## cold cast) — a nerf so the invincibility can't be chained into free,
+## controlled repositioning. suspend_control() disables the whole input block
+## in TurtlePlayer, including the tech-slot activation call, so while hot
+## (0s cooldown) this also blocks re-triggering Transporter until the shock
+## from the previous cast wears off, without any extra cooldown bookkeeping.
+##
 ## `windup` and `invincible` are read directly by TurtlePlayer for its
 ## sprite-modulate priority chain and its damage-blocking OR-chain — they
 ## stay public flags rather than query methods so those call sites don't
@@ -55,6 +63,7 @@ func activate(player, _slot_index: int) -> void:
 	player.linear_velocity *= 0.3
 	invincible = true
 	_invincible_timer = INVINCIBLE_DURATION
+	player.suspend_control(INVINCIBLE_DURATION)
 
 	# Scale pop on arrival
 	var sprite = player.get_node("AnimatedSprite2D")
