@@ -35,7 +35,7 @@ class_name StimShotEffect
 const COLD_SCALE: float = 1.6
 const HOT_SCALE: float = 2.0
 const ENERGY_RECOVERY_BOOST: float = 1.7  # on top of scale_factor, not instead of it
-const AIR_DRAIN_MULT: float = 3.5  # flat, same whether hot or cold
+const AIR_DRAIN_MULT: float = 4.0  # flat, same whether hot or cold
 
 var active: bool = false
 var scale_factor: float = 1.0
