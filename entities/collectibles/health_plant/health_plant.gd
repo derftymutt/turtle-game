@@ -27,6 +27,7 @@ var age: float = 0.0
 var pulse_offset: float = 0.0
 var visual_node: Node2D = null
 var attached_wall: Node2D = null
+var pulled_by_lance: bool = false  # Multi Lance is reeling this plant in
 
 func _ready():
 	add_to_group("health_plants")
@@ -52,9 +53,11 @@ func _process(delta):
 	if collected or despawning:
 		return
 	
-	# Track age
-	age += delta
-	
+	# Track age (paused while a Multi Lance is reeling the plant in, so it
+	# can't despawn mid-pull)
+	if not pulled_by_lance:
+		age += delta
+
 	# Check for despawn
 	if age >= lifetime:
 		despawning = true
@@ -151,6 +154,19 @@ func start_despawn():
 	tween.finished.connect(queue_free)
 	
 	print("🌿 Health plant despawned (not collected)")
+
+## Multi Lance: dislodges the plant from its wall (the only way to do so) and
+## freezes its despawn clock while it's dragged toward the player. The lance
+## moves global_position itself; collection still happens through the normal
+## Area2D overlap when the plant reaches the turtle.
+func begin_lance_pull() -> void:
+	pulled_by_lance = true
+	attached_wall = null  # its wall is free for HealthPlantSpawner to reuse
+
+## Multi Lance ended without the plant being collected (e.g. the turtle took
+## damage) — it stays where it was dragged to and its despawn clock resumes.
+func end_lance_pull() -> void:
+	pulled_by_lance = false
 
 ## Attach plant to a wall surface
 func attach_to_wall_surface(wall: Node2D, spawn_position: Vector2, wall_normal: Vector2):

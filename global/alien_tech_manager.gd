@@ -67,6 +67,8 @@ const ION_EXCITER_COOLDOWN_DURATION: float = 5.0
 const STIM_SHOT_ACTIVE_DURATION:   float = 6.0
 const STIM_SHOT_COOLDOWN_DURATION: float = 8.0
 
+const MULTI_LANCE_COOLDOWN_DURATION: float = 3.0
+
 const _COOLDOWN_DURATIONS: Dictionary = {
 	AlienTechRegistry.INERTIA_DAMPENER: INERTIA_DAMPENER_ACTIVE_DURATION + INERTIA_DAMPENER_COOLDOWN_DURATION,
 	AlienTechRegistry.LATERAL_THRUST:   5.0,
@@ -81,7 +83,19 @@ const _COOLDOWN_DURATIONS: Dictionary = {
 	AlienTechRegistry.QUANTUM_MIRROR:    QUANTUM_MIRROR_ACTIVE_DURATION + QUANTUM_MIRROR_COOLDOWN_DURATION,
 	AlienTechRegistry.ION_EXCITER:       ION_EXCITER_ACTIVE_DURATION + ION_EXCITER_COOLDOWN_DURATION,
 	AlienTechRegistry.STIM_SHOT:      STIM_SHOT_ACTIVE_DURATION + STIM_SHOT_COOLDOWN_DURATION,
+	AlienTechRegistry.MULTI_LANCE:    MULTI_LANCE_COOLDOWN_DURATION,
 }
+
+# Techs whose cooldown doesn't start draining on press: try_activate_slot()
+# seeds it as usual (so the bar reads full and re-presses are refused), but
+# _process() holds it there until the tech calls release_cooldown_hold() —
+# i.e. the cooldown runs from the END of the action, not its start.
+const _HOLD_COOLDOWN_TECHS: Array[String] = [
+	AlienTechRegistry.MULTI_LANCE,
+]
+
+# Per slot index (not tech id) so it travels with swap_slots().
+var _cooldown_held: Array[bool] = [false, false]
 
 # Techs whose HUD bar should read as two distinct phases — full-color drain
 # for the active window, then a greyed-out refill for the cooldown — rather
@@ -159,6 +173,8 @@ func _ready():
 
 func _process(delta: float):
 	for i in MAX_SLOTS:
+		if _cooldown_held[i]:
+			continue
 		if _cooldowns[i] > 0.0:
 			_cooldowns[i] = max(0.0, _cooldowns[i] - delta)
 			if _cooldowns[i] == 0.0:
@@ -216,6 +232,7 @@ func assign_tech(tech_id: String, slot_index: int):
 		_record_lost_tech(slots[slot_index].get("id", ""))
 	slots[slot_index] = tech
 	_cooldowns[slot_index] = 0.0
+	_cooldown_held[slot_index] = false
 	_slot_assigned_order[slot_index] = _assignment_counter
 	_assignment_counter += 1
 	_hot_streak[slot_index] = 0  # a freshly-picked tech always starts cold
@@ -229,6 +246,7 @@ func clear_slot(slot_index: int):
 	_record_lost_tech(slots[slot_index].get("id", ""))
 	slots[slot_index] = {}
 	_cooldowns[slot_index] = 0.0
+	_cooldown_held[slot_index] = false
 	_slot_assigned_order[slot_index] = -1
 	_hot_streak[slot_index] = 0
 	tech_slots_changed.emit(slots[0], slots[1])
@@ -310,9 +328,27 @@ func try_activate_slot(slot_index: int) -> bool:
 		print("👽 %s on cooldown: %.1fs remaining" % [tech["name"], _cooldowns[slot_index]])
 		return false
 	_cooldowns[slot_index] = _effective_cooldown_max(slot_index, tech["id"])
+	_cooldown_held[slot_index] = tech["id"] in _HOLD_COOLDOWN_TECHS
 	tech_activated.emit(slot_index, tech["id"])
 	print("👽 Activated: %s (slot %s)" % [tech["name"], _slot_letter(slot_index)])
 	return true
+
+## Starts draining a held cooldown (see _HOLD_COOLDOWN_TECHS). If
+## `max_remaining` is >= 0 the cooldown is also cut down to at most that many
+## seconds (never extended) — e.g. Multi Lance's short cooldown after a miss.
+## Safe to call when nothing is held or the tech is no longer equipped.
+func release_cooldown_hold(tech_id: String, max_remaining: float = -1.0) -> void:
+	var idx := get_slot_index_for_tech(tech_id)
+	if idx != -1:
+		_cooldown_held[idx] = false
+		if max_remaining >= 0.0:
+			_cooldowns[idx] = minf(_cooldowns[idx], max_remaining)
+
+## Drops every held cooldown. Called when a fresh TurtlePlayer spawns, since
+## the previous player may have been destroyed mid-action without ever
+## releasing its hold.
+func clear_all_cooldown_holds() -> void:
+	_cooldown_held = [false, false]
 
 ## The cooldown ceiling for a slot, adjusted for hot overrides. Shared by
 ## try_activate_slot() (to seed the timer) and get_cooldown_ratio() (to
@@ -338,6 +374,8 @@ func _effective_cooldown_max(slot_index: int, tech_id: String) -> float:
 			# Hot: active duration doubled, post-active recovery halved (scale itself
 			# is bumped separately in StimShotEffect.activate()).
 			return (STIM_SHOT_ACTIVE_DURATION * 2.0) + (STIM_SHOT_COOLDOWN_DURATION * 0.5)
+		AlienTechRegistry.MULTI_LANCE:
+			return MULTI_LANCE_COOLDOWN_DURATION * 0.5  # hot: half the cooldown (plus Sky Hook)
 		_:
 			return base
 
@@ -519,6 +557,9 @@ func swap_slots() -> void:
 	var temp_cd := _cooldowns[0]
 	_cooldowns[0] = _cooldowns[1]
 	_cooldowns[1] = temp_cd
+	var temp_held := _cooldown_held[0]
+	_cooldown_held[0] = _cooldown_held[1]
+	_cooldown_held[1] = temp_held
 	var temp_order := _slot_assigned_order[0]
 	_slot_assigned_order[0] = _slot_assigned_order[1]
 	_slot_assigned_order[1] = temp_order

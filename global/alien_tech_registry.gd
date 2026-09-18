@@ -28,6 +28,7 @@ const HYDRO_FUNNEL        := "hydro_funnel"
 const QUANTUM_MIRROR      := "quantum_mirror"
 const ION_EXCITER         := "ion_exciter"
 const STIM_SHOT           := "stim_shot"
+const MULTI_LANCE         := "multi_lance"
 
 # ─── Tech definitions ────────────────────────────────────────────────────────
 
@@ -264,6 +265,16 @@ var _definitions: Array[Dictionary] = [
 		"has_passive_bar": true,
 		"color":           Color(1.0, 0.7, 0.2),
 		"hot_description": "Longer, faster, more often.",
+	},
+	{
+		"id":              MULTI_LANCE,
+		"name":            "Multi Lance",
+		"description":     "Multi-purpose beam: Grab walls, grab powerups, pierce enemies, shock crocs! 3s cooldown.",
+		"hook":            "It can do it all!",
+		"slot_label":      "Multi Lance",
+		"needs_input":     true,
+		"color":           Color(0.3, 1.0, 0.85),
+		"hot_description": "Now with Sky Hook. Grab the sky itself! Half the cooldown.",
 	},
 ]
 

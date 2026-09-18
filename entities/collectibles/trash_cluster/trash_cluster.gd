@@ -114,6 +114,12 @@ func _on_area_body_entered(body: Node2D):
 	if body.has_method("set_velocity") and body.collision_layer == 8:
 		_take_hit()
 
+## Multi Lance: counts as `hits` bullet hits (_take_hit() ignores hits once
+## the bag has already burst).
+func take_lance_hit(hits: int = 1) -> void:
+	for _i in hits:
+		_take_hit()
+
 func _take_hit():
 	if is_destroyed:
 		return

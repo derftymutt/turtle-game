@@ -234,10 +234,12 @@ func _ready():
 	_tech_effects[AlienTechRegistry.TIME_FREEZE] = TimeFreezeEffect.new()
 	_tech_effects[AlienTechRegistry.ION_EXCITER] = IonExciterEffect.new()
 	_tech_effects[AlienTechRegistry.STIM_SHOT] = StimShotEffect.new()
+	_tech_effects[AlienTechRegistry.MULTI_LANCE] = MultiLanceEffect.new()
 	for effect in _tech_effects.values():
 		(effect as AlienTechEffect).setup(self)
 
 	AlienTechManager.clear_all_passive_bars()
+	AlienTechManager.clear_all_cooldown_holds()  # a previous player may have died mid-lance
 	AlienTechManager.tech_activated.connect(_on_alien_tech_activated)
 	AlienTechManager.tech_slots_changed.connect(_on_alien_tech_slots_changed_player)
 	LevelManager.level_complete.connect(func(): _level_complete = true)
@@ -263,6 +265,10 @@ func _physics_process(delta):
 	# speeds up the turtle's own cooldown recovery, animation, and ocean drag
 	# response without touching thrust_strength or bullet_speed.
 	var stim_shot := _tech_effects[AlienTechRegistry.STIM_SHOT] as StimShotEffect
+	# Multi Lance: while it's hauling something, thrust is locked out (shooting
+	# is not) and — if it's the turtle being hauled — ocean physics is
+	# suppressed so buoyancy/drag don't fight the pull.
+	var multi_lance := _tech_effects[AlienTechRegistry.MULTI_LANCE] as MultiLanceEffect
 
 	# Update cooldown timers
 	if not can_thrust:
@@ -376,10 +382,12 @@ func _physics_process(delta):
 
 	_tech_effects[AlienTechRegistry.ION_EXCITER].physics_process(self, delta)
 
+	multi_lance.physics_process(self, delta)
+
 	stim_shot.physics_process(self, delta)
 
 	# Ocean physics — suppressed while pinned to a bumper or flipper
-	if not (_tech_effects[AlienTechRegistry.BUMPER_MAGNET] as BumperMagnetEffect).attached and not _flipper_velcro_latched:
+	if not (_tech_effects[AlienTechRegistry.BUMPER_MAGNET] as BumperMagnetEffect).attached and not _flipper_velcro_latched and not multi_lance.pulling_player:
 		if ocean:
 			apply_ocean_effects(delta)
 		else:
@@ -470,7 +478,7 @@ func _physics_process(delta):
 	if hud and movement_input.length() > 0.1 and not energy_freeze_active:
 		can_actually_thrust = can_actually_thrust and hud.can_thrust()
 
-	if movement_input.length() > 0.1 and can_actually_thrust:
+	if movement_input.length() > 0.1 and can_actually_thrust and not multi_lance.pulling:
 		apply_thrust(movement_input.normalized())
 
 	if shoot_input.length() > 0.1 and can_shoot:
@@ -810,6 +818,7 @@ func take_damage(amount: float, use_iframes: bool = false, source: String = ""):
 	_tech_effects[AlienTechRegistry.TRANSPORTER].cancel_on_damage(self)
 	_tech_effects[AlienTechRegistry.DERMAL_REGEN].cancel_on_damage(self)
 	_tech_effects[AlienTechRegistry.BUMPER_MAGNET].cancel_on_damage(self)
+	_tech_effects[AlienTechRegistry.MULTI_LANCE].cancel_on_damage(self)
 	if _flipper_velcro_latched:
 		_cancel_flipper_velcro()
 

@@ -179,6 +179,14 @@ func _on_area_body_entered(body: Node2D) -> void:
 		_get_shot()
 
 
+## Multi Lance: same as being shot (guarded, since _get_shot() has no guard of
+## its own and the lance can strike a piece that's already mid-destruction).
+func take_lance_hit() -> void:
+	if is_destroyed:
+		return
+	_get_shot()
+
+
 func _get_shot() -> void:
 	is_destroyed = true
 	freeze = true
