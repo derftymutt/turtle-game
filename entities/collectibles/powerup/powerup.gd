@@ -30,6 +30,10 @@ enum PowerupType {
 @export var floor_lifetime: float = 12.0  # How long it stays on floor before despawning
 @export var disable_floor_despawn: bool = false
 
+# Below this speed (px/s) the powerup counts as resting and its sprite stops
+# spinning. Sinking speed is ~40-60 px/s, so this only trips once it has landed.
+const REST_SPEED: float = 8.0
+
 # Internal state
 var ocean: Ocean = null
 var collected: bool = false
@@ -80,7 +84,13 @@ func _ready():
 	visual_node = get_node_or_null("Sprite2D")
 	if not visual_node:
 		visual_node = get_node_or_null("AnimatedSprite2D")
-	
+
+	# Spawners set powerup_type before this node enters the tree, but the sprite's
+	# autoplay ("shield") fires on entering it and overwrites any animation they
+	# played beforehand — so pick the icon here, after autoplay has run.
+	if visual_node is AnimatedSprite2D:
+		visual_node.play(_animation_for_type(powerup_type))
+
 	# Connect Area2D for player detection
 	# NOTE: Area2D collision MUST be set in Inspector:
 	# - Collision Layer: 0 (nothing)
@@ -152,8 +162,14 @@ func animate_powerup(delta: float):
 	var glow = 1.0 + (sin(glow_offset) * glow_amount)
 	visual_node.modulate = Color(glow, glow, glow, 1.0)
 	
-	# Gentle rotation
-	rotation += rotation_speed * delta
+	# Gentle rotation while drifting/sinking — spin the sprite only, never the
+	# body. Forcing rotation on the RigidBody2D turns its square collider into a
+	# wheel that "walks" along the sea floor, so powerups all crawled into the
+	# same corner. The spin stops once the body has come to rest so it visibly
+	# sits still. (Not gated on on_floor: that needs y > 160, but real floors
+	# hold a powerup's center a few px above that.)
+	if linear_velocity.length() > REST_SPEED:
+		visual_node.rotation += rotation_speed * delta
 
 func _on_area_body_entered(body: Node2D):
 	if body.is_in_group("player") and not collected:
@@ -237,6 +253,19 @@ func start_despawn():
 	tween.tween_property(self, "scale", Vector2(0.3, 0.3), 1.5)
 	
 	tween.finished.connect(queue_free)
+
+func _animation_for_type(type: PowerupType) -> StringName:
+	match type:
+		PowerupType.AIR_RESERVE:
+			return &"air"
+		PowerupType.ENERGY_ENDLESS:
+			return &"energy"
+		PowerupType.RAPID_FIRE:
+			return &"rapid_fire"
+		PowerupType.RANDOM:
+			return &"random"
+		_:
+			return &"shield"
 
 ## Get powerup type name for display
 func get_powerup_name() -> String:

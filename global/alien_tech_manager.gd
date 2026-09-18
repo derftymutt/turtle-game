@@ -296,6 +296,11 @@ func advance_level_transition() -> Dictionary:
 		time_freeze_active = false
 		clear_passive_bar(AlienTechRegistry.TIME_FREEZE)
 
+	# Every tech starts the next level fresh: drop any cooldown (or held
+	# cooldown) still running from the level being left.
+	_cooldowns = [0.0, 0.0]
+	clear_all_cooldown_holds()
+
 	var hot: Array[Dictionary] = []
 	var fried: Array[Dictionary] = []
 	for i in MAX_SLOTS:
