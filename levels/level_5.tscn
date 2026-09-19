@@ -187,6 +187,12 @@ position = Vector2(-201, 143)
 
 [node name="FlipperLeftDownPixelPerfect" parent="FlipperCenterLeftTop" index="0" unique_id=1447591536 instance=ExtResource("10_a58qw")]
 position = Vector2(-244, -93)
+rest_angle_degrees = -30.0
+flip_angle_degrees = 60.0
+flip_force = 300.0
+flip_speed = 40.0
+flip_input = "flipper_left"
+collision_rotation_scale = 0.85
 
 [node name="DeadWall2" parent="FlipperCenterLeftTop" index="1" unique_id=797132162 instance=ExtResource("11_ij65d")]
 position = Vector2(-270, -65)
@@ -198,6 +204,12 @@ mirrored = true
 
 [node name="FlipperLeftDownPixelPerfect" parent="FlipperCenterLeftTop2" index="0" unique_id=1962845215 instance=ExtResource("10_a58qw")]
 position = Vector2(-44, -93)
+rest_angle_degrees = -30.0
+flip_angle_degrees = 60.0
+flip_force = 300.0
+flip_speed = 40.0
+flip_input = "flipper_left"
+collision_rotation_scale = 0.85
 
 [node name="DeadWall2" parent="FlipperCenterLeftTop2" index="1" unique_id=1113742759 instance=ExtResource("11_ij65d")]
 position = Vector2(-70, -65)
@@ -209,6 +221,12 @@ mirrored = true
 
 [node name="FlipperLeftDownPixelPerfect" parent="FlipperCenterLeftTop3" index="0" unique_id=1778070611 instance=ExtResource("10_a58qw")]
 position = Vector2(166, -93)
+rest_angle_degrees = -30.0
+flip_angle_degrees = 60.0
+flip_force = 300.0
+flip_speed = 40.0
+flip_input = "flipper_left"
+collision_rotation_scale = 0.85
 
 [node name="DeadWall2" parent="FlipperCenterLeftTop3" index="1" unique_id=1329656790 instance=ExtResource("11_ij65d")]
 position = Vector2(140, -65)
@@ -248,12 +266,30 @@ angle_preset = 2
 
 [node name="FlipperLeftDownPixelPerfect" parent="." index="21" unique_id=815066450 instance=ExtResource("10_a58qw")]
 position = Vector2(-270, 20)
+rest_angle_degrees = -30.0
+flip_angle_degrees = 60.0
+flip_force = 300.0
+flip_speed = 40.0
+flip_input = "flipper_left"
+collision_rotation_scale = 0.85
 
 [node name="FlipperLeftDownPixelPerfect2" parent="." index="22" unique_id=2029634595 instance=ExtResource("10_a58qw")]
 position = Vector2(-75, 22)
+rest_angle_degrees = -30.0
+flip_angle_degrees = 60.0
+flip_force = 300.0
+flip_speed = 40.0
+flip_input = "flipper_left"
+collision_rotation_scale = 0.85
 
 [node name="FlipperLeftDownPixelPerfect3" parent="." index="23" unique_id=966627239 instance=ExtResource("10_a58qw")]
 position = Vector2(130, 22)
+rest_angle_degrees = -30.0
+flip_angle_degrees = 60.0
+flip_force = 300.0
+flip_speed = 40.0
+flip_input = "flipper_left"
+collision_rotation_scale = 0.85
 
 [node name="FlipperRightDownPixelPerfect3" parent="." index="24" unique_id=1806466733 instance=ExtResource("12_ij65d")]
 position = Vector2(-130, 22)

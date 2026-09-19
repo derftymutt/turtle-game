@@ -57,6 +57,10 @@ func _freeze_world_bodies(player) -> void:
 				})
 				node.set_physics_process(false)
 				node.set_process(false)
+				# Movement driven by tweens/timers (the submarine boss) isn't
+				# stopped by the above — let the enemy hold those itself.
+				if node.has_method("on_time_freeze"):
+					node.on_time_freeze(true)
 	# Pause all spawners FIRST. process_mode=DISABLED propagates to children,
 	# which would include trash items — we handle that below.
 	var spawner_groups := ["spawners", "trash_spawners"]
@@ -134,6 +138,8 @@ func _unfreeze_world_bodies() -> void:
 			"animatable":
 				body.set_physics_process(true)
 				body.set_process(true)
+				if body.has_method("on_time_freeze"):
+					body.on_time_freeze(false)
 			"spawner":
 				body.process_mode = entry["process_mode"]
 			"powerup_frozen":

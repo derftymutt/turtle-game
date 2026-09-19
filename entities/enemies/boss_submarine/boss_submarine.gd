@@ -111,6 +111,12 @@ var _hit_invincible: bool = false
 # frame (see _process()/_update_magnetic_lift()).
 var _magnetic_lift: float = 0.0
 
+# Time Freeze tie-in (see on_time_freeze()). The patrol tween is remembered so
+# it can be paused, and the sprite's speed_scale so it can be restored.
+var _patrol_tween: Tween = null
+var _time_frozen: bool = false
+var _sprite_speed_scale: float = 1.0
+
 # Cached node references (set in _enemy_ready)
 var _missile_launch: Marker2D = null
 var _hatch_point: Marker2D = null
@@ -159,7 +165,7 @@ func _enemy_ready() -> void:
 
 	# Start the main behaviour loop after a short intro pause
 	_state = State.INTRO
-	await get_tree().create_timer(1.5).timeout
+	await _wait(1.5)
 	if is_instance_valid(self):
 		_begin_move_phase()
 
@@ -185,6 +191,41 @@ func _process(delta: float) -> void:
 	if _state == State.DYING:
 		return
 	_update_magnetic_lift(delta)
+
+# ─────────────────────────────────────────────────────────────
+# TIME FREEZE
+# ─────────────────────────────────────────────────────────────
+
+## Called by TimeFreezeEffect when Time Freeze starts (true) and ends (false).
+## The effect already turns off _process/_physics_process (lift, drone timer),
+## but the patrol tween, the sprite animation and the attack-pacing timers run
+## outside those callbacks, so they are held here.
+func on_time_freeze(frozen: bool) -> void:
+	if frozen == _time_frozen:
+		return
+	_time_frozen = frozen
+	if _patrol_tween and _patrol_tween.is_valid():
+		if frozen:
+			_patrol_tween.pause()
+		else:
+			_patrol_tween.play()
+	if _sprite:
+		if frozen:
+			_sprite_speed_scale = _sprite.speed_scale
+			_sprite.speed_scale = 0.0
+		else:
+			_sprite.speed_scale = _sprite_speed_scale
+
+## Drop-in for get_tree().create_timer(seconds).timeout that stops counting
+## while Time Freeze is in effect, so an attack doesn't carry on firing.
+func _wait(seconds: float) -> void:
+	var remaining := seconds
+	while remaining > 0.0:
+		await get_tree().process_frame
+		if not is_instance_valid(self):
+			return
+		if not _time_frozen:
+			remaining -= get_process_delta_time()
 
 # ─────────────────────────────────────────────────────────────
 # SUPER-SPEED HIT — called by the SuperSpeedHitArea signal
@@ -258,6 +299,7 @@ func _begin_move_phase() -> void:
 	# and bake in whatever partial height it had reached the moment travel
 	# started, so it could never catch up.
 	var tween := create_tween()
+	_patrol_tween = tween
 	tween.set_ease(Tween.EASE_IN_OUT)
 	tween.set_trans(Tween.TRANS_SINE)
 	tween.tween_property(self, "global_position:x", target_x, travel_time)
@@ -268,7 +310,7 @@ func _begin_move_phase() -> void:
 
 	# Arrival pause — sub slows to a stop
 	_state = State.PAUSING
-	await get_tree().create_timer(arrival_pause).timeout
+	await _wait(arrival_pause)
 
 	if _state == State.DYING or not is_instance_valid(self):
 		return
@@ -329,7 +371,7 @@ func _do_fan_salvo() -> void:
 		_spawn_missile(dir * fan_missile_speed)
 
 	# Small pause so the volley has time to leave before the sub moves
-	await get_tree().create_timer(1.2).timeout
+	await _wait(1.2)
 
 # ─────────────────────────────────────────────────────────────
 # PATTERN 2: AROUND THE WORLD
@@ -355,10 +397,10 @@ func _do_around_world() -> void:
 		var angle := start_angle + step * idx
 		var dir := Vector2(cos(angle), sin(angle))
 		_spawn_missile(dir * arc_missile_speed)
-		await get_tree().create_timer(arc_step_delay).timeout
+		await _wait(arc_step_delay)
 
 	# Brief pause after sweep
-	await get_tree().create_timer(0.5).timeout
+	await _wait(0.5)
 
 # ─────────────────────────────────────────────────────────────
 # PATTERN 3: HEAVY SWEEP
@@ -389,9 +431,9 @@ func _do_heavy_sweep() -> void:
 			var dir := Vector2(cos(angle), sin(angle))
 			_spawn_missile(dir * heavy_missile_speed)
 
-		await get_tree().create_timer(heavy_step_delay).timeout
+		await _wait(heavy_step_delay)
 
-	await get_tree().create_timer(0.6).timeout
+	await _wait(0.6)
 
 # ─────────────────────────────────────────────────────────────
 # MISSILE SPAWNING HELPER
@@ -451,7 +493,7 @@ func _try_deploy_drone() -> void:
 
 	if _sprite and _sprite.sprite_frames and _sprite.sprite_frames.has_animation("open_hatch"):
 		var duration := _get_animation_duration("open_hatch")
-		await get_tree().create_timer(duration).timeout
+		await _wait(duration)
 		if not is_instance_valid(self) or _state == State.DYING:
 			return
 		_sprite.play("default")
