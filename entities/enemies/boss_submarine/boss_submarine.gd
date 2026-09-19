@@ -216,11 +216,22 @@ func on_time_freeze(frozen: bool) -> void:
 		else:
 			_sprite.speed_scale = _sprite_speed_scale
 
+## Leaving the tree (level reload, quit to menu) ends every attack sequence
+## the same way dying does — they all already bail on State.DYING after each
+## _wait(), which returns early once we're out of the tree.
+func _exit_tree() -> void:
+	_state = State.DYING
+
 ## Drop-in for get_tree().create_timer(seconds).timeout that stops counting
 ## while Time Freeze is in effect, so an attack doesn't carry on firing.
 func _wait(seconds: float) -> void:
 	var remaining := seconds
 	while remaining > 0.0:
+		# A level reload/quit removes the sub from the tree a frame or more
+		# before it's actually freed, so is_instance_valid() alone isn't enough
+		# — get_tree() is already null by then.
+		if not is_inside_tree():
+			return
 		await get_tree().process_frame
 		if not is_instance_valid(self):
 			return

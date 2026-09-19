@@ -274,7 +274,7 @@ alignment = 1
 [node name="Lead" type="Label" parent="TutorialUI/Prompt/Margin/VBox/EnergySparkleRow/Inner/WordRow" index="0" unique_id=1293090603]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
-text = "You will see the "
+text = "You will see (and hear) the "
 
 [node name="Word" type="Label" parent="TutorialUI/Prompt/Margin/VBox/EnergySparkleRow/Inner/WordRow" index="1" unique_id=300000222]
 layout_mode = 2

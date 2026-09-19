@@ -11,7 +11,8 @@ extends CanvasLayer
 ##   ENERGY_PAUSED  - paused lesson: energy bars + surface recovery
 ##   TO_SURFACE / SURFACE_WATCH - reach the surface, see the fast-recharge sparkle
 ##   FLIPPER_PAUSED - paused lesson: reveals the pinball field, then makes the
-##                    player work the left and right flippers before A dismisses
+##                    player work the left and right flippers, then tells them
+##                    to launch themselves down to the part, before A dismisses
 ##   TO_PICKUP      - wait until the player is carrying a UFO part
 ##   PICKUP_DELAY   - beat, then...
 ##   DROP_PAUSED    - paused lesson: parts are heavy, actually drop it with X —
@@ -28,6 +29,14 @@ extends CanvasLayer
 ## Note: while the SceneTree is paused, Input.is_action_just_pressed() and
 ## _input() do not fire reliably, but Input.is_action_pressed() (level state)
 ## does. So dismiss detection polls the level state and finds the edge itself.
+##
+## Typewriter: every prompt types its text out a letter at a time (see
+## _tick_typing()). A prompt is a list of pages (_pages) — each a Callable that
+## lays out that page's labels and returns them in typing order. Long lessons
+## (energy, flippers) are split into several pages; the dismiss key (A / Enter)
+## first finishes the text that's still typing, then turns to the next page,
+## and only dismisses the lesson once the final page is fully shown (see
+## _tick_prompt()).
 
 enum Step {
 	INTRO,
@@ -49,11 +58,22 @@ const INTRO_HINT := "Swim with the Left Stick (or W A S D)"
 ## Reference copy of the wording — built as rich text in _show_energy_prompt()
 ## instead (same pattern as INTRO_TEXT/_show_intro()) so the icon/bar images
 ## can sit inline.
-const ENERGY_TEXT := "Tired? Swimming uses energy, which is tracked by a small bar above you. [turtle+bar icon]\nA large version is at the top right [icon+bar]\n\nYou recover energy slowly when not swimming.\n\nBUT- you can recover it QUICKLY [sparkle] as well.\n\n\nGo to the surface. (larger font)\n\nYou will see the yellow sparkles [sparkle] of QUICK energy recovery."
+const ENERGY_TEXT := "Tired? Swimming uses energy, which is tracked by a small bar above you. [turtle+bar icon]\nA large version is at the top right [icon+bar]\n\nYou recover energy slowly when not swimming.\n\nBUT- you can recover it QUICKLY [sparkle] as well.\n\n\nGo to the surface. (larger font)\n\nYou will see (and hear) the yellow sparkles [sparkle] of QUICK energy recovery."
 
 ## Reference copy — built from FlipperFastRow + FlipperBody in
 ## _show_flipper_prompt() instead, so the sparkle can land on "QUICKLY" here too.
-const FLIPPER_TEXT := "You also recover energy QUICKLY [sparkle] while TOUCHING pinball walls and flippers. THIS IS KEY!!\n\nPlus, flippers are a great way to get around — life is much easier when you use them. Try launching yourself deep into the ocean to reach the UFO part.\n\nFlip with the LT / RT triggers (or Left Shift / Right Shift)."
+const FLIPPER_TEXT := "You also recover energy QUICKLY [sparkle] while TOUCHING pinball walls and flippers. THIS IS KEY!!\n\nPlus, flippers are a great way to get around — life is much easier when you use them.\n\nYou flip flippers with the LT / RT triggers (or Left Shift / Right Shift).\n\n[after trying both flippers:] Now try launching yourself deep into the ocean with the flippers to reach the UFO part."
+## The same wording as FLIPPER_TEXT, one entry per page — FlipperBody is
+## retyped for each. Page 0 also shows FlipperFastRow's "You also recover
+## energy QUICKLY" as its opening line, so its entry picks up mid-sentence.
+const FLIPPER_BODY_PAGES: Array[String] = [
+	"while TOUCHING pinball walls and flippers. THIS IS KEY!!",
+	"Plus, flippers are a great way to get around — life is much easier when you use them.",
+	"You flip flippers with the LT / RT triggers (or Left Shift / Right Shift).",
+]
+## Not one of the pages above: it's only typed once the player has actually
+## worked both flippers (see Step.FLIPPER_PAUSED and _show_flipper_launch_page()).
+const FLIPPER_LAUNCH_TEXT := "Now try launching yourself deep into the ocean with the flippers to reach the UFO part."
 const FLIPPER_HINT_LEFT := "Try the LEFT flipper: LT (or Left Shift)"
 const FLIPPER_HINT_RIGHT := "Now the RIGHT flipper: RT (or Right Shift)"
 
@@ -71,6 +91,20 @@ const FINAL_TEXT := "You're ready!\nDeliver UFO parts to complete each level.\n\
 
 const CONTINUE_HINT := "Press A / Enter to continue"
 const FINISH_HINT := "Press A / Enter to finish"
+
+## Typewriter pacing. Layout is fixed up front (see _configure_typed_labels()),
+## so a slower/faster speed never reflows the text — only how quickly it appears.
+const TYPE_CHARS_PER_SECOND := 50.0
+## Extra beats after punctuation so sentences land instead of streaming past.
+const TYPE_SENTENCE_PAUSE := 0.25
+const TYPE_CLAUSE_PAUSE := 0.12
+## Held back at the start of every page — covers the prompt's fade-in and gives
+## a page turn a small "new text is coming" beat.
+const TYPE_START_DELAY := 0.25
+## The intro is dismissed by swimming, which the player is likely already doing
+## as it types. Movement only counts this long after the text has finished, so
+## they get a moment with the full goal on screen.
+const INTRO_LINGER_SECONDS := 0.8
 
 const MOVE_ACTIONS: Array[StringName] = [&"move_up", &"move_down", &"move_left", &"move_right"]
 ## Generous: the turtle bobs ~0-20px around the waterline while resting there.
@@ -113,10 +147,17 @@ const TRASH_SAFETY_SECONDS := 34.0
 @onready var _message: Label = $Prompt/Margin/VBox/Message
 @onready var _message_rich: RichTextLabel = $Prompt/Margin/VBox/MessageRich
 @onready var _energy_fast_row:     HBoxContainer = $Prompt/Margin/VBox/EnergyFastRow
+@onready var _energy_fast_before:  Label         = $Prompt/Margin/VBox/EnergyFastRow/Inner/Before
+@onready var _energy_fast_lead:    Label         = $Prompt/Margin/VBox/EnergyFastRow/Inner/WordRow/Lead
 @onready var _energy_fast_word:    Label         = $Prompt/Margin/VBox/EnergyFastRow/Inner/WordRow/Word
+@onready var _energy_fast_after:   Label         = $Prompt/Margin/VBox/EnergyFastRow/Inner/WordRow/After
 @onready var _energy_sparkle_row:  HBoxContainer = $Prompt/Margin/VBox/EnergySparkleRow
+@onready var _energy_sparkle_before: Label       = $Prompt/Margin/VBox/EnergySparkleRow/Inner/Before
+@onready var _energy_sparkle_lead: Label         = $Prompt/Margin/VBox/EnergySparkleRow/Inner/WordRow/Lead
 @onready var _energy_sparkle_word: Label         = $Prompt/Margin/VBox/EnergySparkleRow/Inner/WordRow/Word
+@onready var _energy_sparkle_after: Label        = $Prompt/Margin/VBox/EnergySparkleRow/Inner/WordRow/After
 @onready var _flipper_fast_row:    HBoxContainer = $Prompt/Margin/VBox/FlipperFastRow
+@onready var _flipper_fast_before: Label         = $Prompt/Margin/VBox/FlipperFastRow/Before
 @onready var _flipper_fast_word:   Label         = $Prompt/Margin/VBox/FlipperFastRow/Word
 @onready var _flipper_body:        Label         = $Prompt/Margin/VBox/FlipperBody
 @onready var _hint: Label = $Prompt/Margin/VBox/HintRow/Hint
@@ -157,7 +198,27 @@ var _surface_time := 0.0
 var _energy_depleted_time := 0.0
 var _arm_timer := 0.0
 var _dismiss_down_last := false
-var _dismiss_held_at_pause := false
+## True while a paused lesson is waiting on the dismiss key (set by
+## _arm_dismiss(), cleared by _unpause()). The intro isn't one — it's cleared
+## by swimming, not a key press.
+var _dismiss_active := false
+## Set by _tick_prompt() on the frame the dismiss key is pressed with nothing
+## left to skip or turn — i.e. the press that should actually end the lesson.
+var _dismiss_pressed := false
+
+# Typewriter / paging state (see the header note, _show_pages() and _tick_typing()).
+var _pages: Array = []                ## Callables, one per page; each returns its labels in typing order
+var _page_index := 0
+var _final_hint := ""                 ## Hint shown once the LAST page is fully typed; earlier pages show CONTINUE_HINT
+var _typing := false
+var _type_nodes: Array = []           ## Label / RichTextLabel nodes on the current page, in typing order
+var _type_node_i := 0
+var _type_text := ""
+var _type_pos := 0
+var _type_budget := 0.0               ## Seconds banked toward the next letter (starts negative — see TYPE_START_DELAY)
+var _type_cost := 0.0                 ## Seconds the next letter costs
+var _type_sparkles: Dictionary = {}   ## Label -> sparkle id, started the moment that label finishes typing
+var _intro_linger := 0.0
 
 var _beat_timer := 0.0
 var _fight_timer := 0.0
@@ -186,6 +247,7 @@ var _sparkles: Dictionary = {}
 
 func _ready() -> void:
 	_hint.add_theme_color_override("font_color", HINT_COLOR)
+	_configure_typed_labels(_prompt)
 	_resolve_refs()
 	if _pinball:
 		_pinball.visible = false
@@ -195,9 +257,14 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	# Ahead of the _hud/_turtle guard below: the intro types out before those exist.
+	_tick_prompt(delta)
+
 	if _hint_row.visible:
+		# Kept in the layout but invisible while typing (rather than hidden) so
+		# the text block doesn't jump when the hint appears afterwards.
 		var blink_on := int(Time.get_ticks_msec() / HINT_BLINK_PERIOD_MSEC) % 2 == 0
-		_hint_row.modulate.a = 1.0 if blink_on else HINT_BLINK_LOW_ALPHA
+		_hint_row.modulate.a = 0.0 if _typing else (1.0 if blink_on else HINT_BLINK_LOW_ALPHA)
 
 	if _hud == null or _turtle == null:
 		_resolve_refs()
@@ -205,9 +272,13 @@ func _process(delta: float) -> void:
 
 	match _step:
 		Step.INTRO:
-			if _any_pressed(MOVE_ACTIONS):
-				_hide_prompt()
-				_step = Step.TO_ENERGY
+			if _typing:
+				_intro_linger = INTRO_LINGER_SECONDS
+			else:
+				_intro_linger -= delta
+				if _intro_linger <= 0.0 and _any_pressed(MOVE_ACTIONS):
+					_hide_prompt()
+					_step = Step.TO_ENERGY
 
 		Step.TO_ENERGY:
 			# Flat delay once energy first dips into the red (see
@@ -221,7 +292,7 @@ func _process(delta: float) -> void:
 					_pause_with_energy_prompt()
 
 		Step.ENERGY_PAUSED:
-			if _dismiss_ready(delta):
+			if _dismiss_ready():
 				_unpause()
 				_hide_prompt()
 				_step = Step.TO_SURFACE
@@ -246,16 +317,18 @@ func _process(delta: float) -> void:
 
 		Step.FLIPPER_PAUSED:
 			# Make them work each flipper (and watch it move) before "A" unlocks.
-			if not _flipped_left:
+			if not _text_complete():
+				pass  # still reading — A skips/turns pages (see _tick_prompt()); flippers don't count yet
+			elif not _flipped_left:
 				if Input.is_action_pressed(&"flipper_left"):
 					_flipped_left = true
 					_set_hint(FLIPPER_HINT_RIGHT)
 			elif not _flipped_right:
 				if Input.is_action_pressed(&"flipper_right"):
 					_flipped_right = true
-					_set_hint(CONTINUE_HINT)
+					_show_flipper_launch_page()
 					_arm_timer = 0.25
-			elif _dismiss_ready(delta):
+			elif _dismiss_ready():
 				_unpause()
 				_hide_prompt()
 				_step = Step.TO_PICKUP
@@ -288,7 +361,9 @@ func _process(delta: float) -> void:
 			# detection (see _drop_down_last) since is_action_just_pressed()
 			# isn't reliable while paused.
 			var drop_down := Input.is_action_pressed(&"drop_piece")
-			if drop_down and not _drop_down_last:
+			# Not until the text has finished typing, so the drop can't
+			# unpause the lesson before they've read it.
+			if drop_down and not _drop_down_last and _text_complete():
 				_perform_tutorial_drop()
 				_unpause()
 				_hide_prompt()
@@ -303,7 +378,7 @@ func _process(delta: float) -> void:
 				_pause_with_prompt(MEANIES_TEXT, CONTINUE_HINT)
 
 		Step.MEANIES_PAUSED:
-			if _dismiss_ready(delta):
+			if _dismiss_ready():
 				_shot_once = false
 				_shoot_test_cooldown = 0.0
 				_step = Step.SHOOT_PAUSED
@@ -326,7 +401,7 @@ func _process(delta: float) -> void:
 					_shot_once = true
 					_set_hint(CONTINUE_HINT)
 					_arm_timer = 0.25
-			if _shot_once and _dismiss_ready(delta):
+			if _shot_once and _dismiss_ready():
 				_unpause()
 				_hide_prompt()
 				_spawn_piranha(PIRANHA_COUNT)
@@ -341,7 +416,7 @@ func _process(delta: float) -> void:
 				_pause_with_prompt(TRASH_TEXT, CONTINUE_HINT)
 
 		Step.TRASH_PAUSED:
-			if _dismiss_ready(delta):
+			if _dismiss_ready():
 				_unpause()
 				_hide_prompt()
 				_spawn_trash()
@@ -355,7 +430,7 @@ func _process(delta: float) -> void:
 				_pause_with_prompt(FINAL_TEXT, FINISH_HINT)
 
 		Step.FINAL_PAUSED:
-			if _dismiss_ready(delta):
+			if _dismiss_ready():
 				_unpause()
 				_step = Step.DONE
 				GameManager.load_main_menu()
@@ -506,27 +581,20 @@ func _pause_with_flipper_prompt() -> void:
 func _arm_dismiss() -> void:
 	_arm_timer = DISMISS_ARM_DELAY
 	_dismiss_down_last = _dismiss_input_down()
-	_dismiss_held_at_pause = _dismiss_down_last
+	_dismiss_active = true
 	get_tree().paused = true
 
 
-## True once the player has acknowledged a paused prompt: a fresh press of the
-## dismiss key, or releasing it if it was already held when the pause began
-## (e.g. they were swimming left, which is the A key).
-func _dismiss_ready(delta: float) -> bool:
-	var down := _dismiss_input_down()
-	if _arm_timer > 0.0:
-		_arm_timer -= delta
-		_dismiss_down_last = down
-		_dismiss_held_at_pause = _dismiss_held_at_pause and down
-		return false
-	if down and not _dismiss_down_last:
-		_dismiss_down_last = down
-		return true
-	if _dismiss_held_at_pause and not down:
-		return true
-	_dismiss_down_last = down
-	return false
+## True on the frame the player has acknowledged a paused prompt whose text is
+## all on screen: a fresh press of the dismiss key on the final page (earlier
+## presses are spent skipping the typing / turning pages — see _tick_prompt()).
+##
+## This used to also accept RELEASING a key that was already held when the
+## pause began (they were swimming left, which is the A key). With typed text
+## that would skip straight past a prompt the moment they let go of the stick,
+## so only a fresh press counts now.
+func _dismiss_ready() -> bool:
+	return _dismiss_pressed
 
 
 func _dismiss_input_down() -> bool:
@@ -534,33 +602,121 @@ func _dismiss_input_down() -> bool:
 
 
 func _unpause() -> void:
+	_dismiss_active = false
 	get_tree().paused = false
 
 
-func _show_prompt(text: String, hint: String = "") -> void:
+## Drives the current prompt every frame: types its text (_tick_typing()) and
+## interprets the dismiss key. Each press does the first of — finish the text
+## that's still typing; turn to the next page; otherwise flag a real dismiss
+## for the step logic to pick up via _dismiss_ready().
+func _tick_prompt(delta: float) -> void:
+	_tick_typing(delta)
+	_dismiss_pressed = false
+	if not _dismiss_active:
+		return
+	var down := _dismiss_input_down()
+	if _arm_timer > 0.0:
+		_arm_timer -= delta
+		_dismiss_down_last = down
+		return
+	var pressed := down and not _dismiss_down_last
+	_dismiss_down_last = down
+	if not pressed:
+		return
+	if _typing:
+		_finish_typing()
+	elif _page_index < _pages.size() - 1:
+		_start_page(_page_index + 1)
+	else:
+		_dismiss_pressed = true
+
+
+## True once every page of the current prompt has been fully typed out.
+func _text_complete() -> bool:
+	return not _typing and _page_index >= _pages.size() - 1
+
+
+## Whole prompt as its list of pages (Callables — see _start_page()).
+## final_hint is shown once the last page has finished typing; earlier pages
+## show CONTINUE_HINT for turning to the next one.
+func _show_pages(pages: Array, final_hint: String) -> void:
 	_prompt_wanted = true
 	if _prompt_tween and _prompt_tween.is_valid():
 		_prompt_tween.kill()
-	_message_rich.visible = false
-	_hide_all_custom_prompt_nodes()
-	_message.visible = true
-	_message.text = text
-	_hint.text = hint
-	_hint_row.visible = hint != ""
+	_pages = pages
+	_final_hint = final_hint
 	_prompt.modulate.a = 0.0
 	_prompt.visible = true
 	_prompt_tween = create_tween()
 	_prompt_tween.tween_property(_prompt, "modulate:a", 1.0, 0.3)
+	_start_page(0)
+
+
+func _show_prompt(text: String, hint: String = "") -> void:
+	_show_pages([_page_plain.bind(text)], hint)
+
+
+## The intro isn't paused or dismissed by a key — swimming clears it.
+func _show_intro() -> void:
+	_show_pages([_page_intro], INTRO_HINT)
+
+
+## Three pages: the energy bars, the slow-vs-QUICK recovery, then "go to the
+## surface".
+func _show_energy_prompt() -> void:
+	_show_pages([_page_energy_bars, _page_energy_recover, _page_energy_surface], CONTINUE_HINT)
+
+
+## One page per entry in FLIPPER_BODY_PAGES. The final page's hint walks the
+## player through the flippers (see Step.FLIPPER_PAUSED).
+func _show_flipper_prompt() -> void:
+	var pages: Array = []
+	for i in FLIPPER_BODY_PAGES.size():
+		pages.append(_page_flipper.bind(i))
+	_show_pages(pages, FLIPPER_HINT_LEFT)
+
+
+## Once both flippers have been worked, adds one more page onto the flipper
+## prompt — the "now go launch yourself" line — and types it. It becomes the
+## last page, so its hint is the plain continue prompt rather than the
+## flipper-walkthrough one the earlier final page carried.
+func _show_flipper_launch_page() -> void:
+	_pages.append(_page_flipper_launch)
+	_final_hint = CONTINUE_HINT
+	_start_page(_pages.size() - 1)
+
+
+## Lays out one page and starts typing it. Page callables show whatever labels
+## they need, and return the ones to type, in order (setting up any sparkle
+## words in _type_sparkles on the way).
+func _start_page(index: int) -> void:
+	_page_index = index
+	_message.visible = false
+	_message_rich.visible = false
+	_hide_all_custom_prompt_nodes()
+	_type_sparkles.clear()
+	_type_nodes = _pages[index].call()
+	# Blank every label on the page now, not as its turn comes up — the ones
+	# still waiting would otherwise sit there fully visible from the start.
+	for node: Control in _type_nodes:
+		_set_visible_chars(node, 0)
+	_set_hint(_final_hint if index >= _pages.size() - 1 else CONTINUE_HINT)
+	_type_budget = -TYPE_START_DELAY
+	_typing = not _type_nodes.is_empty()
+	if _typing:
+		_begin_node(0)
+
+
+func _page_plain(text: String) -> Array:
+	_message.visible = true
+	_message.text = text
+	return [_message]
 
 
 ## The intro prompt, built as rich text so the UFO part and workshop icons can
 ## sit inline right after their names (like the how-to-play screen).
-func _show_intro() -> void:
-	_prompt_wanted = true
-	if _prompt_tween and _prompt_tween.is_valid():
-		_prompt_tween.kill()
-	_message.visible = false
-	_hide_all_custom_prompt_nodes()
+func _page_intro() -> Array:
 	_message_rich.visible = true
 	_message_rich.clear()
 	_message_rich.push_paragraph(HORIZONTAL_ALIGNMENT_CENTER)
@@ -570,25 +726,12 @@ func _show_intro() -> void:
 	_message_rich.add_image(WORKSHOP_ICON, 17, 17, Color.WHITE, INLINE_ALIGNMENT_CENTER, WORKSHOP_ICON_REGION)
 	_message_rich.append_text(".\n\nGive it a try!")
 	_message_rich.pop()
-	_hint.text = INTRO_HINT
-	_hint_row.visible = true
-	_prompt.modulate.a = 0.0
-	_prompt.visible = true
-	_prompt_tween = create_tween()
-	_prompt_tween.tween_property(_prompt, "modulate:a", 1.0, 0.3)
+	return [_message_rich]
 
 
-## The energy lesson. Built partly as rich text (for the inline icon/bar
-## images) and partly as dedicated rows of plain Labels for the two sparkle
-## words ("QUICKLY", "yellow sparkles") — each needs to be its own node so the
-## sparkle can be positioned exactly on top of it via get_global_rect(),
-## which a substring inside a flowing RichTextLabel paragraph can't give us.
-func _show_energy_prompt() -> void:
-	_prompt_wanted = true
-	if _prompt_tween and _prompt_tween.is_valid():
-		_prompt_tween.kill()
-	_hide_all_custom_prompt_nodes()
-	_message.visible = false
+## Energy lesson, page 1: the small bar above the turtle and the big one in the
+## HUD. Rich text, for the inline icon/bar images.
+func _page_energy_bars() -> Array:
 	_message_rich.visible = true
 	_message_rich.clear()
 	_message_rich.push_paragraph(HORIZONTAL_ALIGNMENT_CENTER)
@@ -600,41 +743,133 @@ func _show_energy_prompt() -> void:
 	_message_rich.add_image(ENERGY_ICON, ENERGY_ICON_SIZE.x, ENERGY_ICON_SIZE.y)
 	_message_rich.add_image(ENERGY_BAR_FILL, ENERGY_BAR_SIZE.x, ENERGY_BAR_SIZE.y)
 	_message_rich.pop()
+	return [_message_rich]
+
+
+## Energy lesson, pages 2 and 3: dedicated rows of plain Labels (text lives in
+## the scene) for the two sparkle words ("QUICKLY", "yellow sparkles") — each
+## needs to be its own node so the sparkle can be positioned exactly on top of
+## it via get_global_rect(), which a substring inside a flowing RichTextLabel
+## paragraph can't give us. The sparkle starts once its word has been typed.
+func _page_energy_recover() -> Array:
 	_energy_fast_row.visible = true
+	_type_sparkles[_energy_fast_word] = "energy_fast"
+	return [_energy_fast_before, _energy_fast_lead, _energy_fast_word, _energy_fast_after]
+
+
+func _page_energy_surface() -> Array:
 	_energy_sparkle_row.visible = true
-	_hint.text = CONTINUE_HINT
-	_hint_row.visible = true
-	_prompt.modulate.a = 0.0
-	_prompt.visible = true
-	_prompt_tween = create_tween()
-	_prompt_tween.tween_property(_prompt, "modulate:a", 1.0, 0.3)
-	_show_sparkle_on("energy_fast", _energy_fast_word)
-	_show_sparkle_on("energy_sparkle_word", _energy_sparkle_word)
+	_type_sparkles[_energy_sparkle_word] = "energy_sparkle_word"
+	return [_energy_sparkle_before, _energy_sparkle_lead, _energy_sparkle_word, _energy_sparkle_after]
 
 
-## The flipper lesson's opening line, split the same way so the sparkle can
-## land on its "QUICKLY" too. The rest of FLIPPER_TEXT (no sparkle needed)
-## continues in FlipperBody, its own plain autowrap Label.
-func _show_flipper_prompt() -> void:
-	_prompt_wanted = true
-	if _prompt_tween and _prompt_tween.is_valid():
-		_prompt_tween.kill()
-	_hide_all_custom_prompt_nodes()
-	_message.visible = false
-	_message_rich.visible = false
-	_flipper_fast_row.visible = true
+## Flipper lesson, one page per entry in FLIPPER_BODY_PAGES. Page 0 opens with
+## FlipperFastRow, split off the same way so the sparkle can land on its
+## "QUICKLY" too; the rest of each page is FlipperBody, a plain autowrap Label.
+func _page_flipper(index: int) -> Array:
 	_flipper_body.visible = true
-	_hint.text = FLIPPER_HINT_LEFT
-	_hint_row.visible = true
-	_prompt.modulate.a = 0.0
-	_prompt.visible = true
-	_prompt_tween = create_tween()
-	_prompt_tween.tween_property(_prompt, "modulate:a", 1.0, 0.3)
-	_show_sparkle_on("flipper_fast", _flipper_fast_word)
+	_flipper_body.text = FLIPPER_BODY_PAGES[index]
+	if index == 0:
+		_flipper_fast_row.visible = true
+		_type_sparkles[_flipper_fast_word] = "flipper_fast"
+		return [_flipper_fast_before, _flipper_fast_word, _flipper_body]
+	return [_flipper_body]
+
+
+func _page_flipper_launch() -> Array:
+	_flipper_body.visible = true
+	_flipper_body.text = FLIPPER_LAUNCH_TEXT
+	return [_flipper_body]
+
+
+# ── Typewriter ───────────────────────────────────────────────────────────
+
+## Every prompt label reveals its text through visible_characters. The default
+## behavior (VC_CHARS_BEFORE_SHAPING) re-wraps the text as letters are added, so
+## words jump lines mid-type and the centered block shifts as it grows;
+## AFTER_SHAPING lays the whole text out up front and only hides the glyphs not
+## yet typed.
+func _configure_typed_labels(node: Node) -> void:
+	for child in node.get_children():
+		if child is Label:
+			(child as Label).visible_characters_behavior = TextServer.VC_CHARS_AFTER_SHAPING
+		elif child is RichTextLabel:
+			(child as RichTextLabel).visible_characters_behavior = TextServer.VC_CHARS_AFTER_SHAPING
+		_configure_typed_labels(child)
+
+
+func _tick_typing(delta: float) -> void:
+	if not _typing:
+		return
+	_type_budget += delta
+	while _typing and _type_budget >= _type_cost:
+		_type_budget -= _type_cost
+		_type_pos += 1
+		_set_visible_chars(_type_nodes[_type_node_i], _type_pos)
+		_type_cost = _char_cost(_type_pos - 1)
+		if _type_pos >= _type_text.length():
+			_finish_current_node()
+
+
+## Seconds to wait after revealing the letter at `index` of the current label.
+## Sentence-ending punctuation only pauses when it actually ends the sentence
+## (followed by a space, newline or the end), so "yeah..." pauses once, not
+## three times.
+func _char_cost(index: int) -> float:
+	var cost := 1.0 / TYPE_CHARS_PER_SECOND
+	var c: String = _type_text[index]
+	var next: String = _type_text[index + 1] if index + 1 < _type_text.length() else ""
+	if c in ".!?" and (next == "" or next == " " or next == "\n"):
+		cost += TYPE_SENTENCE_PAUSE
+	elif c in ",;:—" and (next == "" or next == " "):
+		cost += TYPE_CLAUSE_PAUSE
+	return cost
+
+
+func _begin_node(index: int) -> void:
+	_type_node_i = index
+	var node: Control = _type_nodes[index]
+	_type_text = _node_text(node)
+	_type_pos = 0
+	_type_cost = 1.0 / TYPE_CHARS_PER_SECOND
+	_set_visible_chars(node, 0)
+	if _type_text.is_empty():
+		_finish_current_node()
+
+
+## Shows the current label in full, starts its sparkle (if it has one), and
+## moves on to the next label on the page — or ends typing.
+func _finish_current_node() -> void:
+	var node: Control = _type_nodes[_type_node_i]
+	_set_visible_chars(node, -1)
+	if _type_sparkles.has(node):
+		_show_sparkle_on(_type_sparkles[node], node as Label)
+	if _type_node_i + 1 < _type_nodes.size():
+		_begin_node(_type_node_i + 1)
+	else:
+		_typing = false
+
+
+## Dismiss key while text is still typing: reveal the rest of the page at once.
+func _finish_typing() -> void:
+	while _typing:
+		_finish_current_node()
+
+
+func _node_text(node: Control) -> String:
+	if node is RichTextLabel:
+		return (node as RichTextLabel).get_parsed_text()
+	return (node as Label).text
+
+
+## Label and RichTextLabel both expose visible_characters (-1 = everything).
+func _set_visible_chars(node: Control, count: int) -> void:
+	node.set("visible_characters", count)
 
 
 func _hide_prompt() -> void:
 	_prompt_wanted = false
+	_typing = false
 	if _prompt_tween and _prompt_tween.is_valid():
 		_prompt_tween.kill()
 	_prompt_tween = create_tween()
@@ -708,7 +943,9 @@ func _show_sparkle_on(id: String, label: Label) -> void:
 	var p := _get_or_make_sparkle(id)
 	for i in 3:
 		await get_tree().process_frame
-	if not is_instance_valid(label) or not label.visible:
+	# is_visible_in_tree(), not .visible: a page turn hides the label's whole row,
+	# which leaves the label's own flag set.
+	if not is_instance_valid(label) or not label.is_visible_in_tree():
 		return
 	p.global_position = label.get_global_rect().get_center()
 	p.emitting = true
