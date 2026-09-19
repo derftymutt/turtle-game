@@ -1498,11 +1498,11 @@ func _launch_from_flipper_velcro() -> void:
 
 	GameManager.mark_flipper_used()
 
-	# Trigger the full flipper animation (force-flip for 0.25s then returns to rest)
-	flipper.trigger_flip(0.25)
+	# Trigger the full flipper animation (force-flip for 0.25s then returns to rest).
+	# The flipper holds its swing back a few ticks so the arm doesn't jump over us, and
+	# exempts us from its own hit_body so the launch below isn't double-applied.
+	flipper.trigger_flip(0.25, self)
 	flipper.play_launch_sound()
-	# Prevent the flipper's hit_body from double-applying force in the next frame
-	flipper.hit_bodies[get_instance_id()] = 0.5
 
 	# Compute launch direction: tangent to our position relative to the pivot,
 	# oriented in the flip rotation direction.

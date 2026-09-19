@@ -15,6 +15,11 @@ const _SFX_FLIPPER_LAUNCH = preload("res://assets/sounds/sfx/flipper launch_1.og
 ## release), so a full cycle is twice this. ~12 flips/s — past what a thumb can do.
 const AUTOMATON_HALF_PERIOD: float = 0.04
 const AUTOMATON_DAMAGE: float = 5.0
+## Flipper Velcro tech: physics ticks a velcro-triggered flip is held back after the
+## launch. The arm jumps ~60° on its first tick (instant overswing + lerp), which lands
+## on a turtle still sitting beside it, cancels its launch velocity and leaves it jammed
+## or on the far side of the arm. Waiting lets the turtle clear the sweep first.
+const FORCE_FLIP_DELAY_TICKS: int = 3
 ## Minimum seconds between hits on the same enemy while the automaton is engaged.
 const AUTOMATON_HIT_INTERVAL: float = 0.25
 ## Physics layer bit for enemies (layer 3, zero-indexed = 2).
@@ -37,6 +42,9 @@ var angular_velocity: float = 0.0
 var hit_bodies: Dictionary = {}
 var is_actively_moving: bool = false
 var _force_flip_timer: float = 0.0  # > 0 while a velcro-triggered flip is running
+var _force_flip_delay_ticks: int = 0  # > 0 while a velcro-triggered flip is still being held back
+var _force_flip_duration: float = 0.0
+var _force_flip_exempt_id: int = 0  # instance id of the launched body, exempt from hit_body
 var active_movement_timer: float = 0.0
 var active_movement_duration: float = 0.3
 var last_input_was_press: bool = false
@@ -95,8 +103,17 @@ func _ready():
 	update_collision_rotation()
 
 func _physics_process(delta):
-	# Force-flip override (Flipper Velcro tech): hold flip position for the timer duration,
-	# then fall through to normal input so the flipper naturally returns to rest.
+	# Force-flip override (Flipper Velcro tech): after the launch delay, hold flip position
+	# for the timer duration, then fall through to normal input so the flipper naturally
+	# returns to rest.
+	if _force_flip_delay_ticks > 0:
+		_force_flip_delay_ticks -= 1
+		if _force_flip_delay_ticks == 0:
+			_force_flip_timer = _force_flip_duration
+			activate_flip()
+			# activate_flip() clears hit_bodies, so exempt the launched body afterwards
+			if _force_flip_exempt_id != 0:
+				hit_bodies[_force_flip_exempt_id] = 0.5
 	if _force_flip_timer > 0.0:
 		_force_flip_timer -= delta
 		if not is_flipping:
@@ -232,11 +249,14 @@ func update_sprite_frame():
 		animated_sprite.play('extend')
 
 
-func trigger_flip(duration: float = 0.25) -> void:
+func trigger_flip(duration: float = 0.25, launched_body: Node = null) -> void:
 	"""Fire a complete flip cycle for `duration` seconds, ignoring normal flipper input.
-	Used by Flipper Velcro tech on launch so the flipper visually snaps and returns."""
-	_force_flip_timer = duration
-	activate_flip()
+	Used by Flipper Velcro tech on launch so the flipper visually snaps and returns.
+	The swing starts FORCE_FLIP_DELAY_TICKS physics ticks later, and `launched_body` (the
+	turtle, already given its own launch velocity) is exempt from this flip's hit_body."""
+	_force_flip_duration = duration
+	_force_flip_exempt_id = launched_body.get_instance_id() if launched_body else 0
+	_force_flip_delay_ticks = FORCE_FLIP_DELAY_TICKS
 
 func activate_flip():
 	# play() restarts the stream, so at automaton speed let each click finish
