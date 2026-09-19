@@ -1514,6 +1514,16 @@ func _launch_from_flipper_velcro() -> void:
 	if flip_sign < 0:
 		tangent = -tangent
 
+	# The swing direction only clears the arm when latched on its leading side. From the
+	# trailing (underside) the tangent points into the arm, and at launch speed (~35px per
+	# physics tick vs a 12px-thick arm) the turtle tunnels straight through. Mirror that
+	# component across the arm so the turtle is launched away from it on the side it's gripping.
+	var arm_dir: Vector2 = flipper.collision_shape.position.normalized()
+	var outward: Vector2 = Vector2(-arm_dir.y, arm_dir.x) * _flipper_velcro_normal_side
+	var into_arm: float = tangent.dot(outward)
+	if into_arm < 0.0:
+		tangent -= 2.0 * into_arm * outward
+
 	# Multiplier is slightly higher than the regular hit_body formula (0.12 vs 0.10)
 	# to compensate for velcro starting from zero velocity while regular flips are additive.
 	var impulse: float = clamp(flipper.flip_force * dist * 0.15, flipper.flip_force * 1.2, flipper.flip_force * 4.0)
