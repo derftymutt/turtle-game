@@ -11,6 +11,15 @@ const _SFX_FLIPPER_LAUNCH = preload("res://assets/sounds/sfx/flipper launch_1.og
 ## - Swap sprite frames (pixel-perfect visuals)
 ## - Collision setup IDENTICAL to original flipper
 
+## Flipper Automaton tech: seconds each half of the flip cycle lasts (press, then
+## release), so a full cycle is twice this. ~12 flips/s — past what a thumb can do.
+const AUTOMATON_HALF_PERIOD: float = 0.04
+const AUTOMATON_DAMAGE: float = 5.0
+## Minimum seconds between hits on the same enemy while the automaton is engaged.
+const AUTOMATON_HIT_INTERVAL: float = 0.25
+## Physics layer bit for enemies (layer 3, zero-indexed = 2).
+const _ENEMY_LAYER_MASK: int = 1 << 2
+
 @export var flip_force: float = 300.0
 @export var flip_speed: float = 40.0
 @export var flip_input: String = "flipper_left"
@@ -42,6 +51,14 @@ var base_collision_position: Vector2 = Vector2.ZERO  # Store initial collision p
 var base_area_collision_position: Vector2 = Vector2.ZERO
 
 var _is_phased: bool = false
+
+# Flipper Automaton tech: while true the flipper cycles on its own and ignores
+# the flip input, and enemies overlapping it take damage.
+var automaton_active: bool = false
+var _automaton_timer: float = 0.0
+var _automaton_area: Area2D = null
+var _automaton_area_shape: CollisionShape2D = null
+var _automaton_hit_cooldowns: Dictionary = {}  # enemy instance id -> seconds left
 
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
@@ -84,6 +101,9 @@ func _physics_process(delta):
 		_force_flip_timer -= delta
 		if not is_flipping:
 			activate_flip()
+	# Flipper Automaton tech: self-driven cycle in place of the flip input
+	elif automaton_active:
+		_step_automaton(delta)
 	# Normal input handling
 	elif Input.is_action_pressed(flip_input):
 		if not is_flipping:
@@ -156,6 +176,9 @@ func _physics_process(delta):
 	for body_id in to_remove:
 		hit_bodies.erase(body_id)
 	
+	if automaton_active:
+		_damage_automaton_contacts(delta)
+
 	# Force application
 	var velocity_threshold = 0.5 if not last_input_was_press else 2.0
 	
@@ -185,6 +208,9 @@ func update_collision_rotation():
 	if area_collision_shape:
 		area_collision_shape.rotation = base_collision_rotation + scaled_rotation
 		area_collision_shape.position = base_area_collision_position.rotated(scaled_rotation)
+		if _automaton_area_shape:
+			_automaton_area_shape.rotation = area_collision_shape.rotation
+			_automaton_area_shape.position = area_collision_shape.position
 
 
 func update_sprite_frame():
@@ -213,7 +239,9 @@ func trigger_flip(duration: float = 0.25) -> void:
 	activate_flip()
 
 func activate_flip():
-	if _sfx_flip:
+	# play() restarts the stream, so at automaton speed let each click finish
+	# instead of stuttering on its first few milliseconds.
+	if _sfx_flip and not (automaton_active and _sfx_flip.playing):
 		_sfx_flip.play()
 	is_flipping = true
 	target_rotation = get_flip_angle()
@@ -274,6 +302,68 @@ func hit_body(body: RigidBody2D, is_press_action: bool, was_cradle_release: bool
 func play_launch_sound() -> void:
 	if _sfx_launch:
 		_sfx_launch.play()
+
+## Flipper Automaton
+
+func set_automaton(on: bool) -> void:
+	if automaton_active == on:
+		return
+	automaton_active = on
+	if on:
+		_automaton_timer = 0.0  # first step fires immediately
+		was_cradling = false    # a stale cradle would swallow the first release hit
+		_ensure_automaton_area()
+	else:
+		_automaton_hit_cooldowns.clear()
+		# Nothing to reset here: if the flipper is left mid-flip, the normal
+		# input branch sees is_flipping with no button held and releases it.
+	if _automaton_area:
+		_automaton_area.monitoring = on
+
+func _step_automaton(delta: float) -> void:
+	_automaton_timer -= delta
+	if _automaton_timer > 0.0:
+		return
+	_automaton_timer += AUTOMATON_HALF_PERIOD
+	if is_flipping:
+		deactivate_flip()
+	else:
+		activate_flip()
+
+## The flipper's own Area2D only watches the player (mask 32), so contact
+## damage needs a second one that watches enemies. Built on first use — most
+## runs never equip the tech — and reuses the existing area's shape.
+func _ensure_automaton_area() -> void:
+	if _automaton_area or not area_collision_shape:
+		return
+	_automaton_area = Area2D.new()
+	_automaton_area.collision_layer = 0
+	_automaton_area.collision_mask = _ENEMY_LAYER_MASK
+	_automaton_area_shape = CollisionShape2D.new()
+	_automaton_area_shape.shape = area_collision_shape.shape
+	_automaton_area.add_child(_automaton_area_shape)
+	add_child(_automaton_area)
+	update_collision_rotation()
+
+func _damage_automaton_contacts(delta: float) -> void:
+	for id in _automaton_hit_cooldowns.keys():
+		_automaton_hit_cooldowns[id] -= delta
+		if _automaton_hit_cooldowns[id] <= 0.0:
+			_automaton_hit_cooldowns.erase(id)
+	if not _automaton_area or _is_phased:
+		return
+	for body in _automaton_area.get_overlapping_bodies():
+		if not body.is_in_group("enemies") or not body.has_method("take_damage"):
+			continue
+		# Invincible enemies (crocodile, urchin, boss) shrug it off; skip them
+		# rather than replaying their "clang" feedback every hit interval.
+		if body.get("is_invincible"):
+			continue
+		var body_id: int = body.get_instance_id()
+		if _automaton_hit_cooldowns.has(body_id):
+			continue
+		_automaton_hit_cooldowns[body_id] = AUTOMATON_HIT_INTERVAL
+		body.take_damage(AUTOMATON_DAMAGE)
 
 ## Phase Shift
 

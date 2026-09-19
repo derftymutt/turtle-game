@@ -70,6 +70,9 @@ const STIM_SHOT_COOLDOWN_DURATION: float = 8.0
 const URCHIN_TRANSMOGRIFY_ACTIVE_DURATION:   float = 10.0
 const URCHIN_TRANSMOGRIFY_COOLDOWN_DURATION: float = 5.0
 
+const FLIPPER_AUTOMATON_ACTIVE_DURATION:   float = 8.0
+const FLIPPER_AUTOMATON_COOLDOWN_DURATION: float = 4.0
+
 const MULTI_LANCE_COOLDOWN_DURATION: float = 3.0
 
 const DERMAL_REGEN_COOLDOWN_DURATION: float = 30.0
@@ -91,6 +94,7 @@ const _COOLDOWN_DURATIONS: Dictionary = {
 	AlienTechRegistry.MULTI_LANCE:    MULTI_LANCE_COOLDOWN_DURATION,
 	AlienTechRegistry.DERMAL_REGEN:   DERMAL_REGEN_COOLDOWN_DURATION,
 	AlienTechRegistry.URCHIN_TRANSMOGRIFY: URCHIN_TRANSMOGRIFY_ACTIVE_DURATION + URCHIN_TRANSMOGRIFY_COOLDOWN_DURATION,
+	AlienTechRegistry.FLIPPER_AUTOMATON: FLIPPER_AUTOMATON_ACTIVE_DURATION + FLIPPER_AUTOMATON_COOLDOWN_DURATION,
 }
 
 # Techs whose cooldown doesn't start draining on press: try_activate_slot()
@@ -121,6 +125,7 @@ const _TWO_PHASE_BAR_DURATIONS: Dictionary = {
 	AlienTechRegistry.ION_EXCITER:       {"active": ION_EXCITER_ACTIVE_DURATION,       "cooldown": ION_EXCITER_COOLDOWN_DURATION},
 	AlienTechRegistry.STIM_SHOT:      {"active": STIM_SHOT_ACTIVE_DURATION,      "cooldown": STIM_SHOT_COOLDOWN_DURATION},
 	AlienTechRegistry.URCHIN_TRANSMOGRIFY: {"active": URCHIN_TRANSMOGRIFY_ACTIVE_DURATION, "cooldown": URCHIN_TRANSMOGRIFY_COOLDOWN_DURATION},
+	AlienTechRegistry.FLIPPER_AUTOMATON: {"active": FLIPPER_AUTOMATON_ACTIVE_DURATION, "cooldown": FLIPPER_AUTOMATON_COOLDOWN_DURATION},
 }
 
 # Techs whose HOT behavior is a manual on/off toggle (via set_passive_bar in
@@ -133,6 +138,7 @@ const _HOT_TOGGLE_TECHS: Array[String] = [
 	AlienTechRegistry.HYDRO_FUNNEL,
 	AlienTechRegistry.ION_EXCITER,
 	AlienTechRegistry.URCHIN_TRANSMOGRIFY,
+	AlienTechRegistry.FLIPPER_AUTOMATON,
 ]
 
 var _passive_bar_ratios: Dictionary = {}
@@ -308,8 +314,7 @@ func advance_level_transition() -> Dictionary:
 
 	# Every tech starts the next level fresh: drop any cooldown (or held
 	# cooldown) still running from the level being left.
-	_cooldowns = [0.0, 0.0]
-	clear_all_cooldown_holds()
+	reset_level_state()
 
 	var hot: Array[Dictionary] = []
 	var fried: Array[Dictionary] = []
@@ -365,6 +370,17 @@ func release_cooldown_hold(tech_id: String, max_remaining: float = -1.0) -> void
 func clear_all_cooldown_holds() -> void:
 	_cooldown_held = [false, false]
 
+## Puts every equipped tech back to a fresh, ready state. Called whenever a new
+## TurtlePlayer spawns (next level, Continue after dying, restart): the previous
+## player and its effect objects are gone, but this autoload's timers, held
+## cooldowns, passive bars and the Time Freeze flag would otherwise keep running
+## for an action that no longer exists.
+func reset_level_state() -> void:
+	_cooldowns = [0.0, 0.0]
+	clear_all_cooldown_holds()
+	clear_all_passive_bars()
+	time_freeze_active = false
+
 ## The cooldown ceiling for a slot, adjusted for hot overrides. Shared by
 ## try_activate_slot() (to seed the timer) and get_cooldown_ratio() (to
 ## normalize it), so the two never disagree about what "full" means.
@@ -377,7 +393,8 @@ func _effective_cooldown_max(slot_index: int, tech_id: String) -> float:
 		AlienTechRegistry.SHOCKWAVE, AlienTechRegistry.INERTIA_DAMPENER, \
 		AlienTechRegistry.BUMPER_MAGNET, AlienTechRegistry.GRAVITON_HARNESS, \
 		AlienTechRegistry.MAGNETIC_REPULSION, AlienTechRegistry.HYDRO_FUNNEL, \
-		AlienTechRegistry.ION_EXCITER, AlienTechRegistry.URCHIN_TRANSMOGRIFY:
+		AlienTechRegistry.ION_EXCITER, AlienTechRegistry.URCHIN_TRANSMOGRIFY, \
+		AlienTechRegistry.FLIPPER_AUTOMATON:
 			return 0.0  # hot: no cooldown
 		AlienTechRegistry.TIME_FREEZE:
 			# Hot: active duration doubled, post-active recovery halved.

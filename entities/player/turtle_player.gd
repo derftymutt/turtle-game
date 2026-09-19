@@ -236,11 +236,13 @@ func _ready():
 	_tech_effects[AlienTechRegistry.STIM_SHOT] = StimShotEffect.new()
 	_tech_effects[AlienTechRegistry.MULTI_LANCE] = MultiLanceEffect.new()
 	_tech_effects[AlienTechRegistry.URCHIN_TRANSMOGRIFY] = UrchinTransmogrifyEffect.new()
+	_tech_effects[AlienTechRegistry.FLIPPER_AUTOMATON] = FlipperAutomatonEffect.new()
 	for effect in _tech_effects.values():
 		(effect as AlienTechEffect).setup(self)
 
-	AlienTechManager.clear_all_passive_bars()
-	AlienTechManager.clear_all_cooldown_holds()  # a previous player may have died mid-lance
+	# A previous player may have died mid-action (mid-lance, mid-transmogrify...) —
+	# start every tech fresh, whether this is a new level or a Continue.
+	AlienTechManager.reset_level_state()
 	AlienTechManager.tech_activated.connect(_on_alien_tech_activated)
 	AlienTechManager.tech_slots_changed.connect(_on_alien_tech_slots_changed_player)
 	LevelManager.level_complete.connect(func(): _level_complete = true)
@@ -384,6 +386,8 @@ func _physics_process(delta):
 	_tech_effects[AlienTechRegistry.ION_EXCITER].physics_process(self, delta)
 
 	_tech_effects[AlienTechRegistry.URCHIN_TRANSMOGRIFY].physics_process(self, delta)
+
+	_tech_effects[AlienTechRegistry.FLIPPER_AUTOMATON].physics_process(self, delta)
 
 	multi_lance.physics_process(self, delta)
 

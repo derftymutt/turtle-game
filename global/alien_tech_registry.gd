@@ -30,6 +30,7 @@ const ION_EXCITER         := "ion_exciter"
 const STIM_SHOT           := "stim_shot"
 const MULTI_LANCE         := "multi_lance"
 const URCHIN_TRANSMOGRIFY := "urchin_transmogrify"
+const FLIPPER_AUTOMATON   := "flipper_automaton"
 
 # ─── Tech definitions ────────────────────────────────────────────────────────
 
@@ -286,6 +287,17 @@ var _definitions: Array[Dictionary] = [
 		"needs_input":     true,
 		"has_passive_bar": true,
 		"color":           Color(0.95, 0.45, 0.85),
+		"hot_description": "Click on/off.",
+	},
+	{
+		"id":              FLIPPER_AUTOMATON,
+		"name":            "Flipper Automaton",
+		"description":     "Flippers auto fire fast. Damage enemies on contact. 8s active, 4s cooldown.",
+		"hook":            "The flippers are flipping themselves!",
+		"slot_label":      "Flipper Automaton",
+		"needs_input":     true,
+		"has_passive_bar": true,
+		"color":           Color(1.0, 0.35, 0.35),
 		"hot_description": "Click on/off.",
 	},
 ]
