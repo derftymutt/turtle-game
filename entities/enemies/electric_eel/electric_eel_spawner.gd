@@ -170,7 +170,7 @@ func _create_crackling_effect(parent: Node2D):
 		parent.add_child(spark_line)
 		
 		# Animate sparks
-		var tween = create_tween().set_loops()
+		var tween = spark_line.create_tween().set_loops()
 		tween.tween_property(spark_line, "modulate:a", 0.0, 0.2)
 		tween.tween_property(spark_line, "modulate:a", 1.0, 0.2)
 
