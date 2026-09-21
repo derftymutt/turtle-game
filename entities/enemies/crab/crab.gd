@@ -183,7 +183,9 @@ func _start_windup_indicator():
 	indicator.scale = Vector2.ONE
 	_windup_node = indicator
 	add_child(indicator)
-	var tween = create_tween().set_loops()
+	# Bound to the indicator, not the crab: a looping tween whose target is freed
+	# spins forever inside one frame in release builds (no debug-only loop guard).
+	var tween = indicator.create_tween().set_loops()
 	tween.tween_property(indicator, "scale", Vector2(2.5, 2.5), WINDUP_DURATION * 0.4)
 	tween.tween_property(indicator, "scale", Vector2(1.0, 1.0), WINDUP_DURATION * 0.2)
 
