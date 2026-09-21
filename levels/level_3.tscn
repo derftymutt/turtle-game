@@ -12,7 +12,6 @@
 [ext_resource type="PackedScene" uid="uid://dtv45nw6ur1dc" path="res://entities/enemies/piranha/piranha.tscn" id="11_46211"]
 [ext_resource type="Script" uid="uid://3jp0yf3qb8pa" path="res://entities/collectibles/air_bubble/air_bubble_spawner.gd" id="12_t5hu4"]
 [ext_resource type="PackedScene" uid="uid://cdmr2papqk2ih" path="res://entities/collectibles/air_bubble/air_bubble.tscn" id="13_eg35p"]
-[ext_resource type="Script" uid="uid://b6alh2alsvuph" path="res://entities/enemies/electric_eel/electric_eel_spawner.gd" id="14_4gw27"]
 [ext_resource type="PackedScene" uid="uid://bwyt5nkmne05h" path="res://entities/collectibles/ufo_piece/ufo_piece_seeder.tscn" id="16_8swdu"]
 [ext_resource type="PackedScene" uid="uid://bp6g8v1jmnruo" path="res://entities/environment/walls/circular_bumper/circular_bumper.tscn" id="17_svivd"]
 [ext_resource type="PackedScene" uid="uid://c55cfm3aeb65a" path="res://systems/trash_cleanup/trash_sequence_spawner.tscn" id="18_yafm2"]
@@ -174,10 +173,6 @@ position = Vector2(-175, 40)
 
 [node name="CrabSpawner" parent="." index="15" unique_id=1401205188 instance=ExtResource("19_46211")]
 initial_super_count = 1
-
-[node name="EelSpawner" type="Node2D" parent="." index="16" unique_id=898521451]
-script = ExtResource("14_4gw27")
-metadata/_custom_type_script = "uid://b6alh2alsvuph"
 
 [node name="AirBubbleSpawner" type="Node2D" parent="." index="17" unique_id=1031744682]
 script = ExtResource("12_t5hu4")

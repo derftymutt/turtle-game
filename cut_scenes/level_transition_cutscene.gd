@@ -220,12 +220,12 @@ func _build_tech_transition_text() -> String:
 	var lines: PackedStringArray = []
 	for tech in _hot_techs:
 		var hot_desc: String = tech.get("hot_description", "")
-		var line := "[color=#ffcc33]⚡ %s is now HOT![/color]" % tech.get("name", "")
+		var line := "[color=#ffcc33]%s is now HOT![/color]" % tech.get("name", "")
 		if not hot_desc.is_empty():
 			line += "\n[color=#ffe9a8]%s[/color]" % hot_desc
 		lines.append(line)
 	for tech in _fried_techs:
-		lines.append("[color=#ff5c40]💀 %s got fried and was lost![/color]" % tech.get("name", ""))
+		lines.append("[color=#ff5c40]%s got fried and was lost![/color]" % tech.get("name", ""))
 	return "\n\n".join(lines)
 
 func _show_level_title() -> void:

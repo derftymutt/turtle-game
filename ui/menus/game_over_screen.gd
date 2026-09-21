@@ -130,7 +130,7 @@ func show_game_over(level_score: int, run_total: int, death_cause: String = ""):
 			death_cause_label.visible = false
 		else:
 			death_cause_label.visible = true
-			death_cause_label.text = "☠ %s%s. ☠" % [death_cause[0].to_upper(), death_cause.substr(1)]
+			death_cause_label.text = "%s%s." % [death_cause[0].to_upper(), death_cause.substr(1)]
 
 	if hint_label:
 		hint_label.text = _pick_hint()

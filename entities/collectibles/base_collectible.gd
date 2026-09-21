@@ -41,7 +41,10 @@ func _ready():
 	
 	# Connect Area2D for player detection
 	if has_node("Area2D"):
-		$Area2D.body_entered.connect(_on_area_2d_body_entered)
+		# Some collectible scenes (sky_star, star_collectible) already wire this
+		# signal in the .tscn; connecting twice logs an error every spawn.
+		if not $Area2D.body_entered.is_connected(_on_area_2d_body_entered):
+			$Area2D.body_entered.connect(_on_area_2d_body_entered)
 	else:
 		push_warning("%s has no Area2D child!" % name)
 	
