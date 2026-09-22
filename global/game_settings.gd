@@ -45,6 +45,20 @@ func _ready():
 	_load_settings()
 	_apply_mouse_mode_bindings()
 
+func _enter_tree() -> void:
+	# Not _ready(): at startup the whole main scene enters the tree before any
+	# autoload's _ready() runs, so connecting there misses the main menu's
+	# scene-authored buttons. Autoloads enter the tree ahead of the main scene.
+	get_tree().node_added.connect(_on_node_added)
+
+## Every button (Button, CheckBox, TextureButton...) gets the pointing-hand
+## cursor, including ones built at runtime — a Theme can't set cursor shape,
+## and this saves setting it per scene. Non-button clickables (the tech
+## selection panels) set it themselves in their .tscn.
+func _on_node_added(node: Node) -> void:
+	if node is BaseButton:
+		node.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+
 func _input(event: InputEvent) -> void:
 	if event is InputEventJoypadButton and event.pressed:
 		_set_using_gamepad(true)
