@@ -12,7 +12,7 @@ const _SFX_MENU_SELECT = preload("res://assets/sounds/sfx/menu select_1.ogg")
 
 # Same input-hint / status-line convention as the alien tech selection
 # screen, so the two read as one system.
-const _SLOT_INPUT_HINTS: Array[String] = ["LB · Q", "RB · E"]
+const _SLOT_GAMEPAD_HINTS: Array[String] = ["LB", "RB"]
 const _ALWAYS_ACTIVE_TEXT: String = "Always Active"
 const _INPUT_HINT_COLOR: Color = Color(1.0, 0.85, 0.3, 1.0)
 const _ALWAYS_ACTIVE_COLOR: Color = Color(0.55, 1.0, 0.6, 1.0)
@@ -189,7 +189,7 @@ func _update_slot(slot_index: int, slot: Dictionary, icon: TextureRect, input_lb
 		input_lbl.visible = true
 		_slot_input_blinking[slot_index] = true
 		if needs_input:
-			input_lbl.text = _SLOT_INPUT_HINTS[slot_index]
+			input_lbl.text = "%s · %s" % [_SLOT_GAMEPAD_HINTS[slot_index], GameSettings.tech_slot_key_label(slot_index)]
 			input_lbl.add_theme_color_override("font_color", _INPUT_HINT_COLOR)
 		else:
 			input_lbl.text = _ALWAYS_ACTIVE_TEXT

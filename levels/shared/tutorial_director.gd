@@ -76,14 +76,21 @@ const FLIPPER_BODY_PAGES: Array[String] = [
 const FLIPPER_LAUNCH_TEXT := "Now try launching yourself deep into the ocean with the flippers to reach the UFO part."
 const FLIPPER_HINT_LEFT := "Try the LEFT flipper: LT (or Left Shift)"
 const FLIPPER_HINT_RIGHT := "Now the RIGHT flipper: RT (or Right Shift)"
+## GameSettings.mouse_mode variants of the lines above/below that name keys.
+const FLIPPER_HOWTO_MOUSE := "You flip flippers with the LT / RT triggers (or the Left / Right mouse buttons)."
+const FLIPPER_HINT_LEFT_MOUSE := "Try the LEFT flipper: LT (or Left Click)"
+const FLIPPER_HINT_RIGHT_MOUSE := "Now the RIGHT flipper: RT (or Right Click)"
 
-const DROP_NOW_TEXT := "UFO parts are heavy. You can drop them if you need to with X (or Space).\n\nDrop the part now (and then go pick it up!)."
-const DROP_NOW_HINT := "Push X (or Space) to drop the part"
+## %s = GameSettings.drop_key_label()
+const DROP_NOW_TEXT := "UFO parts are heavy. You can drop them if you need to with X (or %s).\n\nDrop the part now (and then go pick it up!)."
+const DROP_NOW_HINT := "Push X (or %s) to drop the part"
 
 const MEANIES_TEXT := "Look out for meanies! You can shoot most of them with your turtle spit.\nAim with the Right Stick (or I J K L)."
 
 const SHOOT_TEXT := "Try shooting turtle spit now."
 const SHOOT_HINT := "Use the Right Stick to shoot turtle spit in any direction"
+const MEANIES_TEXT_MOUSE := "Look out for meanies! You can shoot most of them with your turtle spit.\nAim with the Right Stick (or the mouse - it spits on its own. Tab turns it off and on)."
+const SHOOT_HINT_MOUSE := "Use the Right Stick (or point the mouse) to spit in any direction"
 
 const TRASH_TEXT := "You can also shoot trash you find floating by. Get it all and you'll get rewarded..."
 
@@ -322,7 +329,7 @@ func _process(delta: float) -> void:
 			elif not _flipped_left:
 				if Input.is_action_pressed(&"flipper_left"):
 					_flipped_left = true
-					_set_hint(FLIPPER_HINT_RIGHT)
+					_set_hint(FLIPPER_HINT_RIGHT_MOUSE if GameSettings.mouse_mode else FLIPPER_HINT_RIGHT)
 			elif not _flipped_right:
 				if Input.is_action_pressed(&"flipper_right"):
 					_flipped_right = true
@@ -348,7 +355,7 @@ func _process(delta: float) -> void:
 				if _is_carrying():
 					_step = Step.DROP_PAUSED
 					_drop_down_last = Input.is_action_pressed(&"drop_piece")
-					_pause_with_prompt(DROP_NOW_TEXT, DROP_NOW_HINT)
+					_pause_with_prompt(DROP_NOW_TEXT % GameSettings.drop_key_label(), DROP_NOW_HINT % GameSettings.drop_key_label())
 				else:
 					# No longer holding it (dropped or delivered) — skip the drop lesson.
 					_beat_timer = MEANIES_DELAY_SECONDS
@@ -375,14 +382,14 @@ func _process(delta: float) -> void:
 			_beat_timer -= delta
 			if _beat_timer <= 0.0:
 				_step = Step.MEANIES_PAUSED
-				_pause_with_prompt(MEANIES_TEXT, CONTINUE_HINT)
+				_pause_with_prompt(MEANIES_TEXT_MOUSE if GameSettings.mouse_mode else MEANIES_TEXT, CONTINUE_HINT)
 
 		Step.MEANIES_PAUSED:
 			if _dismiss_ready():
 				_shot_once = false
 				_shoot_test_cooldown = 0.0
 				_step = Step.SHOOT_PAUSED
-				_pause_with_prompt(SHOOT_TEXT, SHOOT_HINT)
+				_pause_with_prompt(SHOOT_TEXT, SHOOT_HINT_MOUSE if GameSettings.mouse_mode else SHOOT_HINT)
 
 		Step.SHOOT_PAUSED:
 			# Stays paused the whole time — same idea as the flipper lesson:
@@ -390,11 +397,8 @@ func _process(delta: float) -> void:
 			# still flies while the rest of the world is frozen) and only once
 			# they've actually fired does "A" become available to move on.
 			_shoot_test_cooldown = maxf(0.0, _shoot_test_cooldown - delta)
-			if _has_shoot_input() and _shoot_test_cooldown <= 0.0:
-				var shoot_dir := Vector2(
-					Input.get_axis("shoot_left", "shoot_right"),
-					Input.get_axis("shoot_up", "shoot_down")
-				).normalized()
+			var shoot_dir := _shoot_input()
+			if shoot_dir != Vector2.ZERO and _shoot_test_cooldown <= 0.0:
 				_tutorial_test_shoot(shoot_dir)
 				_shoot_test_cooldown = 0.3
 				if not _shot_once:
@@ -674,7 +678,7 @@ func _show_flipper_prompt() -> void:
 	var pages: Array = []
 	for i in FLIPPER_BODY_PAGES.size():
 		pages.append(_page_flipper.bind(i))
-	_show_pages(pages, FLIPPER_HINT_LEFT)
+	_show_pages(pages, FLIPPER_HINT_LEFT_MOUSE if GameSettings.mouse_mode else FLIPPER_HINT_LEFT)
 
 
 ## Once both flippers have been worked, adds one more page onto the flipper
@@ -769,6 +773,8 @@ func _page_energy_surface() -> Array:
 func _page_flipper(index: int) -> Array:
 	_flipper_body.visible = true
 	_flipper_body.text = FLIPPER_BODY_PAGES[index]
+	if GameSettings.mouse_mode and index == FLIPPER_BODY_PAGES.size() - 1:
+		_flipper_body.text = FLIPPER_HOWTO_MOUSE
 	if index == 0:
 		_flipper_fast_row.visible = true
 		_type_sparkles[_flipper_fast_word] = "flipper_fast"
@@ -998,15 +1004,13 @@ func _any_pressed(actions: Array[StringName]) -> bool:
 	return false
 
 
-## Mirrors the exact threshold TurtlePlayer itself checks before firing
-## (see turtle_player.gd), so "has shot" here means a real bullet actually
-## spawned, not just a stick nudge.
-func _has_shoot_input() -> bool:
-	var shoot_input := Vector2(
-		Input.get_axis("shoot_left", "shoot_right"),
-		Input.get_axis("shoot_up", "shoot_down")
-	)
-	return shoot_input.length() > 0.1
+## Delegates to TurtlePlayer.get_shoot_input() — the same check it uses
+## before firing (stick threshold, mouse-mode aim/auto-fire), so "has shot"
+## here means a real bullet would actually have spawned. ZERO = not shooting.
+func _shoot_input() -> Vector2:
+	if _turtle == null or not _turtle.has_method("get_shoot_input"):
+		return Vector2.ZERO
+	return _turtle.call(&"get_shoot_input")
 
 
 # ── Paused mini-lessons (drop / shoot) ────────────────────────────────────

@@ -18,7 +18,9 @@ const _TEXT_SHINE_SHADER = preload("res://ui/alien_tech/shaders/text_shine.gdsha
 # regardless of which tech occupies them — lead with the gamepad button,
 # then the keyboard key, matching the pause menu's "Left/Right Bumper or Q/E"
 # phrasing.
-const _SLOT_INPUT_HINTS: Array[String] = ["LB · Q", "RB · E"]
+# The keyboard half comes from GameSettings.tech_slot_key_label() (it depends
+# on the keyboard-only setting).
+const _SLOT_GAMEPAD_HINTS: Array[String] = ["LB", "RB"]
 const _ALWAYS_ACTIVE_TEXT: String = "Always Active"
 
 const _INPUT_HINT_COLOR: Color = Color(1.0, 0.85, 0.3, 1.0)
@@ -52,8 +54,13 @@ const _MENU_BG_PULSE_PERIOD_SEC: float = 5.0
 # ignored until every guarded action reads released (arms instantly for a
 # player whose hands are already neutral), or after a timeout cap so a
 # stuck input can't lock the menu out indefinitely.
-const _GUARDED_ACTIONS: Array[String] = ["ui_left", "ui_right", "ui_up", "ui_down", "ui_accept"]
+# The flippers are guarded too: in mouse mode they're LMB/RMB, and a player
+# mid-flip must not have that click land on whichever panel is under the cursor.
+const _GUARDED_ACTIONS: Array[String] = ["ui_left", "ui_right", "ui_up", "ui_down", "ui_accept", "flipper_left", "flipper_right"]
 const _INPUT_ARM_TIMEOUT_SEC: float = 1.5
+# Even once armed, clicks are ignored this long after the screen appears — a
+# player hammering the flipper buttons won't have noticed the screen yet.
+const _CLICK_ARM_DELAY_MSEC: int = 500
 
 @onready var outer_panel:     PanelContainer = $"Control/CenterContainer/PanelContainer"
 @onready var title_label:     Label = $"Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TitleLabel"
@@ -130,6 +137,7 @@ var _shine_material: ShaderMaterial
 # See _GUARDED_ACTIONS above.
 var _input_armed: bool = false
 var _input_arm_elapsed: float = 0.0
+var _shown_msec: int = 0
 
 
 func _ready():
@@ -250,6 +258,7 @@ func _on_selection_ready(choices: Array):
 	get_tree().paused = true
 	_input_armed = false
 	_input_arm_elapsed = 0.0
+	_shown_msec = Time.get_ticks_msec()
 	_menu_flair_time = 0.0
 	if _candidate_slot == 1:
 		slot_r_panel.grab_focus()
@@ -388,7 +397,7 @@ func _render_slot(slot_index: int, tech: Dictionary, is_really_equipped: bool):
 	input_lbl.visible = true
 	_slot_blinking[slot_index] = true
 	if needs_input:
-		input_lbl.text = _SLOT_INPUT_HINTS[slot_index]
+		input_lbl.text = "%s · %s" % [_SLOT_GAMEPAD_HINTS[slot_index], GameSettings.tech_slot_key_label(slot_index)]
 		input_lbl.add_theme_color_override("font_color", _INPUT_HINT_COLOR)
 	else:
 		input_lbl.text = _ALWAYS_ACTIVE_TEXT
@@ -540,6 +549,9 @@ func _close_screen():
 
 func _input(event: InputEvent):
 	if not visible:
+		return
+	if event is InputEventMouseButton and (not _input_armed or Time.get_ticks_msec() - _shown_msec < _CLICK_ARM_DELAY_MSEC):
+		get_viewport().set_input_as_handled()
 		return
 	if not _input_armed:
 		for action in _GUARDED_ACTIONS:

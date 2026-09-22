@@ -6,6 +6,21 @@ class_name GuideScreen
 @onready var _control: Control = $Control
 
 var invert_thrust_checkbox: CheckBox
+var keyboard_only_checkbox: CheckBox
+var _mouse_mode_note: Label
+## Keyboard-column labels whose text depends on GameSettings.mouse_mode,
+## keyed by action name — see _refresh_keyboard_labels().
+var _keyboard_labels: Dictionary = {}
+
+## [keyboard-only, mouse mode] — must match GameSettings._apply_mouse_mode_bindings().
+const _KEYBOARD_TEXT := {
+	"Shoot":          ["IJKL",    "Mouse aim"],
+	"Flipper Left":   ["L Shift", "Left Click"],
+	"Flipper Right":  ["R Shift", "Right Click"],
+	"Drop UFO Piece": ["Space",   "F"],
+	"Tech Left":      ["Q",       "L Shift"],
+	"Tech Right":     ["E",       "Space"],
+}
 var _back_callback: Callable
 
 # Plain-text options marked by a sliding turtle indicator + green text
@@ -58,7 +73,10 @@ func _build_content():
 		["Pause",         "Start",       "Escape"],
 	]
 	for row: Array in controls:
-		content_container.add_child(_control_row(row[0], row[1], row[2], false))
+		var control_row := _control_row(row[0], row[1], row[2], false)
+		content_container.add_child(control_row)
+		if _KEYBOARD_TEXT.has(row[0]):
+			_keyboard_labels[row[0]] = control_row.get_child(2)
 
 	content_container.add_child(_spacer(4))
 	content_container.add_child(HSeparator.new())
@@ -71,10 +89,26 @@ func _build_content():
 	invert_thrust_checkbox.toggled.connect(_on_invert_thrust_toggled)
 	content_container.add_child(invert_thrust_checkbox)
 
-	# Focus wiring only after both nodes share a parent tree
+	keyboard_only_checkbox = CheckBox.new()
+	keyboard_only_checkbox.text = "Keyboard Only  (aim with I J K L, no mouse)"
+	keyboard_only_checkbox.add_theme_font_size_override("font_size", 10)
+	keyboard_only_checkbox.button_pressed = not GameSettings.mouse_mode
+	keyboard_only_checkbox.toggled.connect(_on_keyboard_only_toggled)
+	content_container.add_child(keyboard_only_checkbox)
+
+	_mouse_mode_note = Label.new()
+	_mouse_mode_note.text = "Mouse aim fires on its own - Tab or middle click toggles"
+	_mouse_mode_note.add_theme_font_size_override("font_size", 9)
+	_mouse_mode_note.add_theme_color_override("font_color", Color(0.65, 0.65, 0.65))
+	content_container.add_child(_mouse_mode_note)
+	_refresh_keyboard_labels()
+
+	# Focus wiring only after all nodes share a parent tree
+	invert_thrust_checkbox.focus_neighbor_bottom = invert_thrust_checkbox.get_path_to(keyboard_only_checkbox)
+	keyboard_only_checkbox.focus_neighbor_top = keyboard_only_checkbox.get_path_to(invert_thrust_checkbox)
 	if back_button:
-		invert_thrust_checkbox.focus_neighbor_bottom = invert_thrust_checkbox.get_path_to(back_button)
-		back_button.focus_neighbor_top = back_button.get_path_to(invert_thrust_checkbox)
+		keyboard_only_checkbox.focus_neighbor_bottom = keyboard_only_checkbox.get_path_to(back_button)
+		back_button.focus_neighbor_top = back_button.get_path_to(keyboard_only_checkbox)
 
 func _on_back_pressed():
 	hide_guide()
@@ -89,6 +123,18 @@ func _on_back_pressed():
 
 func _on_invert_thrust_toggled(pressed: bool):
 	GameSettings.set_thrust_inverted(pressed)
+
+func _on_keyboard_only_toggled(pressed: bool):
+	GameSettings.set_mouse_mode(not pressed)
+	_refresh_keyboard_labels()
+
+func _refresh_keyboard_labels() -> void:
+	var index := 1 if GameSettings.mouse_mode else 0
+	for action: String in _keyboard_labels:
+		(_keyboard_labels[action] as Label).text = _KEYBOARD_TEXT[action][index]
+	if _mouse_mode_note:
+		# Hidden, not freed, so the menu doesn't reflow when toggled.
+		_mouse_mode_note.modulate.a = 1.0 if GameSettings.mouse_mode else 0.0
 
 
 # ── layout helpers ────────────────────────────────────────────────────────────

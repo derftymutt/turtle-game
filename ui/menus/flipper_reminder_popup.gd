@@ -28,6 +28,8 @@ func _on_piece_delivered(pieces_collected: int, _pieces_needed: int) -> void:
 	if pieces_collected < 2:
 		return
 	GameManager.has_shown_flipper_reminder = true
+	_hint_label.text = "Use flippers with LT / RT (%s)" % (
+		"Left/Right Click" if GameSettings.mouse_mode else "Left/Right Shift")
 	visible = true
 	get_tree().paused = true
 

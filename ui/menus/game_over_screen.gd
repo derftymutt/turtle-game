@@ -30,6 +30,11 @@ var _sfx_select:      AudioStreamPlayer
 # shine, same look as the main menu (see ui/shared/turtle_option_list.gd).
 var _option_list: TurtleOptionList
 
+# Mouse mode puts the flippers on LMB/RMB, so a player mid-flip when this
+# screen pops up would otherwise click whatever button is under the cursor.
+const _CLICK_ARM_DELAY_MSEC: int = 500
+var _shown_msec: int = 0
+
 var final_score: int = 0
 
 const HINTS: Array[String] = [
@@ -160,6 +165,7 @@ func show_game_over(level_score: int, run_total: int, death_cause: String = ""):
 
 	visible = true
 	get_tree().paused = true
+	_shown_msec = Time.get_ticks_msec()
 	if _sfx_game_over:
 		_sfx_game_over.play()
 
@@ -215,6 +221,9 @@ func _on_quit_pressed():
 
 func _input(event):
 	if not visible:
+		return
+	if event is InputEventMouseButton and Time.get_ticks_msec() - _shown_msec < _CLICK_ARM_DELAY_MSEC:
+		get_viewport().set_input_as_handled()
 		return
 	if event.is_action_pressed("ui_accept"):
 		if continue_button and continue_button.has_focus():

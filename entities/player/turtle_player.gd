@@ -96,6 +96,19 @@ var rapid_fire_timer: float = 0.0
 
 var is_player_controlling_rotation: bool = false
 
+# Mouse mode (GameSettings.mouse_mode): the cursor aims and the turtle fires
+# continuously; Tab / middle click (GameSettings.TOGGLE_FIRE_ACTION) toggles firing.
+# Resets to on for every fresh player (new level / Continue).
+const MOUSE_AIM_DEADZONE: float = 10.0
+var mouse_fire_enabled: bool = true
+var _last_mouse_aim: Vector2 = Vector2.RIGHT
+var _mouse_crosshair: MouseCrosshair
+
+# Bumped by every shoot() so only the newest return_to_idle_after_delay()
+# timer gets to act — stale ones from earlier shots would otherwise snap the
+# sprite to idle mid-animation (constant under mouse-mode auto-fire).
+var _idle_anim_token: int = 0
+
 var control_suspended: bool = false
 var control_suspend_timer: float = 0.0
 
@@ -212,6 +225,9 @@ func _ready():
 	_setup_rest_particles()
 	_setup_bubble_visual()
 	_setup_float_energy_bar()
+
+	_mouse_crosshair = MouseCrosshair.new()
+	add_child(_mouse_crosshair)
 
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
@@ -434,6 +450,10 @@ func _physics_process(delta):
 
 	_update_rest_particles()
 
+	if GameSettings.mouse_mode and Input.is_action_just_pressed(GameSettings.TOGGLE_FIRE_ACTION):
+		mouse_fire_enabled = not mouse_fire_enabled
+	_mouse_crosshair.firing = mouse_fire_enabled
+
 	# Control suspension timer — runs even while suspended so it keeps counting down
 	control_suspend_timer -= delta
 	if control_suspend_timer <= 0 and control_suspended:
@@ -461,11 +481,8 @@ func _physics_process(delta):
 			# Hot: shooting still works while gripping the flipper. Everything
 			# else (movement, other tech slots, etc.) stays locked out either way.
 			if AlienTechManager.is_tech_hot(AlienTechRegistry.FLIPPER_VELCRO):
-				var fv_shoot_input := Vector2(
-					Input.get_axis("shoot_left", "shoot_right"),
-					Input.get_axis("shoot_up", "shoot_down")
-				)
-				if fv_shoot_input.length() > 0.1 and can_shoot:
+				var fv_shoot_input := get_shoot_input()
+				if fv_shoot_input != Vector2.ZERO and can_shoot:
 					shoot(fv_shoot_input.normalized())
 			return
 
@@ -475,10 +492,7 @@ func _physics_process(delta):
 		Input.get_axis("move_up", "move_down")
 	)
 
-	var shoot_input = Vector2(
-		Input.get_axis("shoot_left", "shoot_right"),
-		Input.get_axis("shoot_up", "shoot_down")
-	)
+	var shoot_input := get_shoot_input()
 
 	# Movement — check energy unless energy freeze is active
 	var can_actually_thrust = can_thrust
@@ -488,8 +502,8 @@ func _physics_process(delta):
 	if movement_input.length() > 0.1 and can_actually_thrust and not multi_lance.pulling:
 		apply_thrust(movement_input.normalized())
 
-	if shoot_input.length() > 0.1 and can_shoot:
-		shoot(shoot_input.normalized())
+	if shoot_input != Vector2.ZERO and can_shoot:
+		shoot(shoot_input)
 		
 	# Drop all carried UFO pieces on button press (intentional = grace period before re-pickup)
 	if Input.is_action_just_pressed("drop_piece"):
@@ -655,12 +669,36 @@ func apply_ocean_effects(_delta: float):
 # MOVEMENT & SHOOTING
 # ---------------------------------------------------------------------------
 
+## Unit shot direction for this frame, or Vector2.ZERO for "not shooting".
+## The one place shooting input is read — TutorialDirector calls it too, so
+## its paused shoot lesson matches real gameplay. Explicit aim (IJKL / right
+## stick) always wins; in mouse mode, otherwise fire at the cursor unless
+## auto-fire has been toggled off or the gamepad is the active device (see
+## GameSettings.mouse_aim_active()). Safe to call while the tree is paused.
+func get_shoot_input() -> Vector2:
+	var stick := Vector2(
+		Input.get_axis("shoot_left", "shoot_right"),
+		Input.get_axis("shoot_up", "shoot_down")
+	)
+	if stick.length() > 0.1:
+		return stick.normalized()
+	if not GameSettings.mouse_aim_active() or not mouse_fire_enabled:
+		return Vector2.ZERO
+	# Cursor sitting on the turtle gives a jittery angle — keep the last one.
+	var to_mouse := get_global_mouse_position() - global_position
+	if to_mouse.length() > MOUSE_AIM_DEADZONE:
+		_last_mouse_aim = to_mouse.normalized()
+	return _last_mouse_aim
+
 func return_to_idle_after_delay():
+	_idle_anim_token += 1
+	var token := _idle_anim_token
 	await get_tree().create_timer(current_kick_animation_duration).timeout
-	if not is_inside_tree():
+	if not is_inside_tree() or token != _idle_anim_token:
 		return
 	var animated_sprite = $AnimatedSprite2D
-	if animated_sprite and is_instance_valid(animated_sprite):
+	# Only undo our own shoot pose — a kick that started since keeps playing.
+	if animated_sprite and is_instance_valid(animated_sprite) and String(animated_sprite.animation).begins_with("shoot_"):
 		animated_sprite.play("idle_" + facing_direction)
 
 func apply_thrust(direction: Vector2):

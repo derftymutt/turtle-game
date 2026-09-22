@@ -19,6 +19,11 @@ class_name LevelCompleteScreen
 # shine, same look as the main menu (see ui/shared/turtle_option_list.gd).
 var _option_list: TurtleOptionList
 
+# Mouse mode puts the flippers on LMB/RMB, so a player mid-flip when this
+# screen pops up would otherwise click whatever button is under the cursor.
+const _CLICK_ARM_DELAY_MSEC: int = 500
+var _shown_msec: int = 0
+
 func _ready():
 	hide()
 	_option_list = TurtleOptionList.new()
@@ -74,6 +79,7 @@ func show_completion(
 
 	get_tree().paused = true
 	show()
+	_shown_msec = Time.get_ticks_msec()
 	if sfx_beat:
 		sfx_beat.play()
 	_play_entrance_animation()
@@ -108,3 +114,11 @@ func _play_entrance_animation():
 func hide_screen():
 	get_tree().paused = false
 	hide()
+
+
+func _input(event: InputEvent) -> void:
+	if not visible:
+		return
+	if event is InputEventMouseButton and Time.get_ticks_msec() - _shown_msec < _CLICK_ARM_DELAY_MSEC:
+		get_viewport().set_input_as_handled()
+		return
