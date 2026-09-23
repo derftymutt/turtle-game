@@ -25,6 +25,13 @@ const AUTOMATON_HIT_INTERVAL: float = 0.25
 ## Physics layer bit for enemies (layer 3, zero-indexed = 2).
 const _ENEMY_LAYER_MASK: int = 1 << 2
 
+## Accent colours that tell the player which input a flipper uses.
+const _ACCENT_SWAP_SHADER = preload("res://entities/environment/flippers/flipper_accent_swap.gdshader")
+const _LEFT_ACCENT := Color("#99e550")
+const _RIGHT_ACCENT := Color("#d77bba")
+## One shared material per input, created on first use.
+static var _accent_materials: Dictionary = {}
+
 @export var flip_force: float = 300.0
 @export var flip_speed: float = 40.0
 @export var flip_input: String = "flipper_left"
@@ -98,9 +105,28 @@ func _ready():
 	if animated_sprite:
 		animated_sprite.frame = 0
 		animated_sprite.stop()
+		_apply_input_accent()
 	
 	# Set initial collision rotation
 	update_collision_rotation()
+
+
+func _apply_input_accent() -> void:
+	"""Recolor the sprite's accent to match flip_input (green = left, pink = right),
+	so a right-shaped flipper bound to the left input still reads as a left flipper."""
+	if flip_input != "flipper_left" and flip_input != "flipper_right":
+		return
+	if animated_sprite.material:
+		return  # scene set its own material; don't clobber it
+	if not _accent_materials.has(flip_input):
+		var mat := ShaderMaterial.new()
+		mat.shader = _ACCENT_SWAP_SHADER
+		mat.set_shader_parameter("left_accent", _LEFT_ACCENT)
+		mat.set_shader_parameter("right_accent", _RIGHT_ACCENT)
+		mat.set_shader_parameter("target_accent",
+				_LEFT_ACCENT if flip_input == "flipper_left" else _RIGHT_ACCENT)
+		_accent_materials[flip_input] = mat
+	animated_sprite.material = _accent_materials[flip_input]
 
 func _physics_process(delta):
 	# Force-flip override (Flipper Velcro tech): after the launch delay, hold flip position
