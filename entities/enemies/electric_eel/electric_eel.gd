@@ -72,15 +72,9 @@ func _enemy_ready():
 	# Random starting wiggle
 	wiggle_offset = randf() * TAU
 	
-	# damage area
+	# damage area (contact damage itself is handled by BaseEnemy)
 	if not damage_area:
 		push_error("ElectricEel: damage_area not found! Assign it in the scene.")
-		return
-	
-	# Reconnect signal to use our override
-	if damage_area.body_entered.is_connected(_on_damage_area_entered):
-		damage_area.body_entered.disconnect(_on_damage_area_entered)
-	damage_area.body_entered.connect(_on_damage_area_entered)
 
 func _physics_process(delta):
 	if _is_dying or not player or not is_instance_valid(player):
@@ -363,14 +357,6 @@ func _cleanup_all_shocked_walls() -> void:
 	
 	shocked_walls.clear()
 
-func _setup_damage_area():
-	damage_area.body_entered.connect(_on_damage_area_entered)
-
-func _on_damage_area_entered(body: Node2D):
-	"""Override from BaseEnemy - always deals damage when touched"""
-	if body.is_in_group("player") and body.has_method("take_damage"):
-		_deal_damage_to_player(body)
-
 func die():
 	"""Electric discharge death animation"""
 	_play_die_sound()
@@ -390,9 +376,13 @@ func die():
 	
 	tween.finished.connect(queue_free)
 	
-	# Disable collision
+	# Disable collision. The DamageArea is a separate Area2D, so it has to be
+	# switched off too or the corpse keeps hurting the player while it fades.
 	collision_layer = 0
 	collision_mask = 0
+	if damage_area:
+		damage_area.set_deferred("monitoring", false)
+	_contact_players.clear()
 
 
 # ============================================================================
