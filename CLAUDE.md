@@ -89,17 +89,23 @@ Defeating enemies has a 2% chance to drop an `AlienTechPiece`. Collecting one ca
 
 ## Input Actions (Keyboard Defaults)
 
-| Action | Key |
-|---|---|
-| Move | WASD |
-| Shoot | IJKL |
-| Tech slot left | Q |
-| Tech slot right | E |
-| Drop UFO piece | Space |
-| Pause | Escape |
-| UFO windup | Z |
+Mouse mode (`GameSettings.mouse_mode`) is the **default** keyboard layout; "Keyboard Only" in Options switches to the IJKL layout defined in `project.godot`.
+
+| Action | Mouse mode (default) | Keyboard only |
+|---|---|---|
+| Move | WASD | WASD |
+| Shoot | Mouse aim, auto-fire | IJKL |
+| Toggle auto-fire | Tab / middle click | — |
+| Flipper left / right | LMB / RMB | L Shift / R Shift |
+| Tech slot left | L Shift | Q |
+| Tech slot right | Space | E |
+| Drop UFO piece | F | Space |
+| Pause | Escape | Escape |
+| UFO windup | Z | Z |
 
 All actions also support gamepad.
+
+**Mouse mode internals**: `project.godot` holds the keyboard-only bindings; `GameSettings._apply_mouse_mode_bindings()` rewires the InputMap at runtime (and fully undoes it when switched off). `toggle_fire` is a runtime-only action. `GameSettings` tracks the last-used device (`using_gamepad`, `input_device_changed`); `mouse_aim_active()` = mouse mode **and** keyboard/mouse in use — auto-fire and the `MouseCrosshair` (runtime child of the player, hides the OS cursor during live play) only run when it's true. All shooting input goes through `TurtlePlayer.get_shoot_input()` — don't read the `shoot_*` axes directly. UI key hints come from `GameSettings.tech_slot_key_label()` / `drop_key_label()`. Popups that can appear mid-play (tech selection, game over, level complete) ignore mouse clicks for 500 ms, since LMB/RMB are the flippers. Every `BaseButton` gets the pointing-hand cursor automatically via `GameSettings._on_node_added()` — no need to set it per scene; non-button clickables must set `mouse_default_cursor_shape` themselves.
 
 ## Groups Convention
 

@@ -33,7 +33,7 @@ extends CanvasLayer
 ## Typewriter: every prompt types its text out a letter at a time (see
 ## _tick_typing()). A prompt is a list of pages (_pages) — each a Callable that
 ## lays out that page's labels and returns them in typing order. Long lessons
-## (energy, flippers) are split into several pages; the dismiss key (A / Enter)
+## (energy, flippers) are split into several pages; the dismiss key (A / Space)
 ## first finishes the text that's still typing, then turns to the next page,
 ## and only dismisses the lesson once the final page is fully shown (see
 ## _tick_prompt()).
@@ -96,8 +96,8 @@ const TRASH_TEXT := "You can also shoot trash you find floating by. Get it all a
 
 const FINAL_TEXT := "You're ready!\nDeliver UFO parts to complete each level.\n\nOh yeah... just don't forget to breathe!"
 
-const CONTINUE_HINT := "Press A / Enter to continue"
-const FINISH_HINT := "Press A / Enter to finish"
+const CONTINUE_HINT := "Press A / Space to continue"
+const FINISH_HINT := "Press A / Space to finish"
 
 ## Typewriter pacing. Layout is fixed up front (see _configure_typed_labels()),
 ## so a slower/faster speed never reflows the text — only how quickly it appears.
@@ -199,6 +199,8 @@ const TURTLE_ENERGY_BAR_ICON_SIZE := Vector2i(24, 29)
 var _step: int = Step.INTRO
 var _hud: Node = null
 var _turtle: Node2D = null
+## False until the shooting lesson — see _resolve_refs().
+var _auto_fire_unlocked: bool = false
 var _ocean: Node = null
 var _pinball: Node2D = null
 var _surface_time := 0.0
@@ -389,6 +391,7 @@ func _process(delta: float) -> void:
 				_shot_once = false
 				_shoot_test_cooldown = 0.0
 				_step = Step.SHOOT_PAUSED
+				_unlock_auto_fire()
 				_pause_with_prompt(SHOOT_TEXT, SHOOT_HINT_MOUSE if GameSettings.mouse_mode else SHOOT_HINT)
 
 		Step.SHOOT_PAUSED:
@@ -446,9 +449,20 @@ func _process(delta: float) -> void:
 func _resolve_refs() -> void:
 	_hud = get_tree().get_first_node_in_group("hud")
 	_turtle = get_tree().get_first_node_in_group("player")
+	# Mouse-mode auto-fire starts off, so a stream of spit isn't competing with
+	# the swim/flipper lessons before shooting has even been explained — it's
+	# switched on at Step.SHOOT_PAUSED (see _unlock_auto_fire()).
+	if _turtle and not _auto_fire_unlocked:
+		_turtle.set(&"mouse_fire_enabled", false)
 	_ocean = get_tree().get_first_node_in_group("ocean")
 	if _pinball == null:
 		_pinball = get_node_or_null("../PinballElements")
+
+
+func _unlock_auto_fire() -> void:
+	_auto_fire_unlocked = true
+	if _turtle:
+		_turtle.set(&"mouse_fire_enabled", true)
 
 
 func _energy_depleted() -> bool:
@@ -559,8 +573,8 @@ func _offscreen(node: Node2D) -> bool:
 
 # ── Prompt + pause ───────────────────────────────────────────────────────
 
-## Show the prompt and pause. The dismiss input (the A key, or the gamepad A /
-## Enter) is ignored for the first DISMISS_ARM_DELAY seconds — ticked down in
+## Show the prompt and pause. The dismiss input (the A key, the gamepad A, or
+## ui_accept — Space/Enter) is ignored for the first DISMISS_ARM_DELAY seconds — ticked down in
 ## _process, which keeps running while paused — so the press that reached this
 ## beat can't skip it. A dedicated key rather than "any movement" so the player
 ## doesn't dismiss a lesson by accident while swimming.

@@ -12,6 +12,14 @@ var _sfx_select: AudioStreamPlayer
 # shine, same look as the main menu (see ui/shared/turtle_option_list.gd).
 var _option_list: TurtleOptionList
 
+# Any click anywhere (or Space / Enter / A) starts the game — the Plunge button
+# alone wasn't obvious enough, and nothing on this screen needs a choice.
+# Input is ignored briefly after showing so the press that opened the screen
+# can't skip straight past it.
+const _INPUT_ARM_DELAY_MSEC: int = 300
+var _shown_msec: int = 0
+var _started: bool = false
+
 func _ready():
 	visible = false
 	add_to_group("game_info_screen")
@@ -40,6 +48,8 @@ func _ready():
 
 func show_screen():
 	visible = true
+	_started = false
+	_shown_msec = Time.get_ticks_msec()
 	# This CanvasLayer's Control subtree doesn't get a real layout pass while
 	# hidden, so the button's get_global_rect() is still stale for a frame or
 	# two after it's shown — wait for layout to actually settle before
@@ -123,7 +133,23 @@ func _build_content():
 	content_container.add_child(row_meters)
 
 
+func _input(event: InputEvent) -> void:
+	if not visible:
+		return
+	var is_click: bool = event is InputEventMouseButton and event.pressed
+	var is_accept: bool = event.is_action_pressed("ui_accept") and not event.is_echo()
+	if not (is_click or is_accept):
+		return
+	# Handled either way, so the focused Plunge button can't fire a second time.
+	get_viewport().set_input_as_handled()
+	if Time.get_ticks_msec() - _shown_msec >= _INPUT_ARM_DELAY_MSEC:
+		_on_start_pressed()
+
+
 func _on_start_pressed():
+	if _started:
+		return
+	_started = true
 	if _sfx_select:
 		_sfx_select.play()
 	LevelManager.load_level(1)

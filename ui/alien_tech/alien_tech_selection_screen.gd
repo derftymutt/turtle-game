@@ -7,7 +7,7 @@ class_name AlienTechSelectionScreen
 ## tech-info panel) are themselves the "equip" controls: whichever one has
 ## focus previews the newly found tech — pulsing green border, full
 ## description — while the other keeps showing whatever is really equipped
-## there. Move focus with left/right, confirm with ui_accept (Enter/A) or a
+## there. Move focus with left/right, confirm with ui_accept (Space/Enter/A) or a
 ## click, or move focus to Skip to back out without equipping anything.
 
 const _SFX_MENU_NAV    = preload("res://assets/sounds/sfx/menu nav_1.ogg")
