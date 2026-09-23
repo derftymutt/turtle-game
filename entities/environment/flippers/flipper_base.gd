@@ -24,6 +24,14 @@ const FORCE_FLIP_DELAY_TICKS: int = 3
 const AUTOMATON_HIT_INTERVAL: float = 0.25
 ## Physics layer bit for enemies (layer 3, zero-indexed = 2).
 const _ENEMY_LAYER_MASK: int = 1 << 2
+## Overswing tech: ticks the overswing offset takes to ramp up to full value after a flip
+## activates, instead of snapping there instantly. A resting body gets hit via the
+## Area2D overlap check in the same window the collision shape sweeps past it; snapping
+## overswing_degrees on top of the normal per-tick rotation in one frame can sweep the
+## shape clean past a body sitting mid-arm before that check ever sees it overlapping,
+## so the body gets a token nudge (or none at all) instead of a real launch — same
+## tunneling mechanism as FORCE_FLIP_DELAY_TICKS above, just via the button-press path.
+const OVERSWING_ATTACK_TICKS: int = 3
 
 ## Accent colours that tell the player which input a flipper uses.
 const _ACCENT_SWAP_SHADER = preload("res://entities/environment/flippers/flipper_accent_swap.gdshader")
@@ -42,6 +50,8 @@ static var _accent_materials: Dictionary = {}
 
 var is_flipping: bool = false
 var _overswing_offset: float = 0.0
+var _overswing_full_value: float = 0.0
+var _overswing_attack_ticks_left: int = 0
 var current_rotation: float = 0.0  # Physics rotation
 var target_rotation: float = 0.0
 var previous_rotation: float = 0.0
@@ -187,8 +197,13 @@ func _physics_process(delta):
 	current_rotation = lerp_angle(current_rotation, target_rotation, flip_speed * delta)
 	angular_velocity = (current_rotation - previous_rotation) / delta
 
-	# Decay collision overswing offset back to zero
-	if _overswing_offset != 0.0:
+	# Ramp the overswing offset up to full value over a few ticks (see
+	# OVERSWING_ATTACK_TICKS), then decay it back to zero as before.
+	if _overswing_attack_ticks_left > 0:
+		_overswing_attack_ticks_left -= 1
+		var attack_t: float = 1.0 - float(_overswing_attack_ticks_left) / float(OVERSWING_ATTACK_TICKS)
+		_overswing_offset = _overswing_full_value * attack_t
+	elif _overswing_offset != 0.0:
 		_overswing_offset = lerp(_overswing_offset, 0.0, overswing_decay_speed * delta)
 		if abs(_overswing_offset) < 0.001:
 			_overswing_offset = 0.0
@@ -295,7 +310,8 @@ func activate_flip():
 
 	if overswing_enabled:
 		var flip_direction = sign(get_flip_angle() - get_rest_angle())
-		_overswing_offset = flip_direction * deg_to_rad(overswing_degrees)
+		_overswing_full_value = flip_direction * deg_to_rad(overswing_degrees)
+		_overswing_attack_ticks_left = OVERSWING_ATTACK_TICKS
 
 	is_actively_moving = true
 	active_movement_timer = active_movement_duration

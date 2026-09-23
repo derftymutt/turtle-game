@@ -467,7 +467,7 @@ mirrored = true
 
 [node name="FlipperTopRightPairRight" type="Node" parent="." index="27" unique_id=1610761626]
 
-[node name="FlipperRightUp3" parent="FlipperTopRightPairRight" index="0" unique_id=561564554 instance=ExtResource("17_lf5e3")]
+[node name="FlipperRightUp2" parent="FlipperTopRightPairRight" index="0" unique_id=561564554 instance=ExtResource("17_lf5e3")]
 position = Vector2(215, -120)
 overswing_enabled = true
 
