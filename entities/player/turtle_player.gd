@@ -30,6 +30,8 @@ extends RigidBody2D
 # streams). Hearts carry across levels (LevelManager persists current_hearts).
 const MAX_HEARTS: int = 7
 const HEART_DAMAGE_IFRAME: float = 0.75
+## Sprite tint pulsed in while on the last heart (see _update_sprite_modulate)
+const LOW_HEALTH_TINT := Color(1.0, 0.15, 0.15)
 var current_hearts: int = MAX_HEARTS
 var _heart_iframe_timer: float = 0.0
 var _last_damage_source: String = ""  # cause clause for the game over screen, e.g. "killed by a crab"
@@ -617,6 +619,14 @@ func _update_sprite_modulate():
 		sprite.modulate = super_speed_color.lerp(Color.WHITE, 1.0 - fade_factor)
 	else:
 		sprite.modulate = Color.WHITE
+
+	# Last-heart warning: slow red pulse blended over whatever color was set
+	# above, so it stays visible even while a tech/powerup tint is active.
+	if current_hearts == 1:
+		var pulse := (sin(Time.get_ticks_msec() * 0.006) + 1.0) * 0.5
+		var a: float = sprite.modulate.a
+		sprite.modulate = sprite.modulate.lerp(LOW_HEALTH_TINT, lerpf(0.5, 0.9, pulse))
+		sprite.modulate.a = a
 
 	# Iframe blink: flicker alpha on top of whatever color was set above.
 	# FlashOverlay and sprite modulate are separate nodes so they can coexist.
