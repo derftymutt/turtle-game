@@ -44,6 +44,16 @@ enum PlaneType { SPREAD, MISSILE }
 ## How many missiles fire during one pass.
 @export var missile_count: int = 2
 
+@export_group("Fairness")
+## The plane only fires while it's on screen with the turtle. A scheduled shot
+## that comes due while the plane is off camera is skipped, not queued.
+## The plane must also have been visible this long first, so a turtle climbing
+## into the sky gets a moment to spot it before the first shot.
+@export var min_visible_before_fire: float = 0.5
+## Shrinks the visible area by this many pixels on each side, so the plane
+## has to be clearly on screen, not just clipping the edge.
+@export var on_screen_margin: float = 8.0
+
 # ── Internal State ─────────────────────────────────────────────────────────
 var active: bool = false
 var plane_type: PlaneType = PlaneType.SPREAD
@@ -55,6 +65,7 @@ var _pass_duration: float = 0.0    # Total time the pass takes
 var _pass_elapsed: float = 0.0     # Time since pass started
 var _fire_times: Array[float] = [] # Pre-calculated times to fire (seconds into pass)
 var _fired_count: int = 0
+var _visible_time: float = 0.0     # How long the plane has been continuously on screen
 
 var _spread_sprite: Node2D = null
 var _missile_sprite: Node2D = null
@@ -74,12 +85,21 @@ func _process(delta: float) -> void:
 	position.x += travel_direction * fly_speed * delta
 	_pass_elapsed += delta
 
-	# Fire at pre-calculated times during the pass
+	if _is_on_camera():
+		_visible_time += delta
+	else:
+		_visible_time = 0.0
+	var can_fire: bool = _visible_time >= min_visible_before_fire
+
+	# Fire at pre-calculated times during the pass. A shot that comes due while
+	# the turtle can't see the plane is dropped, so the turtle never gets hit by
+	# something fired from off screen.
 	while _fired_count < _fire_times.size() and _pass_elapsed >= _fire_times[_fired_count]:
-		if plane_type == PlaneType.SPREAD:
-			_fire_spread()
-		else:
-			_fire_missile()
+		if can_fire:
+			if plane_type == PlaneType.SPREAD:
+				_fire_spread()
+			else:
+				_fire_missile()
 		_fired_count += 1
 
 	# End pass once the full duration has elapsed
@@ -109,6 +129,7 @@ func launch(type: PlaneType = PlaneType.SPREAD, from_left: bool = true) -> void:
 	_pass_duration = total_distance / fly_speed
 	_pass_elapsed  = 0.0
 	_fired_count   = 0
+	_visible_time  = 0.0
 	_fire_times.clear()
 
 	# How many shots this pass
@@ -177,6 +198,14 @@ func _spawn_projectile(projectile: Node2D, initial_velocity: Vector2) -> void:
 
 
 # ── Internal ───────────────────────────────────────────────────────────────
+
+## True when the plane is inside the area the camera is currently showing.
+## Uses the live canvas transform, so camera pan and zoom are both accounted for.
+func _is_on_camera() -> bool:
+	var vp: Viewport = get_viewport()
+	var world_rect: Rect2 = vp.get_canvas_transform().affine_inverse() * vp.get_visible_rect()
+	return world_rect.grow(-on_screen_margin).has_point(global_position)
+
 
 func _finish_pass() -> void:
 	active  = false
