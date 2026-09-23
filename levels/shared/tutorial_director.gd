@@ -266,6 +266,13 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	# This node runs while paused, so it would otherwise keep typing and read
+	# Space/A presses meant for the pause menu. Treat the key as held so the
+	# press that picks "Resume" can't also dismiss the prompt underneath.
+	if _pause_menu_open():
+		_dismiss_down_last = true
+		return
+
 	# Ahead of the _hud/_turtle guard below: the intro types out before those exist.
 	_tick_prompt(delta)
 
@@ -457,6 +464,11 @@ func _resolve_refs() -> void:
 	_ocean = get_tree().get_first_node_in_group("ocean")
 	if _pinball == null:
 		_pinball = get_node_or_null("../PinballElements")
+
+
+func _pause_menu_open() -> bool:
+	var menu := get_tree().get_first_node_in_group("pause_menu")
+	return menu != null and menu.has_method("is_open") and menu.call(&"is_open")
 
 
 func _unlock_auto_fire() -> void:

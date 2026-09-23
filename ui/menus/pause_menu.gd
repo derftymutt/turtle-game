@@ -55,9 +55,22 @@ var _option_list: TurtleOptionList
 @onready var slot_r_hot_badge: Label         = $Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRRow/SlotRTextContainer/SlotRHotRow/SlotRHotBadge
 @onready var slot_r_hot_desc:  Label         = $Control/CenterContainer/PanelContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotRRow/SlotRTextContainer/SlotRHotRow/SlotRHotDesc
 
+## Above every other overlay (tutorial prompts, popups — all at the default
+## layer 1) so it always draws on top and gets clicks first; below
+## TurtleConfirmDialog (layer 10), which it spawns for the save prompt.
+const _LAYER := 8
+
+## Whether the tree was already paused when this menu opened (a tutorial prompt,
+## the tech selection screen...) — resuming restores that instead of blindly
+## unpausing the game underneath it.
+var _was_paused: bool = false
+
 func _ready():
 	add_to_group("pause_menu")
 	visible = false
+	layer = _LAYER
+	if guide_screen:
+		guide_screen.layer = _LAYER + 1
 
 	_sfx_nav = AudioStreamPlayer.new()
 	_sfx_nav.stream = _SFX_MENU_NAV
@@ -113,7 +126,12 @@ func _process(_delta: float) -> void:
 	if _slot_hot_blinking[1]:
 		slot_r_hot_badge.modulate.a = alpha
 
+## True while this menu or the Options screen it opened is showing.
+func is_open() -> bool:
+	return visible or (guide_screen != null and guide_screen.visible)
+
 func _open():
+	_was_paused = get_tree().paused
 	get_tree().paused = true
 	visible = true
 	_update_tech_display()
@@ -129,7 +147,7 @@ func _open():
 		resume_button.grab_focus()
 
 func _resume():
-	get_tree().paused = false
+	get_tree().paused = _was_paused
 	visible = false
 
 func _on_resume_pressed():
@@ -214,6 +232,10 @@ func _update_slot(slot_index: int, slot: Dictionary, icon: TextureRect, input_lb
 				hot_desc.text = hot_text
 
 func _show_save_prompt(action: Callable):
+	# The tutorial isn't part of level progression — there's nothing to save.
+	if LevelManager.is_tutorial:
+		action.call()
+		return
 	var dialog := TurtleConfirmDialog.new()
 	add_child(dialog)
 	# A multi-line lambda nested inside an array/dict literal confuses

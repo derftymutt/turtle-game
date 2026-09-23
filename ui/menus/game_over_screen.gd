@@ -180,6 +180,10 @@ func show_game_over(level_score: int, run_total: int, death_cause: String = ""):
 		continue_button.grab_focus()
 
 func _show_save_prompt(action: Callable):
+	# The tutorial isn't part of level progression — there's nothing to save.
+	if LevelManager.is_tutorial:
+		action.call()
+		return
 	var dialog := TurtleConfirmDialog.new()
 	add_child(dialog)
 	# A multi-line lambda nested inside an array/dict literal confuses
