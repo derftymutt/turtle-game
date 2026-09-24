@@ -141,6 +141,21 @@ const _HOT_TOGGLE_TECHS: Array[String] = [
 	AlienTechRegistry.FLIPPER_AUTOMATON,
 ]
 
+# Techs that become fully passive when HOT — always in effect, so the slot has
+# nothing to press and no bar to show. (A press is still a harmless no-op.)
+const _HOT_ALWAYS_ON_TECHS: Array[String] = [
+	AlienTechRegistry.GRAVITON_HARNESS,
+	AlienTechRegistry.MAGNETIC_REPULSION,
+]
+
+# Press-to-fire techs whose HOT cooldown drops to zero with no timed active
+# window to show — still pressed, but their bar would just sit permanently full.
+const _HOT_NO_BAR_TECHS: Array[String] = [
+	AlienTechRegistry.LATERAL_THRUST,
+	AlienTechRegistry.TRANSPORTER,
+	AlienTechRegistry.SHOCKWAVE,
+]
+
 var _passive_bar_ratios: Dictionary = {}
 
 var time_freeze_active: bool = false
@@ -506,6 +521,26 @@ func clear_all_passive_bars() -> void:
 
 func tech_has_bar(tech_id: String) -> bool:
 	return _COOLDOWN_DURATIONS.has(tech_id)
+
+## False when the slot's tech is currently hot in a way that makes its button
+## pointless (always-on) — the HUD hides its key prompt.
+func slot_needs_input(slot_index: int) -> bool:
+	if slot_index < 0 or slot_index >= MAX_SLOTS or slots[slot_index].is_empty():
+		return false
+	var tech: Dictionary = slots[slot_index]
+	if not tech.get("needs_input", false):
+		return false
+	return not (is_slot_hot(slot_index) and tech.get("id", "") in _HOT_ALWAYS_ON_TECHS)
+
+## False when being hot has made the slot's cooldown bar meaningless — the
+## HUD hides it. Says nothing about techs that never have a bar at all.
+func slot_bar_meaningful(slot_index: int) -> bool:
+	if slot_index < 0 or slot_index >= MAX_SLOTS or slots[slot_index].is_empty():
+		return false
+	if not is_slot_hot(slot_index):
+		return true
+	var tech_id: String = slots[slot_index].get("id", "")
+	return not (tech_id in _HOT_ALWAYS_ON_TECHS or tech_id in _HOT_NO_BAR_TECHS)
 
 # ─── Run lifecycle ───────────────────────────────────────────────────────────
 

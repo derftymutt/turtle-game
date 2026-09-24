@@ -172,7 +172,7 @@ func _process(delta):
 	# one-shot flash for the air-reserve powerup.
 	_air.process(self, delta)
 
-	# Alien Tech slot UI: cooldown bars, label/icon state, hot borders
+	# Alien Tech slot UI: cooldown bars, label/icon state, hot fire text, key prompts
 	_tech_slots.process(delta)
 
 	# Level timer countdown

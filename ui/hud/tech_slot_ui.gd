@@ -1,8 +1,8 @@
 extends RefCounted
 class_name TechSlotUI
 
-## Alien tech slot UI: slot labels/icons/cooldown bars, the flashing "hot"
-## border, and the powerup-replicator's icon carousel + uses-remaining badge.
+## Alien tech slot UI: slot labels/icons/cooldown bars, the fiery "hot" label
+## sheen, the blinking ready-key prompt, and the powerup-replicator's icon carousel + uses-remaining badge.
 ##
 ## Fully self-contained — nothing outside hud.gd references any of this
 ## class's symbols — so unlike AirSystem/EnergySystem/TrashClusterSpawner it
@@ -28,15 +28,19 @@ var _slot_b_rpl_icons: Array = []
 var _slot_a_rpl_count_label: Label = null  # hot only — "x2"/"x1" uses-remaining badge
 var _slot_b_rpl_count_label: Label = null
 
-# Hot tech indicator — a flashing red border drawn around the slot's icon+label
-# row. Built at runtime (like the replicator icons above) and kept in sync with
-# its target container's rect every frame, since the row resizes with its text.
-var _slot_a_hot_border: ReferenceRect = null
-var _slot_b_hot_border: ReferenceRect = null
-var _hot_pulse_timer: float = 0.0
+# Hot tech indicator — a band of flowing red/yellow fire sweeps across the slot
+# label's text, which otherwise keeps its tech colour. One material per slot,
+# since each carries its own label's colour and width as shader uniforms.
+var _fire_materials: Array[ShaderMaterial] = []
+
+# "Ready" key prompt (e.g. "LB" / "L Shift") that blinks just under the
+# cooldown bar, flush with its screen-centre end, whenever a press-activated
+# tech can be fired.
+var _slot_a_key_prompt: Label = null
+var _slot_b_key_prompt: Label = null
 
 ## Finds the slot nodes under `hud` and builds the runtime-only extras
-## (powerup icon atlas, replicator carousels, hot borders). Call once from
+## (powerup icon atlas, replicator carousels, fire material, key prompts). Call once from
 ## HUD._ready(), then connect AlienTechManager's signals to this object and
 ## call refresh().
 func build(hud) -> void:
@@ -57,10 +61,21 @@ func build(hud) -> void:
 		slot_b_label.get_parent().move_child(_slot_b_rpl_container, slot_b_label.get_index())
 		_slot_b_rpl_count_label = _create_rpl_count_label(_slot_b_rpl_container)
 
-	if slot_a_label:
-		_slot_a_hot_border = _make_hot_border(hud)
-	if slot_b_label:
-		_slot_b_hot_border = _make_hot_border(hud)
+	var fire_shader: Shader = load("res://ui/hud/fire_text.gdshader")
+	for i in 2:
+		var mat := ShaderMaterial.new()
+		mat.shader = fire_shader
+		_fire_materials.append(mat)
+
+	# Each prompt is a child of its cooldown bar (a plain Control, not a
+	# Container), so it can hang in the spare space below the 6px bar without
+	# growing the row, and hides along with the bar for techs that have none.
+	if slot_a_label and slot_a_cooldown:
+		_slot_a_key_prompt = _create_key_prompt(slot_a_label)
+		slot_a_cooldown.add_child(_slot_a_key_prompt)
+	if slot_b_label and slot_b_cooldown:
+		_slot_b_key_prompt = _create_key_prompt(slot_b_label)
+		slot_b_cooldown.add_child(_slot_b_key_prompt)
 
 func _build_powerup_icons() -> void:
 	var sheet: Texture2D = load("res://entities/collectibles/powerup/sprites/powerup.png")
@@ -108,73 +123,131 @@ func _create_rpl_count_label(container: HBoxContainer) -> Label:
 	container.add_child(lbl)
 	return lbl
 
-## Border-only overlay control, parented directly to the HUD CanvasLayer (not
-## inside a Container) so it's free to be positioned/sized manually each frame
-## instead of being fought over by container layout.
-func _make_hot_border(hud) -> ReferenceRect:
-	var rect := ReferenceRect.new()
-	rect.editor_only = false
-	rect.border_color = Color(1.0, 0.15, 0.1, 1.0)
-	rect.border_width = 2.0
-	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	rect.visible = false
-	hud.add_child(rect)
-	return rect
+## Blinking key-name prompt, styled to match the slot label it sits beside.
+func _create_key_prompt(slot_label: Label) -> Label:
+	var lbl := Label.new()
+	var font := slot_label.get_theme_font("font")
+	if font:
+		lbl.add_theme_font_override("font", font)
+	lbl.add_theme_color_override("font_color", Color.WHITE)
+	lbl.add_theme_color_override("font_outline_color", Color.BLACK)
+	lbl.add_theme_constant_override("outline_size", 2)
+	lbl.add_theme_font_size_override("font_size", _KEY_PROMPT_FONT_SIZE)
+	lbl.add_theme_constant_override("line_spacing", 0)
+	lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	lbl.visible = false
+	return lbl
 
 ## Called every frame from HUD._process().
-func process(delta: float) -> void:
+func process(_delta: float) -> void:
+	_apply_bar_visibility(slot_a_cooldown, 0)
+	_apply_bar_visibility(slot_b_cooldown, 1)
 	_apply_slot_cooldown_bar(slot_a_cooldown, 0)
 	_apply_slot_cooldown_bar(slot_b_cooldown, 1)
 	_apply_slot_label_state(slot_a_label, slot_a_icon, 0)
 	_apply_slot_label_state(slot_b_label, slot_b_icon, 1)
-	_update_hot_borders(delta)
+	_apply_hot_text(slot_a_label, 0)
+	_apply_hot_text(slot_b_label, 1)
+	_apply_key_prompt(_slot_a_key_prompt, 0)
+	_apply_key_prompt(_slot_b_key_prompt, 1)
 
-func _update_hot_borders(delta: float) -> void:
-	_hot_pulse_timer += delta * 6.0
-	var pulse := (sin(_hot_pulse_timer) + 1.0) * 0.5
-	var alpha := lerpf(0.35, 1.0, pulse)
-	_sync_hot_border(_slot_a_hot_border, slot_a_label, AlienTechManager.is_slot_hot(0), alpha)
-	_sync_hot_border(_slot_b_hot_border, slot_b_label, AlienTechManager.is_slot_hot(1), alpha)
+const _KEY_PROMPT_BLINK_PERIOD_MSEC: int = 350
+const _KEY_PROMPT_FONT_SIZE: int = 12
+const _KEY_PROMPT_Y_OFFSET: float = -3.0  # tuck up under the bar (font has top padding)
+const _SLOT_GAMEPAD_KEYS := ["LB", "RB"]
 
-func _sync_hot_border(border: ReferenceRect, label: Label, is_hot: bool, alpha: float) -> void:
-	if not border:
+## Hot slots get the fire-sweep shader on their label text (which supplies the
+## tech colour itself); everything else gets its normal tech colour back. Runs after _apply_slot_label_state() so the
+## alpha it chose (dimmed / blinking) is preserved — only rgb is touched.
+func _apply_hot_text(label: Label, slot_index: int) -> void:
+	if not label:
 		return
-	border.visible = is_hot
-	if not is_hot or not label:
+	var tech: Dictionary = AlienTechManager.slots[slot_index]
+	if tech.is_empty():
+		label.material = null
 		return
-	var row: Control = label.get_parent()
-	if not row:
-		return
-	# row.get_global_rect() would be the row container's own rect, which is
-	# stretched wide (size_flags_horizontal expand) to split evenly with its
-	# sibling column — reaching halfway across the screen even though the
-	# icon/label/bar inside only use part of that width. Use the tight union
-	# of the row's visible children instead, so the border hugs the content.
-	const PAD := 2.0
-	var rect := _tight_content_rect(row)
-	if rect.size == Vector2.ZERO:
-		return
-	rect = rect.grow(PAD)
-	border.global_position = rect.position
-	border.size = rect.size
-	border.modulate.a = alpha
+	var a := label.modulate.a
+	var c: Color = tech.get("color", Color.WHITE)
+	if AlienTechManager.is_slot_hot(slot_index):
+		var mat := _fire_materials[slot_index]
+		mat.set_shader_parameter("base_color", c)
+		mat.set_shader_parameter("text_width", label.size.x)
+		label.material = mat
+		label.modulate = Color(1.0, 1.0, 1.0, a)  # colour comes from base_color instead
+	else:
+		label.material = null
+		label.modulate = Color(c.r, c.g, c.b, a)
 
-## Union of a Control's visible children's global rects.
-func _tight_content_rect(row: Control) -> Rect2:
-	var result := Rect2()
-	var first := true
-	for child in row.get_children():
-		if not child is Control:
-			continue
-		var c: Control = child
-		if not c.visible:
-			continue
-		var r: Rect2 = c.get_global_rect()
-		if r.size == Vector2.ZERO:
-			continue
-		result = r if first else result.merge(r)
-		first = false
-	return result
+## The key prompt is a child of the bar, so a slot that needs a prompt but no
+## bar (e.g. hot Lateral Thrust, hot Phase Shifter) keeps the bar node in the
+## layout with only its own texture made transparent (self_modulate doesn't
+## reach children) — the prompt stays put where the bar's end would be.
+func _apply_bar_visibility(bar: TextureProgressBar, slot_index: int) -> void:
+	if not bar:
+		return
+	var wants_bar := _slot_wants_bar(slot_index)
+	bar.visible = wants_bar or _is_slot_ready_to_press(slot_index)
+	bar.self_modulate.a = 1.0 if wants_bar else 0.0
+
+func _slot_wants_bar(slot_index: int) -> bool:
+	var tech: Dictionary = AlienTechManager.slots[slot_index]
+	if tech.is_empty():
+		return false
+	var tech_id: String = tech.get("id", "")
+	if tech_id == AlienTechRegistry.PHASE_SHIFTER:
+		return not AlienTechManager.is_tech_hot(AlienTechRegistry.PHASE_SHIFTER)
+	if tech_id == AlienTechRegistry.POWERUP_REPLICATOR:
+		return false
+	if not (AlienTechManager.tech_has_bar(tech_id) or tech.get("has_passive_bar", false)):
+		return false
+	return AlienTechManager.slot_bar_meaningful(slot_index)
+
+## Shows the slot's button name, blinking, while its press-activated tech is
+## fully charged and can be fired right now.
+func _apply_key_prompt(prompt: Label, slot_index: int) -> void:
+	if not prompt:
+		return
+	var ready := _is_slot_ready_to_press(slot_index)
+	prompt.visible = ready
+	if not ready:
+		return
+	prompt.text = _SLOT_GAMEPAD_KEYS[slot_index] if GameSettings.using_gamepad \
+			else GameSettings.tech_slot_key_label(slot_index)
+	# Normally tucked under the bar, flush with its screen-centre end. With the
+	# bar hidden (transparent placeholder) it instead sits level with the
+	# label, at the bar end touching it, so it doesn't float in empty space.
+	var bar: Control = prompt.get_parent()
+	prompt.size = prompt.get_minimum_size()
+	var toward_centre := slot_index == 0
+	if bar.self_modulate.a > 0.0:
+		var x := bar.size.x - prompt.size.x if toward_centre else 0.0
+		prompt.position = Vector2(x, bar.size.y + _KEY_PROMPT_Y_OFFSET)
+	else:
+		var x := 0.0 if toward_centre else bar.size.x - prompt.size.x
+		prompt.position = Vector2(x, (bar.size.y - prompt.size.y) * 0.5)
+	var blink_on := int(Time.get_ticks_msec() / _KEY_PROMPT_BLINK_PERIOD_MSEC) % 2 == 0
+	prompt.modulate.a = 1.0 if blink_on else 0.15
+
+func _is_slot_ready_to_press(slot_index: int) -> bool:
+	if not AlienTechManager.slot_needs_input(slot_index):
+		return false
+	# Only techs that (cold) have a bar get a prompt — it's anchored to that
+	# bar. That leaves out the Replicator (its carousel sits there instead).
+	# Flipper Velcro and Phase Shifter are the exceptions: no bar of their own
+	# (or none when hot), but knowing the button matters more than the prompt
+	# never stopping blinking, so they get the transparent placeholder bar.
+	var tech: Dictionary = AlienTechManager.slots[slot_index]
+	var tech_id: String = tech.get("id", "")
+	if tech_id == AlienTechRegistry.POWERUP_REPLICATOR:
+		return false
+	if tech_id != AlienTechRegistry.PHASE_SHIFTER and tech_id != AlienTechRegistry.FLIPPER_VELCRO \
+			and not (AlienTechManager.tech_has_bar(tech_id) or tech.get("has_passive_bar", false)):
+		return false
+	var phase: String = AlienTechManager.get_bar_phase(slot_index).get("phase", "none")
+	if phase != "none":
+		# "off" = hot toggle-style tech that's switched off — pressable now.
+		return phase == "ready" or phase == "off"
+	return not _is_slot_dimmed(slot_index)
 
 func on_tech_piece_collected(current: int, needed: int) -> void:
 	if tech_piece_label:
@@ -184,7 +257,9 @@ func on_tech_slots_changed(slot_a: Dictionary, slot_b: Dictionary) -> void:
 	_update_slot_display(slot_a_label, slot_a_cooldown, slot_a_icon, slot_a, _slot_a_rpl_container, _slot_a_rpl_icons)
 	_update_slot_display(slot_b_label, slot_b_cooldown, slot_b_icon, slot_b, _slot_b_rpl_container, _slot_b_rpl_icons)
 
-func _update_slot_display(label: Label, cooldown_bar: TextureProgressBar,
+## Cooldown bar visibility isn't set here — hot state can change without a
+## slot-change signal, so _apply_bar_visibility() decides it every frame.
+func _update_slot_display(label: Label, _cooldown_bar: TextureProgressBar,
 		icon: TextureRect, tech: Dictionary,
 		rpl_container: HBoxContainer = null, rpl_icons: Array = []):
 	if not label:
@@ -194,13 +269,9 @@ func _update_slot_display(label: Label, cooldown_bar: TextureProgressBar,
 	if tech.is_empty():
 		label.text = ""
 		label.modulate = Color(0.5, 0.5, 0.5, 0.8)
-		if cooldown_bar:
-			cooldown_bar.visible = false
 	elif tech.get("id", "") == AlienTechRegistry.PHASE_SHIFTER:
 		if AlienTechManager.is_tech_hot(AlienTechRegistry.PHASE_SHIFTER):
 			label.text = "Phase Shifter ∞"
-			if cooldown_bar:
-				cooldown_bar.visible = false
 		else:
 			var ammo := AlienTechManager.phase_shifter_ammo
 			var max_ammo := AlienTechManager.PHASE_SHIFTER_MAX_AMMO
@@ -209,16 +280,12 @@ func _update_slot_display(label: Label, cooldown_bar: TextureProgressBar,
 				label.text = "Phase Shifter --/%d" % max_ammo
 			else:
 				label.text = "Phase Shifter %d/%d" % [ammo, max_ammo]
-			if cooldown_bar:
-				cooldown_bar.visible = true
 		label.modulate = tech.get("color", Color.WHITE)
 	elif tech.get("id", "") == AlienTechRegistry.POWERUP_REPLICATOR:
 		var slots_state := AlienTechManager.powerup_replicator_slots
 		var selected := AlienTechManager.powerup_replicator_selected
 		label.text = tech.get("slot_label", tech.get("name", "?"))
 		label.modulate = tech.get("color", Color.WHITE)
-		if cooldown_bar:
-			cooldown_bar.visible = false
 		if rpl_container and rpl_icons.size() >= slots_state.size():
 			var filled_count := 0
 			for i in slots_state.size():
@@ -246,9 +313,6 @@ func _update_slot_display(label: Label, cooldown_bar: TextureProgressBar,
 	else:
 		label.text = tech.get("slot_label", tech.get("name", "?"))
 		label.modulate = tech.get("color", Color.WHITE)
-		if cooldown_bar:
-			var tech_id: String = tech.get("id", "")
-			cooldown_bar.visible = AlienTechManager.tech_has_bar(tech_id) or tech.get("has_passive_bar", false)
 
 func refresh() -> void:
 	if tech_piece_label:
