@@ -152,6 +152,8 @@ func process(_delta: float) -> void:
 	_apply_key_prompt(_slot_b_key_prompt, 1)
 
 const _KEY_PROMPT_BLINK_PERIOD_MSEC: int = 350
+# Blink alternates white with the violet of the turtle's TechAura glow.
+const _KEY_PROMPT_BLINK_COLOR := Color(0.65, 0.12, 1.0)
 const _KEY_PROMPT_FONT_SIZE: int = 12
 const _KEY_PROMPT_Y_OFFSET: float = -3.0  # tuck up under the bar (font has top padding)
 const _SLOT_GAMEPAD_KEYS := ["LB", "RB"]
@@ -202,7 +204,7 @@ func _slot_wants_bar(slot_index: int) -> bool:
 		return false
 	return AlienTechManager.slot_bar_meaningful(slot_index)
 
-## Shows the slot's button name, blinking, while its press-activated tech is
+## Shows the slot's button name, blinking white/violet, while its press-activated tech is
 ## fully charged and can be fired right now.
 func _apply_key_prompt(prompt: Label, slot_index: int) -> void:
 	if not prompt:
@@ -226,7 +228,7 @@ func _apply_key_prompt(prompt: Label, slot_index: int) -> void:
 		var x := 0.0 if toward_centre else bar.size.x - prompt.size.x
 		prompt.position = Vector2(x, (bar.size.y - prompt.size.y) * 0.5)
 	var blink_on := int(Time.get_ticks_msec() / _KEY_PROMPT_BLINK_PERIOD_MSEC) % 2 == 0
-	prompt.modulate.a = 1.0 if blink_on else 0.15
+	prompt.add_theme_color_override("font_color", Color.WHITE if blink_on else _KEY_PROMPT_BLINK_COLOR)
 
 func _is_slot_ready_to_press(slot_index: int) -> bool:
 	if not AlienTechManager.slot_needs_input(slot_index):
