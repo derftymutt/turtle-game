@@ -37,7 +37,7 @@ class_name MultiLanceEffect
 
 const REACH: float = 128.0            # a fifth of the 640px viewport
 const DAMAGE: float = 20.0
-const MISS_COOLDOWN: float = 1.0      # cooldown after a lance that did nothing (never longer than the normal one)
+const MISS_COOLDOWN: float = 0.5      # cooldown after a lance that did nothing (never longer than the normal one)
 const SHOCK_DURATION: float = 5.0     # invincible enemies: frozen + harmless this long
 const PULL_SPEED: float = 150.0       # well under super_speed_threshold (300)
 const PLAYER_RADIUS: float = 7.0
@@ -82,6 +82,10 @@ var _pull_elapsed: float = 0.0
 var _best_dist: float = INF
 var _stuck_timer: float = 0.0
 var _line: Line2D = null
+
+## True from the lance firing until it has fully retracted — read by TechAura.
+func is_in_progress() -> bool:
+	return _state != State.IDLE
 
 func setup(player) -> void:
 	_line = Line2D.new()

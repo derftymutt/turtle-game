@@ -271,7 +271,7 @@ var _definitions: Array[Dictionary] = [
 	{
 		"id":              MULTI_LANCE,
 		"name":            "Multi Lance",
-		"description":     "Multi-purpose beam: Grab walls, grab powerups, pierce enemies, shock crocs! 3s cooldown.",
+		"description":     "Multi-purpose beam: Grab walls, grab powerups, pierce enemies, shock crocs! 2s cooldown.",
 		"hook":            "It can do it all!",
 		"slot_label":      "Multi Lance",
 		"needs_input":     true,

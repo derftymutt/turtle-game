@@ -258,6 +258,10 @@ func _ready():
 	for effect in _tech_effects.values():
 		(effect as AlienTechEffect).setup(self)
 
+	# Equipped-tech glow around the turtle (left/right halves = slot A/B).
+	# After _tech_effects is filled — the aura reads effect state from frame one.
+	add_child(TechAura.new())
+
 	# A previous player may have died mid-action (mid-lance, mid-transmogrify...) —
 	# start every tech fresh, whether this is a new level or a Continue.
 	AlienTechManager.reset_level_state()

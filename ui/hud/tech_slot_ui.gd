@@ -328,7 +328,7 @@ func on_phase_shifter_ammo_changed(_current: int, _max_ammo: int, _recharging: b
 func on_powerup_replicator_changed() -> void:
 	on_tech_slots_changed(AlienTechManager.slots[0], AlienTechManager.slots[1])
 
-const _COOLDOWN_BAR_MUTED := Color(0.55, 0.55, 0.55, 1.0)
+const _COOLDOWN_BAR_MUTED := Color(0.75, 0.75, 0.75, 1.0)
 
 ## Drives one slot's cooldown TextureProgressBar. Techs AlienTechManager
 ## tracks as two-phase (see get_bar_phase()) get a full-color drain for their
@@ -336,15 +336,16 @@ const _COOLDOWN_BAR_MUTED := Color(0.55, 0.55, 0.55, 1.0)
 ## full color the instant it's ready again. Only tint_progress (the fill) is
 ## ever touched — tint_under (the background track) is left alone so it
 ## always reads as its normal grey, never darkening toward black. Everything
-## else keeps the older single-bar behavior (_get_slot_bar_value), untinted.
+## else keeps the older single-bar behavior (_get_slot_bar_value), muted the
+## same way whenever that bar is a cooldown refilling (_is_bar_refilling).
 func _apply_slot_cooldown_bar(cooldown_bar: TextureProgressBar, slot_index: int) -> void:
 	if not cooldown_bar or not cooldown_bar.visible:
 		return
 	var phase_info := AlienTechManager.get_bar_phase(slot_index)
 	var phase: String = phase_info.get("phase", "none")
 	if phase == "none":
-		cooldown_bar.tint_progress = Color.WHITE
 		cooldown_bar.value = _get_slot_bar_value(slot_index)
+		cooldown_bar.tint_progress = _COOLDOWN_BAR_MUTED if _is_bar_refilling(slot_index, cooldown_bar.value) else Color.WHITE
 		return
 	cooldown_bar.value = phase_info.get("ratio", 0.0)
 	# Multiplying the fill's own baked-in color by a neutral grey darkens it
@@ -353,6 +354,22 @@ func _apply_slot_cooldown_bar(cooldown_bar: TextureProgressBar, slot_index: int)
 	# engaged — see get_bar_phase()) reads the same as "cooldown": greyed,
 	# and its ratio is 0.0 so the bar also empties out, not just dims.
 	cooldown_bar.tint_progress = _COOLDOWN_BAR_MUTED if phase == "cooldown" or phase == "off" else Color.WHITE
+
+## Single-bar techs: is this bar a cooldown/recharge refilling (muted), as
+## opposed to full/ready or a tech's own active window draining (full color)?
+func _is_bar_refilling(slot_index: int, value: float) -> bool:
+	if value >= 1.0:
+		return false
+	var tech_id: String = AlienTechManager.slots[slot_index].get("id", "")
+	if tech_id == AlienTechRegistry.PHASE_SHIFTER:
+		# A partly spent magazine is still usable — only the reload is a refill.
+		return AlienTechManager.phase_shifter_recharging
+	# A passive bar is normally a tech's active window draining (Bumper Magnet
+	# orbiting, Dermal Regen channeling) — except Bubble Shield, whose passive
+	# bar is its pop-to-regen recharge.
+	if AlienTechManager.has_passive_bar(tech_id) and tech_id != AlienTechRegistry.BUBBLE_SHIELD:
+		return false
+	return true
 
 const _ACTIVE_BLINK_PERIOD_MSEC: int = 300  # one alpha flip every 300ms (600ms full cycle)
 const _ACTIVE_BLINK_LOW_ALPHA: float = 0.35

@@ -73,7 +73,7 @@ const URCHIN_TRANSMOGRIFY_COOLDOWN_DURATION: float = 5.0
 const FLIPPER_AUTOMATON_ACTIVE_DURATION:   float = 8.0
 const FLIPPER_AUTOMATON_COOLDOWN_DURATION: float = 4.0
 
-const MULTI_LANCE_COOLDOWN_DURATION: float = 3.0
+const MULTI_LANCE_COOLDOWN_DURATION: float = 2.0
 
 const DERMAL_REGEN_COOLDOWN_DURATION: float = 30.0
 
@@ -508,6 +508,10 @@ func set_passive_bar(tech_id: String, ratio: float):
 
 func clear_passive_bar(tech_id: String):
 	_passive_bar_ratios.erase(tech_id)
+
+## True while a tech is driving its own bar via set_passive_bar().
+func has_passive_bar(tech_id: String) -> bool:
+	return _passive_bar_ratios.has(tech_id)
 
 ## Wipes every passive-bar override. Call this when a fresh TurtlePlayer
 ## spawns (level load, respawn, retry): all of a tech's per-instance "active"
