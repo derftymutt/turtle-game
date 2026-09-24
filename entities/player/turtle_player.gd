@@ -103,6 +103,10 @@ var is_player_controlling_rotation: bool = false
 # Resets to on for every fresh player (new level / Continue).
 const MOUSE_AIM_DEADZONE: float = 10.0
 var mouse_fire_enabled: bool = true
+
+## Set by the tutorial to hold the turtle still until the prompt telling the
+## player to swim is on screen. Only blocks thrust — physics still runs.
+var swim_locked: bool = false
 var _last_mouse_aim: Vector2 = Vector2.RIGHT
 var _mouse_crosshair: MouseCrosshair
 
@@ -506,7 +510,7 @@ func _physics_process(delta):
 	if hud and movement_input.length() > 0.1 and not energy_freeze_active:
 		can_actually_thrust = can_actually_thrust and hud.can_thrust()
 
-	if movement_input.length() > 0.1 and can_actually_thrust and not multi_lance.pulling and not multi_lance.aiming:
+	if movement_input.length() > 0.1 and can_actually_thrust and not swim_locked and not multi_lance.pulling and not multi_lance.aiming:
 		apply_thrust(movement_input.normalized())
 
 	if shoot_input != Vector2.ZERO and can_shoot:

@@ -22,6 +22,8 @@ extends CanvasLayer
 ##   SHOOT_PAUSED   - paused lesson: test-fire the Right Stick as much as
 ##                    they want (like the flipper lesson) before A dismisses
 ##   FIGHT          - wait until the piranha are dead or the part is delivered
+##   HEALTH_PAUSED  - paused lesson: health plants; spawns a few on dismiss
+##   HEALTH_WATCH   - a couple of seconds of free play to spot/grab them
 ##   TRASH_PAUSED   - paused lesson: shoot trash for a reward; spawns trash on dismiss
 ##   TRASH_WATCH    - wait until the trash is cleared or has drifted off
 ##   FINAL_PAUSED   - "you're ready" — dismiss returns to the title screen
@@ -44,6 +46,7 @@ enum Step {
 	TO_SURFACE, SURFACE_WATCH, FLIPPER_PAUSED,
 	TO_PICKUP, PICKUP_DELAY, DROP_PAUSED,
 	MEANIES_DELAY, MEANIES_PAUSED, SHOOT_PAUSED, FIGHT,
+	HEALTH_PAUSED, HEALTH_WATCH,
 	TRASH_PAUSED, TRASH_WATCH,
 	FINAL_PAUSED, DONE,
 }
@@ -51,6 +54,7 @@ enum Step {
 const PIRANHA_SCENE := preload("res://entities/enemies/piranha/piranha.tscn")
 const TRASH_SEQUENCE_SCENE := preload("res://systems/trash_cleanup/trash_sequence.tscn")
 const TRASH_CLUSTER_SCENE := preload("res://entities/collectibles/trash_cluster/trash_cluster.tscn")
+const HEALTH_PLANT_SPAWNER_SCENE := preload("res://entities/collectibles/health_plant/health_plant_spawner.tscn")
 
 const INTRO_TEXT := "You are Flip, UFO Repair Turtle.\n\nYour goal is to pick up UFO parts and bring them to your UFO Workshop.\n\nGive it a try!"
 const INTRO_HINT := "Swim with the Left Stick (or W A S D)"
@@ -91,6 +95,8 @@ const SHOOT_TEXT := "Try shooting turtle spit now."
 const SHOOT_HINT := "Use the Right Stick to shoot turtle spit in any direction"
 const MEANIES_TEXT_MOUSE := "Look out for meanies! You can shoot most of them with your turtle spit.\nAim with the Right Stick (or the mouse - it spits on its own. Tab turns it off and on)."
 const SHOOT_HINT_MOUSE := "Use the Right Stick (or point the mouse) to spit in any direction"
+
+const HEALTH_TEXT := "Keep your eye out for health plants. You can collect them to heal yourself when you're injured. But act fast, they don't last forever!"
 
 const TRASH_TEXT := "You can also shoot trash you find floating by. Get it all and you'll get rewarded..."
 
@@ -149,6 +155,11 @@ const PIRANHA_COUNT := 4
 ## Safety caps so a stuck player never dead-ends the tutorial.
 const FIGHT_SAFETY_SECONDS := 60.0
 const TRASH_SAFETY_SECONDS := 34.0
+## Free play after the health plant lesson before the trash lesson interrupts.
+const HEALTH_WATCH_SECONDS := 2.0
+## How many plants the lesson sprouts (inclusive range, picked at random).
+const HEALTH_PLANT_MIN := 3
+const HEALTH_PLANT_MAX := 4
 
 @onready var _prompt: Panel = $Prompt
 @onready var _message: Label = $Prompt/Margin/VBox/Message
@@ -288,6 +299,9 @@ func _process(delta: float) -> void:
 
 	match _step:
 		Step.INTRO:
+			# No swimming until the "Swim with the Left Stick" hint shows,
+			# i.e. once the goal text has finished typing.
+			_turtle.set(&"swim_locked", _typing)
 			if _typing:
 				_intro_linger = INTRO_LINGER_SECONDS
 			else:
@@ -426,6 +440,20 @@ func _process(delta: float) -> void:
 			_fight_timer -= delta
 			# Any survivors stay in the water — the meanies don't just vanish.
 			if _all_piranha_dead() or _piece_delivered() or _fight_timer <= 0.0:
+				_step = Step.HEALTH_PAUSED
+				_pause_with_prompt(HEALTH_TEXT, CONTINUE_HINT)
+
+		Step.HEALTH_PAUSED:
+			if _dismiss_ready():
+				_unpause()
+				_hide_prompt()
+				_spawn_health_plants(randi_range(HEALTH_PLANT_MIN, HEALTH_PLANT_MAX))
+				_beat_timer = HEALTH_WATCH_SECONDS
+				_step = Step.HEALTH_WATCH
+
+		Step.HEALTH_WATCH:
+			_beat_timer -= delta
+			if _beat_timer <= 0.0:
 				_step = Step.TRASH_PAUSED
 				_pause_with_prompt(TRASH_TEXT, CONTINUE_HINT)
 
@@ -461,6 +489,10 @@ func _resolve_refs() -> void:
 	# switched on at Step.SHOOT_PAUSED (see _unlock_auto_fire()).
 	if _turtle and not _auto_fire_unlocked:
 		_turtle.set(&"mouse_fire_enabled", false)
+	# Locked from the very first frame — Step.INTRO releases it once the
+	# swim prompt is on screen.
+	if _turtle and _step == Step.INTRO:
+		_turtle.set(&"swim_locked", true)
 	_ocean = get_tree().get_first_node_in_group("ocean")
 	if _pinball == null:
 		_pinball = get_node_or_null("../PinballElements")
@@ -526,6 +558,22 @@ func _all_piranha_dead() -> bool:
 		if is_instance_valid(p):
 			return false
 	return true
+
+
+## Sprouts plants through a real HealthPlantSpawner, so they land on random
+## DeadWalls exactly as they do in a level. The tutorial scene has no spawner
+## of its own (no score thresholds to hit here), so one is added on demand
+## with the simultaneous-plant cap raised to fit the whole batch.
+func _spawn_health_plants(count: int) -> void:
+	var scene := get_tree().current_scene
+	if scene == null:
+		return
+	var spawner: HealthPlantSpawner = HEALTH_PLANT_SPAWNER_SCENE.instantiate()
+	spawner.spawn_thresholds = []
+	spawner.max_simultaneous_plants = count
+	scene.add_child(spawner)
+	for i in count:
+		spawner.spawn_plant_now()
 
 
 func _spawn_trash() -> void:
