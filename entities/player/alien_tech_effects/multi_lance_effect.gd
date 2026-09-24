@@ -3,6 +3,17 @@ class_name MultiLanceEffect
 
 ## Multi Lance — fires a short lance (a fifth of the screen wide) in the aimed
 ## direction (stick, then momentum, then facing — same priority as Transporter).
+##
+## Pressing the button doesn't fire immediately — it opens a brief AIM_DURATION
+## aim window first: a short preview segment appears at the initial direction,
+## and the left stick can re-point it live (any stick push snaps the preview
+## to point exactly where it's pushed, continuously, so the player can correct
+## before it commits) — see _update_aim(). Thrust is locked out for the window
+## (see `aiming`) so the stick only steers the preview, not the turtle. Once
+## the window ends, the strike is resolved the same way it always was — a
+## raycast, not a travelling projectile — using whatever direction the preview
+## was last left pointing (see _launch()).
+##
 ## What it does depends on the FIRST thing the lance strikes:
 ##   enemy          — 20 damage (double a basic bullet), lance retracts.
 ##                    Invincible enemies (crocodile, sea urchin) can't be hurt,
@@ -21,9 +32,8 @@ class_name MultiLanceEffect
 ## surface anchors on the empty air and hauls the turtle there, and the
 ## cooldown is halved.
 ##
-## The strike is resolved instantly on press (a raycast, not a travelling
-## projectile); the line then animates out to the contact point and the
-## outcome is applied when the tip lands.
+## Once the strike resolves, the line animates out to the contact point and
+## the outcome above is applied when the tip lands.
 ##
 ## Damage ends everything at once (see cancel_on_damage()). The cooldown does
 ## NOT start on press — AlienTechManager holds it full (_HOLD_COOLDOWN_TECHS)
@@ -31,19 +41,21 @@ class_name MultiLanceEffect
 ## A lance that did nothing (hit nothing, struck something it couldn't act on,
 ## or its target vanished) is cut down to MISS_COOLDOWN when it's released.
 ##
-## `pulling` and `pulling_player` are read directly by TurtlePlayer (thrust
-## lockout / ocean-physics suppression), same public-flag convention as the
-## other effects.
+## `pulling`, `pulling_player`, and `aiming` are read directly by TurtlePlayer
+## (thrust lockout / ocean-physics suppression), same public-flag convention
+## as the other effects.
 
 const REACH: float = 128.0            # a fifth of the 640px viewport
 const DAMAGE: float = 20.0
+const AIM_DURATION: float = 0.4       # brief steerable window before the lance actually fires
+const AIM_PREVIEW_LENGTH: float = 40.0  # length of the preview segment shown during AIM_DURATION
 const MISS_COOLDOWN: float = 0.5      # cooldown after a lance that did nothing (never longer than the normal one)
 const SHOCK_DURATION: float = 5.0     # invincible enemies: frozen + harmless this long
 const PULL_SPEED: float = 150.0       # well under super_speed_threshold (300)
 const PLAYER_RADIUS: float = 7.0
 const STANDOFF: float = PLAYER_RADIUS + 1.0  # stop this far off a struck surface
 const ARRIVE_DISTANCE: float = 3.0
-const EXTEND_TIME: float = 0.08
+const EXTEND_TIME: float = 0.15       # how long the beam takes to shoot out to its target
 const RETRACT_TIME: float = 0.10
 const STUCK_TIMEOUT: float = 0.4      # no closing progress for this long = give up
 const MAX_PULL_TIME: float = 3.0
@@ -63,14 +75,19 @@ const MAX_RAY_SKIPS: int = 8
 
 const TRASH_GROUPS: Array[String] = ["trash_items", "trash_clusters", "trash_cluster_pieces", "space_debris"]
 
-enum State { IDLE, EXTENDING, PULLING_PLAYER, PULLING_ITEM, RETRACTING }
+const BEAM_COLOR: Color = Color(0.3, 1.0, 0.85, 1.0)
+const AIM_PREVIEW_COLOR: Color = Color(0.3, 1.0, 0.85, 0.55)  # dimmer — reads as "not committed yet"
+
+enum State { IDLE, AIMING, EXTENDING, PULLING_PLAYER, PULLING_ITEM, RETRACTING }
 enum Kind { NONE, DUD, ENEMY, BUBBLE, TRASH, SOLID, ITEM, PLANT, AIR }
 
 var pulling: bool = false          # true during either pull — thrust is locked out
 var pulling_player: bool = false   # true only while the turtle itself is hauled
+var aiming: bool = false           # true during the AIM_DURATION preview window — thrust is locked out
 
 var _state: State = State.IDLE
 var _whiffed: bool = false   # the lance did nothing — see MISS_COOLDOWN
+var _aim_dir: Vector2 = Vector2.ZERO   # live-steered direction during AIMING, then locked in at _launch()
 var _kind: Kind = Kind.NONE
 # Untyped on purpose: enemies, bubbles, rigid pickups and health plants share
 # no base class, and each is called through its own duck-typed method.
@@ -81,9 +98,11 @@ var _timer: float = 0.0
 var _pull_elapsed: float = 0.0
 var _best_dist: float = INF
 var _stuck_timer: float = 0.0
+var _target_saved_ccd: int = -1  # RigidBody2D items only — see _land()'s Kind.ITEM branch. -1 = nothing saved
 var _line: Line2D = null
 
-## True from the lance firing until it has fully retracted — read by TechAura.
+## True from the button press (including the aim window) until the lance has
+## fully retracted — read by TechAura.
 func is_in_progress() -> bool:
 	return _state != State.IDLE
 
@@ -93,7 +112,7 @@ func setup(player) -> void:
 	# global coordinates.
 	_line.top_level = true
 	_line.width = BEAM_WIDTH
-	_line.default_color = Color(0.3, 1.0, 0.85)
+	_line.default_color = BEAM_COLOR
 	_line.z_as_relative = false
 	_line.z_index = 14  # over motion trails, under the turtle sprite (15)
 	_line.visible = false
@@ -103,33 +122,24 @@ func activate(player, _slot_index: int) -> void:
 	if _state != State.IDLE:
 		return
 
-	var origin: Vector2 = player.global_position
-	var dir: Vector2 = _aim_direction(player)
-	var result: Dictionary = _cast(player, origin, dir)
-
-	# Sky Hook (hot): a lance that reached nothing but ends above the surface
-	# treats the empty air as a solid anchor.
-	if result.kind == Kind.NONE and AlienTechManager.is_tech_hot(AlienTechRegistry.MULTI_LANCE):
-		var end: Vector2 = origin + dir * REACH
-		if player.ocean and end.y < player.ocean.surface_y:
-			var air_point: Vector2 = player._clamp_to_boundaries(end)
-			result = {"kind": Kind.AIR, "point": air_point, "anchor": air_point, "node": null}
-
-	_kind = result.kind
-	_target = result.node
-	_whiffed = _kind == Kind.NONE or _kind == Kind.DUD
-	_tip_point = result.point
-	_anchor = result.get("anchor", result.point)
+	_aim_dir = _aim_direction(player)
 	_timer = 0.0
-	_state = State.EXTENDING
-	player.get_node("SfxShoot").play()
-	_draw_line(origin, origin)
+	aiming = true
+	_state = State.AIMING
+	_line.default_color = AIM_PREVIEW_COLOR
+	_draw_line(player.global_position, player.global_position + _aim_dir * AIM_PREVIEW_LENGTH)
 
 func physics_process(player, delta: float) -> void:
 	if _state == State.IDLE:
 		return
 	var origin: Vector2 = player.global_position
 	match _state:
+		State.AIMING:
+			_timer += delta
+			_update_aim()
+			_draw_line(origin, origin + _aim_dir * AIM_PREVIEW_LENGTH)
+			if _timer >= AIM_DURATION:
+				_launch(player, origin)
 		State.EXTENDING:
 			_timer += delta
 			var t: float = minf(_timer / EXTEND_TIME, 1.0)
@@ -177,6 +187,50 @@ func _aim_direction(player) -> Vector2:
 	if vel.length() > 30.0:
 		return vel.normalized()
 	return player._direction_suffix_to_vector(player.facing_direction)
+
+## Live-steers the AIMING preview. Any stick push (past the deadzone) snaps
+## _aim_dir to point exactly where the stick is pushed, every frame — a light
+## touch re-aims instantly rather than nudging incrementally, so the player
+## can correct in one motion. No stick input leaves _aim_dir exactly where it
+## was (the initial pick, or wherever the stick last pointed).
+func _update_aim() -> void:
+	var stick := Vector2(
+		Input.get_axis("move_left", "move_right"),
+		Input.get_axis("move_up", "move_down")
+	)
+	if stick.length() <= 0.1:
+		return
+	stick = stick.normalized()
+	if GameSettings.thrust_inverted:
+		stick = -stick
+	_aim_dir = stick
+
+## The AIM_DURATION window is over — resolve the strike along _aim_dir and
+## start the real beam. This is exactly what used to happen synchronously in
+## activate() before the aim window existed.
+func _launch(player, origin: Vector2) -> void:
+	aiming = false
+	var dir: Vector2 = _aim_dir
+	var result: Dictionary = _cast(player, origin, dir)
+
+	# Sky Hook (hot): a lance that reached nothing but ends above the surface
+	# treats the empty air as a solid anchor.
+	if result.kind == Kind.NONE and AlienTechManager.is_tech_hot(AlienTechRegistry.MULTI_LANCE):
+		var end: Vector2 = origin + dir * REACH
+		if player.ocean and end.y < player.ocean.surface_y:
+			var air_point: Vector2 = player._clamp_to_boundaries(end)
+			result = {"kind": Kind.AIR, "point": air_point, "anchor": air_point, "node": null}
+
+	_kind = result.kind
+	_target = result.node
+	_whiffed = _kind == Kind.NONE or _kind == Kind.DUD
+	_tip_point = result.point
+	_anchor = result.get("anchor", result.point)
+	_timer = 0.0
+	_state = State.EXTENDING
+	_line.default_color = BEAM_COLOR
+	player.get_node("SfxShoot").play()
+	_draw_line(origin, origin)
 
 ## Finds the first thing the beam strikes. Returns
 ## {kind, point, node} (+ "anchor" for SOLID).
@@ -309,6 +363,18 @@ func _land() -> void:
 			_reset_pull_tracking()
 			if _kind == Kind.PLANT:
 				_target.begin_lance_pull()
+			elif _target is RigidBody2D:
+				# Some items (e.g. UFOPiece) turn on continuous collision
+				# detection to stop enemy-knockback from punching them through
+				# a thin wall. That makes the engine re-test the item's swept
+				# shape against nearby geometry every physics step — with the
+				# item starting in flush contact with the ocean floor, that
+				# can read as "still fighting the floor" for the pull's first
+				# few frames and trip _is_stuck() before it's gone anywhere.
+				# A steady PULL_SPEED tug has no tunnelling risk of its own,
+				# so suspend it for the pull and restore it in _end().
+				_target_saved_ccd = (_target as RigidBody2D).continuous_cd
+				(_target as RigidBody2D).continuous_cd = RigidBody2D.CCD_MODE_DISABLED
 		_:
 			_start_retract()
 
@@ -372,11 +438,15 @@ func _start_retract() -> void:
 func _end() -> void:
 	if _kind == Kind.PLANT and is_instance_valid(_target):
 		_target.end_lance_pull()
+	if _target_saved_ccd != -1 and is_instance_valid(_target):
+		(_target as RigidBody2D).continuous_cd = _target_saved_ccd
+	_target_saved_ccd = -1
 	_state = State.IDLE
 	_kind = Kind.NONE
 	_target = null
 	pulling = false
 	pulling_player = false
+	aiming = false
 	if _line and is_instance_valid(_line):
 		_line.visible = false
 	AlienTechManager.release_cooldown_hold(AlienTechRegistry.MULTI_LANCE, MISS_COOLDOWN if _whiffed else -1.0)

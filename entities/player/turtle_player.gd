@@ -290,9 +290,10 @@ func _physics_process(delta):
 	# speeds up the turtle's own cooldown recovery, animation, and ocean drag
 	# response without touching thrust_strength or bullet_speed.
 	var stim_shot := _tech_effects[AlienTechRegistry.STIM_SHOT] as StimShotEffect
-	# Multi Lance: while it's hauling something, thrust is locked out (shooting
-	# is not) and — if it's the turtle being hauled — ocean physics is
-	# suppressed so buoyancy/drag don't fight the pull.
+	# Multi Lance: thrust is locked out during its brief aim window (so the
+	# stick only steers the preview) and while it's hauling something
+	# (shooting is not blocked either way); if it's the turtle being hauled,
+	# ocean physics is also suppressed so buoyancy/drag don't fight the pull.
 	var multi_lance := _tech_effects[AlienTechRegistry.MULTI_LANCE] as MultiLanceEffect
 
 	# Update cooldown timers
@@ -505,7 +506,7 @@ func _physics_process(delta):
 	if hud and movement_input.length() > 0.1 and not energy_freeze_active:
 		can_actually_thrust = can_actually_thrust and hud.can_thrust()
 
-	if movement_input.length() > 0.1 and can_actually_thrust and not multi_lance.pulling:
+	if movement_input.length() > 0.1 and can_actually_thrust and not multi_lance.pulling and not multi_lance.aiming:
 		apply_thrust(movement_input.normalized())
 
 	if shoot_input != Vector2.ZERO and can_shoot:
