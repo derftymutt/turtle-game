@@ -304,7 +304,7 @@ var _definitions: Array[Dictionary] = [
 	{
 		"id":              TIMELINE_ALTERNATOR,
 		"name":            "Timeline Alternator",
-		"description":     "Hop timelines and change UFO Workshop location. 10s active, 6s cooldown.",
+		"description":     "Hop timelines and change UFO Workshop location. Oops, urchins shift too. 10s active, 6s cooldown.",
 		"hook":            "What if I never...",
 		"slot_label":      "Timeline Alternator",
 		"needs_input":     true,

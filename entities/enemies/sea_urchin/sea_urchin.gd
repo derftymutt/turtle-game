@@ -22,6 +22,13 @@ var starting_position: Vector2
 var bob_offset: float = 0.0
 var rotation_offset: float = 0.0
 
+# Stand-down state. Either one takes the urchin out of play (see
+# _apply_stand_down()); they're tracked separately so ending one never
+# revives an urchin the other still has down.
+var _transmogrified: bool = false
+var _benched: bool = false
+var _benched_groups: Array[StringName] = []
+
 func _enemy_ready():
 	add_to_group("sea_urchins")
 
@@ -89,12 +96,43 @@ func apply_position_locking():
 	linear_velocity *= 0.8
 
 ## Urchin Transmogrify: stand this urchin down while a bumper takes its place.
-## DISABLED process mode (which cascades to DamageArea) takes the body and its
-## damage area out of the physics space and stops _process(), so nothing can
-## hurt the turtle or be hit. _contact_players is cleared because a turtle
-## overlapping at the moment of the swap would otherwise stay in it.
+## _contact_players is cleared because a turtle overlapping at the moment of
+## the swap would otherwise stay in it.
 func set_transmogrified(on: bool) -> void:
-	visible = not on
-	process_mode = Node.PROCESS_MODE_DISABLED if on else Node.PROCESS_MODE_INHERIT
+	_transmogrified = on
 	if on:
 		_contact_players.clear()
+	_apply_stand_down()
+
+## SeaUrchinGroup: take this urchin out of the level's active set (or put it
+## back). Unlike transmogrify it also leaves every group ("enemies",
+## "sea_urchins", ...) so nothing that looks urchins up finds it; the groups
+## are remembered and rejoined when it comes back.
+## Always reapplies visibility, so it also snaps back a benched urchin that
+## SeaUrchinGroup made visible for a fade.
+func set_benched(on: bool) -> void:
+	if on != _benched:
+		_benched = on
+		if on:
+			_benched_groups.clear()
+			for group in get_groups():
+				if not String(group).begins_with("_"):
+					_benched_groups.append(group)
+					remove_from_group(group)
+			_contact_players.clear()
+		else:
+			for group in _benched_groups:
+				add_to_group(group)
+			_benched_groups.clear()
+	_apply_stand_down()
+
+func is_benched() -> bool:
+	return _benched
+
+## DISABLED process mode (which cascades to DamageArea) takes the body and its
+## damage area out of the physics space and stops _process(), so nothing can
+## hurt the turtle or be hit.
+func _apply_stand_down() -> void:
+	var down := _transmogrified or _benched
+	visible = not down
+	process_mode = Node.PROCESS_MODE_DISABLED if down else Node.PROCESS_MODE_INHERIT

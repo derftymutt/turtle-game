@@ -22,11 +22,6 @@ const _SFX_BEAT_LEVEL = preload("res://assets/sounds/sfx/beat level_1.ogg")
 @export var pulse_speed: float = 2.0
 @export var pulse_amount: float = 0.2
 
-## Timeline Alternator hop: shake + fade out, jump, shake + fade in.
-const HOP_FADE_TIME: float = 0.3
-const HOP_SHAKE_AMPLITUDE: float = 4.0
-const HOP_SHAKE_CYCLES: float = 5.0
-
 # Node references (set up in scene editor)
 @onready var delivery_area: Area2D = $DeliveryArea
 @onready var sprite: Node2D = _find_sprite()
@@ -269,19 +264,10 @@ func hop_to(target: Vector2) -> void:
 	_hopping = true
 	is_player_nearby_with_piece = false
 	_hop_tween = create_tween()
-	_hop_tween.tween_property(self, "modulate:a", 0.0, HOP_FADE_TIME).from(modulate.a)
-	_hop_tween.parallel().tween_method(_set_hop_shake, 1.0, 0.0, HOP_FADE_TIME)
+	TimelineHop.shake_fade(_hop_tween, self, sprite, false)
 	_hop_tween.tween_callback(func() -> void: global_position = target)
-	_hop_tween.tween_property(self, "modulate:a", 1.0, HOP_FADE_TIME)
-	_hop_tween.parallel().tween_method(_set_hop_shake, 1.0, 0.0, HOP_FADE_TIME)
+	TimelineHop.shake_fade(_hop_tween, self, sprite, true)
 	_hop_tween.tween_callback(_finish_hop)
-
-## `strength` runs 1 → 0 over each half of the hop, so the shake settles out.
-func _set_hop_shake(strength: float) -> void:
-	if not sprite:
-		return
-	var t := 1.0 - strength
-	sprite.position.x = sin(t * TAU * HOP_SHAKE_CYCLES) * HOP_SHAKE_AMPLITUDE * strength
 
 func _finish_hop() -> void:
 	_hopping = false
