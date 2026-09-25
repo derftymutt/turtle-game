@@ -449,6 +449,7 @@ curve = SubResource("Curve2D_aacai")
 position = Vector2(301, -21)
 
 [node name="BossIntroPopup" parent="." index="53" unique_id=1650217290 instance=ExtResource("24_bossintro")]
+visible = false
 
 [editable path="SpaceDebrisGroup"]
 [editable path="HydroFunnel"]

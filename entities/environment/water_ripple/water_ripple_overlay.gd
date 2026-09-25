@@ -43,6 +43,8 @@ var _cur_band_width: float = 0.16
 
 
 func _ready() -> void:
+	# Saved hidden in level_base.tscn so it doesn't cover the level in the editor
+	visible = true
 	# The material is a shared sub-resource of the packed scene, so every
 	# instance would otherwise write shader params to the SAME material and
 	# stomp each other. Give this instance its own copy.

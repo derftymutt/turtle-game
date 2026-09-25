@@ -446,6 +446,7 @@ curve = SubResource("Curve2D_4knja")
 position = Vector2(251, -110)
 
 [node name="FlipperReminderPopup" parent="." index="42" unique_id=21372061 instance=ExtResource("28_flipreminder")]
+visible = false
 
 [editable path="SpaceDebrisGroup"]
 [editable path="HydroFunnel"]

@@ -89,6 +89,8 @@ var _trash_clusters := TrashClusterSpawner.new()
 
 func _ready():
 	add_to_group("hud")
+	# Saved hidden in level_base.tscn so it doesn't cover the level in the editor
+	visible = true
 	
 	sfx_low_air = find_child("SfxLowAir")
 	sfx_energy_charge = find_child("SfxEnergyCharge")

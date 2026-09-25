@@ -20,14 +20,19 @@ volume_db = -10.0
 autoplay = true
 
 [node name="HUD" parent="." unique_id=1369229575 instance=ExtResource("2_vmt1o")]
+visible = false
 
 [node name="GameOverScreen" parent="." unique_id=301166293 instance=ExtResource("3_da5si")]
+visible = false
 
 [node name="LevelCompleteScreen" parent="." unique_id=1103608067 instance=ExtResource("4_se1mh")]
+visible = false
 
 [node name="PauseMenu" parent="." unique_id=2047821456 instance=ExtResource("5_pausemenu")]
+visible = false
 
 [node name="AlienTechSelectionScreen" parent="." unique_id=500000001 instance=ExtResource("6_atselect")]
+visible = false
 
 [node name="DevTechSeeder" type="Node" parent="." unique_id=500000002]
 script = ExtResource("7_devseeder")
@@ -36,8 +41,10 @@ script = ExtResource("7_devseeder")
 script = ExtResource("8_lec")
 
 [node name="WaterRippleOverlay" parent="." unique_id=500000004 instance=ExtResource("10_wripl")]
+visible = false
 
 [node name="WaterRippleGentle" parent="." unique_id=500000005 instance=ExtResource("10_wripl")]
+visible = false
 interval_min = 2.5
 interval_max = 4.5
 sweep_duration = 3.4
