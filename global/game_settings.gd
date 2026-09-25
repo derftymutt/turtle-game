@@ -18,9 +18,9 @@ const _GAMEPAD_AXIS_THRESHOLD := 0.5
 ## since the gamepad took over, so a bumped desk doesn't steal control back.
 const _MOUSE_MOTION_THRESHOLD := 20.0
 
-## Game speed while fast_mode is on. Scales delta, physics, timers, tweens and
-## animations; audio and Time.get_ticks_msec() stay real-time.
-const FAST_GAME_SPEED := 1.1
+## Global game speed. Scales delta, physics, timers, tweens and animations;
+## audio and Time.get_ticks_msec() stay real-time.
+const GAME_SPEED := 1.1
 ## project.godot's physics_ticks_per_second. Scaled with the game speed so each
 ## physics step stays the same size in game time — see _apply_game_speed().
 const _BASE_PHYSICS_TICKS := 60
@@ -33,8 +33,6 @@ var thrust_inverted: bool = false
 ## keyboard-only IJKL layout from project.godot. Mouse aim only actually runs
 ## while the keyboard/mouse is the active device — see mouse_aim_active().
 var mouse_mode: bool = true
-## Runs the whole game at FAST_GAME_SPEED instead of 1x.
-var fast_mode: bool = false
 
 ## True while the gamepad is the device the player last touched.
 var using_gamepad: bool = false
@@ -103,7 +101,6 @@ func _load_settings():
 	if result is Dictionary:
 		thrust_inverted = result.get("thrust_inverted", false)
 		mouse_mode = result.get("mouse_mode", true)
-		fast_mode = result.get("fast_mode", false)
 
 func _save_settings():
 	var file = FileAccess.open(SETTINGS_PATH, FileAccess.WRITE)
@@ -111,7 +108,6 @@ func _save_settings():
 		file.store_string(JSON.stringify({
 			"thrust_inverted": thrust_inverted,
 			"mouse_mode": mouse_mode,
-			"fast_mode": fast_mode,
 		}))
 		file.close()
 
@@ -126,15 +122,9 @@ func set_mouse_mode(enabled: bool):
 	_apply_mouse_mode_bindings()
 	get_tree().call_group("player", "_on_settings_changed")
 
-func set_fast_mode(enabled: bool):
-	fast_mode = enabled
-	_save_settings()
-	_apply_game_speed()
-
 func _apply_game_speed() -> void:
-	var speed := FAST_GAME_SPEED if fast_mode else 1.0
-	Engine.time_scale = speed
-	Engine.physics_ticks_per_second = roundi(_BASE_PHYSICS_TICKS * speed)
+	Engine.time_scale = GAME_SPEED
+	Engine.physics_ticks_per_second = roundi(_BASE_PHYSICS_TICKS * GAME_SPEED)
 
 
 # ── Keyboard labels for UI text (gamepad labels don't change) ────────────────
