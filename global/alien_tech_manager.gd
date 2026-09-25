@@ -73,7 +73,7 @@ const URCHIN_TRANSMOGRIFY_COOLDOWN_DURATION: float = 5.0
 const FLIPPER_AUTOMATON_ACTIVE_DURATION:   float = 8.0
 const FLIPPER_AUTOMATON_COOLDOWN_DURATION: float = 4.0
 
-const MULTI_LANCE_COOLDOWN_DURATION: float = 2.0
+const MULTI_BEAM_COOLDOWN_DURATION: float = 2.0
 
 const DERMAL_REGEN_COOLDOWN_DURATION: float = 30.0
 
@@ -91,7 +91,7 @@ const _COOLDOWN_DURATIONS: Dictionary = {
 	AlienTechRegistry.QUANTUM_MIRROR:    QUANTUM_MIRROR_ACTIVE_DURATION + QUANTUM_MIRROR_COOLDOWN_DURATION,
 	AlienTechRegistry.ION_EXCITER:       ION_EXCITER_ACTIVE_DURATION + ION_EXCITER_COOLDOWN_DURATION,
 	AlienTechRegistry.STIM_SHOT:      STIM_SHOT_ACTIVE_DURATION + STIM_SHOT_COOLDOWN_DURATION,
-	AlienTechRegistry.MULTI_LANCE:    MULTI_LANCE_COOLDOWN_DURATION,
+	AlienTechRegistry.MULTI_BEAM:     MULTI_BEAM_COOLDOWN_DURATION,
 	AlienTechRegistry.DERMAL_REGEN:   DERMAL_REGEN_COOLDOWN_DURATION,
 	AlienTechRegistry.URCHIN_TRANSMOGRIFY: URCHIN_TRANSMOGRIFY_ACTIVE_DURATION + URCHIN_TRANSMOGRIFY_COOLDOWN_DURATION,
 	AlienTechRegistry.FLIPPER_AUTOMATON: FLIPPER_AUTOMATON_ACTIVE_DURATION + FLIPPER_AUTOMATON_COOLDOWN_DURATION,
@@ -102,7 +102,7 @@ const _COOLDOWN_DURATIONS: Dictionary = {
 # _process() holds it there until the tech calls release_cooldown_hold() —
 # i.e. the cooldown runs from the END of the action, not its start.
 const _HOLD_COOLDOWN_TECHS: Array[String] = [
-	AlienTechRegistry.MULTI_LANCE,
+	AlienTechRegistry.MULTI_BEAM,
 	AlienTechRegistry.DERMAL_REGEN,  # only runs if the heal lands — a cancelled channel releases with 0
 ]
 
@@ -370,7 +370,7 @@ func try_activate_slot(slot_index: int) -> bool:
 
 ## Starts draining a held cooldown (see _HOLD_COOLDOWN_TECHS). If
 ## `max_remaining` is >= 0 the cooldown is also cut down to at most that many
-## seconds (never extended) — e.g. Multi Lance's short cooldown after a miss.
+## seconds (never extended) — e.g. Multi-Beam's short cooldown after a miss.
 ## Safe to call when nothing is held or the tech is no longer equipped.
 func release_cooldown_hold(tech_id: String, max_remaining: float = -1.0) -> void:
 	var idx := get_slot_index_for_tech(tech_id)
@@ -421,8 +421,8 @@ func _effective_cooldown_max(slot_index: int, tech_id: String) -> float:
 			# Hot: active duration doubled, post-active recovery halved (scale itself
 			# is bumped separately in StimShotEffect.activate()).
 			return (STIM_SHOT_ACTIVE_DURATION * 2.0) + (STIM_SHOT_COOLDOWN_DURATION * 0.5)
-		AlienTechRegistry.MULTI_LANCE:
-			return MULTI_LANCE_COOLDOWN_DURATION * 0.5  # hot: half the cooldown (plus Sky Hook)
+		AlienTechRegistry.MULTI_BEAM:
+			return MULTI_BEAM_COOLDOWN_DURATION * 0.5  # hot: half the cooldown (plus Sky Hook)
 		_:
 			return base
 

@@ -139,7 +139,7 @@ func _is_slot_active(slot_index: int) -> bool:
 	match tech_id:
 		AlienTechRegistry.TRANSPORTER:
 			return effect.windup or effect.invincible
-		AlienTechRegistry.MULTI_LANCE:
+		AlienTechRegistry.MULTI_BEAM:
 			return effect.is_in_progress()
 	# Every other timed/toggle effect exposes a plain `active` flag.
 	return "active" in effect and effect.active

@@ -161,12 +161,12 @@ func _deal_damage_to_player(player: Node2D):
 	if player is RigidBody2D:
 		player.apply_central_impulse(knockback_dir * knockback_force)
 
-## Multi Lance shocks these instead of damaging them: permanently invincible
+## Multi-Beam shocks these instead of damaging them: permanently invincible
 ## enemies (crocodile). See BaseEnemy.can_be_shocked().
 func can_be_shocked() -> bool:
 	return is_invincible and not is_in_group("submarine_boss")
 
-## Multi Lance shock — frozen and harmless for `duration` seconds. See EnemyShock.
+## Multi-Beam shock — frozen and harmless for `duration` seconds. See EnemyShock.
 func shock(duration: float) -> void:
 	EnemyShock.apply(self, duration)
 

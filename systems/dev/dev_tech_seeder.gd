@@ -14,7 +14,7 @@ class_name DevTechSeeder
 	"Phase Shifter", "Powerup Replicator", "Deflector Shield",
 	"Chrono Stasis", "Flipper Velcro", "Disturbance Wave", "Vacuum Grip",
 	"Graviton Harness", "Plasma Spit", "Magnetic Repulsion", "Hydro Funnel",
-	"Quantum Mirror", "Ion Exciter", "Stim Shot", "Multi Lance",
+	"Quantum Mirror", "Ion Exciter", "Stim Shot", "Multi-Beam",
 	"Urchin Transmogrify", "Flipper Automaton"
 ) var slot_a: int = 0
 
@@ -25,7 +25,7 @@ class_name DevTechSeeder
 	"Phase Shifter", "Powerup Replicator", "Deflector Shield",
 	"Chrono Stasis", "Flipper Velcro", "Disturbance Wave", "Vacuum Grip",
 	"Graviton Harness", "Plasma Spit", "Magnetic Repulsion", "Hydro Funnel",
-	"Quantum Mirror", "Ion Exciter", "Stim Shot", "Multi Lance",
+	"Quantum Mirror", "Ion Exciter", "Stim Shot", "Multi-Beam",
 	"Urchin Transmogrify", "Flipper Automaton"
 ) var slot_b: int = 0
 
@@ -59,7 +59,7 @@ const _TECH_IDS: Array[String] = [
 	AlienTechRegistry.QUANTUM_MIRROR,
 	AlienTechRegistry.ION_EXCITER,
 	AlienTechRegistry.STIM_SHOT,
-	AlienTechRegistry.MULTI_LANCE,
+	AlienTechRegistry.MULTI_BEAM,
 	AlienTechRegistry.URCHIN_TRANSMOGRIFY,
 	AlienTechRegistry.FLIPPER_AUTOMATON,
 ]

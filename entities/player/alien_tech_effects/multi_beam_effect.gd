@@ -1,34 +1,40 @@
 extends AlienTechEffect
-class_name MultiLanceEffect
+class_name MultiBeamEffect
 
-## Multi Lance — fires a short lance (a fifth of the screen wide) in the aimed
-## direction (stick, then momentum, then facing — same priority as Transporter).
+## Multi-Beam — fires a short beam (a quarter of the screen wide) in the aimed
+## direction (shoot input, then momentum, then facing). "Shoot input" goes
+## through TurtlePlayer.get_shoot_input() — the same right-stick-or-mouse
+## direction every bullet already fires along — so the beam follows whichever
+## of the two the player is actually using (see GameSettings.mouse_aim_active()).
+## This deliberately shares a stick with normal shooting rather than with
+## movement (the left stick / WASD).
 ##
 ## Pressing the button doesn't fire immediately — it opens a brief AIM_DURATION
 ## aim window first: a short preview segment appears at the initial direction,
-## and the left stick can re-point it live (any stick push snaps the preview
-## to point exactly where it's pushed, continuously, so the player can correct
-## before it commits) — see _update_aim(). Thrust is locked out for the window
-## (see `aiming`) so the stick only steers the preview, not the turtle. Once
+## and the shoot input can re-point it live (any push snaps the preview to
+## point exactly where it's aimed, continuously, so the player can correct
+## before it commits) — see _update_aim(). Thrust is paused for the window
+## (see `aiming`) — a deliberate "hold still to line up the shot" beat, not a
+## stick-conflict workaround (aim and thrust are different sticks now). Once
 ## the window ends, the strike is resolved the same way it always was — a
 ## raycast, not a travelling projectile — using whatever direction the preview
 ## was last left pointing (see _launch()).
 ##
-## What it does depends on the FIRST thing the lance strikes:
-##   enemy          — 20 damage (double a basic bullet), lance retracts.
+## What it does depends on the FIRST thing the beam strikes:
+##   enemy          — 20 damage (double a basic bullet), beam retracts.
 ##                    Invincible enemies (crocodile, sea urchin) can't be hurt,
 ##                    so they're shocked instead: frozen and harmless for
 ##                    SHOCK_DURATION (see EnemyShock).
-##   air bubble     — pops it (same as a bullet), lance retracts
+##   air bubble     — pops it (same as a bullet), beam retracts
 ##   solid          — wall / floor / boundary / flipper / bumper: hauls the
 ##                    turtle to the contact point at PULL_SPEED
 ##   pickup         — UFO piece, powerup, alien tech piece, health plant: reels
 ##                    it to the turtle at PULL_SPEED until it's collected
 ##   trash          — trash item, trash bag (cluster), cluster piece, space
 ##                    debris: triggers it as if shot (a bag takes CLUSTER_HITS
-##                    hits — enough to burst it), lance retracts
-##   nothing        — lance retracts
-## Hot adds Sky Hook: a lance that reaches nothing but ends above the ocean
+##                    hits — enough to burst it), beam retracts
+##   nothing        — beam retracts
+## Hot adds Sky Hook: a beam that reaches nothing but ends above the ocean
 ## surface anchors on the empty air and hauls the turtle there, and the
 ## cooldown is halved.
 ##
@@ -38,18 +44,18 @@ class_name MultiLanceEffect
 ## Damage ends everything at once (see cancel_on_damage()). The cooldown does
 ## NOT start on press — AlienTechManager holds it full (_HOLD_COOLDOWN_TECHS)
 ## until _end() releases it, so it runs from the end of the whole sequence.
-## A lance that did nothing (hit nothing, struck something it couldn't act on,
+## A beam that did nothing (hit nothing, struck something it couldn't act on,
 ## or its target vanished) is cut down to MISS_COOLDOWN when it's released.
 ##
 ## `pulling`, `pulling_player`, and `aiming` are read directly by TurtlePlayer
 ## (thrust lockout / ocean-physics suppression), same public-flag convention
 ## as the other effects.
 
-const REACH: float = 128.0            # a fifth of the 640px viewport
+const REACH: float = 160.0            # a quarter of the 640px viewport — a bit longer than it used to be, so ocean drift during the aim pause doesn't shortchange the shot
 const DAMAGE: float = 20.0
-const AIM_DURATION: float = 0.4       # brief steerable window before the lance actually fires
+const AIM_DURATION: float = 0.4       # brief steerable window before the beam actually fires
 const AIM_PREVIEW_LENGTH: float = 40.0  # length of the preview segment shown during AIM_DURATION
-const MISS_COOLDOWN: float = 0.5      # cooldown after a lance that did nothing (never longer than the normal one)
+const MISS_COOLDOWN: float = 0.5      # cooldown after a beam that did nothing (never longer than the normal one)
 const SHOCK_DURATION: float = 5.0     # invincible enemies: frozen + harmless this long
 const PULL_SPEED: float = 150.0       # well under super_speed_threshold (300)
 const PLAYER_RADIUS: float = 7.0
@@ -60,7 +66,7 @@ const RETRACT_TIME: float = 0.10
 const STUCK_TIMEOUT: float = 0.4      # no closing progress for this long = give up
 const MAX_PULL_TIME: float = 3.0
 const HEALTH_PLANT_HIT_RADIUS: float = 11.0  # matches HealthPlant's Area2D circle
-const CLUSTER_HITS: int = 3           # = TrashCluster.max_hits, so one lance strike bursts a bag outright
+const CLUSTER_HITS: int = 3           # = TrashCluster.max_hits, so one beam strike bursts a bag outright
 
 # The beam is BEAM_WIDTH wide: three parallel rays BEAM_HALF_WIDTH apart, so the
 # strike area matches the drawn line.
@@ -69,7 +75,7 @@ const BEAM_HALF_WIDTH: float = BEAM_WIDTH * 0.5
 
 # World_Player (walls, floor, boundaries, flippers, bumpers — and enemies, which
 # also sit on it), Collectibles, Enemies, CloudFlippers, Trash. Trash is also
-# where OceanFlora lives; _classify() lets the lance pass through that.
+# where OceanFlora lives; _classify() lets the beam pass through that.
 const RAY_MASK: int = 1 | 2 | 4 | 16 | 128
 const MAX_RAY_SKIPS: int = 8
 
@@ -83,10 +89,10 @@ enum Kind { NONE, DUD, ENEMY, BUBBLE, TRASH, SOLID, ITEM, PLANT, AIR }
 
 var pulling: bool = false          # true during either pull — thrust is locked out
 var pulling_player: bool = false   # true only while the turtle itself is hauled
-var aiming: bool = false           # true during the AIM_DURATION preview window — thrust is locked out
+var aiming: bool = false           # true during the AIM_DURATION preview window — thrust is paused
 
 var _state: State = State.IDLE
-var _whiffed: bool = false   # the lance did nothing — see MISS_COOLDOWN
+var _whiffed: bool = false   # the beam did nothing — see MISS_COOLDOWN
 var _aim_dir: Vector2 = Vector2.ZERO   # live-steered direction during AIMING, then locked in at _launch()
 var _kind: Kind = Kind.NONE
 # Untyped on purpose: enemies, bubbles, rigid pickups and health plants share
@@ -101,7 +107,7 @@ var _stuck_timer: float = 0.0
 var _target_saved_ccd: int = -1  # RigidBody2D items only — see _land()'s Kind.ITEM branch. -1 = nothing saved
 var _line: Line2D = null
 
-## True from the button press (including the aim window) until the lance has
+## True from the button press (including the aim window) until the beam has
 ## fully retracted — read by TechAura.
 func is_in_progress() -> bool:
 	return _state != State.IDLE
@@ -136,7 +142,7 @@ func physics_process(player, delta: float) -> void:
 	match _state:
 		State.AIMING:
 			_timer += delta
-			_update_aim()
+			_update_aim(player)
 			_draw_line(origin, origin + _aim_dir * AIM_PREVIEW_LENGTH)
 			if _timer >= AIM_DURATION:
 				_launch(player, origin)
@@ -157,53 +163,44 @@ func physics_process(player, delta: float) -> void:
 			if t >= 1.0:
 				_end()
 
-## Real damage lands — the lance is destroyed and everything it was doing stops.
+## Real damage lands — the beam is destroyed and everything it was doing stops.
 func cancel_on_damage(_player) -> void:
 	if _state != State.IDLE:
 		_whiffed = false  # getting hurt earns no cooldown discount
 		_end()
 
-## Tech swapped out mid-lance.
+## Tech swapped out mid-beam.
 func on_slots_changed(_player) -> void:
-	if _state != State.IDLE and not AlienTechManager.has_tech(AlienTechRegistry.MULTI_LANCE):
+	if _state != State.IDLE and not AlienTechManager.has_tech(AlienTechRegistry.MULTI_BEAM):
 		_end()
 
 # ---------------------------------------------------------------------------
 # AIMING + STRIKE RESOLUTION
 # ---------------------------------------------------------------------------
 
-## Direction priority: active input > current velocity > facing direction.
+## Direction priority: shoot input (right stick, or mouse cursor in mouse-aim
+## mode — see TurtlePlayer.get_shoot_input()) > current velocity > facing
+## direction.
 func _aim_direction(player) -> Vector2:
-	var movement_input := Vector2(
-		Input.get_axis("move_left", "move_right"),
-		Input.get_axis("move_up", "move_down")
-	)
-	if movement_input.length() > 0.1:
-		var dir: Vector2 = movement_input.normalized()
-		if GameSettings.thrust_inverted:
-			dir = -dir
-		return dir
+	var shoot_dir: Vector2 = player.get_shoot_input()
+	if shoot_dir != Vector2.ZERO:
+		return shoot_dir
 	var vel: Vector2 = player.linear_velocity
 	if vel.length() > 30.0:
 		return vel.normalized()
 	return player._direction_suffix_to_vector(player.facing_direction)
 
-## Live-steers the AIMING preview. Any stick push (past the deadzone) snaps
-## _aim_dir to point exactly where the stick is pushed, every frame — a light
-## touch re-aims instantly rather than nudging incrementally, so the player
-## can correct in one motion. No stick input leaves _aim_dir exactly where it
-## was (the initial pick, or wherever the stick last pointed).
-func _update_aim() -> void:
-	var stick := Vector2(
-		Input.get_axis("move_left", "move_right"),
-		Input.get_axis("move_up", "move_down")
-	)
-	if stick.length() <= 0.1:
+## Live-steers the AIMING preview. Any shoot input (right-stick push, or mouse
+## movement in mouse-aim mode) snaps _aim_dir to point exactly where it's
+## aimed, every frame — a light touch re-aims instantly rather than nudging
+## incrementally, so the player can correct in one motion. No shoot input
+## leaves _aim_dir exactly where it was (the initial pick, or wherever it last
+## pointed).
+func _update_aim(player) -> void:
+	var shoot_dir: Vector2 = player.get_shoot_input()
+	if shoot_dir == Vector2.ZERO:
 		return
-	stick = stick.normalized()
-	if GameSettings.thrust_inverted:
-		stick = -stick
-	_aim_dir = stick
+	_aim_dir = shoot_dir
 
 ## The AIM_DURATION window is over — resolve the strike along _aim_dir and
 ## start the real beam. This is exactly what used to happen synchronously in
@@ -213,9 +210,9 @@ func _launch(player, origin: Vector2) -> void:
 	var dir: Vector2 = _aim_dir
 	var result: Dictionary = _cast(player, origin, dir)
 
-	# Sky Hook (hot): a lance that reached nothing but ends above the surface
+	# Sky Hook (hot): a beam that reached nothing but ends above the surface
 	# treats the empty air as a solid anchor.
-	if result.kind == Kind.NONE and AlienTechManager.is_tech_hot(AlienTechRegistry.MULTI_LANCE):
+	if result.kind == Kind.NONE and AlienTechManager.is_tech_hot(AlienTechRegistry.MULTI_BEAM):
 		var end: Vector2 = origin + dir * REACH
 		if player.ocean and end.y < player.ocean.surface_y:
 			var air_point: Vector2 = player._clamp_to_boundaries(end)
@@ -301,14 +298,14 @@ func _classify(collider) -> Kind:
 		var piece := collider as UFOPiece
 		if piece.is_carried or piece._drop_grace_timer > 0.0:
 			return Kind.NONE
-		# Hands full: the lance strikes it but can't reel it in.
+		# Hands full: the beam strikes it but can't reel it in.
 		return Kind.ITEM if GameManager.can_carry_more_pieces() else Kind.DUD
 	if collider is Powerup or collider is AlienTechPiece:
 		return Kind.ITEM if _is_live(collider) else Kind.NONE
 	if _is_trash(collider):
 		return Kind.TRASH if _is_live(collider) else Kind.NONE
 	if collider.is_in_group("collectibles"):
-		return Kind.NONE  # stars, sky stars, … — not lance targets
+		return Kind.NONE  # stars, sky stars, … — not beam targets
 	# Anything else on the world / cloud-flipper layers is solid (OceanFlora,
 	# which shares the Trash layer, falls through to NONE here). TileMapLayer
 	# (floor, walls) exposes no collision_layer of its own — treat it as solid.
@@ -362,7 +359,7 @@ func _land() -> void:
 			pulling = true
 			_reset_pull_tracking()
 			if _kind == Kind.PLANT:
-				_target.begin_lance_pull()
+				_target.begin_beam_pull()
 			elif _target is RigidBody2D:
 				# Some items (e.g. UFOPiece) turn on continuous collision
 				# detection to stop enemy-knockback from punching them through
@@ -437,7 +434,7 @@ func _start_retract() -> void:
 ## Ends the whole sequence and lets the cooldown start draining.
 func _end() -> void:
 	if _kind == Kind.PLANT and is_instance_valid(_target):
-		_target.end_lance_pull()
+		_target.end_beam_pull()
 	if _target_saved_ccd != -1 and is_instance_valid(_target):
 		(_target as RigidBody2D).continuous_cd = _target_saved_ccd
 	_target_saved_ccd = -1
@@ -449,7 +446,7 @@ func _end() -> void:
 	aiming = false
 	if _line and is_instance_valid(_line):
 		_line.visible = false
-	AlienTechManager.release_cooldown_hold(AlienTechRegistry.MULTI_LANCE, MISS_COOLDOWN if _whiffed else -1.0)
+	AlienTechManager.release_cooldown_hold(AlienTechRegistry.MULTI_BEAM, MISS_COOLDOWN if _whiffed else -1.0)
 	_whiffed = false
 
 # ---------------------------------------------------------------------------
@@ -479,9 +476,9 @@ func _hit_trash(node) -> void:
 	if node.is_in_group("trash_items"):
 		node.destroy_trash()
 	elif node.is_in_group("trash_clusters"):
-		node.take_lance_hit(CLUSTER_HITS)
+		node.take_beam_hit(CLUSTER_HITS)
 	else:
-		node.take_lance_hit()
+		node.take_beam_hit()
 
 ## Still in the world and not already collected/despawning/destroyed.
 func _is_live(node) -> bool:

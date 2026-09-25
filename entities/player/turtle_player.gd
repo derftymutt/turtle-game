@@ -256,7 +256,7 @@ func _ready():
 	_tech_effects[AlienTechRegistry.TIME_FREEZE] = TimeFreezeEffect.new()
 	_tech_effects[AlienTechRegistry.ION_EXCITER] = IonExciterEffect.new()
 	_tech_effects[AlienTechRegistry.STIM_SHOT] = StimShotEffect.new()
-	_tech_effects[AlienTechRegistry.MULTI_LANCE] = MultiLanceEffect.new()
+	_tech_effects[AlienTechRegistry.MULTI_BEAM] = MultiBeamEffect.new()
 	_tech_effects[AlienTechRegistry.URCHIN_TRANSMOGRIFY] = UrchinTransmogrifyEffect.new()
 	_tech_effects[AlienTechRegistry.FLIPPER_AUTOMATON] = FlipperAutomatonEffect.new()
 	for effect in _tech_effects.values():
@@ -266,7 +266,7 @@ func _ready():
 	# After _tech_effects is filled — the aura reads effect state from frame one.
 	add_child(TechAura.new())
 
-	# A previous player may have died mid-action (mid-lance, mid-transmogrify...) —
+	# A previous player may have died mid-action (mid-beam, mid-transmogrify...) —
 	# start every tech fresh, whether this is a new level or a Continue.
 	AlienTechManager.reset_level_state()
 	AlienTechManager.tech_activated.connect(_on_alien_tech_activated)
@@ -294,11 +294,13 @@ func _physics_process(delta):
 	# speeds up the turtle's own cooldown recovery, animation, and ocean drag
 	# response without touching thrust_strength or bullet_speed.
 	var stim_shot := _tech_effects[AlienTechRegistry.STIM_SHOT] as StimShotEffect
-	# Multi Lance: thrust is locked out during its brief aim window (so the
-	# stick only steers the preview) and while it's hauling something
-	# (shooting is not blocked either way); if it's the turtle being hauled,
-	# ocean physics is also suppressed so buoyancy/drag don't fight the pull.
-	var multi_lance := _tech_effects[AlienTechRegistry.MULTI_LANCE] as MultiLanceEffect
+	# Multi-Beam: thrust is paused during its brief aim window — aim rides
+	# the shoot input (right stick / mouse), not movement, so this is a
+	# deliberate "hold still to line up the shot" beat rather than a
+	# stick-conflict workaround — and while it's hauling something (shooting
+	# is not blocked either way); if it's the turtle being hauled, ocean
+	# physics is also suppressed so buoyancy/drag don't fight the pull.
+	var multi_beam := _tech_effects[AlienTechRegistry.MULTI_BEAM] as MultiBeamEffect
 
 	# Update cooldown timers
 	if not can_thrust:
@@ -416,12 +418,12 @@ func _physics_process(delta):
 
 	_tech_effects[AlienTechRegistry.FLIPPER_AUTOMATON].physics_process(self, delta)
 
-	multi_lance.physics_process(self, delta)
+	multi_beam.physics_process(self, delta)
 
 	stim_shot.physics_process(self, delta)
 
 	# Ocean physics — suppressed while pinned to a bumper or flipper
-	if not (_tech_effects[AlienTechRegistry.BUMPER_MAGNET] as BumperMagnetEffect).attached and not _flipper_velcro_latched and not multi_lance.pulling_player:
+	if not (_tech_effects[AlienTechRegistry.BUMPER_MAGNET] as BumperMagnetEffect).attached and not _flipper_velcro_latched and not multi_beam.pulling_player:
 		if ocean:
 			apply_ocean_effects(delta)
 		else:
@@ -510,7 +512,7 @@ func _physics_process(delta):
 	if hud and movement_input.length() > 0.1 and not energy_freeze_active:
 		can_actually_thrust = can_actually_thrust and hud.can_thrust()
 
-	if movement_input.length() > 0.1 and can_actually_thrust and not swim_locked and not multi_lance.pulling and not multi_lance.aiming:
+	if movement_input.length() > 0.1 and can_actually_thrust and not swim_locked and not multi_beam.pulling and not multi_beam.aiming:
 		apply_thrust(movement_input.normalized())
 
 	if shoot_input != Vector2.ZERO and can_shoot:
@@ -882,7 +884,7 @@ func take_damage(amount: float, use_iframes: bool = false, source: String = ""):
 	_tech_effects[AlienTechRegistry.TRANSPORTER].cancel_on_damage(self)
 	_tech_effects[AlienTechRegistry.DERMAL_REGEN].cancel_on_damage(self)
 	_tech_effects[AlienTechRegistry.BUMPER_MAGNET].cancel_on_damage(self)
-	_tech_effects[AlienTechRegistry.MULTI_LANCE].cancel_on_damage(self)
+	_tech_effects[AlienTechRegistry.MULTI_BEAM].cancel_on_damage(self)
 	if _flipper_velcro_latched:
 		_cancel_flipper_velcro()
 

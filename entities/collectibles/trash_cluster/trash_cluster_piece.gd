@@ -79,8 +79,8 @@ func _on_area_body_entered(body: Node2D):
 	if body.has_method("set_velocity") and body.collision_layer == 8:
 		_destroy()
 
-## Multi Lance: same as being shot.
-func take_lance_hit() -> void:
+## Multi-Beam: same as being shot.
+func take_beam_hit() -> void:
 	_destroy()
 
 func _destroy():

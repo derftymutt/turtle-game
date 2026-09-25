@@ -183,9 +183,9 @@ func _on_area_body_entered(body: Node2D) -> void:
 		_get_shot()
 
 
-## Multi Lance: same as being shot (guarded, since _get_shot() has no guard of
-## its own and the lance can strike a piece that's already mid-destruction).
-func take_lance_hit() -> void:
+## Multi-Beam: same as being shot (guarded, since _get_shot() has no guard of
+## its own and the beam can strike a piece that's already mid-destruction).
+func take_beam_hit() -> void:
 	if is_destroyed:
 		return
 	_get_shot()

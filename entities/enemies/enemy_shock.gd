@@ -1,7 +1,7 @@
 extends Node
 class_name EnemyShock
 
-## Multi Lance shock. Attached as a child of an invincible enemy (crocodile,
+## Multi-Beam shock. Attached as a child of an invincible enemy (crocodile,
 ## sea urchin, …) for a fixed time, during which the enemy:
 ##   - is frozen in place, using the same conventions Time Freeze uses
 ##     (RigidBody2D.freeze + physics/process callbacks off), so it doesn't move
