@@ -31,6 +31,7 @@ const STIM_SHOT           := "stim_shot"
 const MULTI_BEAM          := "multi_beam"
 const URCHIN_TRANSMOGRIFY := "urchin_transmogrify"
 const FLIPPER_AUTOMATON   := "flipper_automaton"
+const TIMELINE_ALTERNATOR := "timeline_alternator"
 
 # ─── Tech definitions ────────────────────────────────────────────────────────
 
@@ -299,6 +300,17 @@ var _definitions: Array[Dictionary] = [
 		"has_passive_bar": true,
 		"color":           Color(1.0, 0.35, 0.35),
 		"hot_description": "Click on/off.",
+	},
+	{
+		"id":              TIMELINE_ALTERNATOR,
+		"name":            "Timeline Alternator",
+		"description":     "Hop timelines and change UFO Workshop location. 10s active, 6s cooldown.",
+		"hook":            "What if I never...",
+		"slot_label":      "Timeline Alternator",
+		"needs_input":     true,
+		"has_passive_bar": true,
+		"color":           Color(0.6, 0.55, 1.0),
+		"hot_description": "Click on/off, and always hop to closest alternative.",
 	},
 ]
 

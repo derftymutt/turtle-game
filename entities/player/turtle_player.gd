@@ -259,6 +259,7 @@ func _ready():
 	_tech_effects[AlienTechRegistry.MULTI_BEAM] = MultiBeamEffect.new()
 	_tech_effects[AlienTechRegistry.URCHIN_TRANSMOGRIFY] = UrchinTransmogrifyEffect.new()
 	_tech_effects[AlienTechRegistry.FLIPPER_AUTOMATON] = FlipperAutomatonEffect.new()
+	_tech_effects[AlienTechRegistry.TIMELINE_ALTERNATOR] = TimelineAlternatorEffect.new()
 	for effect in _tech_effects.values():
 		(effect as AlienTechEffect).setup(self)
 
@@ -417,6 +418,8 @@ func _physics_process(delta):
 	_tech_effects[AlienTechRegistry.URCHIN_TRANSMOGRIFY].physics_process(self, delta)
 
 	_tech_effects[AlienTechRegistry.FLIPPER_AUTOMATON].physics_process(self, delta)
+
+	_tech_effects[AlienTechRegistry.TIMELINE_ALTERNATOR].physics_process(self, delta)
 
 	multi_beam.physics_process(self, delta)
 

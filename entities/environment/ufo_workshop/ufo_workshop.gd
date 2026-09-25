@@ -22,6 +22,11 @@ const _SFX_BEAT_LEVEL = preload("res://assets/sounds/sfx/beat level_1.ogg")
 @export var pulse_speed: float = 2.0
 @export var pulse_amount: float = 0.2
 
+## Timeline Alternator hop: shake + fade out, jump, shake + fade in.
+const HOP_FADE_TIME: float = 0.3
+const HOP_SHAKE_AMPLITUDE: float = 4.0
+const HOP_SHAKE_CYCLES: float = 5.0
+
 # Node references (set up in scene editor)
 @onready var delivery_area: Area2D = $DeliveryArea
 @onready var sprite: Node2D = _find_sprite()
@@ -38,12 +43,21 @@ var is_player_nearby_with_piece: bool = false
 var pulse_offset: float = 0.0
 var _sfx_beat: AudioStreamPlayer
 
+## Every spot a workshop was placed in this level (global positions), including
+## this one. The election hands the full list to the surviving workshop before
+## freeing the rest, so Timeline Alternator can hop between them.
+var timeline_positions: Array[Vector2] = []
+var _hop_tween: Tween
+var _hopping: bool = false
+var _level_done: bool = false
+
 func _ready():
 	add_to_group("ufo_workshop_candidate")
 	# Elect a single active workshop for this level load. Every instance defers
 	# the same call; a deterministic leader performs the pick once, after all
 	# instances have registered themselves.
 	call_deferred("_elect_single_workshop")
+	timeline_positions = [global_position]
 
 	add_to_group("workshop")
 	_sfx_beat = AudioStreamPlayer.new()
@@ -101,6 +115,11 @@ func _elect_single_workshop() -> void:
 				chosen = w
 				break
 
+	var positions: Array[Vector2] = []
+	for w in candidates:
+		positions.append(w.global_position)
+	chosen.timeline_positions = positions
+
 	for w in candidates:
 		if w != chosen:
 			w.queue_free()
@@ -120,8 +139,8 @@ func _on_delivery_area_entered(body: Node2D):
 	if not body.is_in_group("player"):
 		return
 
-	# Check if carrying a piece
-	if GameManager.is_carrying_piece:
+	# Check if carrying a piece (not mid-hop — the workshop is half gone)
+	if GameManager.is_carrying_piece and not _hopping:
 		is_player_nearby_with_piece = true
 		attempt_delivery()
 
@@ -226,4 +245,49 @@ func _on_piece_delivered(pieces_collected: int, pieces_needed: int):
 
 func _on_level_complete():
 	"""React to level completion"""
+	_level_done = true
 	print("🛠️ Workshop: Level complete! UFO assembled!")
+
+# ─── Timeline Alternator ─────────────────────────────────────────────────────
+
+## Every recorded workshop spot other than where the workshop is right now.
+func get_alternate_positions() -> Array[Vector2]:
+	var result: Array[Vector2] = []
+	for pos in timeline_positions:
+		if pos.distance_to(global_position) > 1.0:
+			result.append(pos)
+	return result
+
+## Shake laterally and fade out here, then jump to `target` and shake/fade back
+## in. Refused once the level is complete, so the UFO launch cut scene (which
+## reads our position once) never loses its workshop.
+func hop_to(target: Vector2) -> void:
+	if _level_done or target.distance_to(global_position) <= 1.0:
+		return
+	if _hop_tween and _hop_tween.is_valid():
+		_hop_tween.kill()
+	_hopping = true
+	is_player_nearby_with_piece = false
+	_hop_tween = create_tween()
+	_hop_tween.tween_property(self, "modulate:a", 0.0, HOP_FADE_TIME).from(modulate.a)
+	_hop_tween.parallel().tween_method(_set_hop_shake, 1.0, 0.0, HOP_FADE_TIME)
+	_hop_tween.tween_callback(func() -> void: global_position = target)
+	_hop_tween.tween_property(self, "modulate:a", 1.0, HOP_FADE_TIME)
+	_hop_tween.parallel().tween_method(_set_hop_shake, 1.0, 0.0, HOP_FADE_TIME)
+	_hop_tween.tween_callback(_finish_hop)
+
+## `strength` runs 1 → 0 over each half of the hop, so the shake settles out.
+func _set_hop_shake(strength: float) -> void:
+	if not sprite:
+		return
+	var t := 1.0 - strength
+	sprite.position.x = sin(t * TAU * HOP_SHAKE_CYCLES) * HOP_SHAKE_AMPLITUDE * strength
+
+func _finish_hop() -> void:
+	_hopping = false
+	if sprite:
+		sprite.position.x = 0.0
+	# The player may already be sitting in the new spot — body_entered fired
+	# while we were still hopping and got ignored, so check again now.
+	for body in delivery_area.get_overlapping_bodies():
+		_on_delivery_area_entered(body)

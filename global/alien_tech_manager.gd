@@ -73,6 +73,9 @@ const URCHIN_TRANSMOGRIFY_COOLDOWN_DURATION: float = 5.0
 const FLIPPER_AUTOMATON_ACTIVE_DURATION:   float = 8.0
 const FLIPPER_AUTOMATON_COOLDOWN_DURATION: float = 4.0
 
+const TIMELINE_ALTERNATOR_ACTIVE_DURATION:   float = 10.0
+const TIMELINE_ALTERNATOR_COOLDOWN_DURATION: float = 6.0
+
 const MULTI_BEAM_COOLDOWN_DURATION: float = 2.0
 
 const DERMAL_REGEN_COOLDOWN_DURATION: float = 30.0
@@ -95,6 +98,7 @@ const _COOLDOWN_DURATIONS: Dictionary = {
 	AlienTechRegistry.DERMAL_REGEN:   DERMAL_REGEN_COOLDOWN_DURATION,
 	AlienTechRegistry.URCHIN_TRANSMOGRIFY: URCHIN_TRANSMOGRIFY_ACTIVE_DURATION + URCHIN_TRANSMOGRIFY_COOLDOWN_DURATION,
 	AlienTechRegistry.FLIPPER_AUTOMATON: FLIPPER_AUTOMATON_ACTIVE_DURATION + FLIPPER_AUTOMATON_COOLDOWN_DURATION,
+	AlienTechRegistry.TIMELINE_ALTERNATOR: TIMELINE_ALTERNATOR_ACTIVE_DURATION + TIMELINE_ALTERNATOR_COOLDOWN_DURATION,
 }
 
 # Techs whose cooldown doesn't start draining on press: try_activate_slot()
@@ -126,13 +130,13 @@ const _TWO_PHASE_BAR_DURATIONS: Dictionary = {
 	AlienTechRegistry.STIM_SHOT:      {"active": STIM_SHOT_ACTIVE_DURATION,      "cooldown": STIM_SHOT_COOLDOWN_DURATION},
 	AlienTechRegistry.URCHIN_TRANSMOGRIFY: {"active": URCHIN_TRANSMOGRIFY_ACTIVE_DURATION, "cooldown": URCHIN_TRANSMOGRIFY_COOLDOWN_DURATION},
 	AlienTechRegistry.FLIPPER_AUTOMATON: {"active": FLIPPER_AUTOMATON_ACTIVE_DURATION, "cooldown": FLIPPER_AUTOMATON_COOLDOWN_DURATION},
+	AlienTechRegistry.TIMELINE_ALTERNATOR: {"active": TIMELINE_ALTERNATOR_ACTIVE_DURATION, "cooldown": TIMELINE_ALTERNATOR_COOLDOWN_DURATION},
 }
 
 # Techs whose HOT behavior is a manual on/off toggle (via set_passive_bar in
-# turtle_player.gd) rather than "always on" — their bar's "off" state isn't
-# a genuinely-ready cooldown-complete state, it's just not engaged, so it
-# reads as an empty/greyed bar rather than a full-color one. See
-# get_bar_phase()'s "off" phase.
+# the tech's effect) rather than "always on". When hot they show no bar — the
+# slot label alone carries the state: blinking while on, greyed while off
+# (get_bar_phase()'s "active" / "off" phases).
 const _HOT_TOGGLE_TECHS: Array[String] = [
 	AlienTechRegistry.INERTIA_DAMPENER,
 	AlienTechRegistry.HYDRO_FUNNEL,
@@ -154,6 +158,7 @@ const _HOT_NO_BAR_TECHS: Array[String] = [
 	AlienTechRegistry.LATERAL_THRUST,
 	AlienTechRegistry.TRANSPORTER,
 	AlienTechRegistry.SHOCKWAVE,
+	AlienTechRegistry.TIMELINE_ALTERNATOR,
 ]
 
 var _passive_bar_ratios: Dictionary = {}
@@ -409,7 +414,7 @@ func _effective_cooldown_max(slot_index: int, tech_id: String) -> float:
 		AlienTechRegistry.BUMPER_MAGNET, AlienTechRegistry.GRAVITON_HARNESS, \
 		AlienTechRegistry.MAGNETIC_REPULSION, AlienTechRegistry.HYDRO_FUNNEL, \
 		AlienTechRegistry.ION_EXCITER, AlienTechRegistry.URCHIN_TRANSMOGRIFY, \
-		AlienTechRegistry.FLIPPER_AUTOMATON:
+		AlienTechRegistry.FLIPPER_AUTOMATON, AlienTechRegistry.TIMELINE_ALTERNATOR:
 			return 0.0  # hot: no cooldown
 		AlienTechRegistry.TIME_FREEZE:
 			# Hot: active duration doubled, post-active recovery halved.
@@ -544,7 +549,8 @@ func slot_bar_meaningful(slot_index: int) -> bool:
 	if not is_slot_hot(slot_index):
 		return true
 	var tech_id: String = slots[slot_index].get("id", "")
-	return not (tech_id in _HOT_ALWAYS_ON_TECHS or tech_id in _HOT_NO_BAR_TECHS)
+	return not (tech_id in _HOT_ALWAYS_ON_TECHS or tech_id in _HOT_NO_BAR_TECHS \
+			or tech_id in _HOT_TOGGLE_TECHS)
 
 # ─── Run lifecycle ───────────────────────────────────────────────────────────
 
