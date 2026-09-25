@@ -9,8 +9,8 @@ class_name TimelineAlternatorEffect
 ## Hot: every press is a one-way hop — the workshop to the spot closest to the
 ## turtle, the urchins to a fresh random layout. No timer, no return trip, no
 ## cooldown (see AlienTechManager's _HOT_NO_BAR_TECHS).
-## Urchins are left alone while Urchin Transmogrify has them as bumpers; a cold
-## return that lands then waits for the transmogrify to end.
+## While Urchin Mutation is active its bumpers follow the urchins through
+## every hop (see UrchinMutationEffect.on_urchins_reseeded()).
 ## No-op in levels with nothing to move.
 
 var active: bool = false
@@ -19,7 +19,6 @@ var _home: Vector2 = Vector2.ZERO
 var _home_set: bool = false
 # SeaUrchinGroup -> its layout before a cold hop, to restore when it ends.
 var _urchin_homes: Dictionary = {}
-var _urchin_restore_pending: bool = false
 
 func activate(player, _slot_index: int) -> void:
 	var hot := AlienTechManager.is_tech_hot(AlienTechRegistry.TIMELINE_ALTERNATOR)
@@ -35,8 +34,6 @@ func activate(player, _slot_index: int) -> void:
 	player._flash(AlienTechRegistry.get_tech(AlienTechRegistry.TIMELINE_ALTERNATOR)["color"], 0.3)
 
 func physics_process(player, delta: float) -> void:
-	if _urchin_restore_pending:
-		_restore_urchins(player)
 	if not active:
 		return
 	_timer -= delta
@@ -68,12 +65,8 @@ func _hop_workshop(player, hot: bool) -> bool:
 	workshop.hop_to(target)
 	return true
 
-## Returns false when no urchin layout changed. Skipped entirely while Urchin
-## Transmogrify is active: its bumpers stand in for specific urchins, and
-## swapping those urchins out from under it would strand the bumpers.
+## Returns false when no urchin layout changed.
 func _reseed_urchins(player, hot: bool) -> bool:
-	if _transmogrify_active(player):
-		return false
 	var any := false
 	for node in player.get_tree().get_nodes_in_group("sea_urchin_groups"):
 		var group := node as SeaUrchinGroup
@@ -82,24 +75,33 @@ func _reseed_urchins(player, hot: bool) -> bool:
 		var before := group.get_layout()
 		if group.reseed():
 			any = true
+			_sync_mutation(player, before, group.get_layout())
 			if not hot:
 				_urchin_homes[group] = before
 	return any
 
-## Fades every group reseeded by the last cold hop back to its old layout —
-## or, while Urchin Transmogrify is active, keeps it pending until it isn't.
+## Fades every group reseeded by the last cold hop back to its old layout.
 func _restore_urchins(player) -> void:
-	if _transmogrify_active(player):
-		_urchin_restore_pending = not _urchin_homes.is_empty()
-		return
-	for group in _urchin_homes:
-		if is_instance_valid(group):
-			(group as SeaUrchinGroup).restore_layout(_urchin_homes[group])
+	for node in _urchin_homes:
+		if not is_instance_valid(node):
+			continue
+		var group := node as SeaUrchinGroup
+		var before := group.get_layout()
+		group.restore_layout(_urchin_homes[group])
+		_sync_mutation(player, before, group.get_layout())
 	_urchin_homes.clear()
-	_urchin_restore_pending = false
 
-func _transmogrify_active(player) -> bool:
-	return player._tech_effects[AlienTechRegistry.URCHIN_TRANSMOGRIFY].active
+## Lets an active Urchin Mutation move its bumpers along with a layout change.
+func _sync_mutation(player, before: Array[SeaUrchin], after: Array[SeaUrchin]) -> void:
+	var leaving: Array[SeaUrchin] = []
+	var arriving: Array[SeaUrchin] = []
+	for urchin in before:
+		if urchin not in after:
+			leaving.append(urchin)
+	for urchin in after:
+		if urchin not in before:
+			arriving.append(urchin)
+	player._tech_effects[AlienTechRegistry.URCHIN_MUTATION].on_urchins_reseeded(leaving, arriving)
 
 func _stop(player) -> void:
 	active = false

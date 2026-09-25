@@ -1,11 +1,11 @@
 extends AlienTechEffect
-class_name UrchinTransmogrifyEffect
+class_name UrchinMutationEffect
 
-## Urchin Transmogrify — swaps every sea urchin for a CircularBumper, then
+## Urchin Mutation — swaps every sea urchin for a CircularBumper, then
 ## swaps them back. Each urchin picks its own bumper size via
 ## SeaUrchin.bumper_size. The bumpers are spawned on activation and freed on
 ## revert rather than pre-placed in the levels; the urchin itself is only
-## stood down (see SeaUrchin.set_transmogrified()). While active the bumpers
+## stood down (see SeaUrchin.set_mutated()). While active the bumpers
 ## are ordinary members of the "bumpers" group, so Bumper Magnet and Ion
 ## Exciter treat them like any other.
 ## Hot: manual on/off toggle, no timer, no cooldown (see AlienTechManager's
@@ -28,13 +28,13 @@ var _bumper_alpha: float = 1.0
 var _swaps: Array[Dictionary] = []
 
 func activate(player, _slot_index: int) -> void:
-	var hot := AlienTechManager.is_tech_hot(AlienTechRegistry.URCHIN_TRANSMOGRIFY)
+	var hot := AlienTechManager.is_tech_hot(AlienTechRegistry.URCHIN_MUTATION)
 	if active:
 		# Hot: click on, click off. Cold: the timer decides, presses are ignored.
 		if hot:
 			_revert()
 		return
-	_timer = AlienTechManager.URCHIN_TRANSMOGRIFY_ACTIVE_DURATION
+	_timer = AlienTechManager.URCHIN_MUTATION_ACTIVE_DURATION
 	_elapsed = 0.0
 	_swaps.clear()
 	for node in player.get_tree().get_nodes_in_group("sea_urchins"):
@@ -45,14 +45,14 @@ func activate(player, _slot_index: int) -> void:
 	active = true
 	_apply_bumper_alpha(_BLINK_DIM_ALPHA)  # first frame of the intro blink
 	if hot:
-		AlienTechManager.set_passive_bar(AlienTechRegistry.URCHIN_TRANSMOGRIFY, 1.0)
-	player._flash(AlienTechRegistry.get_tech(AlienTechRegistry.URCHIN_TRANSMOGRIFY)["color"], 0.3)
+		AlienTechManager.set_passive_bar(AlienTechRegistry.URCHIN_MUTATION, 1.0)
+	player._flash(AlienTechRegistry.get_tech(AlienTechRegistry.URCHIN_MUTATION)["color"], 0.3)
 
 func physics_process(_player, delta: float) -> void:
 	if not active:
 		return
 	_elapsed += delta
-	var hot := AlienTechManager.is_tech_hot(AlienTechRegistry.URCHIN_TRANSMOGRIFY)
+	var hot := AlienTechManager.is_tech_hot(AlienTechRegistry.URCHIN_MUTATION)
 	if not hot:
 		_timer -= delta
 		if _timer <= 0.0:
@@ -68,7 +68,7 @@ func physics_process(_player, delta: float) -> void:
 
 ## Swapped out mid-effect: put the urchins back, or they'd stay bumpers forever.
 func on_slots_changed(_player) -> void:
-	if active and not AlienTechManager.has_tech(AlienTechRegistry.URCHIN_TRANSMOGRIFY):
+	if active and not AlienTechManager.has_tech(AlienTechRegistry.URCHIN_MUTATION):
 		_revert()
 
 func _swap_in(urchin: SeaUrchin) -> void:
@@ -82,22 +82,64 @@ func _swap_in(urchin: SeaUrchin) -> void:
 	bumper.size_preset = urchin.bumper_size as CircularBumper.SizePreset
 	parent.add_child(bumper)
 	bumper.global_position = urchin.global_position
-	urchin.set_transmogrified(true)
+	urchin.set_mutated(true)
 	_swaps.append({"urchin": urchin, "bumper": bumper})
+
+## Timeline Alternator reseeded a SeaUrchinGroup mid-mutation: the bumpers
+## follow the urchins. Leaving urchins' bumpers shake and fade out; arriving
+## urchins get a new bumper that shakes and fades in right after, in step with
+## the group's own urchin fades. A hopping bumper is out of the physics space
+## (DISABLED) until it has fully arrived, same as a hopping urchin.
+func on_urchins_reseeded(leaving: Array[SeaUrchin], arriving: Array[SeaUrchin]) -> void:
+	if not active:
+		return
+	for urchin in leaving:
+		for i in _swaps.size():
+			if _swaps[i]["urchin"] == urchin:
+				var bumper: CircularBumper = _swaps[i]["bumper"]
+				_swaps.remove_at(i)
+				urchin.set_mutated(false)  # stays hidden: the group has it benched
+				if is_instance_valid(bumper):
+					_hop_bumper(bumper, false)
+				break
+	for urchin in arriving:
+		if is_instance_valid(urchin) and not urchin.is_mutated():
+			_swap_in(urchin)
+			_hop_bumper(_swaps[-1]["bumper"], true)
+
+## The tween lives on the bumper's parent (the urchin group), since a DISABLED
+## bumper would pause a tween bound to itself.
+func _hop_bumper(bumper: CircularBumper, arriving: bool) -> void:
+	var parent := bumper.get_parent()
+	if parent == null:
+		return
+	bumper.process_mode = Node.PROCESS_MODE_DISABLED
+	var sprite := bumper.get_node_or_null("AnimatedSprite2D") as Node2D
+	var tween := parent.create_tween()
+	if arriving:
+		bumper.modulate.a = 0.0
+		tween.tween_interval(TimelineHop.FADE_TIME)  # wait for the leavers to go
+		TimelineHop.shake_fade(tween, bumper, sprite, true)
+		tween.tween_callback(func() -> void:
+			if is_instance_valid(bumper):
+				bumper.process_mode = Node.PROCESS_MODE_INHERIT)
+	else:
+		TimelineHop.shake_fade(tween, bumper, sprite, false)
+		tween.tween_callback(bumper.queue_free)
 
 func _revert() -> void:
 	for swap in _swaps:
 		if is_instance_valid(swap["bumper"]):
 			(swap["bumper"] as CircularBumper).queue_free()
 		if is_instance_valid(swap["urchin"]):
-			(swap["urchin"] as SeaUrchin).set_transmogrified(false)
+			(swap["urchin"] as SeaUrchin).set_mutated(false)
 	_swaps.clear()
 	active = false
 	_timer = 0.0
 	_elapsed = 0.0
 	_bumper_alpha = 1.0
 	# Erase rather than zero the override — see HydroFunnelEffect.activate().
-	AlienTechManager.clear_passive_bar(AlienTechRegistry.URCHIN_TRANSMOGRIFY)
+	AlienTechManager.clear_passive_bar(AlienTechRegistry.URCHIN_MUTATION)
 
 ## Full alpha on even half-cycles, dim on odd ones. `t` is any value moving
 ## through time (elapsed or remaining) — only its phase matters.

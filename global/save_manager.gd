@@ -60,8 +60,8 @@ func apply_save():
 	GameManager.total_score = data.get("total_score", 0)
 	LevelManager.continue_count = data.get("continue_count", 1)
 	AlienTechManager.reset_run()
-	var slot0: String = data.get("tech_slot_0", "")
-	var slot1: String = data.get("tech_slot_1", "")
+	var slot0: String = _current_tech_id(data.get("tech_slot_0", ""))
+	var slot1: String = _current_tech_id(data.get("tech_slot_1", ""))
 	if not slot0.is_empty():
 		AlienTechManager.assign_tech(slot0, 0)
 		AlienTechManager.set_slot_hot(0, data.get("tech_hot_0", false))
@@ -116,3 +116,12 @@ func save_victory_time(ms: int):
 		data["best_victory_time_ms"] = ms
 		_save_best_scores(data)
 		print("⏱️ New best victory time: %d ms (was %d ms)" % [ms, current_best])
+
+## Tech ids that were renamed after saves may already have been written with
+## the old one — old id → current id.
+const _RENAMED_TECH_IDS: Dictionary = {
+	"urchin_transmogrify": "urchin_mutation",
+}
+
+func _current_tech_id(id: String) -> String:
+	return _RENAMED_TECH_IDS.get(id, id)

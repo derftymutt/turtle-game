@@ -13,7 +13,7 @@ class_name SeaUrchin
 @export var lock_position: bool = true
 @export var position_lock_strength: float = 100.0
 
-# Urchin Transmogrify: which CircularBumper.SizePreset this urchin becomes.
+# Urchin Mutation: which CircularBumper.SizePreset this urchin becomes.
 # Only small and medium have bumper art.
 @export_enum("Small:0", "Medium:1") var bumper_size: int = 0
 
@@ -25,7 +25,7 @@ var rotation_offset: float = 0.0
 # Stand-down state. Either one takes the urchin out of play (see
 # _apply_stand_down()); they're tracked separately so ending one never
 # revives an urchin the other still has down.
-var _transmogrified: bool = false
+var _mutated: bool = false
 var _benched: bool = false
 var _benched_groups: Array[StringName] = []
 
@@ -95,17 +95,17 @@ func apply_position_locking():
 	# Dampen movement
 	linear_velocity *= 0.8
 
-## Urchin Transmogrify: stand this urchin down while a bumper takes its place.
+## Urchin Mutation: stand this urchin down while a bumper takes its place.
 ## _contact_players is cleared because a turtle overlapping at the moment of
 ## the swap would otherwise stay in it.
-func set_transmogrified(on: bool) -> void:
-	_transmogrified = on
+func set_mutated(on: bool) -> void:
+	_mutated = on
 	if on:
 		_contact_players.clear()
 	_apply_stand_down()
 
 ## SeaUrchinGroup: take this urchin out of the level's active set (or put it
-## back). Unlike transmogrify it also leaves every group ("enemies",
+## back). Unlike a mutation, it also leaves every group ("enemies",
 ## "sea_urchins", ...) so nothing that looks urchins up finds it; the groups
 ## are remembered and rejoined when it comes back.
 ## Always reapplies visibility, so it also snaps back a benched urchin that
@@ -129,10 +129,13 @@ func set_benched(on: bool) -> void:
 func is_benched() -> bool:
 	return _benched
 
+func is_mutated() -> bool:
+	return _mutated
+
 ## DISABLED process mode (which cascades to DamageArea) takes the body and its
 ## damage area out of the physics space and stops _process(), so nothing can
 ## hurt the turtle or be hit.
 func _apply_stand_down() -> void:
-	var down := _transmogrified or _benched
+	var down := _mutated or _benched
 	visible = not down
 	process_mode = Node.PROCESS_MODE_DISABLED if down else Node.PROCESS_MODE_INHERIT

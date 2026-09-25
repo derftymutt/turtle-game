@@ -29,7 +29,7 @@ const QUANTUM_MIRROR      := "quantum_mirror"
 const ION_EXCITER         := "ion_exciter"
 const STIM_SHOT           := "stim_shot"
 const MULTI_BEAM          := "multi_beam"
-const URCHIN_TRANSMOGRIFY := "urchin_transmogrify"
+const URCHIN_MUTATION := "urchin_mutation"
 const FLIPPER_AUTOMATON   := "flipper_automaton"
 const TIMELINE_ALTERNATOR := "timeline_alternator"
 
@@ -280,11 +280,11 @@ var _definitions: Array[Dictionary] = [
 		"hot_description": "Now with Sky Hook. Grab the sky itself! Half the cooldown.",
 	},
 	{
-		"id":              URCHIN_TRANSMOGRIFY,
-		"name":            "Urchin Transmogrify",
+		"id":              URCHIN_MUTATION,
+		"name":            "Urchin Mutation",
 		"description":     "Transform urchins into bumpers. 10s active, 5s cooldown.",
 		"hook":            "Sorry urchins... it's temporary!",
-		"slot_label":      "Urchin Transmogrify",
+		"slot_label":      "Urchin Mutation",
 		"needs_input":     true,
 		"has_passive_bar": true,
 		"color":           Color(0.95, 0.45, 0.85),

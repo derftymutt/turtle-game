@@ -87,13 +87,15 @@ func _transition_to(new_active: Array[SeaUrchin]) -> bool:
 
 	_reseed_tween = create_tween().set_parallel(true)
 	# Leaving: out of play from the first frame, but still drawn for the fade.
+	# A mutated urchin stays hidden throughout — its bumper is what's on
+	# screen, and UrchinMutationEffect.on_urchins_reseeded() hops that instead.
 	for urchin in leaving:
 		urchin.set_benched(true)
-		urchin.visible = true
+		urchin.visible = not urchin.is_mutated()
 		TimelineHop.shake_fade(_reseed_tween, urchin, urchin.sprite, false)
 	_reseed_tween.chain().tween_callback(func() -> void:
 		for urchin in arriving:
-			if is_instance_valid(urchin):
+			if is_instance_valid(urchin) and not urchin.is_mutated():
 				urchin.visible = true)
 	# Arriving: drawn while fading in, but only harmful once fully there.
 	for urchin in arriving:

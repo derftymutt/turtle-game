@@ -257,7 +257,7 @@ func _ready():
 	_tech_effects[AlienTechRegistry.ION_EXCITER] = IonExciterEffect.new()
 	_tech_effects[AlienTechRegistry.STIM_SHOT] = StimShotEffect.new()
 	_tech_effects[AlienTechRegistry.MULTI_BEAM] = MultiBeamEffect.new()
-	_tech_effects[AlienTechRegistry.URCHIN_TRANSMOGRIFY] = UrchinTransmogrifyEffect.new()
+	_tech_effects[AlienTechRegistry.URCHIN_MUTATION] = UrchinMutationEffect.new()
 	_tech_effects[AlienTechRegistry.FLIPPER_AUTOMATON] = FlipperAutomatonEffect.new()
 	_tech_effects[AlienTechRegistry.TIMELINE_ALTERNATOR] = TimelineAlternatorEffect.new()
 	for effect in _tech_effects.values():
@@ -267,7 +267,7 @@ func _ready():
 	# After _tech_effects is filled — the aura reads effect state from frame one.
 	add_child(TechAura.new())
 
-	# A previous player may have died mid-action (mid-beam, mid-transmogrify...) —
+	# A previous player may have died mid-action (mid-beam, mid-mutation...) —
 	# start every tech fresh, whether this is a new level or a Continue.
 	AlienTechManager.reset_level_state()
 	AlienTechManager.tech_activated.connect(_on_alien_tech_activated)
@@ -415,7 +415,7 @@ func _physics_process(delta):
 
 	_tech_effects[AlienTechRegistry.ION_EXCITER].physics_process(self, delta)
 
-	_tech_effects[AlienTechRegistry.URCHIN_TRANSMOGRIFY].physics_process(self, delta)
+	_tech_effects[AlienTechRegistry.URCHIN_MUTATION].physics_process(self, delta)
 
 	_tech_effects[AlienTechRegistry.FLIPPER_AUTOMATON].physics_process(self, delta)
 
