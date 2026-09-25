@@ -7,6 +7,7 @@ class_name GuideScreen
 
 var invert_thrust_checkbox: CheckBox
 var keyboard_only_checkbox: CheckBox
+var fast_mode_checkbox: CheckBox
 var _mouse_mode_note: Label
 ## Keyboard-column labels whose text depends on GameSettings.mouse_mode,
 ## keyed by action name — see _refresh_keyboard_labels().
@@ -103,12 +104,21 @@ func _build_content():
 	content_container.add_child(_mouse_mode_note)
 	_refresh_keyboard_labels()
 
+	fast_mode_checkbox = CheckBox.new()
+	fast_mode_checkbox.text = "Fast Mode  (whole game at %sx speed)" % GameSettings.FAST_GAME_SPEED
+	fast_mode_checkbox.add_theme_font_size_override("font_size", 10)
+	fast_mode_checkbox.button_pressed = GameSettings.fast_mode
+	fast_mode_checkbox.toggled.connect(_on_fast_mode_toggled)
+	content_container.add_child(fast_mode_checkbox)
+
 	# Focus wiring only after all nodes share a parent tree
 	invert_thrust_checkbox.focus_neighbor_bottom = invert_thrust_checkbox.get_path_to(keyboard_only_checkbox)
 	keyboard_only_checkbox.focus_neighbor_top = keyboard_only_checkbox.get_path_to(invert_thrust_checkbox)
+	keyboard_only_checkbox.focus_neighbor_bottom = keyboard_only_checkbox.get_path_to(fast_mode_checkbox)
+	fast_mode_checkbox.focus_neighbor_top = fast_mode_checkbox.get_path_to(keyboard_only_checkbox)
 	if back_button:
-		keyboard_only_checkbox.focus_neighbor_bottom = keyboard_only_checkbox.get_path_to(back_button)
-		back_button.focus_neighbor_top = back_button.get_path_to(keyboard_only_checkbox)
+		fast_mode_checkbox.focus_neighbor_bottom = fast_mode_checkbox.get_path_to(back_button)
+		back_button.focus_neighbor_top = back_button.get_path_to(fast_mode_checkbox)
 
 func _on_back_pressed():
 	hide_guide()
@@ -123,6 +133,9 @@ func _on_back_pressed():
 
 func _on_invert_thrust_toggled(pressed: bool):
 	GameSettings.set_thrust_inverted(pressed)
+
+func _on_fast_mode_toggled(pressed: bool):
+	GameSettings.set_fast_mode(pressed)
 
 func _on_keyboard_only_toggled(pressed: bool):
 	GameSettings.set_mouse_mode(not pressed)
