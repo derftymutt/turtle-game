@@ -28,7 +28,7 @@
 [ext_resource type="TileSet" uid="uid://dyl02kfc4a681" path="res://entities/environment/ocean_boundaries/ocean_wall.tres" id="26_4knja"]
 [ext_resource type="PackedScene" uid="uid://ko8xdpxfr5ej" path="res://entities/environment/current/current.tscn" id="27_4knja"]
 [ext_resource type="PackedScene" path="res://ui/menus/flipper_reminder_popup.tscn" id="28_flipreminder"]
-[ext_resource type="Script" path="res://entities/enemies/sea_urchin/sea_urchin_group.gd" id="29_urchgroup"]
+[ext_resource type="Script" uid="uid://ykvgbrbroqju" path="res://entities/enemies/sea_urchin/sea_urchin_group.gd" id="29_urchgroup"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ryfpa"]
 friction = 0.1
