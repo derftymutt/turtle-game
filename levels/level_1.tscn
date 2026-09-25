@@ -28,6 +28,7 @@
 [ext_resource type="TileSet" uid="uid://dyl02kfc4a681" path="res://entities/environment/ocean_boundaries/ocean_wall.tres" id="26_4knja"]
 [ext_resource type="PackedScene" uid="uid://ko8xdpxfr5ej" path="res://entities/environment/current/current.tscn" id="27_4knja"]
 [ext_resource type="PackedScene" path="res://ui/menus/flipper_reminder_popup.tscn" id="28_flipreminder"]
+[ext_resource type="Script" path="res://entities/enemies/sea_urchin/sea_urchin_group.gd" id="29_urchgroup"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ryfpa"]
 friction = 0.1
@@ -115,7 +116,7 @@ _data = {
 }
 point_count = 16
 
-[node name="LevelBase" unique_id=519430445 instance=ExtResource("1_lrvbd")]
+[node name="LevelBase2" unique_id=519430445 instance=ExtResource("1_lrvbd")]
 
 [node name="SkyBackground" parent="." index="3" unique_id=967020750 instance=ExtResource("2_ntdhj")]
 
@@ -137,11 +138,19 @@ patrol_speed = 50.0
 chase_speed = 120.0
 
 [node name="SeaUrchins" type="Node2D" parent="." index="11" unique_id=673576481]
+script = ExtResource("29_urchgroup")
+active_count = 2
 
 [node name="SeaUrchin5" parent="SeaUrchins" index="0" unique_id=1974948612 instance=ExtResource("7_i6od7")]
 position = Vector2(-110, -80)
 
-[node name="SeaUrchin6" parent="SeaUrchins" index="1" unique_id=876129622 instance=ExtResource("7_i6od7")]
+[node name="SeaUrchin7" parent="SeaUrchins" index="1" unique_id=1964309753 instance=ExtResource("7_i6od7")]
+position = Vector2(-280, 20)
+
+[node name="SeaUrchin8" parent="SeaUrchins" index="2" unique_id=262681927 instance=ExtResource("7_i6od7")]
+position = Vector2(280, 28)
+
+[node name="SeaUrchin6" parent="SeaUrchins" index="3" unique_id=876129622 instance=ExtResource("7_i6od7")]
 position = Vector2(110, -80)
 
 [node name="PiranhaSpawner" parent="." index="12" unique_id=664138342 instance=ExtResource("11_4knja")]
@@ -200,10 +209,16 @@ variant = "3"
 [node name="UfoWorkshop" parent="." index="18" unique_id=625327535 instance=ExtResource("21_w75he")]
 position = Vector2(0, -138)
 
-[node name="Piranha" parent="." index="19" unique_id=923197771 instance=ExtResource("10_0fu15")]
+[node name="UfoWorkshop3" parent="." index="19" unique_id=1126443571 instance=ExtResource("21_w75he")]
+position = Vector2(150, -138)
+
+[node name="UfoWorkshop2" parent="." index="20" unique_id=537676167 instance=ExtResource("21_w75he")]
+position = Vector2(-150, -138)
+
+[node name="Piranha" parent="." index="21" unique_id=923197771 instance=ExtResource("10_0fu15")]
 position = Vector2(-134, 77)
 
-[node name="FlipperLeftTop" type="Node" parent="." index="20" unique_id=917613486]
+[node name="FlipperLeftTop" type="Node" parent="." index="22" unique_id=917613486]
 
 [node name="DeadWall4" parent="FlipperLeftTop" index="0" unique_id=605233877 instance=ExtResource("24_ryfpa")]
 position = Vector2(-246, -63)
@@ -220,7 +235,7 @@ flip_speed = 40.0
 flip_input = "flipper_left"
 collision_rotation_scale = 0.85
 
-[node name="FlipperLeftBottom" type="Node" parent="." index="21" unique_id=909378231]
+[node name="FlipperLeftBottom" type="Node" parent="." index="23" unique_id=909378231]
 
 [node name="FlipperLeftDown2" parent="FlipperLeftBottom" index="0" unique_id=661980428 instance=ExtResource("22_ryfpa")]
 position = Vector2(-255, 55)
@@ -237,7 +252,7 @@ physics_material_override = SubResource("PhysicsMaterial_0wxk8")
 angle_preset = 2
 mirrored = true
 
-[node name="FlipperCenterLeftTop" type="Node" parent="." index="22" unique_id=1355188047]
+[node name="FlipperCenterLeftTop" type="Node" parent="." index="24" unique_id=1355188047]
 
 [node name="FlipperLeftDownPixelPerfect" parent="FlipperCenterLeftTop" index="0" unique_id=94480237 instance=ExtResource("22_ryfpa")]
 position = Vector2(-65, -40)
@@ -254,7 +269,7 @@ physics_material_override = SubResource("PhysicsMaterial_gtrna")
 angle_preset = 2
 mirrored = true
 
-[node name="FlipperCenterLeftBottom" type="Node" parent="." index="23" unique_id=745265317]
+[node name="FlipperCenterLeftBottom" type="Node" parent="." index="25" unique_id=745265317]
 
 [node name="FlipperLeftDown3" parent="FlipperCenterLeftBottom" index="0" unique_id=431302676 instance=ExtResource("22_ryfpa")]
 position = Vector2(-115, 85)
@@ -271,7 +286,7 @@ physics_material_override = SubResource("PhysicsMaterial_stsco")
 angle_preset = 2
 mirrored = true
 
-[node name="FlipperRightTop" type="Node" parent="." index="24" unique_id=2037267374]
+[node name="FlipperRightTop" type="Node" parent="." index="26" unique_id=2037267374]
 
 [node name="FlipperRightDownPixelPerfect3" parent="FlipperRightTop" index="0" unique_id=62498836 instance=ExtResource("23_ntdhj")]
 position = Vector2(220, -90)
@@ -281,7 +296,7 @@ position = Vector2(246, -63)
 physics_material_override = SubResource("PhysicsMaterial_xv8d5")
 angle_preset = 2
 
-[node name="FlipperRightBottom" type="Node" parent="." index="25" unique_id=1441754290]
+[node name="FlipperRightBottom" type="Node" parent="." index="27" unique_id=1441754290]
 
 [node name="FlipperRightDownPixelPerfect4" parent="FlipperRightBottom" index="0" unique_id=1458908778 instance=ExtResource("23_ntdhj")]
 position = Vector2(255, 55)
@@ -291,7 +306,7 @@ position = Vector2(281, 82)
 physics_material_override = SubResource("PhysicsMaterial_ai2ei")
 angle_preset = 2
 
-[node name="FlipperCenterRightTop" type="Node" parent="." index="26" unique_id=1290375918]
+[node name="FlipperCenterRightTop" type="Node" parent="." index="28" unique_id=1290375918]
 
 [node name="DeadWall3" parent="FlipperCenterRightTop" index="0" unique_id=1391944787 instance=ExtResource("24_ryfpa")]
 position = Vector2(91, -12)
@@ -301,7 +316,7 @@ angle_preset = 2
 [node name="FlipperRightDownPixelPerfect" parent="FlipperCenterRightTop" index="1" unique_id=366067672 instance=ExtResource("23_ntdhj")]
 position = Vector2(65, -40)
 
-[node name="FlipperCenterRightBottom" type="Node" parent="." index="27" unique_id=1426286718]
+[node name="FlipperCenterRightBottom" type="Node" parent="." index="29" unique_id=1426286718]
 
 [node name="FlipperRightDownPixelPerfect2" parent="FlipperCenterRightBottom" index="0" unique_id=1894723362 instance=ExtResource("23_ntdhj")]
 position = Vector2(115, 85)
@@ -311,22 +326,22 @@ position = Vector2(141, 113)
 physics_material_override = SubResource("PhysicsMaterial_4cd1h")
 angle_preset = 2
 
-[node name="OceanFloor" type="TileMapLayer" parent="." index="28" unique_id=435019183]
+[node name="OceanFloor" type="TileMapLayer" parent="." index="30" unique_id=435019183]
 position = Vector2(0, 4)
 tile_map_data = PackedByteArray("AADs/woAAAABAAAAAADt/woAAAAAAAAAAADu/woAAAACAAAAAADv/woAAAABAAAAAADw/woAAAAAAAAAAADx/woAAAAAAAAAAADy/woAAAAAAAAAAADz/woAAAAAAAAAAAD0/woAAAACAAAAAAD1/woAAAAAAAAAAAD2/woAAAAAAAAAAAD3/woAAAAAAAAAAAD4/woAAAAAAAAAAAD5/woAAAACAAAAAAD6/woAAAAAAAAAAAD7/woAAAABAAAAAAD8/woAAAACAAAAAAD9/woAAAABAAAAAAD+/woAAAAAAAAAAAD//woAAAAAAAAAAAAAAAoAAAACAAAAAAABAAoAAAAAAAAAAAACAAoAAAABAAAAAAADAAoAAAAAAAAAAAAEAAoAAAAAAAAAAAAFAAoAAAABAAAAAAAGAAoAAAACAAAAAAAHAAoAAAAAAAAAAAAIAAoAAAABAAAAAAAJAAoAAAABAAAAAAAKAAoAAAAAAAAAAAALAAoAAAABAAAAAAAMAAoAAAAAAAAAAAANAAoAAAAAAAAAAAAOAAoAAAACAAAAAAAPAAoAAAAAAAAAAAAQAAoAAAABAAAAAAARAAoAAAAAAAAAAAASAAoAAAAAAAAAAAATAAoAAAACAAAAAAA=")
 tile_set = SubResource("TileSet_0x1rk")
 
-[node name="OceanWallLeft" type="TileMapLayer" parent="." index="29" unique_id=256635777]
+[node name="OceanWallLeft" type="TileMapLayer" parent="." index="31" unique_id=256635777]
 position = Vector2(0, 4)
 tile_map_data = PackedByteArray("AADY/wkAAAAAAAAAAADY/wgAAAACAAAAAADY/wcAAAABAAAAAADY/wYAAAAAAAAAAADY/wUAAAACAAAAAADY/wQAAAAAAAAAAADY/wMAAAABAAAAAADY/wIAAAACAAAAAADY/wEAAAAAAAAAAADY/wAAAAACAAAAAADY////AAAAAAAAAADY//7/AAAAAAAAAADY//3/AAAAAAAAAADY//z/AAACAAAAAADY//v/AAAAAAAAAADY//r/AAABAAAAAADY//n/AAAAAAAAAADY//j/AAACAAAAAAA=")
 tile_set = ExtResource("26_4knja")
 
-[node name="OceanWallRight" type="TileMapLayer" parent="." index="30" unique_id=1620327425]
+[node name="OceanWallRight" type="TileMapLayer" parent="." index="32" unique_id=1620327425]
 position = Vector2(632, 4)
 tile_map_data = PackedByteArray("AADY/wkAAAAAAAAAAADY/wgAAAACAAAAAADY/wcAAAABAAAAAADY/wYAAAAAAAAAAADY/wUAAAACAAAAAADY/wQAAAAAAAAAAADY/wMAAAABAAAAAADY/wIAAAACAAAAAADY/wEAAAAAAAAAAADY/wAAAAACAAAAAADY////AAAAAAAAAADY//7/AAAAAAAAAADY//3/AAAAAAAAAADY//z/AAACAAAAAADY//v/AAAAAAAAAADY//r/AAABAAAAAADY//n/AAAAAAAAAADY//j/AAACAAAAAAA=")
 tile_set = ExtResource("26_4knja")
 
-[node name="WorldSafetyBoundaries" type="Node2D" parent="." index="31" unique_id=1310245755]
+[node name="WorldSafetyBoundaries" type="Node2D" parent="." index="33" unique_id=1310245755]
 
 [node name="BoundaryBottom" type="StaticBody2D" parent="WorldSafetyBoundaries" index="0" unique_id=457102919]
 position = Vector2(1.0000612, 175.99995)
@@ -390,7 +405,7 @@ offset_right = -323.4816
 offset_bottom = 62.268524
 color = Color(0.1764706, 0.12156863, 0.023529412, 1)
 
-[node name="SpaceDebrisGroup" parent="." index="33" unique_id=511816800 instance=ExtResource("23_ryfpa")]
+[node name="SpaceDebrisGroup" parent="." index="35" unique_id=511816800 instance=ExtResource("23_ryfpa")]
 position = Vector2(-96, -161)
 powerup_scene = ExtResource("24_0fu15")
 
@@ -402,7 +417,7 @@ debris_animation = &"shield"
 position = Vector2(29, -31)
 debris_animation = &"shield"
 
-[node name="SpaceDebrisGroup2" parent="." index="34" unique_id=603951862 instance=ExtResource("23_ryfpa")]
+[node name="SpaceDebrisGroup2" parent="." index="36" unique_id=603951862 instance=ExtResource("23_ryfpa")]
 powerup_type = 4
 powerup_scene = ExtResource("24_0fu15")
 
@@ -414,10 +429,10 @@ debris_animation = &"random"
 position = Vector2(149, -196)
 debris_animation = &"random"
 
-[node name="AlienTechPiece" parent="." index="36" unique_id=100000001 instance=ExtResource("26_0fu15")]
+[node name="AlienTechPiece" parent="." index="38" unique_id=100000001 instance=ExtResource("26_0fu15")]
 position = Vector2(0, 82)
 
-[node name="HydroFunnel" parent="." index="39" unique_id=1683655070 instance=ExtResource("27_4knja")]
+[node name="HydroFunnel" parent="." index="41" unique_id=1683655070 instance=ExtResource("27_4knja")]
 propulsion_force = 1600.0
 centering_force = 800.0
 lateral_damping = 1.0
@@ -431,7 +446,7 @@ curve = SubResource("Curve2D_voubc")
 [node name="Visuals" parent="HydroFunnel" index="1" unique_id=2005124627]
 position = Vector2(-263, -116)
 
-[node name="HydroFunnel2" parent="." index="40" unique_id=1462029198 instance=ExtResource("27_4knja")]
+[node name="HydroFunnel2" parent="." index="42" unique_id=1462029198 instance=ExtResource("27_4knja")]
 propulsion_force = 1600.0
 centering_force = 800.0
 lateral_damping = 1.0
@@ -445,7 +460,7 @@ curve = SubResource("Curve2D_4knja")
 [node name="Visuals" parent="HydroFunnel2" index="1" unique_id=2005124627]
 position = Vector2(251, -110)
 
-[node name="FlipperReminderPopup" parent="." index="42" unique_id=21372061 instance=ExtResource("28_flipreminder")]
+[node name="FlipperReminderPopup" parent="." index="44" unique_id=21372061 instance=ExtResource("28_flipreminder")]
 visible = false
 
 [editable path="SpaceDebrisGroup"]

@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://btbnsn74vk1b" path="res://entities/player/turtle_player.tscn" id="4_8l0e1"]
 [ext_resource type="PackedScene" uid="uid://dysmgxrg7t1o4" path="res://entities/environment/ocean_background/ocean_background.tscn" id="4_kyq6o"]
 [ext_resource type="PackedScene" uid="uid://d2kw7hdpyp6d0" path="res://entities/enemies/sea_urchin/sea_urchin.tscn" id="8_u4kh1"]
+[ext_resource type="Script" uid="uid://ykvgbrbroqju" path="res://entities/enemies/sea_urchin/sea_urchin_group.gd" id="9_mb3d3"]
 [ext_resource type="PackedScene" uid="uid://bu0sjqqm7uvm1" path="res://entities/enemies/crocodile/crocodile.tscn" id="9_svivd"]
 [ext_resource type="PackedScene" uid="uid://bgu8t3jworeir" path="res://entities/enemies/piranha/piranha_spawner.tscn" id="10_yafm2"]
 [ext_resource type="PackedScene" uid="uid://dtv45nw6ur1dc" path="res://entities/enemies/piranha/piranha.tscn" id="11_46211"]
@@ -144,21 +145,35 @@ position = Vector2(212, -124)
 position = Vector2(196, 94)
 
 [node name="SeaUrchins" type="Node2D" parent="." index="12" unique_id=356347317]
+script = ExtResource("9_mb3d3")
+active_count = 5
 
 [node name="SeaUrchin" parent="SeaUrchins" index="0" unique_id=982797359 instance=ExtResource("8_u4kh1")]
 position = Vector2(-285, -105)
 
-[node name="SeaUrchin2" parent="SeaUrchins" index="1" unique_id=140662319 instance=ExtResource("8_u4kh1")]
+[node name="SeaUrchin8" parent="SeaUrchins" index="1" unique_id=1964309753 instance=ExtResource("8_u4kh1")]
+position = Vector2(-285, -60)
+
+[node name="SeaUrchin5" parent="SeaUrchins" index="2" unique_id=1485181643 instance=ExtResource("8_u4kh1")]
+position = Vector2(-200, 0)
+
+[node name="SeaUrchin6" parent="SeaUrchins" index="3" unique_id=234792324 instance=ExtResource("8_u4kh1")]
+position = Vector2(200, 0)
+
+[node name="SeaUrchin2" parent="SeaUrchins" index="4" unique_id=140662319 instance=ExtResource("8_u4kh1")]
 position = Vector2(-145, -90)
 
-[node name="SeaUrchin3" parent="SeaUrchins" index="2" unique_id=1824629733 instance=ExtResource("8_u4kh1")]
+[node name="SeaUrchin3" parent="SeaUrchins" index="5" unique_id=1824629733 instance=ExtResource("8_u4kh1")]
 position = Vector2(145, -90)
 
-[node name="SeaUrchin7" parent="SeaUrchins" index="3" unique_id=1683837988 instance=ExtResource("8_u4kh1")]
+[node name="SeaUrchin7" parent="SeaUrchins" index="6" unique_id=1683837988 instance=ExtResource("8_u4kh1")]
 position = Vector2(0, -106)
 
-[node name="SeaUrchin4" parent="SeaUrchins" index="4" unique_id=1710715458 instance=ExtResource("8_u4kh1")]
+[node name="SeaUrchin4" parent="SeaUrchins" index="7" unique_id=1710715458 instance=ExtResource("8_u4kh1")]
 position = Vector2(285, -105)
+
+[node name="SeaUrchin9" parent="SeaUrchins" index="8" unique_id=1190059585 instance=ExtResource("8_u4kh1")]
+position = Vector2(285, -60)
 
 [node name="Eels" type="Node" parent="." index="13" unique_id=2123386067]
 
@@ -472,7 +487,7 @@ debris_animation = &"bullet"
 position = Vector2(235, -195)
 debris_animation = &"bullet"
 
-[node name="HydroFunnel" parent="." index="49" unique_id=48709372 instance=ExtResource("31_4gw27")]
+[node name="HydroFunnel" parent="." index="48" unique_id=48709372 instance=ExtResource("31_4gw27")]
 propulsion_force = 1600.0
 centering_force = 800.0
 lateral_damping = 1.0
@@ -486,7 +501,7 @@ curve = SubResource("Curve2D_4gw27")
 [node name="Visuals" parent="HydroFunnel" index="1" unique_id=2005124627]
 position = Vector2(-216, -51)
 
-[node name="HydroFunnel2" parent="." index="50" unique_id=93068104 instance=ExtResource("31_4gw27")]
+[node name="HydroFunnel2" parent="." index="49" unique_id=93068104 instance=ExtResource("31_4gw27")]
 propulsion_force = 1600.0
 centering_force = 800.0
 lateral_damping = 1.0
@@ -500,7 +515,7 @@ curve = SubResource("Curve2D_mb3d3")
 [node name="Visuals" parent="HydroFunnel2" index="1" unique_id=2005124627]
 position = Vector2(204, -46)
 
-[node name="HydroFunnel3" parent="." index="51" unique_id=32750845 instance=ExtResource("31_4gw27")]
+[node name="HydroFunnel3" parent="." index="50" unique_id=32750845 instance=ExtResource("31_4gw27")]
 propulsion_force = 1600.0
 centering_force = 800.0
 lateral_damping = 1.0
@@ -515,7 +530,7 @@ curve = SubResource("Curve2D_q26s8")
 [node name="Visuals" parent="HydroFunnel3" index="1" unique_id=2005124627]
 position = Vector2(-89, -27)
 
-[node name="DevTechSeeder2" type="Node" parent="." index="52" unique_id=1666723360]
+[node name="DevTechSeeder2" type="Node" parent="." index="51" unique_id=1666723360]
 script = ExtResource("32_mb3d3")
 
 [editable path="OceanCurrentLeft"]

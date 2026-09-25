@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://dysmgxrg7t1o4" path="res://entities/environment/ocean_background/ocean_background.tscn" id="4_4xp61"]
 [ext_resource type="PackedScene" uid="uid://btbnsn74vk1b" path="res://entities/player/turtle_player.tscn" id="4_h351q"]
 [ext_resource type="PackedScene" uid="uid://bu0sjqqm7uvm1" path="res://entities/enemies/crocodile/crocodile.tscn" id="6_ngvhw"]
+[ext_resource type="Script" uid="uid://ykvgbrbroqju" path="res://entities/enemies/sea_urchin/sea_urchin_group.gd" id="7_4xp61"]
 [ext_resource type="PackedScene" uid="uid://d2kw7hdpyp6d0" path="res://entities/enemies/sea_urchin/sea_urchin.tscn" id="7_itbe0"]
 [ext_resource type="PackedScene" uid="uid://dtv45nw6ur1dc" path="res://entities/enemies/piranha/piranha.tscn" id="10_jqt73"]
 [ext_resource type="PackedScene" uid="uid://bgu8t3jworeir" path="res://entities/enemies/piranha/piranha_spawner.tscn" id="11_00pa0"]
@@ -138,20 +139,31 @@ super_speed_color = Color(0.778, 1.504, 0, 1)
 [node name="BumperWalls" type="Node2D" parent="." index="12" unique_id=1829756997]
 
 [node name="SeaUrchins" type="Node2D" parent="." index="13" unique_id=262217376]
+script = ExtResource("7_4xp61")
+active_count = 5
 
 [node name="SeaUrchin" parent="SeaUrchins" index="0" unique_id=511668719 instance=ExtResource("7_itbe0")]
 position = Vector2(-295, -110)
 
-[node name="SeaUrchin2" parent="SeaUrchins" index="1" unique_id=1925304990 instance=ExtResource("7_itbe0")]
+[node name="SeaUrchin5" parent="SeaUrchins" index="1" unique_id=1964309753 instance=ExtResource("7_itbe0")]
+position = Vector2(-270, -15)
+
+[node name="SeaUrchin6" parent="SeaUrchins" index="2" unique_id=1950936950 instance=ExtResource("7_itbe0")]
+position = Vector2(270, -15)
+
+[node name="SeaUrchin2" parent="SeaUrchins" index="3" unique_id=1925304990 instance=ExtResource("7_itbe0")]
 position = Vector2(-150, -90)
 
-[node name="SeaUrchin3" parent="SeaUrchins" index="2" unique_id=193513502 instance=ExtResource("7_itbe0")]
+[node name="SeaUrchin3" parent="SeaUrchins" index="4" unique_id=193513502 instance=ExtResource("7_itbe0")]
 position = Vector2(150, -90)
 
-[node name="SeaUrchin7" parent="SeaUrchins" index="3" unique_id=66989983 instance=ExtResource("7_itbe0")]
+[node name="SeaUrchin8" parent="SeaUrchins" index="5" unique_id=2084353605 instance=ExtResource("7_itbe0")]
+position = Vector2(130, -10)
+
+[node name="SeaUrchin7" parent="SeaUrchins" index="6" unique_id=66989983 instance=ExtResource("7_itbe0")]
 position = Vector2(0, 25)
 
-[node name="SeaUrchin4" parent="SeaUrchins" index="4" unique_id=785923782 instance=ExtResource("7_itbe0")]
+[node name="SeaUrchin4" parent="SeaUrchins" index="7" unique_id=785923782 instance=ExtResource("7_itbe0")]
 position = Vector2(295, -110)
 
 [node name="Crocodile" parent="." index="14" unique_id=666111827 instance=ExtResource("6_ngvhw")]
