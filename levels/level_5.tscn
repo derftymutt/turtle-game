@@ -24,6 +24,7 @@
 [ext_resource type="PackedScene" uid="uid://q614lo3kanxc" path="res://systems/space_debris/space_debris.tscn" id="22_mlk23"]
 [ext_resource type="PackedScene" uid="uid://ko8xdpxfr5ej" path="res://entities/environment/current/current.tscn" id="23_cekp2"]
 [ext_resource type="PackedScene" path="res://ui/menus/boss_intro_popup.tscn" id="24_bossintro"]
+[ext_resource type="PackedScene" path="res://entities/enemies/puffer_fish/puffer_spawner.tscn" id="25_b36k0"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_av2kh"]
 size = Vector2(8.000034, 1916.0011)
@@ -450,6 +451,10 @@ position = Vector2(301, -21)
 
 [node name="BossIntroPopup" parent="." index="53" unique_id=1650217290 instance=ExtResource("24_bossintro")]
 visible = false
+
+[node name="PufferSpawner" parent="." index="54" unique_id=1590595872 instance=ExtResource("25_b36k0")]
+spawn_area_min = Vector2(-280, -50)
+spawn_area_max = Vector2(280, 150)
 
 [editable path="SpaceDebrisGroup"]
 [editable path="HydroFunnel"]

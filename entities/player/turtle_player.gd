@@ -118,6 +118,11 @@ var _idle_anim_token: int = 0
 var control_suspended: bool = false
 var control_suspend_timer: float = 0.0
 
+# Puffer fish capture — set while the turtle is inside a PufferFish (entered
+# by ramming it at super speed). The puffer owns the spin/eject logic; we just
+# hand it our physics tick via update_capture() and skip everything else.
+var captor_puffer: Node2D = null
+
 # Alien Tech state
 # Extracted effects (see entities/player/alien_tech_effects/) for
 # dispatch-table techs — keyed by AlienTechRegistry id, one instance per
@@ -323,7 +328,7 @@ func _physics_process(delta):
 	# super speed system off for the duration of the attachment.
 	var current_speed = linear_velocity.length()
 	var was_super_speed = is_super_speed
-	if (_tech_effects[AlienTechRegistry.BUMPER_MAGNET] as BumperMagnetEffect).attached or _flipper_velcro_latched:
+	if (_tech_effects[AlienTechRegistry.BUMPER_MAGNET] as BumperMagnetEffect).attached or _flipper_velcro_latched or captor_puffer:
 		was_super_speed = false  # prevents cooldown from triggering on the way out
 		is_super_speed = false
 		is_super_speed_cooldown = false
@@ -425,8 +430,8 @@ func _physics_process(delta):
 
 	stim_shot.physics_process(self, delta)
 
-	# Ocean physics — suppressed while pinned to a bumper or flipper
-	if not (_tech_effects[AlienTechRegistry.BUMPER_MAGNET] as BumperMagnetEffect).attached and not _flipper_velcro_latched and not multi_beam.pulling_player:
+	# Ocean physics — suppressed while pinned to a bumper or flipper, or inside a puffer
+	if not (_tech_effects[AlienTechRegistry.BUMPER_MAGNET] as BumperMagnetEffect).attached and not _flipper_velcro_latched and not multi_beam.pulling_player and not captor_puffer:
 		if ocean:
 			apply_ocean_effects(delta)
 		else:
@@ -477,6 +482,15 @@ func _physics_process(delta):
 		if animated_sprite and is_instance_valid(animated_sprite):
 			animated_sprite.scale = Vector2.ONE
 			animated_sprite.position = Vector2.ZERO
+
+	# Inside a puffer fish: it holds us, spins, and decides when to spit us out
+	if captor_puffer:
+		if is_instance_valid(captor_puffer):
+			linear_velocity = Vector2.ZERO
+			captor_puffer.update_capture(self, delta)
+		else:
+			exit_puffer(global_position, Vector2.ZERO)
+		return
 
 	if control_suspended:
 		if animated_sprite and is_instance_valid(animated_sprite):
@@ -864,7 +878,7 @@ func take_damage(amount: float, use_iframes: bool = false, source: String = ""):
 		return
 	if use_iframes and _contact_iframes_active:
 		return
-	if is_super_speed or is_super_speed_cooldown or shield_active or (_tech_effects[AlienTechRegistry.TRANSPORTER] as TransporterEffect).invincible or (_tech_effects[AlienTechRegistry.DEFLECTOR_SHIELD] as DeflectorShieldEffect).active or _bravado_iframe_active or (_tech_effects[AlienTechRegistry.QUANTUM_MIRROR] as QuantumMirrorEffect).active:
+	if captor_puffer or is_super_speed or is_super_speed_cooldown or shield_active or (_tech_effects[AlienTechRegistry.TRANSPORTER] as TransporterEffect).invincible or (_tech_effects[AlienTechRegistry.DEFLECTOR_SHIELD] as DeflectorShieldEffect).active or _bravado_iframe_active or (_tech_effects[AlienTechRegistry.QUANTUM_MIRROR] as QuantumMirrorEffect).active:
 		return
 	# Shared grace window after any heart loss — this is what tames rapid /
 	# continuous sources with no i-frames of their own (drowning, shock, volleys).
@@ -1066,6 +1080,15 @@ func _update_rest_particles():
 		rest_particles.emitting = should_emit
 
 func _on_super_speed_area_entered(body: Node2D):
+	# Puffer fish swallow the turtle instead of taking the hit. The cooldown
+	# window counts too: it still looks like super speed (green trail) and
+	# is invulnerable, and a weak bumper bounce (400 px/s) only stays above
+	# the threshold for ~6 frames / ~35px — most of its "super speed" is
+	# really cooldown.
+	if (is_super_speed or is_super_speed_cooldown) and not captor_puffer and body.has_method("on_super_speed_contact"):
+		body.on_super_speed_contact(self)
+		return
+
 	if not is_super_speed and not shield_active:
 		return
 
@@ -1489,6 +1512,47 @@ func suspend_control(duration: float):
 func end_control_suspension():
 	"""Cut a stun short (e.g. Dermal Regenerator's channel ending early)"""
 	control_suspend_timer = 0.0
+
+# ---------------------------------------------------------------------------
+# PUFFER FISH CAPTURE
+# ---------------------------------------------------------------------------
+
+## Called by PufferFish when rammed at super speed. Returns false if we're
+## already inside one, so the second fish stays free.
+func enter_puffer(puffer: Node2D) -> bool:
+	if captor_puffer:
+		return false
+	captor_puffer = puffer
+	if _flipper_velcro_latched:
+		_cancel_flipper_velcro()
+	linear_velocity = Vector2.ZERO
+	angular_velocity = 0.0
+	visible = false
+	# Out of the physics world while inside: no pushing against the puffer's
+	# body, no contact damage, no projectile hits.
+	$CollisionShape2D.set_deferred("disabled", true)
+	super_speed_area.set_deferred("monitoring", false)
+	return true
+
+## Called by PufferFish to spit us out (or to let us go if it's freed).
+func exit_puffer(exit_position: Vector2, exit_velocity: Vector2) -> void:
+	if not captor_puffer:
+		return
+	captor_puffer = null
+	global_position = exit_position
+	linear_velocity = exit_velocity
+	visible = true
+	$CollisionShape2D.set_deferred("disabled", false)
+	# Re-enabling monitoring re-reports anything already overlapping, so a
+	# puffer sitting right at the mouth still gets rammed (chaining).
+	super_speed_area.set_deferred("monitoring", true)
+	if exit_velocity.length() >= super_speed_threshold:
+		# Count as super speed right away — the overlap signals above can land
+		# before our next _physics_process recomputes it.
+		is_super_speed = true
+		_create_super_speed_burst()
+		facing_direction = _vector_to_direction_suffix(exit_velocity)
+		_play_animation("kick")
 
 # ---------------------------------------------------------------------------
 # FLIPPER VELCRO

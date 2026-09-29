@@ -1,0 +1,8 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://entities/enemies/puffer_fish/puffer_spawner.gd" id="1_pufspawn"]
+[ext_resource type="PackedScene" path="res://entities/enemies/puffer_fish/puffer_fish.tscn" id="2_puffer"]
+
+[node name="PufferSpawner" type="Node2D"]
+script = ExtResource("1_pufspawn")
+puffer_scene = ExtResource("2_puffer")

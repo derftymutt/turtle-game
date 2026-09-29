@@ -1,0 +1,92 @@
+[gd_scene format=3 uid="uid://drrc4oaqc22u7"]
+
+[ext_resource type="Script" uid="uid://c520lfndt4ygt" path="res://entities/enemies/puffer_fish/puffer_fish.gd" id="1_puffer"]
+[ext_resource type="Texture2D" uid="uid://6ourcyy7qljv" path="res://entities/enemies/puffer_fish/sprites/puffer.png" id="2_hjk5x"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wewv1"]
+atlas = ExtResource("2_hjk5x")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0bnnl"]
+atlas = ExtResource("2_hjk5x")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hjk5x"]
+atlas = ExtResource("2_hjk5x")
+region = Rect2(128, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1h2rv"]
+atlas = ExtResource("2_hjk5x")
+region = Rect2(160, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_048tb"]
+atlas = ExtResource("2_hjk5x")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ec6td"]
+atlas = ExtResource("2_hjk5x")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_puffer"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wewv1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0bnnl")
+}],
+"loop": true,
+"name": &"default",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hjk5x")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1h2rv")
+}],
+"loop": true,
+"name": &"near_death",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_048tb")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ec6td")
+}],
+"loop": true,
+"name": &"puff",
+"speed": 6.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_body"]
+radius = 9.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_damage"]
+
+[node name="PufferFish" type="RigidBody2D" unique_id=370402052]
+collision_layer = 4
+collision_mask = 33
+script = ExtResource("1_puffer")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1736695760]
+sprite_frames = SubResource("SpriteFrames_puffer")
+animation = &"near_death"
+autoplay = "default"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2027071270]
+shape = SubResource("CircleShape2D_body")
+
+[node name="DamageArea" type="Area2D" parent="." unique_id=1241560129]
+collision_layer = 0
+collision_mask = 32
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DamageArea" unique_id=857492275]
+shape = SubResource("CircleShape2D_damage")
+
+[node name="Mouth" type="Marker2D" parent="." unique_id=1652946472]
+position = Vector2(12, 0)

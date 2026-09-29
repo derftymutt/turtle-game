@@ -31,6 +31,7 @@ var has_shown_tech_tutorial: bool = false
 var first_trash_cluster_spawned: bool = false
 var has_used_flipper: bool = false
 var has_shown_flipper_reminder: bool = false
+var has_shown_puffer_tutorial: bool = false
 
 # High scores per level (persists between sessions if you add save/load)
 var high_scores: Dictionary = {
@@ -96,6 +97,7 @@ func reset_game():
 	first_trash_cluster_spawned = false
 	has_used_flipper = false
 	has_shown_flipper_reminder = false
+	has_shown_puffer_tutorial = false
 	LevelManager.reset_run()
 	AlienTechManager.reset_run()
 
