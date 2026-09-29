@@ -1,0 +1,64 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://entities/enemies/squid/ink_cloud.gd" id="1_ink"]
+
+[sub_resource type="Gradient" id="Gradient_cloud"]
+offsets = PackedFloat32Array(0, 0.2, 0.75, 1)
+colors = PackedColorArray(0.03, 0.02, 0.06, 0, 0.03, 0.02, 0.06, 0.9, 0.05, 0.04, 0.09, 0.8, 0.05, 0.04, 0.09, 0)
+
+[sub_resource type="Curve" id="Curve_cloud_scale"]
+_data = [Vector2(0, 0.5), 0.0, 0.0, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Gradient" id="Gradient_burst"]
+offsets = PackedFloat32Array(0, 1)
+colors = PackedColorArray(0.02, 0.01, 0.04, 1, 0.03, 0.02, 0.06, 0)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_ink"]
+radius = 20.0
+
+[node name="InkCloud" type="Node2D"]
+z_index = 5
+script = ExtResource("1_ink")
+
+[node name="Cloud" type="CPUParticles2D" parent="."]
+emitting = false
+amount = 60
+lifetime = 1.2
+preprocess = 0.6
+emission_shape = 1
+emission_sphere_radius = 16.0
+direction = Vector2(0, -1)
+spread = 180.0
+gravity = Vector2(0, 0)
+initial_velocity_min = 3.0
+initial_velocity_max = 10.0
+scale_amount_min = 4.0
+scale_amount_max = 8.0
+scale_amount_curve = SubResource("Curve_cloud_scale")
+color_ramp = SubResource("Gradient_cloud")
+
+[node name="Burst" type="CPUParticles2D" parent="."]
+emitting = false
+amount = 24
+lifetime = 0.6
+one_shot = true
+explosiveness = 1.0
+direction = Vector2(0, -1)
+spread = 180.0
+gravity = Vector2(0, 0)
+initial_velocity_min = 60.0
+initial_velocity_max = 120.0
+damping_min = 150.0
+damping_max = 200.0
+scale_amount_min = 3.0
+scale_amount_max = 6.0
+color_ramp = SubResource("Gradient_burst")
+
+[node name="Area2D" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 32
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("CircleShape2D_ink")

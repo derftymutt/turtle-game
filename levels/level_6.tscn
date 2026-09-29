@@ -47,15 +47,6 @@ friction = 0.0
 [node name="LevelBase" unique_id=1013451131 instance=ExtResource("1_rqsg2")]
 level_number = 6
 
-[node name="GameOverScreen" parent="." index="1" unique_id=301166293]
-visible = false
-
-[node name="LevelCompleteScreen" parent="." index="2" unique_id=1103608067]
-visible = false
-
-[node name="PauseMenu" parent="." index="3" unique_id=2047821456]
-visible = false
-
 [node name="Ocean" parent="." index="5" unique_id=1274260941 instance=ExtResource("2_fpvgn")]
 
 [node name="OceanBackground" parent="." index="6" unique_id=593268214 instance=ExtResource("3_xn6mk")]

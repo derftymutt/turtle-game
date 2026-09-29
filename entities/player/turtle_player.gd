@@ -123,6 +123,11 @@ var control_suspend_timer: float = 0.0
 # hand it our physics tick via update_capture() and skip everything else.
 var captor_puffer: Node2D = null
 
+# Squid ink — seconds left blinded by an InkCloud: no spitting, sprite pulses
+# black. Set through apply_ink().
+const INK_TINT := Color(0.06, 0.04, 0.1)
+var _ink_timer: float = 0.0
+
 # Alien Tech state
 # Extracted effects (see entities/player/alien_tech_effects/) for
 # dispatch-table techs — keyed by AlienTechRegistry id, one instance per
@@ -321,6 +326,9 @@ func _physics_process(delta):
 			can_shoot = true
 			is_player_controlling_rotation = false
 
+	if _ink_timer > 0.0:
+		_ink_timer -= delta
+
 	# Super speed state
 	# While magnetically attached the bumper's bounce impulse (applied by the
 	# physics engine between frames) can exceed the super speed threshold every
@@ -473,7 +481,7 @@ func _physics_process(delta):
 
 	if GameSettings.mouse_mode and Input.is_action_just_pressed(GameSettings.TOGGLE_FIRE_ACTION):
 		mouse_fire_enabled = not mouse_fire_enabled
-	_mouse_crosshair.firing = mouse_fire_enabled
+	_mouse_crosshair.firing = mouse_fire_enabled and not is_inked()
 
 	# Control suspension timer — runs even while suspended so it keeps counting down
 	control_suspend_timer -= delta
@@ -648,6 +656,14 @@ func _update_sprite_modulate():
 	else:
 		sprite.modulate = Color.WHITE
 
+	# Squid ink: fast black pulse blended over whatever color was set above,
+	# so being unable to spit reads at a glance even under a tech tint.
+	if _ink_timer > 0.0:
+		var pulse := (sin(Time.get_ticks_msec() * 0.012) + 1.0) * 0.5
+		var a: float = sprite.modulate.a
+		sprite.modulate = sprite.modulate.lerp(INK_TINT, lerpf(0.4, 0.9, pulse))
+		sprite.modulate.a = a
+
 	# Last-heart warning: slow red pulse blended over whatever color was set
 	# above, so it stays visible even while a tech/powerup tint is active.
 	if current_hearts == 1:
@@ -781,6 +797,8 @@ func apply_thrust(direction: Vector2):
 func shoot(direction: Vector2):
 	if bullet_scene == null:
 		push_warning("No bullet scene assigned!")
+		return
+	if is_inked():
 		return
 
 	is_player_controlling_rotation = true
@@ -1553,6 +1571,19 @@ func exit_puffer(exit_position: Vector2, exit_velocity: Vector2) -> void:
 		_create_super_speed_burst()
 		facing_direction = _vector_to_direction_suffix(exit_velocity)
 		_play_animation("kick")
+
+# ---------------------------------------------------------------------------
+# SQUID INK
+# ---------------------------------------------------------------------------
+
+## Called every frame by an InkCloud the turtle is inside. Blinds for at
+## least `duration` from now — staying in the cloud keeps topping it up.
+func apply_ink(duration: float) -> void:
+	_ink_timer = maxf(_ink_timer, duration)
+
+## Inked turtles can't spit (every shot goes through shoot()).
+func is_inked() -> bool:
+	return _ink_timer > 0.0
 
 # ---------------------------------------------------------------------------
 # FLIPPER VELCRO

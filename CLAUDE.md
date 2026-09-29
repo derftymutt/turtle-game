@@ -59,6 +59,8 @@ All enemies extend `BaseEnemy` (which extends `RigidBody2D`). Override `_enemy_r
 
 An enemy that defines `on_super_speed_contact(turtle)` gets that call from the turtle's `SuperSpeedArea` instead of `take_damage(super_speed_damage)`. `PufferFish` uses it to swallow the turtle: `TurtlePlayer.enter_puffer()` hides the turtle, disables its collision and hands its physics tick to `PufferFish.update_capture()` (so the capture keeps running under Time Freeze / shock) until `exit_puffer()` launches it out of the mouth. While `captor_puffer` is set the turtle is invulnerable and super speed / ocean physics are off, the same way they are during a Bumper Magnet attach.
 
+`Squid` (`entities/enemies/squid/`) hides in walls (HIDE → THRUST → SWIM). Hide spots come from `Squid.find_hide_spots()`, which raycasts for any `DeadWall` face or collidable `TileMapLayer` (ocean walls/floor) and returns the surface point + normal; `SquidSpawner` uses the same helper to place squids hidden at level start. Hiding holds position by velocity rather than `freeze`, since Time Freeze / `EnemyShock` save and restore `freeze`. Each thrust drops an `InkCloud` that calls `TurtlePlayer.apply_ink()` — while `is_inked()`, `shoot()` returns early (covers every spit type) and the sprite pulses black.
+
 `BaseEnemyStatic` (`AnimatableBody2D`, e.g. Crocodile) is a parallel base class with the same health/damage API. Invincible enemies (crocodile, sea urchin) can be frozen and disarmed for a time via `shock(duration)` on either base class, which delegates to `EnemyShock` (`entities/enemies/enemy_shock.gd`); the boss submarine opts out through `can_be_shocked()`.
 
 ### Physics Collision Layers

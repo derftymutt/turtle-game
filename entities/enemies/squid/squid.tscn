@@ -1,0 +1,133 @@
+[gd_scene format=3 uid="uid://ba8w8i10mwj3d"]
+
+[ext_resource type="Script" uid="uid://ow71pevyyx74" path="res://entities/enemies/squid/squid.gd" id="1_squid"]
+[ext_resource type="Texture2D" uid="uid://bqbeqh6fkr8ck" path="res://entities/enemies/squid/sprites/squid.png" id="2_tex"]
+
+[sub_resource type="AtlasTexture" id="Atlas_4"]
+atlas = ExtResource("2_tex")
+region = Rect2(128, 0, 32, 44)
+
+[sub_resource type="AtlasTexture" id="Atlas_5"]
+atlas = ExtResource("2_tex")
+region = Rect2(160, 0, 32, 44)
+
+[sub_resource type="AtlasTexture" id="Atlas_6"]
+atlas = ExtResource("2_tex")
+region = Rect2(192, 0, 32, 44)
+
+[sub_resource type="AtlasTexture" id="Atlas_7"]
+atlas = ExtResource("2_tex")
+region = Rect2(224, 0, 32, 44)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4f5ts"]
+atlas = ExtResource("2_tex")
+region = Rect2(256, 0, 32, 44)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1v086"]
+atlas = ExtResource("2_tex")
+region = Rect2(288, 0, 32, 44)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_n11jr"]
+atlas = ExtResource("2_tex")
+region = Rect2(320, 0, 32, 44)
+
+[sub_resource type="AtlasTexture" id="Atlas_0"]
+atlas = ExtResource("2_tex")
+region = Rect2(0, 0, 32, 44)
+
+[sub_resource type="AtlasTexture" id="Atlas_1"]
+atlas = ExtResource("2_tex")
+region = Rect2(32, 0, 32, 44)
+
+[sub_resource type="AtlasTexture" id="Atlas_2"]
+atlas = ExtResource("2_tex")
+region = Rect2(64, 0, 32, 44)
+
+[sub_resource type="AtlasTexture" id="Atlas_3"]
+atlas = ExtResource("2_tex")
+region = Rect2(96, 0, 32, 44)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_squid"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("Atlas_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_5")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_6")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_7")
+}],
+"loop": true,
+"name": &"hide",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4f5ts")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1v086")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_n11jr")
+}],
+"loop": true,
+"name": &"near_death",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("Atlas_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_1")
+}],
+"loop": true,
+"name": &"swim",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("Atlas_3")
+}],
+"loop": true,
+"name": &"thrust",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_body"]
+radius = 7.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_damage"]
+radius = 11.0
+
+[node name="Squid" type="RigidBody2D" unique_id=561904919]
+collision_layer = 4
+script = ExtResource("1_squid")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=2075868465]
+sprite_frames = SubResource("SpriteFrames_squid")
+animation = &"near_death"
+autoplay = "hide"
+offset = Vector2(0.5, -8)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1028621068]
+shape = SubResource("CircleShape2D_body")
+
+[node name="DamageArea" type="Area2D" parent="." unique_id=1637246079]
+collision_layer = 0
+collision_mask = 32
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DamageArea" unique_id=892667199]
+shape = SubResource("CircleShape2D_damage")
