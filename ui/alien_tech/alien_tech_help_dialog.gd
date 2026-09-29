@@ -136,7 +136,8 @@ func _build_body(body: RichTextLabel) -> void:
 	body.add_image(_RIGHT_SLOT_ICON, _SLOT_ICON_SIZE, _SLOT_ICON_SIZE)
 	body.append_text(" is triggered with RB (Right Bumper) or \"%s\"\n\n" % GameSettings.tech_slot_key_label(1))
 	body.append_text("Some techs are always on, while some require triggering.\n")
-	body.append_text("This info is displayed in the info box describing the tech.\n(Also shown in the pause menu).")
+	body.append_text("This info is displayed in the info box describing the tech.\n(Also shown in the pause menu).\n\n")
+	body.append_text("Study a tech instead of equipping it to gain Insight. Spend Insight on a later find to reveal a different tech.")
 	body.pop()
 
 

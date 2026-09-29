@@ -180,10 +180,49 @@ func _record_lost_tech(tech_id: String) -> void:
 	if tech_id != "":
 		_last_lost_or_skipped_tech = tech_id
 
-## Called by the selection screen when the player explicitly declines the
-## offered tech, so it isn't immediately offered again next time.
-func record_skipped_tech(tech_id: String) -> void:
+# ─── Insight (studying skipped techs) ────────────────────────────────────────
+
+# Declining an offered tech at the selection screen ("Study it") earns one
+# Insight. A later offer can spend one Insight to swap itself for a different
+# random tech. Run state — cleared in reset_run(), persisted by SaveManager.
+var insight: int = 0
+
+## Called by the selection screen when the player studies (declines) the
+## offered tech. Also feeds the one-slot "don't re-offer it next" memory.
+func study_tech(tech_id: String) -> void:
+	if tech_id == "":
+		return
+	insight += 1
 	_record_lost_tech(tech_id)
+
+func can_use_insight(current_offer_id: String) -> bool:
+	return insight > 0 and not _roll_different_tech(current_offer_id).is_empty()
+
+## Spends one Insight to re-pick the current offer — never the offer itself or
+## an equipped tech. Returns the new offer, or {} (nothing spent) if no such
+## tech exists.
+func use_insight(current_offer_id: String) -> Dictionary:
+	if insight <= 0:
+		return {}
+	var tech := _roll_different_tech(current_offer_id)
+	if not tech.is_empty():
+		insight -= 1
+	return tech
+
+func _roll_different_tech(current_offer_id: String) -> Dictionary:
+	var exclude_ids: Array[String] = [current_offer_id]
+	for slot in slots:
+		if not slot.is_empty():
+			exclude_ids.append(slot["id"])
+	var with_last_lost := exclude_ids.duplicate()
+	if _last_lost_or_skipped_tech != "":
+		with_last_lost.append(_last_lost_or_skipped_tech)
+	var choices := AlienTechRegistry.get_random_choices(1, with_last_lost)
+	if choices.is_empty():
+		# Same fallback as _trigger_selection(): the just-lost tech alone
+		# mustn't block the pick.
+		choices = AlienTechRegistry.get_random_choices(1, exclude_ids)
+	return {} if choices.is_empty() else choices[0]
 
 # ─── Powerup Replicator state ────────────────────────────────────────────────
 
@@ -569,6 +608,7 @@ func reset_run():
 	_passive_bar_ratios.clear()
 	_live_unique_techs.clear()
 	_last_lost_or_skipped_tech = ""
+	insight = 0
 	phase_shifter_ammo = PHASE_SHIFTER_MAX_AMMO
 	phase_shifter_recharging = false
 	phase_shifter_recharge_timer = 0.0

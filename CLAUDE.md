@@ -88,6 +88,8 @@ HUD is instantiated as a child of each level scene (via `LevelBase`). It manages
 
 Defeating enemies has a 2% chance to drop an `AlienTechPiece`. Collecting one calls `AlienTechManager.collect_piece()`. When `pieces_this_threshold >= PIECES_PER_TECH` (currently 1), `AlienTechManager` emits `selection_ready` and shows the tech selection screen. Tech selection assigns a tech to an empty slot.
 
+**Insight (skip/reroll)**: declining an offer ("Study it") calls `AlienTechManager.study_tech()` for +1 `insight`. With Insight, the selection screen shows "Use Insight", which instantly spends one via `use_insight()` to swap the offer for a different random tech (never the current offer or an equipped tech). Run state — cleared in `reset_run()`, saved by `SaveManager`.
+
 ## Input Actions (Keyboard Defaults)
 
 Mouse mode (`GameSettings.mouse_mode`) is the **default** keyboard layout; "Keyboard Only" in Options switches to the IJKL layout defined in `project.godot`.

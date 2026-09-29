@@ -28,6 +28,7 @@ func save_game():
 		"continue_count":      LevelManager.continue_count,
 		"total_time_ms":       LevelManager.total_time_ms,
 		"persisted_hearts":    GameManager.persisted_hearts,
+		"insight":             AlienTechManager.insight,
 	}
 	var file = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if file:
@@ -68,6 +69,7 @@ func apply_save():
 	if not slot1.is_empty():
 		AlienTechManager.assign_tech(slot1, 1)
 		AlienTechManager.set_slot_hot(1, data.get("tech_hot_1", false))
+	AlienTechManager.insight = int(data.get("insight", 0))
 	LevelManager.current_level_number = data.get("level_number", 1)
 	LevelManager.total_time_ms = data.get("total_time_ms", 0)
 	GameManager.persisted_hearts = int(data.get("persisted_hearts", -1))

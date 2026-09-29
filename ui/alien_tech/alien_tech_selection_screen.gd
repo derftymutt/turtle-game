@@ -8,7 +8,10 @@ class_name AlienTechSelectionScreen
 ## focus previews the newly found tech — pulsing green border, full
 ## description — while the other keeps showing whatever is really equipped
 ## there. Move focus with left/right, confirm with ui_accept (Space/Enter/A) or a
-## click, or move focus to Skip to back out without equipping anything.
+## click, or move focus to "Study it" to back out without equipping anything
+## (earning one Insight — see AlienTechManager.study_tech()). With Insight in
+## hand, a "Use Insight" option appears beside it that instantly swaps the
+## offer for a different random tech.
 
 const _SFX_MENU_NAV    = preload("res://assets/sounds/sfx/menu nav_1.ogg")
 const _SFX_MENU_SELECT = preload("res://assets/sounds/sfx/menu select_1.ogg")
@@ -68,17 +71,24 @@ const _CLICK_ARM_DELAY_MSEC: int = 500
 @onready var hook_label:      Label = $"Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/HookLabel"
 
 @onready var skip_panel: PanelContainer = $"Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonsRow/SkipPanel"
-@onready var skip_label: Label = $"Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonsRow/SkipPanel/SkipRow/SkipLabel"
+@onready var skip_label: Label = $"Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonsRow/SkipPanel/SkipRow/SkipTextColumn/SkipLabel"
+@onready var use_panel:  PanelContainer = $"Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonsRow/UsePanel"
+@onready var use_label:  Label = $"Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonsRow/UsePanel/UseTextColumn/UseLabel"
+
+@onready var insight_margin: MarginContainer = $"Control/CenterContainer/PanelContainer/InsightMargin"
+@onready var insight_label:  Label = $"Control/CenterContainer/PanelContainer/InsightMargin/InsightLabel"
 
 @onready var help_panel: PanelContainer = $"Control/CenterContainer/PanelContainer/HelpMargin/HelpPanel"
 
-# Skip is styled as a third slot-like panel (same _style_unfocused/
-# _style_candidate pulsing border as the two tech slots, see _ready() and
-# _apply_candidate_style()) rather than a plain button, so this menu reads as
-# one consistent set of three bordered options instead of two bordered boxes
-# plus an unrelated-looking button.
-var _skip_shine_material: ShaderMaterial
-var _skip_shine_start_msec: int = 0
+# Skip ("Study it") and "Use Insight" are styled as slot-like panels (same
+# _style_unfocused/_style_candidate pulsing border as the two tech slots, see
+# _ready() and _apply_candidate_style()) rather than plain buttons, so this
+# menu reads as one consistent set of bordered options instead of two
+# bordered boxes plus unrelated-looking buttons. One shine material, carried
+# by whichever of their labels is focused (_button_shine_label).
+var _button_shine_material: ShaderMaterial
+var _button_shine_label: Label = null
+var _button_shine_start_msec: int = 0
 
 @onready var slot_l_panel: PanelContainer = $"Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLPanel"
 @onready var slot_l_input:    Label       = $"Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TechInfoMargin/TechInfoContainer/SlotLPanel/SlotLRow/SlotLTextContainer/SlotLInputRow/SlotLInput"
@@ -104,11 +114,13 @@ var _sfx_select: AudioStreamPlayer
 var _pending_tech_id: String = ""
 
 # Which slot currently previews the found tech: 0 (left), 1 (right), -1 when
-# Skip has focus, or _HELP_CANDIDATE when Help has focus — the last two both
-# mean neither slot should preview it.
+# Skip has focus, _HELP_CANDIDATE when Help has focus, or _USE_CANDIDATE when
+# Use Insight has focus — the negative values all mean neither slot should
+# preview it.
 var _candidate_slot: int = 0
 
 const _HELP_CANDIDATE: int = -2
+const _USE_CANDIDATE: int = -3
 
 # Whether each slot currently needs a blinking input hint (set on each
 # display refresh, read every _process so the blink itself costs no lookups).
@@ -188,15 +200,21 @@ func _ready():
 	slot_r_panel.focus_neighbor_left = slot_r_panel.get_path_to(slot_l_panel)
 	slot_r_panel.focus_neighbor_right = slot_r_panel.get_path_to(skip_panel)
 
-	_skip_shine_material = ShaderMaterial.new()
-	_skip_shine_material.shader = _TEXT_SHINE_SHADER
-	_skip_shine_material.set_shader_parameter("shine_color", Vector3(0.4, 1.0, 0.45))
+	_button_shine_material = ShaderMaterial.new()
+	_button_shine_material.shader = _TEXT_SHINE_SHADER
+	_button_shine_material.set_shader_parameter("shine_color", Vector3(0.4, 1.0, 0.45))
 
 	skip_panel.add_theme_stylebox_override("panel", _style_unfocused)
 	skip_panel.focus_neighbor_left = skip_panel.get_path_to(slot_r_panel)
 	skip_panel.focus_entered.connect(_on_skip_focused)
 	skip_panel.gui_input.connect(_on_skip_gui_input)
 	skip_panel.mouse_entered.connect(func(): skip_panel.grab_focus())
+
+	use_panel.add_theme_stylebox_override("panel", _style_unfocused)
+	use_panel.focus_neighbor_left = use_panel.get_path_to(skip_panel)
+	use_panel.focus_entered.connect(_on_use_focused)
+	use_panel.gui_input.connect(_on_use_gui_input)
+	use_panel.mouse_entered.connect(func(): use_panel.grab_focus())
 
 	help_panel.add_theme_stylebox_override("panel", _style_unfocused)
 	help_panel.focus_entered.connect(_on_help_focused)
@@ -224,7 +242,7 @@ func _process(delta: float) -> void:
 			_input_armed = true
 
 	_update_name_shine()
-	_update_skip_shine()
+	_update_button_shine()
 	_update_menu_flair(delta)
 
 	var active_blink_on := int(Time.get_ticks_msec() / _ACTIVE_BLINK_PERIOD_MSEC) % 2 == 0
@@ -238,8 +256,8 @@ func _process(delta: float) -> void:
 	if _slot_hot_blinking[1]:
 		slot_r_hot_badge.modulate.a = input_alpha
 
-	# Skip is now a third slot-like panel using this same _style_candidate
-	# object when it's the focused one (_candidate_slot == -1), so the pulse
+	# Skip/Use Insight/Help are slot-like panels using this same
+	# _style_candidate object when focused, so the pulse
 	# always has exactly one live user — no need to gate this on a specific
 	# _candidate_slot value anymore.
 	_pulse_time += delta
@@ -252,8 +270,7 @@ func _process(delta: float) -> void:
 func _on_selection_ready(choices: Array):
 	if choices.is_empty():
 		return
-	_pending_tech_id = choices[0].get("id", "")
-	_build_offer_display(choices[0])
+	_show_offer(choices[0])
 	visible = true
 	get_tree().paused = true
 	_input_armed = false
@@ -290,21 +307,30 @@ func _update_name_shine() -> void:
 	_shine_material.set_shader_parameter("shine_time", Time.get_ticks_msec() / 1000.0)
 
 
-## Same technique as _update_name_shine(), but only while Skip is actually
-## the focused/candidate option (_candidate_slot == -1) — skip_label doesn't
-## carry the shine material at all otherwise, see _on_skip_focused()/
-## _on_slot_focused().
-func _update_skip_shine() -> void:
-	if _candidate_slot != -1 or skip_label.material == null:
+## Same technique as _update_name_shine(), but only while Skip or Use Insight
+## is the focused option — neither label carries the shine material
+## otherwise, see _set_button_shine().
+func _update_button_shine() -> void:
+	if _button_shine_label == null:
 		return
-	var font := skip_label.get_theme_font("font")
-	var font_size := skip_label.get_theme_font_size("font_size")
-	var text_width := font.get_string_size(skip_label.text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
-	var label_rect := skip_label.get_global_rect()
+	var font := _button_shine_label.get_theme_font("font")
+	var font_size := _button_shine_label.get_theme_font_size("font_size")
+	var text_width := font.get_string_size(_button_shine_label.text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+	var label_rect := _button_shine_label.get_global_rect()
 	var vp_width := get_viewport().get_visible_rect().size.x
-	_skip_shine_material.set_shader_parameter("band_left_uv", label_rect.position.x / vp_width)
-	_skip_shine_material.set_shader_parameter("band_right_uv", (label_rect.position.x + text_width) / vp_width)
-	_skip_shine_material.set_shader_parameter("shine_time", (Time.get_ticks_msec() - _skip_shine_start_msec) / 1000.0)
+	_button_shine_material.set_shader_parameter("band_left_uv", label_rect.position.x / vp_width)
+	_button_shine_material.set_shader_parameter("band_right_uv", (label_rect.position.x + text_width) / vp_width)
+	_button_shine_material.set_shader_parameter("shine_time", (Time.get_ticks_msec() - _button_shine_start_msec) / 1000.0)
+
+
+## Moves the shine onto `label` (skip_label/use_label), or clears it with null.
+func _set_button_shine(label: Label) -> void:
+	skip_label.material = null
+	use_label.material = null
+	_button_shine_label = label
+	if label:
+		_button_shine_start_msec = Time.get_ticks_msec()
+		label.material = _button_shine_material
 
 
 ## Gives the outer card a slow, living shimmer instead of a static color —
@@ -329,6 +355,22 @@ func _update_menu_flair(delta: float) -> void:
 		_MENU_BG_BASE_COLOR.b * brightness,
 		_MENU_BG_BASE_COLOR.a
 	)
+
+
+func _show_offer(tech: Dictionary) -> void:
+	_pending_tech_id = tech.get("id", "")
+	_build_offer_display(tech)
+	_refresh_insight_ui()
+
+
+## The corner counter and the Use Insight option only appear with Insight in
+## hand (and, for the option, something it could actually swap to).
+func _refresh_insight_ui() -> void:
+	var insight: int = AlienTechManager.insight
+	insight_margin.visible = insight > 0
+	insight_label.text = "Insight x%d" % insight
+	use_panel.visible = AlienTechManager.can_use_insight(_pending_tech_id)
+	skip_panel.focus_neighbor_right = skip_panel.get_path_to(use_panel if use_panel.visible else skip_panel)
 
 
 func _build_offer_display(tech: Dictionary):
@@ -435,6 +477,7 @@ func _apply_candidate_style():
 	slot_l_panel.add_theme_stylebox_override("panel", _style_candidate if _candidate_slot == 0 else _style_unfocused)
 	slot_r_panel.add_theme_stylebox_override("panel", _style_candidate if _candidate_slot == 1 else _style_unfocused)
 	skip_panel.add_theme_stylebox_override("panel", _style_candidate if _candidate_slot == -1 else _style_unfocused)
+	use_panel.add_theme_stylebox_override("panel", _style_candidate if _candidate_slot == _USE_CANDIDATE else _style_unfocused)
 	help_panel.add_theme_stylebox_override("panel", _style_candidate if _candidate_slot == _HELP_CANDIDATE else _style_unfocused)
 
 
@@ -444,7 +487,7 @@ func _on_slot_focused(slot_index: int):
 	_pulse_time = 0.0
 	_refresh_slots()
 	_apply_candidate_style()
-	skip_label.material = null
+	_set_button_shine(null)
 
 
 func _on_skip_focused():
@@ -453,8 +496,16 @@ func _on_skip_focused():
 	_pulse_time = 0.0
 	_refresh_slots()
 	_apply_candidate_style()
-	_skip_shine_start_msec = Time.get_ticks_msec()
-	skip_label.material = _skip_shine_material
+	_set_button_shine(skip_label)
+
+
+func _on_use_focused():
+	_sfx_nav.play()
+	_candidate_slot = _USE_CANDIDATE
+	_pulse_time = 0.0
+	_refresh_slots()
+	_apply_candidate_style()
+	_set_button_shine(use_label)
 
 
 func _on_help_focused():
@@ -463,7 +514,7 @@ func _on_help_focused():
 	_pulse_time = 0.0
 	_refresh_slots()
 	_apply_candidate_style()
-	skip_label.material = null
+	_set_button_shine(null)
 
 
 # ─── Equip / Skip ─────────────────────────────────────────────────────────────
@@ -484,6 +535,15 @@ func _on_skip_gui_input(event: InputEvent) -> void:
 		is_click = mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT
 	if is_click or event.is_action_pressed("ui_accept"):
 		_on_skip_pressed()
+
+
+func _on_use_gui_input(event: InputEvent) -> void:
+	var is_click := false
+	if event is InputEventMouseButton:
+		var mb := event as InputEventMouseButton
+		is_click = mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT
+	if is_click or event.is_action_pressed("ui_accept"):
+		_use_insight()
 
 
 func _on_help_gui_input(event: InputEvent) -> void:
@@ -531,15 +591,36 @@ func _confirm_skip():
 	# GDScript's indentation parser ("unindent doesn't match" at the dict's
 	# closing brace) — define it as a plain local first instead.
 	var do_skip := func():
-		AlienTechManager.record_skipped_tech(_pending_tech_id)
+		AlienTechManager.study_tech(_pending_tech_id)
 		_close_screen()
 	dialog.show_dialog(
-		"Are you sure you don't wanna equip %s?" % tech_name,
+		"Study %s instead of equipping it?" % tech_name,
 		[
-			{"text": "Skip It", "callback": do_skip},
+			{"text": "Study It", "callback": do_skip},
 			{"text": "Keep Looking", "is_cancel": true},
 		]
 	)
+
+
+# ─── Use Insight ──────────────────────────────────────────────────────────────
+
+## Instant swap, no confirm — unlike studying, it doesn't close the screen and
+## the result is right there to judge.
+func _use_insight():
+	var tech := AlienTechManager.use_insight(_pending_tech_id)
+	if tech.is_empty():
+		return
+	if _sfx_select:
+		_sfx_select.play()
+	_show_offer(tech)
+	# Use Insight may have just hidden itself (last Insight spent) — land on
+	# the new offer's default slot rather than leave focus on a hidden panel.
+	if use_panel.visible:
+		return
+	if _candidate_slot == 1:
+		slot_r_panel.grab_focus()
+	else:
+		slot_l_panel.grab_focus()
 
 
 func _close_screen():

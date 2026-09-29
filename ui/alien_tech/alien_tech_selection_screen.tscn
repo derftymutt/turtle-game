@@ -295,12 +295,66 @@ texture = SubResource("AtlasTexture_skipicon")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="SkipLabel" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonsRow/SkipPanel/SkipRow" unique_id=300000064]
+[node name="SkipTextColumn" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonsRow/SkipPanel/SkipRow" unique_id=300000124]
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_override_constants/separation = 0
+
+[node name="SkipLabel" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonsRow/SkipPanel/SkipRow/SkipTextColumn" unique_id=300000064]
 layout_mode = 2
 mouse_filter = 2
-size_flags_vertical = 4
 theme_override_font_sizes/font_size = 13
-text = "Skip"
+text = "Study it"
+
+[node name="SkipSubLabel" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonsRow/SkipPanel/SkipRow/SkipTextColumn" unique_id=300000125]
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.55, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "+1 Insight"
+
+[node name="UsePanel" type="PanelContainer" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonsRow" unique_id=300000126]
+visible = false
+layout_mode = 2
+focus_mode = 2
+mouse_filter = 0
+mouse_default_cursor_shape = 2
+
+[node name="UseTextColumn" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonsRow/UsePanel" unique_id=300000127]
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_override_constants/separation = 0
+
+[node name="UseLabel" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonsRow/UsePanel/UseTextColumn" unique_id=300000128]
+layout_mode = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 13
+text = "Use Insight"
+
+[node name="UseSubLabel" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonsRow/UsePanel/UseTextColumn" unique_id=300000129]
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.55, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "Reveal a different tech"
+
+[node name="InsightMargin" type="MarginContainer" parent="Control/CenterContainer/PanelContainer" unique_id=300000130]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+mouse_filter = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+
+[node name="InsightLabel" type="Label" parent="Control/CenterContainer/PanelContainer/InsightMargin" unique_id=300000131]
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.55, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "Insight x1"
 
 [node name="HelpMargin" type="MarginContainer" parent="Control/CenterContainer/PanelContainer" unique_id=300000099]
 layout_mode = 2
