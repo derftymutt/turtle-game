@@ -9,11 +9,19 @@ const _MAX_SPEED := 200.0
 
 const _PLAYER_SEPARATION_GRACE := 0.5  # see _restore_physics_after_drop()
 
+# Above the water surface the piece falls like a real object instead of
+# using its heavily damped underwater settings (gravity_scale 0.2 /
+# linear_damp 7 — ~28 px/s terminal velocity, which reads as hovering).
+const _AIR_GRAVITY_SCALE := 1.0
+const _AIR_LINEAR_DAMP := 0.5
+
 var is_carried: bool = false
 var carrier: Node2D = null
 var _drop_grace_timer: float = 0.0
 var _cached_limits: Dictionary = {}
 var _dropped_from: Node2D = null  # carrier at the moment of drop, for the collision exception below
+var _water_gravity_scale: float = -1.0  # water-physics values captured before air physics overrides them
+var _water_linear_damp: float = -1.0
 
 func _collectible_ready():
 	sink_speed = 0.0
@@ -51,9 +59,19 @@ func _collectible_physics_process(delta):
 		var depth = ocean.get_depth(global_position)
 		if depth > 0:
 			apply_central_force(Vector2(0, 20))
+		_update_air_physics(depth <= 0)
 
 	# Keep piece inside the play area every frame, not just on intentional drop.
 	_enforce_horizontal_bounds()
+
+func _update_air_physics(in_air: bool) -> void:
+	# Water values are captured lazily rather than in _collectible_ready()
+	# because UFOPieceSeeder overrides them after the piece enters the tree.
+	if _water_gravity_scale < 0.0:
+		_water_gravity_scale = gravity_scale
+		_water_linear_damp = linear_damp
+	gravity_scale = _AIR_GRAVITY_SCALE if in_air else _water_gravity_scale
+	linear_damp = _AIR_LINEAR_DAMP if in_air else _water_linear_damp
 
 func _integrate_forces(state: PhysicsDirectBodyState2D):
 	# Cap speed at physics-engine level so crab collisions cannot accelerate
