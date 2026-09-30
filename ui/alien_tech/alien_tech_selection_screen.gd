@@ -54,13 +54,18 @@ const _MENU_BG_PULSE_PERIOD_SEC: float = 5.0
 # piece, usually downward) the instant this screen steals focus — left
 # unguarded, that stale held input reads as an immediate "navigate to Skip"
 # to Godot's own held-direction menu repeat. So navigation/confirm input is
-# ignored until every guarded action reads released (arms instantly for a
-# player whose hands are already neutral), or after a timeout cap so a
-# stuck input can't lock the menu out indefinitely.
+# ignored until every guarded action has read released for a short quiet
+# period, or after a timeout cap so a stuck input can't lock the menu out
+# indefinitely. Arming on the first released frame wasn't enough: a stick
+# springing back to centre dips under the deadzone for a frame or two and
+# often bounces, and a thumb still settling reads as a fresh press — so any
+# held action restarts the quiet timer.
 # The flippers are guarded too: in mouse mode they're LMB/RMB, and a player
 # mid-flip must not have that click land on whichever panel is under the cursor.
 const _GUARDED_ACTIONS: Array[String] = ["ui_left", "ui_right", "ui_up", "ui_down", "ui_accept", "flipper_left", "flipper_right"]
 const _INPUT_ARM_TIMEOUT_SEC: float = 1.5
+# How long every guarded action must stay released before the menu arms.
+const _INPUT_ARM_QUIET_SEC: float = 0.35
 # Even once armed, clicks are ignored this long after the screen appears — a
 # player hammering the flipper buttons won't have noticed the screen yet.
 const _CLICK_ARM_DELAY_MSEC: int = 500
@@ -149,6 +154,7 @@ var _shine_material: ShaderMaterial
 # See _GUARDED_ACTIONS above.
 var _input_armed: bool = false
 var _input_arm_elapsed: float = 0.0
+var _input_quiet_elapsed: float = 0.0
 var _shown_msec: int = 0
 
 
@@ -238,7 +244,8 @@ func _process(delta: float) -> void:
 			if Input.is_action_pressed(action):
 				any_guarded_action_held = true
 				break
-		if not any_guarded_action_held or _input_arm_elapsed >= _INPUT_ARM_TIMEOUT_SEC:
+		_input_quiet_elapsed = 0.0 if any_guarded_action_held else _input_quiet_elapsed + delta
+		if _input_quiet_elapsed >= _INPUT_ARM_QUIET_SEC or _input_arm_elapsed >= _INPUT_ARM_TIMEOUT_SEC:
 			_input_armed = true
 
 	_update_name_shine()
@@ -275,6 +282,7 @@ func _on_selection_ready(choices: Array):
 	get_tree().paused = true
 	_input_armed = false
 	_input_arm_elapsed = 0.0
+	_input_quiet_elapsed = 0.0
 	_shown_msec = Time.get_ticks_msec()
 	_menu_flair_time = 0.0
 	if _candidate_slot == 1:

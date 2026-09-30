@@ -14,7 +14,7 @@ const _SFX_FLIPPER_LAUNCH = preload("res://assets/sounds/sfx/flipper launch_1.og
 ## Flipper Automaton tech: seconds each half of the flip cycle lasts (press, then
 ## release), so a full cycle is twice this. ~12 flips/s — past what a thumb can do.
 const AUTOMATON_HALF_PERIOD: float = 0.04
-const AUTOMATON_DAMAGE: float = 5.0
+const AUTOMATON_DAMAGE: float = 30.0
 ## Flipper Velcro tech: physics ticks a velcro-triggered flip is held back after the
 ## launch. The arm jumps ~60° on its first tick (instant overswing + lerp), which lands
 ## on a turtle still sitting beside it, cancels its launch velocity and leaves it jammed

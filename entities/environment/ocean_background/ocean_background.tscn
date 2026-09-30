@@ -2,6 +2,8 @@
 
 [ext_resource type="Texture2D" uid="uid://dh1ijqpgoj7nn" path="res://entities/environment/ocean_background/sprites/ocean_background_3.png" id="1_8xcjk"]
 [ext_resource type="Texture2D" uid="uid://bai2hiv3n5xs4" path="res://entities/environment/ocean_background/sprites/ocean_wave.png" id="2_4y8sk"]
+[ext_resource type="Texture2D" uid="uid://xrv4d7ao7ayo" path="res://entities/environment/ocean_background/sprites/ocean_background_3_full_width.png" id="3_fullw"]
+[ext_resource type="Script" uid="uid://dajhyxld66bhy" path="res://entities/environment/ocean_background/ocean_background.gd" id="4_obscr"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_4y8sk"]
 atlas = ExtResource("2_4y8sk")
@@ -53,11 +55,15 @@ animations = [{
 
 [node name="OceanBackground" type="Node2D" unique_id=593268214]
 position = Vector2(0, -126)
+script = ExtResource("4_obscr")
+strip_texture = ExtResource("1_8xcjk")
+full_width_texture = ExtResource("3_fullw")
+use_full_width = true
 
 [node name="OceanGradient" type="Sprite2D" parent="." unique_id=2001845761]
 texture_repeat = 2
 position = Vector2(0, 153)
-texture = ExtResource("1_8xcjk")
+texture = ExtResource("3_fullw")
 region_enabled = true
 region_rect = Rect2(0, 0, 1920, 306)
 
