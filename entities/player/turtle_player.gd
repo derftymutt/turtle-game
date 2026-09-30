@@ -1310,6 +1310,11 @@ func is_magnet_attached_to(bumper) -> bool:
 func is_ion_exciter_active() -> bool:
 	return (_tech_effects[AlienTechRegistry.ION_EXCITER] as IonExciterEffect).active
 
+## True while the wall/surface fast energy recharge is actually filling the bar.
+## DeadWall pairs this with touching_walls to play its charge animation.
+func is_fast_charging() -> bool:
+	return hud != null and hud.wall_recovery_active and hud.current_energy < hud.max_energy
+
 ## Reflects `pos` across the play area's horizontal center (always) and,
 ## when mirror_y is true (hot Quantum Mirror), its vertical center too —
 ## the midpoint between the ocean surface and the floor boundary, so a
@@ -1496,7 +1501,7 @@ func _update_float_energy_bar(delta: float) -> void:
 
 	# Fast-recharge sweep: bright cyan bar sweeps left→right beneath the yellow fill.
 	# Visible only while wall_recovery_active so it directly telegraphs the mechanic.
-	var fast_charging := hud.wall_recovery_active and hud.current_energy < hud.max_energy
+	var fast_charging := is_fast_charging()
 	_float_energy_sweep.visible = fast_charging
 	if fast_charging:
 		_sweep_phase = fmod(_sweep_phase + delta * 5.0, 1.0)

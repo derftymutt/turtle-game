@@ -28,9 +28,28 @@ class_name DeadWall
 		if _polygon:
 			_polygon.color = value
 
+## --- Charge Animation ---
+## Sprite sheets are horizontal strips: frame 0 is the static wall, frames
+## 1..N-1 loop while the turtle is fast-charging energy against this wall.
+## Frame size can't be inferred from the PNG (a 64x8 wall strip is ambiguous),
+## so each animated sheet lists its total frame count here. Sheets not listed
+## are treated as a single static frame.
+const CHARGE_FRAME_COUNTS: Dictionary = {
+	"wall_diagonal_1u": 5,
+	"wall_diagonal_2u": 7,
+	"wall_steep_2u": 6,
+	"wall_shallow_1u": 5,
+	"wall_shallow_2u": 6,
+	"wall_horizontal_1u": 6,
+}
+@export var charge_anim_fps: float = 12.0
+
 ## --- Internal ---
 
 var _slippery_area: Area2D
+var _charge_frames: int = 1
+var _charge_anim_time: float = 0.0
+var _player: Node
 
 ## --- Lifecycle ---
 
@@ -65,6 +84,34 @@ func _find_children() -> void:
 func _on_wall_updated() -> void:
 	_resize_slippery_area()
 	_sync_color()
+	_setup_charge_frames()
+
+## --- Charge Animation ---
+
+func _setup_charge_frames() -> void:
+	if not _sprite:
+		return
+	var key: String = "%s_%s_%du" % [get_sprite_prefix(), ANGLE_NAMES.get(int(angle_preset), "unknown"), length_units]
+	_charge_frames = CHARGE_FRAME_COUNTS.get(key, 1)
+	_sprite.hframes = _charge_frames
+	_sprite.frame = 0
+	_charge_anim_time = 0.0
+
+func _process(delta: float) -> void:
+	if Engine.is_editor_hint() or _charge_frames <= 1 or not _sprite:
+		return
+
+	if not is_instance_valid(_player):
+		_player = get_tree().get_first_node_in_group("player")
+
+	var charging: bool = _player != null and _player.is_fast_charging() and self in _player.touching_walls
+	if charging:
+		_charge_anim_time += delta
+		var anim_frames: int = _charge_frames - 1
+		_sprite.frame = 1 + int(_charge_anim_time * charge_anim_fps) % anim_frames
+	elif _sprite.frame != 0:
+		_sprite.frame = 0
+		_charge_anim_time = 0.0
 
 ## --- Oil Slick ---
 
