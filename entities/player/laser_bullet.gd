@@ -100,6 +100,13 @@ func _on_body_entered(body):
 		body.take_damage(damage)
 		return
 
+	# Rainbow fish stop the laser — piercing on could free the right colour
+	# and then the wrong one with a single shot
+	if body.is_in_group("rainbow_fish"):
+		body.on_shot()
+		queue_free()
+		return
+
 	# Pierce through enemies — damage each one once, keep going
 	if body.is_in_group("enemies") and body.has_method("take_damage"):
 		if body in hit_targets:

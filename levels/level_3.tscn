@@ -32,6 +32,7 @@
 [ext_resource type="Script" uid="uid://d22ywt1ov84p1" path="res://systems/dev/dev_tech_seeder.gd" id="32_mb3d3"]
 [ext_resource type="PackedScene" uid="uid://dq7r6j7ritsv7" path="res://entities/collectibles/powerup/powerup.tscn" id="32_o87u6"]
 [ext_resource type="PackedScene" uid="uid://q614lo3kanxc" path="res://systems/space_debris/space_debris.tscn" id="33_h3b7p"]
+[ext_resource type="PackedScene" path="res://systems/rainbow_fish/rainbow_fish_spawner.tscn" id="33_q26s8"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_jqt73"]
 friction = 0.1
@@ -532,6 +533,8 @@ position = Vector2(-89, -27)
 
 [node name="DevTechSeeder2" type="Node" parent="." index="51" unique_id=1666723360]
 script = ExtResource("32_mb3d3")
+
+[node name="RainbowFishSpawner" parent="." index="52" unique_id=1256303568 instance=ExtResource("33_q26s8")]
 
 [editable path="OceanCurrentLeft"]
 [editable path="OceanCurrentRight"]

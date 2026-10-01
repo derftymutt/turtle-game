@@ -72,6 +72,9 @@ animations = [{
 "speed": 5.0
 }]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rainbowtimer"]
+bg_color = Color(0, 0, 0, 1)
+
 [node name="HUD" type="CanvasLayer" unique_id=113944192 groups=["hud"]]
 script = ExtResource("1_ahhtf")
 
@@ -279,3 +282,23 @@ layout_mode = 2
 size_flags_vertical = 4
 texture = ExtResource("16_uyo40")
 stretch_mode = 5
+
+[node name="RainbowTimerLabel" type="Label" parent="." unique_id=800000001]
+visible = false
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -23.0
+offset_top = 26.0
+offset_right = 23.0
+offset_bottom = 44.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = ExtResource("2_4d6w6")
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_rainbowtimer")
+text = "1:00"
+horizontal_alignment = 1
+vertical_alignment = 1

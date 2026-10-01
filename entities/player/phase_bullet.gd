@@ -124,6 +124,12 @@ func _on_body_entered(body):
 	if body.is_in_group("player"):
 		return
 
+	# Frees a trapped rainbow fish like any other spit
+	if body.is_in_group("rainbow_fish"):
+		body.on_shot()
+		queue_free()
+		return
+
 	# Phase enemies — including invincible ones
 	if body.is_in_group("enemies"):
 		if body.has_method("phase_shift"):

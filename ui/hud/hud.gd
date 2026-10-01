@@ -347,3 +347,29 @@ func _on_boss_health_changed(current: float, max_hp: float):
 
 func freeze_timer():
 	timer_system.freeze()
+
+## Rainbow Fish round countdown, centred between the tech slots. Called every
+## frame by RainbowFishSpawner while a round runs. Cycles through the rainbow
+## so it reads as part of the minigame — twice as fast in the last 10 seconds.
+func show_rainbow_timer(seconds_left: float) -> void:
+	var label := _get_rainbow_timer_label()
+	if not label:
+		return
+	label.visible = true
+	var secs := int(ceil(seconds_left))
+	label.text = "%d:%02d" % [secs / 60, secs % 60]
+	var cycle_rate := 1.0 if seconds_left > 10.0 else 2.0
+	var hue := fmod(Time.get_ticks_msec() * 0.001 * cycle_rate, 1.0)
+	label.modulate = Color.from_hsv(hue, 0.75, 1.0)
+
+func hide_rainbow_timer() -> void:
+	var label := _get_rainbow_timer_label()
+	if label:
+		label.visible = false
+
+var _rainbow_timer_label: Label = null
+
+func _get_rainbow_timer_label() -> Label:
+	if not _rainbow_timer_label:
+		_rainbow_timer_label = find_child("RainbowTimerLabel") as Label
+	return _rainbow_timer_label

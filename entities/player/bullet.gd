@@ -152,6 +152,12 @@ func _on_body_entered(body):
 		queue_free()
 		return
 
+	# Free a trapped rainbow fish (RainbowFishSpawner judges the colour order)
+	if body.is_in_group("rainbow_fish"):
+		body.on_shot()
+		queue_free()
+		return
+
 	# Hit enemies — with Bravado stamina restore on successful hit
 	if body.is_in_group("enemies") and body.has_method("take_damage"):
 		body.take_damage(damage)

@@ -26,6 +26,7 @@ const _ENEMY_DIE_SFX = preload("res://assets/sounds/sfx/dead enemy_1.ogg")
 
 # Internal state
 var current_health: float
+var _kill_reported: bool = false
 var sprite: Node2D = null
 var damage_area: Area2D = null
 var _is_playing_damage_animation: bool = false
@@ -61,6 +62,15 @@ func _ready():
 func _enemy_ready():
 	pass
 
+## Counts this enemy as defeated (GameManager.enemy_killed). Called where an
+## enemy is actually beaten — not from die(), which also runs for despawns
+## (drone lifetime, a puffer letting go when the turtle is freed).
+func _report_kill() -> void:
+	if _kill_reported:
+		return
+	_kill_reported = true
+	GameManager.enemy_killed.emit(self)
+
 ## Handle incoming damage from bullets/other sources
 func take_damage(amount: float):
 	if is_invincible:
@@ -73,6 +83,7 @@ func take_damage(amount: float):
 	_play_damage_feedback()
 	
 	if current_health <= 0:
+		_report_kill()
 		die()
 
 ## Visual feedback when damaged

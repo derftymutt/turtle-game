@@ -5,6 +5,10 @@ extends Node
 
 const _FloatingScore = preload("res://ui/floating_score/floating_score.gd")
 
+## An enemy was defeated (not just despawned). Emitted once per enemy via
+## BaseEnemy/BaseEnemyStatic._report_kill(). RainbowFishSpawner counts these.
+signal enemy_killed(enemy: Node)
+
 # Set to true to show level-select dev buttons on the main menu
 const DEV_MODE: bool = false
 

@@ -408,6 +408,7 @@ func take_damage(amount: float):
 	_stop_reproduce_warning()
 	
 	if current_health <= 0:
+		_report_kill()
 		die()
 	elif was_alive and current_state != State.RELOCATING:
 		_stop_windup_indicator()

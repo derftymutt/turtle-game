@@ -272,6 +272,7 @@ func _apply_super_speed_damage(amount: float) -> void:
 	_start_hit_invincibility()
 
 	if current_health <= 0:
+		_report_kill()
 		die()
 
 func _start_hit_invincibility() -> void:

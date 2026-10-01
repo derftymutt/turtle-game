@@ -32,6 +32,7 @@
 [ext_resource type="PackedScene" uid="uid://c41fis6pd8gh2" path="res://systems/space_debris/space_debris_group.tscn" id="30_4xp61"]
 [ext_resource type="PackedScene" uid="uid://dq7r6j7ritsv7" path="res://entities/collectibles/powerup/powerup.tscn" id="31_4yoxl"]
 [ext_resource type="PackedScene" uid="uid://q614lo3kanxc" path="res://systems/space_debris/space_debris.tscn" id="32_6dcgf"]
+[ext_resource type="PackedScene" path="res://systems/rainbow_fish/rainbow_fish_spawner.tscn" id="33_4yoxl"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_tv8m3"]
 friction = 0.1
@@ -256,12 +257,30 @@ spawn_interval = 13.0
 
 [node name="FlipperLeftDown" parent="." index="36" unique_id=1447591536 instance=ExtResource("25_he6wg")]
 position = Vector2(-40, -65)
+rest_angle_degrees = -30.0
+flip_angle_degrees = 60.0
+flip_force = 300.0
+flip_speed = 40.0
+flip_input = "flipper_left"
+collision_rotation_scale = 0.85
 
 [node name="FlipperLeftDown2" parent="." index="37" unique_id=201881765 instance=ExtResource("25_he6wg")]
 position = Vector2(-245, 25)
+rest_angle_degrees = -30.0
+flip_angle_degrees = 60.0
+flip_force = 300.0
+flip_speed = 40.0
+flip_input = "flipper_left"
+collision_rotation_scale = 0.85
 
 [node name="FlipperLeftDown3" parent="." index="38" unique_id=1448928177 instance=ExtResource("25_he6wg")]
 position = Vector2(155, 25)
+rest_angle_degrees = -30.0
+flip_angle_degrees = 60.0
+flip_force = 300.0
+flip_speed = 40.0
+flip_input = "flipper_left"
+collision_rotation_scale = 0.85
 
 [node name="FlipperRightDownPixelPerfect" parent="." index="39" unique_id=94480237 instance=ExtResource("25_jqt73")]
 position = Vector2(-155, 25)
@@ -470,6 +489,8 @@ curve = SubResource("Curve2D_4yoxl")
 
 [node name="Visuals" parent="HydroFunnel3" index="1" unique_id=2005124627]
 position = Vector2(127, -131)
+
+[node name="RainbowFishSpawner" parent="." index="65" unique_id=727905285 instance=ExtResource("33_4yoxl")]
 
 [editable path="OceanCurrent"]
 [editable path="SpaceDebrisGroup"]

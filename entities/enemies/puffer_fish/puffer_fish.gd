@@ -269,6 +269,7 @@ func _eject(turtle: Node2D) -> void:
 		mouth_dir = Vector2.RIGHT
 	turtle.exit_puffer(_safe_mouth_position(turtle), mouth_dir * eject_speed)
 	_captured_player = null
+	_report_kill()
 	die()
 
 ## Mouth position relative to the fish, following the sprite's mirror + spin.
