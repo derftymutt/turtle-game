@@ -110,6 +110,8 @@ func _start_round() -> void:
 	_level().add_child(_arc)
 	time_left = round_seconds_per_fish * fish_per_color
 	_spawn_color(0)
+	# Pauses the game until dismissed, so the timer starts once it's read
+	RainbowFishPopup.show_round(get_tree(), time_left)
 	round_started.emit()
 	print("🌈 Rainbow fish round %d/%d started" % [rounds_played, kill_triggers.size()])
 
