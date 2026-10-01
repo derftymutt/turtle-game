@@ -47,6 +47,9 @@ static var _accent_materials: Dictionary = {}
 @export var overswing_enabled: bool = false
 @export var overswing_degrees: float = 25.0
 @export var overswing_decay_speed: float = 12.0
+## Tilts the launch impulse from the pure rotation tangent toward the arm's tip,
+## countering the natural "slice" back toward the pivot. 0 = old behaviour.
+@export var launch_angle_offset_degrees: float = 20.0
 
 var is_flipping: bool = false
 var _overswing_offset: float = 0.0
@@ -346,7 +349,11 @@ func hit_body(body: RigidBody2D, is_press_action: bool, was_cradle_release: bool
 	
 	if angular_velocity < 0:
 		tangent = -tangent
-	
+
+	# Rotate the tangent toward the tip (outward along the arm), whichever way it swings
+	var offset := deg_to_rad(launch_angle_offset_degrees)
+	tangent = (tangent * cos(offset) + to_body.normalized() * sin(offset)).normalized()
+
 	var impulse_strength = flip_force * abs(surface_velocity) * 0.1
 	
 	if not is_press_action:
