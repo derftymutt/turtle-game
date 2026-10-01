@@ -32,6 +32,7 @@ const MULTI_BEAM          := "multi_beam"
 const URCHIN_MUTATION := "urchin_mutation"
 const FLIPPER_AUTOMATON   := "flipper_automaton"
 const TIMELINE_ALTERNATOR := "timeline_alternator"
+const COSMIC_MEDITATION   := "cosmic_meditation"
 
 # ─── Tech definitions ────────────────────────────────────────────────────────
 
@@ -311,6 +312,17 @@ var _definitions: Array[Dictionary] = [
 		"has_passive_bar": true,
 		"color":           Color(0.6, 0.55, 1.0),
 		"hot_description": "Click on/off, and always hop to closest alternative.",
+	},
+	{
+		"id":              COSMIC_MEDITATION,
+		"name":            "Cosmic Meditation",
+		"description":     "Suspend in place anywhere and fast-recharge energy. No spitting. Ends at full energy. Getting hit breaks it and costs 2 hearts. 4s cooldown.",
+		"hook":            "Suspend disbelief!",
+		"slot_label":      "Cosmic Meditation",
+		"needs_input":     true,
+		"has_passive_bar": true,
+		"color":           Color(0.75, 0.5, 1.0),
+		"hot_description": "Spit while meditating. Stays suspended at full energy until you swim away.",
 	},
 ]
 

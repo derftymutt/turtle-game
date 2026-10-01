@@ -270,6 +270,7 @@ func _ready():
 	_tech_effects[AlienTechRegistry.URCHIN_MUTATION] = UrchinMutationEffect.new()
 	_tech_effects[AlienTechRegistry.FLIPPER_AUTOMATON] = FlipperAutomatonEffect.new()
 	_tech_effects[AlienTechRegistry.TIMELINE_ALTERNATOR] = TimelineAlternatorEffect.new()
+	_tech_effects[AlienTechRegistry.COSMIC_MEDITATION] = CosmicMeditationEffect.new()
 	for effect in _tech_effects.values():
 		(effect as AlienTechEffect).setup(self)
 
@@ -312,6 +313,9 @@ func _physics_process(delta):
 	# is not blocked either way); if it's the turtle being hauled, ocean
 	# physics is also suppressed so buoyancy/drag don't fight the pull.
 	var multi_beam := _tech_effects[AlienTechRegistry.MULTI_BEAM] as MultiBeamEffect
+	# Cosmic Meditation: holds the turtle in place (ocean physics off) and
+	# forces the fast wall/surface energy recharge while active.
+	var meditation := _tech_effects[AlienTechRegistry.COSMIC_MEDITATION] as CosmicMeditationEffect
 
 	# Update cooldown timers
 	if not can_thrust:
@@ -434,12 +438,14 @@ func _physics_process(delta):
 
 	_tech_effects[AlienTechRegistry.TIMELINE_ALTERNATOR].physics_process(self, delta)
 
+	meditation.physics_process(self, delta)
+
 	multi_beam.physics_process(self, delta)
 
 	stim_shot.physics_process(self, delta)
 
-	# Ocean physics — suppressed while pinned to a bumper or flipper, or inside a puffer
-	if not (_tech_effects[AlienTechRegistry.BUMPER_MAGNET] as BumperMagnetEffect).attached and not _flipper_velcro_latched and not multi_beam.pulling_player and not captor_puffer:
+	# Ocean physics — suppressed while pinned to a bumper or flipper, inside a puffer, or meditating
+	if not (_tech_effects[AlienTechRegistry.BUMPER_MAGNET] as BumperMagnetEffect).attached and not _flipper_velcro_latched and not multi_beam.pulling_player and not captor_puffer and not meditation.active:
 		if ocean:
 			apply_ocean_effects(delta)
 		else:
@@ -475,13 +481,13 @@ func _physics_process(delta):
 		# energy_recovery_scale outpaces scale_factor on purpose — see
 		# StimShotEffect's ENERGY_RECOVERY_BOOST — so the tech is actually
 		# sustainable away from walls, not just break-even.
-		hud.recover_energy(delta * stim_shot.energy_recovery_scale, (touching_walls.size() > 0 or at_surface) and not (_tech_effects[AlienTechRegistry.BUMPER_MAGNET] as BumperMagnetEffect).attached)
+		hud.recover_energy(delta * stim_shot.energy_recovery_scale, ((touching_walls.size() > 0 or at_surface) and not (_tech_effects[AlienTechRegistry.BUMPER_MAGNET] as BumperMagnetEffect).attached) or meditation.active)
 
 	_update_rest_particles()
 
 	if GameSettings.mouse_mode and Input.is_action_just_pressed(GameSettings.TOGGLE_FIRE_ACTION):
 		mouse_fire_enabled = not mouse_fire_enabled
-	_mouse_crosshair.firing = mouse_fire_enabled and not is_inked()
+	_mouse_crosshair.firing = mouse_fire_enabled and not is_inked() and not meditation.blocks_shooting()
 
 	# Control suspension timer — runs even while suspended so it keeps counting down
 	control_suspend_timer -= delta
@@ -537,7 +543,10 @@ func _physics_process(delta):
 	if hud and movement_input.length() > 0.1 and not energy_freeze_active:
 		can_actually_thrust = can_actually_thrust and hud.can_thrust()
 
-	if movement_input.length() > 0.1 and can_actually_thrust and not swim_locked and not multi_beam.pulling and not multi_beam.aiming:
+	# Hot meditation at full energy breaks on swim input (and lets it through).
+	var meditation_blocks_swim := meditation.blocks_movement(self, movement_input)
+
+	if movement_input.length() > 0.1 and can_actually_thrust and not swim_locked and not multi_beam.pulling and not multi_beam.aiming and not meditation_blocks_swim:
 		apply_thrust(movement_input.normalized())
 
 	if shoot_input != Vector2.ZERO and can_shoot:
@@ -605,6 +614,7 @@ func _update_sprite_modulate():
 	var transporter := _tech_effects[AlienTechRegistry.TRANSPORTER] as TransporterEffect
 	var quantum_mirror := _tech_effects[AlienTechRegistry.QUANTUM_MIRROR] as QuantumMirrorEffect
 	var dermal_regen := _tech_effects[AlienTechRegistry.DERMAL_REGEN] as DermalRegenEffect
+	var meditation := _tech_effects[AlienTechRegistry.COSMIC_MEDITATION] as CosmicMeditationEffect
 	var bumper_magnet := _tech_effects[AlienTechRegistry.BUMPER_MAGNET] as BumperMagnetEffect
 	var deflector_shield := _tech_effects[AlienTechRegistry.DEFLECTOR_SHIELD] as DeflectorShieldEffect
 	var time_freeze := _tech_effects[AlienTechRegistry.TIME_FREEZE] as TimeFreezeEffect
@@ -628,6 +638,10 @@ func _update_sprite_modulate():
 		var progress := dermal_regen.progress()
 		var flash := (sin(Time.get_ticks_msec() * (0.06 + progress * 0.18)) + 1.0) * 0.5
 		sprite.modulate = Color(0.1, 0.9, 0.3).lerp(Color(0.7, 1.0, 0.7), flash)
+	elif meditation.active:
+		# Slow, calm violet breathing
+		var flash := (sin(Time.get_ticks_msec() * 0.004) + 1.0) * 0.5
+		sprite.modulate = Color(0.6, 0.4, 1.0).lerp(Color(0.95, 0.85, 1.0), flash)
 	elif bumper_magnet.active:
 		if bumper_magnet.attached:
 			# Slow amber pulse while orbiting
@@ -800,6 +814,8 @@ func shoot(direction: Vector2):
 		return
 	if is_inked():
 		return
+	if (_tech_effects[AlienTechRegistry.COSMIC_MEDITATION] as CosmicMeditationEffect).blocks_shooting():
+		return
 
 	is_player_controlling_rotation = true
 
@@ -915,16 +931,21 @@ func take_damage(amount: float, use_iframes: bool = false, source: String = ""):
 			_bubble_shield_blast()
 		return  # Shield absorbed — transporter windup NOT canceled
 
-	# Real damage lands — cancel active techs that need aborting
+	# Real damage lands — cancel active techs that need aborting. Read
+	# meditation first: a hit that breaks it costs an extra heart.
+	var meditation := _tech_effects[AlienTechRegistry.COSMIC_MEDITATION] as CosmicMeditationEffect
+	var hearts_lost: int = CosmicMeditationEffect.HEARTS_LOST_ON_HIT if meditation.active else 1
 	_tech_effects[AlienTechRegistry.TRANSPORTER].cancel_on_damage(self)
 	_tech_effects[AlienTechRegistry.DERMAL_REGEN].cancel_on_damage(self)
 	_tech_effects[AlienTechRegistry.BUMPER_MAGNET].cancel_on_damage(self)
 	_tech_effects[AlienTechRegistry.MULTI_BEAM].cancel_on_damage(self)
+	meditation.cancel_on_damage(self)
 	if _flipper_velcro_latched:
 		_cancel_flipper_velcro()
 
-	# One damage event = one heart, regardless of `amount`.
-	current_hearts = max(0, current_hearts - 1)
+	# One damage event = one heart, regardless of `amount` (two if it broke
+	# Cosmic Meditation).
+	current_hearts = max(0, current_hearts - hearts_lost)
 	_heart_iframe_timer = HEART_DAMAGE_IFRAME
 	if not source.is_empty():
 		_last_damage_source = source
@@ -1093,7 +1114,8 @@ func _update_rest_particles():
 	if not rest_particles:
 		return
 	var energy_not_full = hud and hud.current_energy < hud.max_energy
-	var should_emit = (touching_walls.size() > 0 or not _is_underwater) and energy_not_full
+	var meditating := (_tech_effects[AlienTechRegistry.COSMIC_MEDITATION] as CosmicMeditationEffect).active
+	var should_emit = (touching_walls.size() > 0 or not _is_underwater or meditating) and energy_not_full
 	if rest_particles.emitting != should_emit:
 		rest_particles.emitting = should_emit
 

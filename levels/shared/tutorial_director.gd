@@ -66,12 +66,12 @@ const ENERGY_TEXT := "Tired? Swimming uses energy, which is tracked by a small b
 
 ## Reference copy — built from FlipperFastRow + FlipperBody in
 ## _show_flipper_prompt() instead, so the sparkle can land on "QUICKLY" here too.
-const FLIPPER_TEXT := "You also recover energy QUICKLY [sparkle] while TOUCHING pinball walls and flippers. THIS IS KEY!!\n\nPlus, flippers are a great way to get around — life is much easier when you use them.\n\nYou flip flippers with the LT / RT triggers (or Left Shift / Right Shift).\n\n[after trying both flippers:] Now try launching yourself deep into the ocean with the flippers to reach the UFO part."
+const FLIPPER_TEXT := "You also recover energy QUICKLY [sparkle] while TOUCHING pinball walls and flippers. THIS IS KEY!! Notice that walls pulse yellow when recharging energy too.\n\nPlus, flippers are a great way to get around — life is much easier when you use them.\n\nYou flip flippers with the LT / RT triggers (or Left Shift / Right Shift).\n\n[after trying both flippers:] Now try launching yourself deep into the ocean with the flippers to reach the UFO part."
 ## The same wording as FLIPPER_TEXT, one entry per page — FlipperBody is
 ## retyped for each. Page 0 also shows FlipperFastRow's "You also recover
 ## energy QUICKLY" as its opening line, so its entry picks up mid-sentence.
 const FLIPPER_BODY_PAGES: Array[String] = [
-	"while TOUCHING pinball walls and flippers. THIS IS KEY!!",
+	"while TOUCHING pinball walls and flippers. THIS IS KEY!! Notice that walls pulse yellow when recharging energy too.",
 	"Plus, flippers are a great way to get around — life is much easier when you use them.",
 	"You flip flippers with the LT / RT triggers (or Left Shift / Right Shift).",
 ]

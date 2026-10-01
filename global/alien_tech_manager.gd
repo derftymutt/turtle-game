@@ -80,6 +80,8 @@ const MULTI_BEAM_COOLDOWN_DURATION: float = 2.0
 
 const DERMAL_REGEN_COOLDOWN_DURATION: float = 30.0
 
+const COSMIC_MEDITATION_COOLDOWN_DURATION: float = 4.0
+
 const _COOLDOWN_DURATIONS: Dictionary = {
 	AlienTechRegistry.INERTIA_DAMPENER: INERTIA_DAMPENER_ACTIVE_DURATION + INERTIA_DAMPENER_COOLDOWN_DURATION,
 	AlienTechRegistry.LATERAL_THRUST:   5.0,
@@ -99,6 +101,7 @@ const _COOLDOWN_DURATIONS: Dictionary = {
 	AlienTechRegistry.URCHIN_MUTATION: URCHIN_MUTATION_ACTIVE_DURATION + URCHIN_MUTATION_COOLDOWN_DURATION,
 	AlienTechRegistry.FLIPPER_AUTOMATON: FLIPPER_AUTOMATON_ACTIVE_DURATION + FLIPPER_AUTOMATON_COOLDOWN_DURATION,
 	AlienTechRegistry.TIMELINE_ALTERNATOR: TIMELINE_ALTERNATOR_ACTIVE_DURATION + TIMELINE_ALTERNATOR_COOLDOWN_DURATION,
+	AlienTechRegistry.COSMIC_MEDITATION: COSMIC_MEDITATION_COOLDOWN_DURATION,
 }
 
 # Techs whose cooldown doesn't start draining on press: try_activate_slot()
@@ -108,6 +111,7 @@ const _COOLDOWN_DURATIONS: Dictionary = {
 const _HOLD_COOLDOWN_TECHS: Array[String] = [
 	AlienTechRegistry.MULTI_BEAM,
 	AlienTechRegistry.DERMAL_REGEN,  # only runs if the heal lands — a cancelled channel releases with 0
+	AlienTechRegistry.COSMIC_MEDITATION,  # runs from when meditation ends; a refused press releases with 0
 ]
 
 # Per slot index (not tech id) so it travels with swap_slots().
