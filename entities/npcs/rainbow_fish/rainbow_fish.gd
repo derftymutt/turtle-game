@@ -22,8 +22,6 @@ class_name RainbowFish
 ## never pushes or gets pushed by anything.
 
 signal shot(fish: RainbowFish)
-## Finished painting its stripe (or vanished partway when the rainbow broke).
-signal painting_finished(fish: RainbowFish)
 
 const _TRAPPED_SHEET = preload("res://entities/npcs/rainbow_fish/sprites/rainbow_fish_trapped.png")
 ## Drop the freed art here (same layout: 24×24 frames, 2 per colour, ROYGBIV)
@@ -71,7 +69,7 @@ const COLOR_NAMES: Array[String] = ["red", "orange", "yellow", "green", "blue", 
 @export_group("Freed")
 @export var freed_swim_speed: float = 260.0
 ## Seconds to travel the whole stripe
-@export var arc_duration: float = 2.2
+@export var arc_duration: float = 1.5
 ## How far below the surface it lines up before leaping out
 @export var surface_line_up_depth: float = 10.0
 ## Seconds an AWAY fish swims before it's gone
@@ -301,7 +299,6 @@ func _update_dive(delta: float) -> void:
 	_sprite.rotation = PI  # head down
 	_sprite.modulate.a = 1.0 - _dive_time / 0.4
 	if _dive_time >= 0.4:
-		painting_finished.emit(self)
 		queue_free()
 
 ## Freed without a stripe to paint — darts off along its heading (away from
@@ -334,14 +331,11 @@ func _update_away(delta: float) -> void:
 func vanish() -> void:
 	if state == State.DEAD:
 		return
-	var was_freed := state != State.TRAPPED
 	state = State.DEAD
 	_stop_colliding()
 	var tween := create_tween()
 	tween.tween_property(self, "modulate:a", 0.0, 0.4)
 	tween.tween_callback(queue_free)
-	if was_freed:
-		painting_finished.emit(self)
 
 # ---------------------------------------------------------------------------
 # DEATH

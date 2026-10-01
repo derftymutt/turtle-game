@@ -23,8 +23,12 @@ class_name RainbowFishSpawner
 signal round_started
 signal round_failed
 signal rainbow_completed
+## The turtle rode a rainbow current up into the glowing apex — the way into
+## the secret level.
+signal secret_entrance_reached
 
 const _FISH_SCENE = preload("res://entities/npcs/rainbow_fish/rainbow_fish.tscn")
+const _CURRENT_SCENE = preload("res://entities/environment/current/current.tscn")
 
 ## Kills needed to start each round, counted from level start for the first
 ## and from the previous failure after that. Its length caps how many rounds
@@ -43,10 +47,22 @@ const _FISH_SCENE = preload("res://entities/npcs/rainbow_fish/rainbow_fish.tscn"
 ## Round time limit per fish_per_color — 1 fish per colour gets this long,
 ## 2 per colour twice as long. Shown centred on the HUD.
 @export var round_seconds_per_fish: float = 30.0
+## Seconds added to the round timer for every fish freed in order
+@export var seconds_per_free: float = 1.0
 ## Fish never spawn closer to the turtle than this
 @export var spawn_min_player_distance: float = 120.0
 ## Fish spawn at least this far from the ocean's edges
 @export var spawn_edge_margin: float = 24.0
+
+@export_group("Secret Entrance")
+## How far below the surface the two rainbow currents start, so the turtle can
+## swim into them from the water
+@export var entrance_current_depth: float = 32.0
+## Current strength — same tuning as the levels' Hydro Funnel currents
+@export var entrance_propulsion_force: float = 1600.0
+@export var entrance_centering_force: float = 800.0
+## Turtle within this distance of the apex glow enters the secret level
+@export var entrance_radius: float = 20.0
 
 enum Phase { WAITING, ACTIVE, COMPLETE, OUT_OF_ROUNDS }
 var phase: Phase = Phase.WAITING
@@ -64,6 +80,9 @@ var time_left: float = 0.0
 
 var _fish: Array[RainbowFish] = []
 var _arc: RainbowArc = null
+var _entrance_open: bool = false
+var _entrance_reached: bool = false
+
 ## Ocean interior for spawning and the rainbow's span: x = wall to wall,
 ## y = surface to floor
 var _ocean_rect: Rect2 = Rect2()
@@ -111,7 +130,7 @@ func _start_round() -> void:
 	time_left = round_seconds_per_fish * fish_per_color
 	_spawn_color(0)
 	# Pauses the game until dismissed, so the timer starts once it's read
-	RainbowFishPopup.show_round(get_tree(), time_left)
+	RainbowFishPopup.show_round(get_tree())
 	round_started.emit()
 	print("🌈 Rainbow fish round %d/%d started" % [rounds_played, kill_triggers.size()])
 
@@ -126,7 +145,6 @@ func _spawn_color(index: int) -> void:
 		var spawn_point := _pick_spawn_point()
 		fish.position = level.to_local(spawn_point) if level else spawn_point
 		fish.shot.connect(_on_fish_shot)
-		fish.painting_finished.connect(_on_fish_painting_finished)
 		fish.tree_exited.connect(func(): _fish.erase(fish))
 		_fish.append(fish)
 		_level().add_child.call_deferred(fish)
@@ -137,7 +155,7 @@ func _process(delta: float) -> void:
 	time_left = maxf(0.0, time_left - delta)
 	var hud = get_tree().get_first_node_in_group("hud")
 	if hud:
-		hud.show_rainbow_timer(time_left)
+		hud.show_rainbow_timer(time_left, RainbowFish.COLORS[next_color])
 	if time_left <= 0.0:
 		print("🌈 Rainbow fish round timed out")
 		_fail()
@@ -150,6 +168,11 @@ func _on_fish_shot(fish: RainbowFish) -> void:
 		_fail()  # still trapped, so it dies in place with the rest
 		return
 	_award_points(fish)
+	time_left += seconds_per_free
+	if seconds_per_free > 0.0:
+		var hud = get_tree().get_first_node_in_group("hud")
+		if hud:
+			hud.flash_rainbow_timer()
 	var color := fish.color_index
 	# Every fish of the colour has to be freed — all but the last swim off,
 	# and the last one paints the stripe
@@ -160,17 +183,85 @@ func _on_fish_shot(fish: RainbowFish) -> void:
 	next_color += 1
 	fish.release(_arc)
 	if next_color >= RainbowFish.COLORS.size():
-		_hide_timer()  # last colour freed — the rest is just the painting
+		_win()
 	_refresh_targets()
 	# Deferred: we're inside the bullet's contact callback
 	_spawn_color.call_deferred(color * 2 + 1)
 	_spawn_color.call_deferred(color * 2 + 2)
 
-func _on_fish_painting_finished(_fish_done: RainbowFish) -> void:
-	if phase == Phase.ACTIVE and next_color >= RainbowFish.COLORS.size() and is_instance_valid(_arc) and _arc.is_complete():
-		phase = Phase.COMPLETE
-		print("🌈 Rainbow complete!")
-		rainbow_completed.emit()
+## The last colour is freed — won. Its stripe is still being painted, but the
+## entrance opens right away: making the player wait out the painting could
+## cost them their life.
+func _win() -> void:
+	phase = Phase.COMPLETE
+	_hide_timer()
+	print("🌈 Rainbow complete!")
+	rainbow_completed.emit()
+	_open_secret_entrance()
+
+# ---------------------------------------------------------------------------
+# SECRET ENTRANCE
+# ---------------------------------------------------------------------------
+
+## Two OceanCurrents, one per end of the rainbow: each starts under the water
+## below its end, climbs to the surface and rides the middle of the rainbow
+## band up to the apex, where the entrance glows.
+func _open_secret_entrance() -> void:
+	if not is_instance_valid(_arc):
+		return
+	_arc.open_portal()
+	for from_left in [true, false]:
+		var current := _CURRENT_SCENE.instantiate() as OceanCurrent
+		current.name = "RainbowCurrentLeft" if from_left else "RainbowCurrentRight"
+		current.propulsion_force = entrance_propulsion_force
+		current.centering_force = entrance_centering_force
+		current.lateral_damping = 1.0
+		current.current_width = _arc.band_width()
+		# The apex trigger catches the turtle — no fling at the end
+		current.exit_impulse = 0.0
+		current.exit_zone_length = 8.0
+		current.show_debug_arrows = false
+		# Denser, brighter bubbles than a normal current — they have to read
+		# over the rainbow's colours
+		current.current_color = Color(1.0, 1.0, 1.0, 0.95)
+		current.particles_per_emitter = 16
+		current.particle_spread = current.current_width * 0.35
+		current.get_node("Path2D").curve = _entrance_curve(from_left)
+		current.modulate.a = 0.0
+		_level().add_child(current)
+		current.position = Vector2.ZERO
+		current.create_tween().tween_property(current, "modulate:a", 1.0, 0.8)
+	_entrance_open = true
+
+## Path for one entrance current, in level space.
+func _entrance_curve(from_left: bool) -> Curve2D:
+	var level := _level() as Node2D
+	var curve := Curve2D.new()
+	var start: Vector2 = _arc.band_point(0.0 if from_left else 1.0)
+	var points: Array[Vector2] = [start + Vector2(0.0, entrance_current_depth)]
+	const STEPS := 24
+	for i in STEPS + 1:
+		var t := 0.5 * i / STEPS
+		points.append(_arc.band_point(t if from_left else 1.0 - t))
+	for p in points:
+		curve.add_point(level.to_local(p) if level else p)
+	return curve
+
+func _physics_process(_delta: float) -> void:
+	if not _entrance_open or not is_instance_valid(_arc):
+		return
+	var player := get_tree().get_first_node_in_group("player") as RigidBody2D
+	if not player:
+		return
+	if _entrance_reached:
+		# Holds the turtle in the entrance until the secret level takes over
+		player.global_position = _arc.apex()
+		player.linear_velocity = Vector2.ZERO
+		return
+	if player.global_position.distance_to(_arc.apex()) < entrance_radius:
+		_entrance_reached = true
+		print("🌈 Secret entrance reached!")
+		secret_entrance_reached.emit()
 
 ## Pulses the fish of the colour that has to be freed next.
 func _refresh_targets() -> void:

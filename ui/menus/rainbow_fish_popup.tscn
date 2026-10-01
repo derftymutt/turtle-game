@@ -61,7 +61,7 @@ bbcode_enabled = true
 fit_content = true
 scroll_active = false
 text = "[center][rainbow]Save the rainbow fish trapped in 6-pack rings!
-You only have 60 seconds![/rainbow][/center]"
+You don't have much time![/rainbow][/center]"
 
 [node name="HintLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2

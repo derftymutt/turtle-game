@@ -349,9 +349,12 @@ func freeze_timer():
 	timer_system.freeze()
 
 ## Rainbow Fish round countdown, centred between the tech slots. Called every
-## frame by RainbowFishSpawner while a round runs. Cycles through the rainbow
-## so it reads as part of the minigame — twice as fast in the last 10 seconds.
-func show_rainbow_timer(seconds_left: float) -> void:
+## frame by RainbowFishSpawner while a round runs. The digits cycle through
+## the rainbow so it reads as part of the minigame — twice as fast in the last
+## 10 seconds — and the box's border shows `target_color`, the colour of fish
+## to free next. The cycle goes on font_color, not modulate, so it doesn't
+## tint the border.
+func show_rainbow_timer(seconds_left: float, target_color: Color) -> void:
 	var label := _get_rainbow_timer_label()
 	if not label:
 		return
@@ -360,7 +363,22 @@ func show_rainbow_timer(seconds_left: float) -> void:
 	label.text = "%d:%02d" % [secs / 60, secs % 60]
 	var cycle_rate := 1.0 if seconds_left > 10.0 else 2.0
 	var hue := fmod(Time.get_ticks_msec() * 0.001 * cycle_rate, 1.0)
-	label.modulate = Color.from_hsv(hue, 0.75, 1.0)
+	label.add_theme_color_override("font_color", Color.from_hsv(hue, 0.75, 1.0))
+	_rainbow_timer_box.border_color = target_color
+
+## Quick pop when time is added: the label jumps up in size and flashes
+## bright, then settles. Uses scale/self_modulate so it layers over the
+## rainbow cycle show_rainbow_timer() drives through modulate.
+func flash_rainbow_timer() -> void:
+	var label := _get_rainbow_timer_label()
+	if not label:
+		return
+	label.pivot_offset = label.size * 0.5
+	label.scale = Vector2.ONE * 1.5
+	label.self_modulate = Color(3.0, 3.0, 3.0)
+	var tween := label.create_tween().set_parallel(true)
+	tween.tween_property(label, "scale", Vector2.ONE, 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_property(label, "self_modulate", Color.WHITE, 0.35)
 
 func hide_rainbow_timer() -> void:
 	var label := _get_rainbow_timer_label()
@@ -368,8 +386,14 @@ func hide_rainbow_timer() -> void:
 		label.visible = false
 
 var _rainbow_timer_label: Label = null
+## The label's box, duplicated so recolouring its border never touches the
+## scene's shared StyleBox
+var _rainbow_timer_box: StyleBoxFlat = null
 
 func _get_rainbow_timer_label() -> Label:
 	if not _rainbow_timer_label:
 		_rainbow_timer_label = find_child("RainbowTimerLabel") as Label
+		if _rainbow_timer_label:
+			_rainbow_timer_box = (_rainbow_timer_label.get_theme_stylebox("normal") as StyleBoxFlat).duplicate()
+			_rainbow_timer_label.add_theme_stylebox_override("normal", _rainbow_timer_box)
 	return _rainbow_timer_label

@@ -18,17 +18,15 @@ const _CLICK_ARM_DELAY_MSEC: int = 500
 @onready var _message: RichTextLabel = $Control/CenterContainer/PanelContainer/VBoxContainer/MessageLabel
 @onready var _hint_label: Label = $Control/CenterContainer/PanelContainer/VBoxContainer/HintLabel
 
-var _seconds: int = 0
 var _shown_msec: int = 0
 
-static func show_round(tree: SceneTree, seconds: float) -> void:
+static func show_round(tree: SceneTree) -> void:
 	var popup := (load(_SCENE_PATH) as PackedScene).instantiate() as RainbowFishPopup
-	popup._seconds = int(ceil(seconds))
 	tree.current_scene.add_child(popup)
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	_message.text = "[center][rainbow freq=0.6 sat=0.75 val=1.0]Save the rainbow fish trapped in 6-pack rings!\nYou only have %d seconds![/rainbow][/center]" % _seconds
+	_message.text = "[center][rainbow freq=0.6 sat=0.75 val=1.0]Save the rainbow fish trapped in 6-pack rings!\nYou don't have much time![/rainbow][/center]"
 	_shown_msec = Time.get_ticks_msec()
 	get_tree().paused = true
 
