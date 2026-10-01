@@ -213,6 +213,8 @@ func _apply_bumper_force(body: RigidBody2D) -> void:
 	body.linear_velocity = collision_normal * bounce_force
 	## Small random angle variation keeps repeated hits from feeling mechanical.
 	body.linear_velocity = body.linear_velocity.rotated(randf_range(-0.1, 0.1))
+	if body.has_method("notify_launch"):
+		body.notify_launch(true)
 
 func _play_hit_animation() -> void:
 	if not _animated_sprite:
@@ -284,5 +286,7 @@ func apply_launch_force(body: RigidBody2D, speed_override: float = -1.0) -> void
 		bounce_force *= 2.0
 	body.linear_velocity = collision_normal * (bounce_force + 100.0)
 	body.linear_velocity = body.linear_velocity.rotated(randf_range(-0.1, 0.1))
+	if body.has_method("notify_launch"):
+		body.notify_launch(true)
 	_play_hit_animation()
 	_play_bumper_sound()

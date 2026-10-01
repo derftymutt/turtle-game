@@ -214,12 +214,12 @@ func apply_ocean_physics(body: RigidBody2D, delta: float):
 		body.apply_central_force(Vector2(0, -buoyancy))
 		
 		# Apply water drag
-		body.linear_velocity *= water_drag
+		body.linear_velocity *= GameSettings.drag_step(water_drag, delta)
 	else:
 		# Object is in air
 		# Apply normal gravity (let Godot handle it)
 		# Just apply air drag
-		body.linear_velocity *= air_drag
+		body.linear_velocity *= GameSettings.drag_step(air_drag, delta)
 
 func get_pressure_tint(depth: float) -> Color:
 	"""

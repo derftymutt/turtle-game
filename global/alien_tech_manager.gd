@@ -82,6 +82,9 @@ const DERMAL_REGEN_COOLDOWN_DURATION: float = 30.0
 
 const COSMIC_MEDITATION_COOLDOWN_DURATION: float = 4.0
 
+const DILATION_SCOPE_ACTIVE_DURATION:   float = 5.0
+const DILATION_SCOPE_COOLDOWN_DURATION: float = 8.0
+
 const _COOLDOWN_DURATIONS: Dictionary = {
 	AlienTechRegistry.INERTIA_DAMPENER: INERTIA_DAMPENER_ACTIVE_DURATION + INERTIA_DAMPENER_COOLDOWN_DURATION,
 	AlienTechRegistry.LATERAL_THRUST:   5.0,
@@ -102,6 +105,7 @@ const _COOLDOWN_DURATIONS: Dictionary = {
 	AlienTechRegistry.FLIPPER_AUTOMATON: FLIPPER_AUTOMATON_ACTIVE_DURATION + FLIPPER_AUTOMATON_COOLDOWN_DURATION,
 	AlienTechRegistry.TIMELINE_ALTERNATOR: TIMELINE_ALTERNATOR_ACTIVE_DURATION + TIMELINE_ALTERNATOR_COOLDOWN_DURATION,
 	AlienTechRegistry.COSMIC_MEDITATION: COSMIC_MEDITATION_COOLDOWN_DURATION,
+	AlienTechRegistry.DILATION_SCOPE: DILATION_SCOPE_ACTIVE_DURATION + DILATION_SCOPE_COOLDOWN_DURATION,
 }
 
 # Techs whose cooldown doesn't start draining on press: try_activate_slot()
@@ -135,6 +139,7 @@ const _TWO_PHASE_BAR_DURATIONS: Dictionary = {
 	AlienTechRegistry.URCHIN_MUTATION: {"active": URCHIN_MUTATION_ACTIVE_DURATION, "cooldown": URCHIN_MUTATION_COOLDOWN_DURATION},
 	AlienTechRegistry.FLIPPER_AUTOMATON: {"active": FLIPPER_AUTOMATON_ACTIVE_DURATION, "cooldown": FLIPPER_AUTOMATON_COOLDOWN_DURATION},
 	AlienTechRegistry.TIMELINE_ALTERNATOR: {"active": TIMELINE_ALTERNATOR_ACTIVE_DURATION, "cooldown": TIMELINE_ALTERNATOR_COOLDOWN_DURATION},
+	AlienTechRegistry.DILATION_SCOPE: {"active": DILATION_SCOPE_ACTIVE_DURATION, "cooldown": DILATION_SCOPE_COOLDOWN_DURATION},
 }
 
 # Techs whose HOT behavior is a manual on/off toggle (via set_passive_bar in
@@ -147,6 +152,7 @@ const _HOT_TOGGLE_TECHS: Array[String] = [
 	AlienTechRegistry.ION_EXCITER,
 	AlienTechRegistry.URCHIN_MUTATION,
 	AlienTechRegistry.FLIPPER_AUTOMATON,
+	AlienTechRegistry.DILATION_SCOPE,
 ]
 
 # Techs that become fully passive when HOT — always in effect, so the slot has
@@ -457,7 +463,8 @@ func _effective_cooldown_max(slot_index: int, tech_id: String) -> float:
 		AlienTechRegistry.BUMPER_MAGNET, AlienTechRegistry.GRAVITON_HARNESS, \
 		AlienTechRegistry.MAGNETIC_REPULSION, AlienTechRegistry.HYDRO_FUNNEL, \
 		AlienTechRegistry.ION_EXCITER, AlienTechRegistry.URCHIN_MUTATION, \
-		AlienTechRegistry.FLIPPER_AUTOMATON, AlienTechRegistry.TIMELINE_ALTERNATOR:
+		AlienTechRegistry.FLIPPER_AUTOMATON, AlienTechRegistry.TIMELINE_ALTERNATOR, \
+		AlienTechRegistry.DILATION_SCOPE:
 			return 0.0  # hot: no cooldown
 		AlienTechRegistry.TIME_FREEZE:
 			# Hot: active duration doubled, post-active recovery halved.

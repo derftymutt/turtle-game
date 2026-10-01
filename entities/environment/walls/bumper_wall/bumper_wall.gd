@@ -121,6 +121,8 @@ func _apply_bumper_force(body: RigidBody2D) -> void:
 	body.linear_velocity = collision_normal * bounce_force
 	## Small random rotation keeps bounces unpredictable and fun
 	body.linear_velocity = body.linear_velocity.rotated(randf_range(-0.1, 0.1))
+	if body.has_method("notify_launch"):
+		body.notify_launch(true)
 
 ## --- Visuals ---
 

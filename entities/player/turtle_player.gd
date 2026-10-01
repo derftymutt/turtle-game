@@ -271,6 +271,7 @@ func _ready():
 	_tech_effects[AlienTechRegistry.FLIPPER_AUTOMATON] = FlipperAutomatonEffect.new()
 	_tech_effects[AlienTechRegistry.TIMELINE_ALTERNATOR] = TimelineAlternatorEffect.new()
 	_tech_effects[AlienTechRegistry.COSMIC_MEDITATION] = CosmicMeditationEffect.new()
+	_tech_effects[AlienTechRegistry.DILATION_SCOPE] = DilationScopeEffect.new()
 	for effect in _tech_effects.values():
 		(effect as AlienTechEffect).setup(self)
 
@@ -316,6 +317,8 @@ func _physics_process(delta):
 	# Cosmic Meditation: holds the turtle in place (ocean physics off) and
 	# forces the fast wall/surface energy recharge while active.
 	var meditation := _tech_effects[AlienTechRegistry.COSMIC_MEDITATION] as CosmicMeditationEffect
+	# Dilation Scope: bullet time after a launch — the stick aims instead of swimming.
+	var dilation_scope := _tech_effects[AlienTechRegistry.DILATION_SCOPE] as DilationScopeEffect
 
 	# Update cooldown timers
 	if not can_thrust:
@@ -440,6 +443,8 @@ func _physics_process(delta):
 
 	meditation.physics_process(self, delta)
 
+	dilation_scope.physics_process(self, delta)
+
 	multi_beam.physics_process(self, delta)
 
 	stim_shot.physics_process(self, delta)
@@ -449,7 +454,7 @@ func _physics_process(delta):
 		if ocean:
 			apply_ocean_effects(delta)
 		else:
-			linear_velocity *= 0.98
+			linear_velocity *= GameSettings.drag_step(0.98, delta)
 
 	# Counter-rotate the sprite to cancel the physics body's rotation every frame.
 	# The body can spin freely (correct flipper/bumper physics) but the sprite
@@ -546,7 +551,7 @@ func _physics_process(delta):
 	# Hot meditation at full energy breaks on swim input (and lets it through).
 	var meditation_blocks_swim := meditation.blocks_movement(self, movement_input)
 
-	if movement_input.length() > 0.1 and can_actually_thrust and not swim_locked and not multi_beam.pulling and not multi_beam.aiming and not meditation_blocks_swim:
+	if movement_input.length() > 0.1 and can_actually_thrust and not swim_locked and not multi_beam.pulling and not multi_beam.aiming and not meditation_blocks_swim and not dilation_scope.blocks_swim():
 		apply_thrust(movement_input.normalized())
 
 	if shoot_input != Vector2.ZERO and can_shoot:
@@ -695,7 +700,7 @@ func _update_sprite_modulate():
 # OCEAN
 # ---------------------------------------------------------------------------
 
-func apply_ocean_effects(_delta: float):
+func apply_ocean_effects(delta: float):
 	"""Apply depth-based buoyancy and water drag"""
 	# Lateral Thrust: suppress all ocean forces during dash window
 	if (_tech_effects[AlienTechRegistry.LATERAL_THRUST] as LateralThrustEffect).active:
@@ -714,7 +719,7 @@ func apply_ocean_effects(_delta: float):
 	# as shallow ocean so the turtle can swim freely above the surface.
 	if dampener.active and depth <= 0:
 		apply_central_force(Vector2(0, -ocean.shallow_buoyancy * mass * time_scale))
-		linear_velocity *= pow(ocean.water_drag, time_scale)
+		linear_velocity *= GameSettings.drag_step(ocean.water_drag, delta * time_scale)
 		linear_damp = 1.0
 		return
 
@@ -726,11 +731,11 @@ func apply_ocean_effects(_delta: float):
 	apply_central_force(Vector2(0, -buoyancy_force))
 
 	if depth > 0:
-		linear_velocity *= pow(ocean.water_drag, time_scale)
+		linear_velocity *= GameSettings.drag_step(ocean.water_drag, delta * time_scale)
 		var depth_factor = clamp(depth / 100.0, 0.0, 1.0)
 		linear_damp = lerp(1.0, 2.0, depth_factor)
 	else:
-		linear_velocity *= pow(ocean.air_drag, time_scale)
+		linear_velocity *= GameSettings.drag_step(ocean.air_drag, delta * time_scale)
 		linear_damp = 1.2
 
 # ---------------------------------------------------------------------------
@@ -815,6 +820,8 @@ func shoot(direction: Vector2):
 	if is_inked():
 		return
 	if (_tech_effects[AlienTechRegistry.COSMIC_MEDITATION] as CosmicMeditationEffect).blocks_shooting():
+		return
+	if (_tech_effects[AlienTechRegistry.DILATION_SCOPE] as DilationScopeEffect).blocks_shooting():
 		return
 
 	is_player_controlling_rotation = true
@@ -940,6 +947,7 @@ func take_damage(amount: float, use_iframes: bool = false, source: String = ""):
 	_tech_effects[AlienTechRegistry.BUMPER_MAGNET].cancel_on_damage(self)
 	_tech_effects[AlienTechRegistry.MULTI_BEAM].cancel_on_damage(self)
 	meditation.cancel_on_damage(self)
+	_tech_effects[AlienTechRegistry.DILATION_SCOPE].cancel_on_damage(self)
 	if _flipper_velcro_latched:
 		_cancel_flipper_velcro()
 
@@ -1332,6 +1340,21 @@ func is_magnet_attached_to(bumper) -> bool:
 func is_ion_exciter_active() -> bool:
 	return (_tech_effects[AlienTechRegistry.ION_EXCITER] as IonExciterEffect).active
 
+## Called by flippers, bumpers (incl. Bumper Magnet's release), the puffer
+## fish and ocean-current ejection right after they launch this turtle.
+## Dilation Scope decides from there whether it's a super-speed launch worth
+## bullet time. `from_bumper` gets the bigger bumper punch on the way out.
+## Impulse-based launchers pass `launch_velocity`, since an impulse isn't
+## visible in linear_velocity until the next physics step.
+func notify_launch(from_bumper: bool = false, launch_velocity = null) -> void:
+	(_tech_effects[AlienTechRegistry.DILATION_SCOPE] as DilationScopeEffect).on_launch(self, from_bumper, launch_velocity)
+
+## Never leave the whole game slowed down if we're freed mid bullet time
+## (death, level change, quit to menu).
+func _exit_tree() -> void:
+	if _tech_effects.has(AlienTechRegistry.DILATION_SCOPE):
+		(_tech_effects[AlienTechRegistry.DILATION_SCOPE] as DilationScopeEffect).shutdown()
+
 ## True while the wall/surface fast energy recharge is actually filling the bar.
 ## DeadWall pairs this with touching_walls to play its charge animation.
 func is_fast_charging() -> bool:
@@ -1598,6 +1621,7 @@ func exit_puffer(exit_position: Vector2, exit_velocity: Vector2) -> void:
 		_create_super_speed_burst()
 		facing_direction = _vector_to_direction_suffix(exit_velocity)
 		_play_animation("kick")
+	notify_launch()
 
 # ---------------------------------------------------------------------------
 # SQUID INK

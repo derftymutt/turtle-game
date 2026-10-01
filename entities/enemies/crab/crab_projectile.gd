@@ -47,7 +47,7 @@ func _physics_process(delta):
 	if ocean:
 		var depth = ocean.get_depth(global_position)
 		if depth > 0:
-			linear_velocity *= water_drag
+			linear_velocity *= GameSettings.drag_step(water_drag, delta)
 	
 	# Tumble naturally as it falls
 	angular_velocity = linear_velocity.x * 0.01

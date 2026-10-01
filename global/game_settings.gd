@@ -123,8 +123,53 @@ func set_mouse_mode(enabled: bool):
 	get_tree().call_group("player", "_on_settings_changed")
 
 func _apply_game_speed() -> void:
-	Engine.time_scale = GAME_SPEED
+	Engine.time_scale = GAME_SPEED * _effective_dilation()
 	Engine.physics_ticks_per_second = roundi(_BASE_PHYSICS_TICKS * GAME_SPEED)
+	AudioServer.playback_speed_scale = maxf(_effective_dilation(), _AUDIO_DILATION_FLOOR)
+
+# ── Time dilation (Dilation Scope bullet time) ───────────────────────────────
+
+## Lowest the audio is slowed (and pitched down) while time is dilated —
+## anything lower is an unrecognisable rumble.
+const _AUDIO_DILATION_FLOOR := 0.4
+
+## Bullet-time multiplier on top of GAME_SPEED (1.0 = normal). Physics ticks
+## are NOT reduced with it — each tick just covers less game time — so
+## per-tick effects must go through drag_step() to stay framerate-correct.
+var _time_dilation: float = 1.0
+
+func set_time_dilation(factor: float) -> void:
+	_time_dilation = clampf(factor, 0.0, 1.0)
+	_apply_game_speed()
+
+func reset_time_dilation() -> void:
+	if _time_dilation != 1.0:
+		set_time_dilation(1.0)
+
+func is_time_dilated() -> bool:
+	return _time_dilation < 1.0
+
+## While paused (pause menu, popups) menus run at normal speed even if the
+## game was frozen mid bullet time; the dilation comes back on unpause.
+func _effective_dilation() -> float:
+	if is_inside_tree() and get_tree().paused:
+		return 1.0
+	return _time_dilation
+
+var _was_paused: bool = false
+
+func _process(_delta: float) -> void:
+	var paused := get_tree().paused
+	if paused != _was_paused:
+		_was_paused = paused
+		if _time_dilation != 1.0:
+			_apply_game_speed()
+
+## Per-physics-tick velocity multiplier for a drag `factor` tuned at one tick
+## per 1/60 s of game time. Identical to `factor` at normal speed (where a
+## tick is exactly 1/60 s); scales correctly when time is dilated.
+func drag_step(factor: float, delta: float) -> float:
+	return pow(factor, delta * float(_BASE_PHYSICS_TICKS))
 
 
 # ── Keyboard labels for UI text (gamepad labels don't change) ────────────────

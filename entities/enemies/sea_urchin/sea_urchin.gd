@@ -93,7 +93,7 @@ func apply_position_locking():
 	apply_central_force(position_error * position_lock_strength)
 	
 	# Dampen movement
-	linear_velocity *= 0.8
+	linear_velocity *= GameSettings.drag_step(0.8, get_physics_process_delta_time())
 
 ## Urchin Mutation: stand this urchin down while a bumper takes its place.
 ## _contact_players is cleared because a turtle overlapping at the moment of

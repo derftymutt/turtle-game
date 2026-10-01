@@ -49,7 +49,7 @@ func _physics_process(delta):
 		first_physics_frame = false
 		check_initial_overlaps()
 
-	linear_velocity *= water_drag
+	linear_velocity *= GameSettings.drag_step(water_drag, delta)
 
 	if is_homing:
 		_apply_homing(delta)

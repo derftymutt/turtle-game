@@ -293,7 +293,7 @@ func _lock_to_floor():
 	apply_central_force(Vector2(0, y_error * position_lock_strength))
 
 	# Dampen vertical movement
-	linear_velocity.y *= 0.8
+	linear_velocity.y *= GameSettings.drag_step(0.8, get_physics_process_delta_time())
 
 	# Horizontal separation: push apart from nearby crabs to prevent stacking
 	const SEPARATION_RADIUS: float = 30.0

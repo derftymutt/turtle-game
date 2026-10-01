@@ -9,6 +9,7 @@ This is a **Godot 4.6** project. Open the project in the Godot editor and press 
 - Main scene: `ui/menus/main_menu.tscn`
 - Viewport: 640×360 (displayed at 1920×1080 with integer scaling)
 - Game speed: the whole game runs at `GameSettings.GAME_SPEED` (1.1×) via `Engine.time_scale`, with `Engine.physics_ticks_per_second` scaled to match (66) so each physics step stays 1/60 s of game time. All tuning values are in game time — never compensate for the speed by hand. `Time.get_ticks_msec()` and audio stay real-time.
+- Bullet time (Dilation Scope) multiplies that speed via `GameSettings.set_time_dilation()` without reducing the tick rate, so ticks get shorter in game time. Any per-tick velocity multiply (drag, damping) must go through `GameSettings.drag_step(factor, delta)` — identical to `factor` at normal speed, correct when dilated.
 
 ## Architecture Overview
 

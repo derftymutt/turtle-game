@@ -59,8 +59,8 @@ func set_velocity(vel: Vector2):
 	velocity = vel
 	linear_velocity = vel
 
-func _physics_process(_delta):
-	linear_velocity *= water_drag
+func _physics_process(delta):
+	linear_velocity *= GameSettings.drag_step(water_drag, delta)
 	if linear_velocity.length() > 10:
 		rotation = linear_velocity.angle()
 

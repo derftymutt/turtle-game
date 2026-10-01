@@ -358,6 +358,8 @@ func hit_body(body: RigidBody2D, is_press_action: bool, was_cradle_release: bool
 		impulse_strength *= 2.0
 
 	body.linear_velocity += tangent * impulse_strength
+	if body.has_method("notify_launch"):
+		body.notify_launch()
 	if _sfx_launch:
 		_sfx_launch.play()
 

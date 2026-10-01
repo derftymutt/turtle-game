@@ -33,6 +33,7 @@ const URCHIN_MUTATION := "urchin_mutation"
 const FLIPPER_AUTOMATON   := "flipper_automaton"
 const TIMELINE_ALTERNATOR := "timeline_alternator"
 const COSMIC_MEDITATION   := "cosmic_meditation"
+const DILATION_SCOPE      := "dilation_scope"
 
 # ─── Tech definitions ────────────────────────────────────────────────────────
 
@@ -323,6 +324,17 @@ var _definitions: Array[Dictionary] = [
 		"has_passive_bar": true,
 		"color":           Color(0.75, 0.5, 1.0),
 		"hot_description": "Spit while meditating. Stays suspended at full energy until you swim away.",
+	},
+	{
+		"id":              DILATION_SCOPE,
+		"name":            "Dilation Scope",
+		"description":     "Launches into super speed slow time to a stop. Steer to bend your trajectory. 5s active, 8s cooldown.",
+		"hook":            "I've seen that movie!",
+		"slot_label":      "Dilation Scope",
+		"needs_input":     true,
+		"has_passive_bar": true,
+		"color":           Color(0.35, 0.95, 0.75),
+		"hot_description": "Click on, click off — no timer, no cooldown.",
 	},
 ]
 
