@@ -25,6 +25,10 @@ signal ready_to_reproduce(crab: Crab)
 @export var relocation_distance_max: float = 50.0  # Max distance to move when hit
 @export var relocation_speed: float = 500.0  # How fast to scuttle to new spot
 
+# Spacing between crabs
+@export var min_crab_spacing: float = 30.0  # Resting crabs are kept at least this far apart (x)
+@export var separation_speed: float = 90.0  # How fast overlapping crabs slide apart (px/s)
+
 # Visual
 @export var idle_bob_amount: float = 1.0
 @export var idle_bob_speed: float = 0.8
@@ -89,6 +93,14 @@ func _enemy_ready():
 	
 	# Add to crabs group for easy lookup
 	add_to_group("crabs")
+
+	# Crabs pass through each other: BaseEnemy puts solid enemies on World_Player
+	# (so they block the turtle), which is also in the crab's mask, so without this
+	# crabs shove each other into clusters. Spacing is handled by _separate_from_crabs().
+	# An exception on either body is enough, so the new crab adds it for both.
+	for crab in get_tree().get_nodes_in_group("crabs"):
+		if crab != self and is_instance_valid(crab):
+			add_collision_exception_with(crab)
 	
 	# Create collision shape if not present
 	_setup_collision_shape()
@@ -206,7 +218,7 @@ func _relocating_behavior(delta: float):
 	var to_target = relocation_target - global_position
 	var distance = to_target.length()
 
-	if distance < 20.0:
+	if distance < 6.0:
 		_finish_relocation()
 		return
 
@@ -295,16 +307,41 @@ func _lock_to_floor():
 	# Dampen vertical movement
 	linear_velocity.y *= GameSettings.drag_step(0.8, get_physics_process_delta_time())
 
-	# Horizontal separation: push apart from nearby crabs to prevent stacking
-	const SEPARATION_RADIUS: float = 30.0
-	const SEPARATION_FORCE: float = 1200.0
+	_separate_from_crabs(get_physics_process_delta_time())
+
+func _separate_from_crabs(delta: float) -> void:
+	"""Slide apart from any resting crab closer than min_crab_spacing.
+
+	Crabs don't collide with each other (collision exceptions set in
+	_enemy_ready()), so spacing is enforced here by moving the crab directly rather
+	than with a force — a force loses to linear_damp and to a relocating crab's
+	scuttle force. Each crab of an overlapping pair moves itself half the overlap,
+	so the pair resolves symmetrically. Relocating crabs are skipped on both sides
+	so a scuttling crab can pass others on its way; it re-joins once it's IDLE."""
+	if current_state == State.RELOCATING:
+		return
+	var max_step := separation_speed * delta
+	var push := 0.0
 	for crab in get_tree().get_nodes_in_group("crabs"):
-		if crab == self or not is_instance_valid(crab):
+		if crab == self or not is_instance_valid(crab) or crab.current_state == State.RELOCATING:
 			continue
-		var delta_x = global_position.x - crab.global_position.x
-		var dist = abs(delta_x)
-		if dist < SEPARATION_RADIUS and dist > 0.1:
-			apply_central_force(Vector2(sign(delta_x) * SEPARATION_FORCE * (1.0 - dist / SEPARATION_RADIUS), 0))
+		var offset: Vector2 = global_position - crab.global_position
+		if absf(offset.y) > min_crab_spacing:
+			continue  # Different floor
+		var dist := absf(offset.x)
+		if dist >= min_crab_spacing:
+			continue
+		var dir := signf(offset.x)
+		if dist < 0.01:
+			# Exactly stacked (e.g. a baby that couldn't leave its parent): break the
+			# tie by instance id so the two crabs always pick opposite directions.
+			dir = 1.0 if get_instance_id() > crab.get_instance_id() else -1.0
+		push += dir * (min_crab_spacing - dist) * 0.5
+	if push == 0.0:
+		return
+	var new_x := clampf(global_position.x + clampf(push, -max_step, max_step), floor_min_x, floor_max_x)
+	global_position.x = new_x
+	starting_position.x = new_x
 
 func throw_projectile():
 	"""Throw a projectile at the player"""
@@ -346,40 +383,48 @@ func throw_projectile():
 	if sprite:
 		sprite.flip_h = horizontal_direction.x < 0
 
-func choose_relocation_target():
-	"""Pick a new floor position away from current spot and other crabs"""
-	const MIN_CRAB_SEPARATION: float = 35.0
-	var other_crabs = get_tree().get_nodes_in_group("crabs")
-	var best_target = Vector2(global_position.x, floor_y)
-	var best_score = -INF
+func choose_relocation_target() -> Vector2:
+	"""Pick a new floor position away from current spot and clear of other crabs.
 
-	for _i in range(15):
-		var candidate = Vector2(
-			randf_range(floor_min_x, floor_max_x),
-			floor_y
-		)
-		var dist_from_self = candidate.distance_to(global_position)
+	Clearance is measured against where each other crab will end up — its
+	relocation target if it's scuttling, otherwise where it stands — so two crabs
+	relocating at once can't claim the same spot. If the floor is too crowded for
+	any candidate to be fully clear, takes the roomiest one rather than staying put."""
+	var claimed: Array[float] = []
+	for crab in get_tree().get_nodes_in_group("crabs"):
+		if crab == self or not is_instance_valid(crab):
+			continue
+		claimed.append(crab.relocation_target.x if crab.current_state == State.RELOCATING else crab.global_position.x)
+
+	var best_target := Vector2(global_position.x, floor_y)
+	var best_score := -INF
+	var roomiest_target := best_target
+	var roomiest_clearance := -INF
+
+	for _i in range(30):
+		var candidate := Vector2(randf_range(floor_min_x, floor_max_x), floor_y)
+		var dist_from_self := absf(candidate.x - global_position.x)
 		if dist_from_self < relocation_distance_min:
 			continue
 
-		# Reject positions too close to any other crab
-		var too_close = false
-		for crab in other_crabs:
-			if crab == self or not is_instance_valid(crab):
-				continue
-			if candidate.distance_to(crab.global_position) < MIN_CRAB_SEPARATION:
-				too_close = true
-				break
-		if too_close:
+		var clearance := INF
+		for x in claimed:
+			clearance = minf(clearance, absf(candidate.x - x))
+
+		if clearance > roomiest_clearance:
+			roomiest_clearance = clearance
+			roomiest_target = candidate
+
+		if clearance < min_crab_spacing + 4.0:
 			continue
 
 		# Score: prefer farther from self, capped at relocation_distance_max
-		var score = min(dist_from_self, relocation_distance_max)
+		var score := minf(dist_from_self, relocation_distance_max)
 		if score > best_score:
 			best_score = score
 			best_target = candidate
 
-	return best_target
+	return best_target if best_score > -INF else roomiest_target
 
 ## PUBLIC METHOD: Called by CrabSpawner to make baby crab relocate
 func relocate_from_parent():
@@ -418,6 +463,8 @@ func take_damage(amount: float):
 
 ## Override die() for crab death animation
 func die():
+	# Dying crabs float off and fade — stop counting them for spacing
+	remove_from_group("crabs")
 	_play_die_sound()
 	_stop_windup_indicator()
 	_stop_reproduce_warning()
