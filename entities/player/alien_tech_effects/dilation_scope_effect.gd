@@ -42,6 +42,12 @@ const RETRIGGER_LOCKOUT: float = 0.75
 const ABORT_GRACE: float = 0.08
 
 const MIN_DILATION: float = 0.03   # "stopped" — true zero would stall physics
+# Ion Exciter doubles flipper/bumper launch speed, so the turtle would cover
+# twice the ground before the stop and creep twice as fast while aiming —
+# halve the drop time and the near-stop speed to compensate. Latched per
+# launch (see on_launch()).
+const ION_SLOW_DURATION: float = 0.05
+const ION_MIN_DILATION: float = 0.015
 const MAX_AIM_DEG: float = 25.0
 const AIM_SPEED: float = 1.3       # radians per real second at full stick
 const LAUNCH_BOOST: float = 1.1
@@ -66,6 +72,8 @@ var _base_dir: Vector2 = Vector2.RIGHT
 var _offset: float = 0.0
 var _speed: float = 0.0
 var _boost: float = LAUNCH_BOOST
+var _slow_duration: float = SLOW_DURATION
+var _min_dilation: float = MIN_DILATION
 
 var _line: Line2D = null
 var _cone_a: Line2D = null
@@ -118,7 +126,7 @@ func physics_process(player, delta: float) -> void:
 		Phase.STOPPED:
 			_update_lines(player)
 			if _phase_time >= STOP_DURATION:
-				_start_ricochet(MIN_DILATION)
+				_start_ricochet(_min_dilation)
 		Phase.RICOCHET:
 			var t: float = clampf(_phase_time / RICOCHET_DURATION, 0.0, 1.0)
 			GameSettings.set_time_dilation(lerpf(_ricochet_from, 1.0, 1.0 - (1.0 - t) * (1.0 - t)))
@@ -137,6 +145,9 @@ func on_launch(player, from_bumper: bool = false, launch_velocity = null) -> voi
 	_base_dir = v.normalized()
 	_speed = v.length()
 	_boost = BUMPER_LAUNCH_BOOST if from_bumper else LAUNCH_BOOST
+	var ion: bool = player.is_ion_exciter_active()
+	_slow_duration = ION_SLOW_DURATION if ion else SLOW_DURATION
+	_min_dilation = ION_MIN_DILATION if ion else MIN_DILATION
 	_offset = 0.0
 	_phase = Phase.SLOWING
 	_phase_time = 0.0
@@ -145,9 +156,9 @@ func on_launch(player, from_bumper: bool = false, launch_velocity = null) -> voi
 	_update_lines(player)
 
 func _process_slowing(player, real_dt: float) -> void:
-	var t: float = clampf(_phase_time / SLOW_DURATION, 0.0, 1.0)
-	# Cubic ease-out drop, then held at MIN_DILATION for the aim window.
-	GameSettings.set_time_dilation(lerpf(MIN_DILATION, 1.0, pow(1.0 - t, 3.0)))
+	var t: float = clampf(_phase_time / _slow_duration, 0.0, 1.0)
+	# Cubic ease-out drop, then held at the near-stop for the aim window.
+	GameSettings.set_time_dilation(lerpf(_min_dilation, 1.0, pow(1.0 - t, 3.0)))
 
 	# Follow the live heading (gravity curves it in the sky); a sharp turn
 	# means the turtle hit something — abort without redirecting.
@@ -176,7 +187,7 @@ func _process_slowing(player, real_dt: float) -> void:
 	_offset = clampf(_offset + stick.dot(tangent_cw) * AIM_SPEED * real_dt, -max_offset, max_offset)
 	_update_lines(player)
 
-	if _phase_time >= SLOW_DURATION + AIM_DURATION:
+	if _phase_time >= _slow_duration + AIM_DURATION:
 		_lock(player)
 
 func _lock(player) -> void:
@@ -184,7 +195,7 @@ func _lock(player) -> void:
 	player.linear_velocity = dir * _speed * _boost
 	player.facing_direction = player._vector_to_direction_suffix(dir)
 	player._play_animation("kick")
-	GameSettings.set_time_dilation(MIN_DILATION)
+	GameSettings.set_time_dilation(_min_dilation)
 	_line.default_color = LOCKED_COLOR
 	_set_cone_visible(false)
 	_phase = Phase.STOPPED

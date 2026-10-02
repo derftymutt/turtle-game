@@ -27,6 +27,9 @@ const _SFX_BUMPER_SMALL = preload("res://assets/sounds/sfx/bumper small_1.ogg")
 ##   Physics material: set bounce/friction in Inspector on the StaticBody2D.
 ##   Collision layers and masks: NEVER set in code — always in the Inspector.
 
+## The turtle bounced off this bumper (RainbowBonusLevel spawns fruit on it).
+signal player_bounced(bumper: CircularBumper)
+
 ## --- Constants ---
 
 ## Maps SizePreset to a suggested radius in pixels (1 pixel = 1 unit in Godot 2D).
@@ -195,6 +198,7 @@ func _on_body_hit(body: Node2D) -> void:
 		_apply_bumper_force(body)
 		_play_hit_animation()
 		_play_bumper_sound()
+		player_bounced.emit(self)
 
 func _play_bumper_sound() -> void:
 	if not _sfx_bumper:
