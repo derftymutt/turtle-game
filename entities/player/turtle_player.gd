@@ -28,7 +28,13 @@ extends RigidBody2D
 # window (HEART_DAMAGE_IFRAME) after each loss tames rapid / continuous sources
 # that carry no i-frames of their own (drowning, electric shock, projectile
 # streams). Hearts carry across levels (LevelManager persists current_hearts).
-const MAX_HEARTS: int = 7
+#
+# Rainbow hearts (one per completed bonus rainbow level, GameManager.rainbow_hearts)
+# replace the rightmost heart icons and are worth 2 HP each, so current_hearts
+# is really health points: max_hp() = MAX_HEARTS + rainbow heart count. Damage
+# drains HP from the right (a hit half-empties a rainbow heart); healing is
+# counted in whole hearts (restore_hearts()).
+const MAX_HEARTS: int = 7  # = GameManager.HEART_SLOTS
 const HEART_DAMAGE_IFRAME: float = 0.75
 ## Sprite tint pulsed in while on the last heart (see _update_sprite_modulate)
 const LOW_HEALTH_TINT := Color(1.0, 0.15, 0.15)
@@ -228,9 +234,9 @@ func _ready():
 
 	# Carry the exact heart count forward from the previous level (-1 = start full)
 	if GameManager.persisted_hearts >= 0:
-		current_hearts = clampi(GameManager.persisted_hearts, 0, MAX_HEARTS)
+		current_hearts = clampi(GameManager.persisted_hearts, 0, max_hp())
 	else:
-		current_hearts = MAX_HEARTS
+		current_hearts = max_hp()
 
 	hud = get_tree().get_first_node_in_group("hud")
 	if not hud:
@@ -991,13 +997,31 @@ func take_damage(amount: float, use_iframes: bool = false, source: String = ""):
 	_contact_iframes_timer = HEART_DAMAGE_IFRAME
 	_flash(Color.RED, 0.3)
 
+## Heals `amount` whole hearts: each fills the leftmost heart that isn't full,
+## completely — so a rainbow heart counts as one heart but restores 2 HP (or 1
+## if it was half full). Never heals half a heart.
 func restore_hearts(amount: int) -> void:
 	if amount <= 0:
 		return
-	current_hearts = min(MAX_HEARTS, current_hearts + amount)
+	for _i in amount:
+		var start := 0
+		var healed := false
+		for slot in MAX_HEARTS:
+			var cap := GameManager.heart_capacity(slot)
+			if current_hearts < start + cap:
+				current_hearts = start + cap
+				healed = true
+				break
+			start += cap
+		if not healed:
+			break  # already full
 	if hud:
 		hud.update_hearts(current_hearts, MAX_HEARTS)
 	_health_restore_flash_timer = 0.2
+
+## Full health in HP — rainbow hearts are worth 2.
+func max_hp() -> int:
+	return GameManager.max_hp()
 
 ## Called by bullet.gd when hot Bravado lands a hit — refreshes the 1s window
 ## rather than stacking, so repeated hits just keep it topped up.

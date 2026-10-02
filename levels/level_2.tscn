@@ -32,7 +32,6 @@
 [ext_resource type="PackedScene" uid="uid://c41fis6pd8gh2" path="res://systems/space_debris/space_debris_group.tscn" id="30_4xp61"]
 [ext_resource type="PackedScene" uid="uid://dq7r6j7ritsv7" path="res://entities/collectibles/powerup/powerup.tscn" id="31_4yoxl"]
 [ext_resource type="PackedScene" uid="uid://q614lo3kanxc" path="res://systems/space_debris/space_debris.tscn" id="32_6dcgf"]
-[ext_resource type="PackedScene" path="res://systems/rainbow_fish/rainbow_fish_spawner.tscn" id="33_4yoxl"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_tv8m3"]
 friction = 0.1
@@ -489,8 +488,6 @@ curve = SubResource("Curve2D_4yoxl")
 
 [node name="Visuals" parent="HydroFunnel3" index="1" unique_id=2005124627]
 position = Vector2(127, -131)
-
-[node name="RainbowFishSpawner" parent="." index="65" unique_id=727905285 instance=ExtResource("33_4yoxl")]
 
 [editable path="OceanCurrent"]
 [editable path="SpaceDebrisGroup"]

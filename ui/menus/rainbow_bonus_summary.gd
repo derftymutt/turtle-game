@@ -3,9 +3,9 @@ extends CanvasLayer
 class_name RainbowBonusSummary
 
 ## End-of-level results for the bonus rainbow level: fruit collected per
-## colour band and the points they're worth, then the total. Pauses the game
-## until any button is pressed, then calls `on_done`. Spawned by
-## RainbowBonusLevel. Same dismiss-on-any-input/pause convention as
+## colour band and the points they're worth, the total, and the rainbow heart
+## earned. Pauses the game until any button is pressed, then calls `on_done`.
+## Spawned by RainbowBonusLevel. Same dismiss-on-any-input/pause convention as
 ## RainbowFishPopup.
 
 const _SCENE_PATH: String = "res://ui/menus/rainbow_bonus_summary.tscn"
@@ -20,22 +20,30 @@ const _CLICK_ARM_DELAY_MSEC: int = 500
 
 var _counts: Array[int] = []
 var _points: Array[int] = []
+var _heart_gained: bool = false
 var _on_done: Callable
 var _shown_msec: int = 0
 var _done: bool = false
 
 ## `counts[band]` / `points[band]`: fruit collected and points earned in each
 ## band (0 = red … 6 = violet).
-static func show_summary(tree: SceneTree, counts: Array[int], points: Array[int], on_done: Callable) -> void:
+static func show_summary(tree: SceneTree, counts: Array[int], points: Array[int], heart_gained: bool, on_done: Callable) -> void:
 	var summary := (load(_SCENE_PATH) as PackedScene).instantiate() as RainbowBonusSummary
 	summary._counts = counts
 	summary._points = points
+	summary._heart_gained = heart_gained
 	summary._on_done = on_done
 	tree.current_scene.add_child(summary)
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	_body.text = _build_text()
+	_body.clear()
+	_body.append_text(_build_text())
+	if _heart_gained:
+		_body.push_paragraph(HORIZONTAL_ALIGNMENT_CENTER)
+		_body.add_image(HeartsDisplay.rainbow_heart_texture(), 22, 20)
+		_body.append_text("  gained!")
+		_body.pop()
 	_shown_msec = Time.get_ticks_msec()
 	get_tree().paused = true
 
@@ -57,7 +65,7 @@ func _build_text() -> String:
 	lines.append("")
 	lines.append("Total   %d" % total)
 	lines.append("[/center]")
-	return "\n".join(lines)
+	return "\n".join(lines) + "\n"
 
 func _process(_delta: float) -> void:
 	var blink_on := int(Time.get_ticks_msec() / _BLINK_PERIOD_MSEC) % 2 == 0

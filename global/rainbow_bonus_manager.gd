@@ -6,7 +6,8 @@ extends Node
 ## The level the turtle came from isn't saved and reloaded — it's frozen and
 ## set aside (detached from the tree) while the bonus level is the current
 ## scene, then put back as it was: UFO pieces, score, health, level timer,
-## enemies and all. Only what crosses over is synced by hand: hearts and score
+## enemies and all. Only what crosses over is synced by hand: hearts go in
+## (and come back full — finishing the bonus level restores full health), score
 ## go in and come back, a carried UFO piece is held back from the bonus turtle.
 ##
 ## Things to know about a detached level:
@@ -104,9 +105,7 @@ func finish() -> void:
 	_finishing = true
 	await _fade_to(1.0, _FADE_OUT_TIME)
 
-	var bonus_turtle = get_tree().get_first_node_in_group("player")
 	var bonus_hud = get_tree().get_first_node_in_group("hud")
-	var hearts: int = maxi(1, bonus_turtle.current_hearts) if bonus_turtle else 1
 	var score: int = bonus_hud.current_score if bonus_hud else _start_score
 
 	_bonus.tree_exited.disconnect(_on_bonus_left_tree)
@@ -125,12 +124,14 @@ func finish() -> void:
 			GameManager.add_carried_piece(piece)
 	_saved_carried.clear()
 	if turtle:
-		turtle.current_hearts = hearts
+		# Finishing the bonus rainbow level restores full health — including
+		# any rainbow heart it just earned
+		turtle.current_hearts = turtle.max_hp()
 		turtle.grant_grace_iframes(RETURN_GRACE_TIME)
 		# Slots may have changed in the bonus level (a tech picked up)
 		turtle._on_alien_tech_slots_changed_player(AlienTechManager.slots[0], AlienTechManager.slots[1])
 	if hud:
-		hud.update_hearts(hearts)
+		hud.update_hearts(turtle.current_hearts if turtle else 0)
 		hud.update_score(score)
 		hud._tech_slots.refresh()
 	if is_instance_valid(_level_camera):

@@ -145,7 +145,7 @@ func _ready():
 	# Initialize displays
 	update_score(0)
 	update_ufo_pieces(0, 0)
-	update_hearts(_hearts.max_hearts, _hearts.max_hearts)
+	update_hearts(_hearts.max_hearts * 2, _hearts.max_hearts)  # full, rainbow hearts included
 	update_air(max_air, max_air)
 	update_energy(max_energy, max_energy)
 	set_super_speed_active(false)
@@ -245,7 +245,8 @@ func update_score(new_score: int):
 func add_score(points: int):
 	update_score(current_score + points)
 
-## Update the heart icons. `current` / `hearts_max` come from TurtlePlayer.
+## Update the heart icons. `current` (HP) / `hearts_max` (icons) come from
+## TurtlePlayer; rainbow hearts are read from GameManager.
 func update_hearts(current: int, hearts_max: int = 7) -> void:
 	_hearts.update(current, hearts_max)
 

@@ -830,6 +830,7 @@ position = Vector2(270, 0)
 position = Vector2(215, -65)
 
 [node name="RainbowFishSpawner" parent="." index="86" unique_id=347763435 instance=ExtResource("41_pb5nj")]
+kill_triggers = Array[int]([20, 20, 15])
 
 [editable path="FlipperSkyCenterLeft/DeadWall10"]
 [editable path="FlipperSkyCenterLeft2/DeadWall10"]

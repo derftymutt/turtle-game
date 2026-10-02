@@ -535,6 +535,7 @@ position = Vector2(-89, -27)
 script = ExtResource("32_mb3d3")
 
 [node name="RainbowFishSpawner" parent="." index="52" unique_id=1256303568 instance=ExtResource("33_q26s8")]
+kill_triggers = Array[int]([20, 20, 15])
 
 [editable path="OceanCurrentLeft"]
 [editable path="OceanCurrentRight"]

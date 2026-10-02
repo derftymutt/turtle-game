@@ -27,8 +27,13 @@ var is_carrying_piece: bool = false
 var carried_piece: Node = null
 var carried_pieces: Array = []
 
-# Exact heart count carried into the next level (-1 = start full, e.g. level 1)
+# Exact heart count (HP) carried into the next level (-1 = start full, e.g. level 1)
 var persisted_hearts: int = -1
+
+# Rainbow hearts earned this run — one per completed bonus rainbow level. Each
+# turns the next heart from the right into a rainbow heart worth 2 HP (see
+# max_hp()).
+var rainbow_hearts: int = 0
 
 # Tutorial flags — reset each run
 var has_shown_tech_tutorial: bool = false
@@ -96,6 +101,7 @@ func reset_game():
 	current_score = 0
 	total_score = 0
 	persisted_hearts = -1
+	rainbow_hearts = 0
 	clear_carried_pieces()
 	has_shown_tech_tutorial = false
 	first_trash_cluster_spawned = false
@@ -104,6 +110,31 @@ func reset_game():
 	has_shown_puffer_tutorial = false
 	LevelManager.reset_run()
 	AlienTechManager.reset_run()
+
+## Heart icons on the HUD — matches TurtlePlayer.MAX_HEARTS. The heart maths
+## lives here (not on TurtlePlayer) so HUD code can use it without a circular
+## class dependency.
+const HEART_SLOTS: int = 7
+
+## Completing a bonus rainbow level upgrades another heart. Returns false
+## once every heart is already a rainbow heart.
+func grant_rainbow_heart() -> bool:
+	if rainbow_hearts >= HEART_SLOTS:
+		return false
+	rainbow_hearts += 1
+	return true
+
+## How many of the rightmost hearts are rainbow hearts.
+func rainbow_heart_count() -> int:
+	return clampi(rainbow_hearts, 0, HEART_SLOTS)
+
+## HP held by heart `slot` (0 = leftmost): 2 for a rainbow heart, else 1.
+func heart_capacity(slot: int) -> int:
+	return 2 if slot >= HEART_SLOTS - rainbow_heart_count() else 1
+
+## Full health in HP — rainbow hearts are worth 2.
+func max_hp() -> int:
+	return HEART_SLOTS + rainbow_heart_count()
 
 ## Hot Graviton Harness lets the turtle carry 2 UFO parts at once instead of 1.
 func max_carry_capacity() -> int:

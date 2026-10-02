@@ -159,11 +159,14 @@ func _end() -> void:
 	if _ended:
 		return
 	_ended = true
+	# Completing the level earns a rainbow heart (worth 2 HP) for the rest of
+	# the run; RainbowBonusManager restores full health on the way back
+	var heart_gained := GameManager.grant_rainbow_heart()
 	# Deferred: can be reached from a physics callback (the turtle dying)
-	_show_summary.call_deferred()
+	_show_summary.call_deferred(heart_gained)
 
-func _show_summary() -> void:
-	RainbowBonusSummary.show_summary(get_tree(), _fruit_counts, _fruit_points, _on_summary_done)
+func _show_summary(heart_gained: bool) -> void:
+	RainbowBonusSummary.show_summary(get_tree(), _fruit_counts, _fruit_points, heart_gained, _on_summary_done)
 
 ## Summary dismissed: pay out the fruit (the bonus HUD's score is what
 ## RainbowBonusManager carries back) and leave.

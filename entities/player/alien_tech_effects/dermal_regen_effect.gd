@@ -25,7 +25,7 @@ var _hot: bool = false    # latched at activation so heat changing mid-channel c
 func activate(player, _slot_index: int) -> void:
 	# Nothing to heal: refuse. try_activate_slot() already seeded the held
 	# cooldown on press, so zero it — a refused press must cost nothing.
-	if player.current_hearts >= player.MAX_HEARTS:
+	if player.current_hearts >= player.max_hp():
 		AlienTechManager.release_cooldown_hold(AlienTechRegistry.DERMAL_REGEN, 0.0)
 		return
 	active = true
