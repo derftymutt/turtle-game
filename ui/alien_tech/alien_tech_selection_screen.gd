@@ -275,6 +275,9 @@ func _process(delta: float) -> void:
 
 
 func _on_selection_ready(choices: Array):
+	# Set aside while the bonus rainbow level runs (RainbowBonusManager)
+	if not is_inside_tree():
+		return
 	if choices.is_empty():
 		return
 	_show_offer(choices[0])

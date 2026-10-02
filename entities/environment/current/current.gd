@@ -424,6 +424,11 @@ func _set_emitters_emitting(enabled: bool) -> void:
 			emitter.emitting = enabled
 
 
+## True while `body` is riding this current.
+func has_body(body: Node) -> bool:
+	return body in _bodies_inside
+
+
 # ── Area signals ──────────────────────────────────────────────────────────────
 
 func _on_body_entered(body: Node2D) -> void:

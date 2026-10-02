@@ -75,6 +75,12 @@ var cinematic_played: bool = false
 # Tracks the target X position for horizontal follow
 var target_x: float = 0.0
 
+# Focus override (focus_on / release_focus): while active the camera just
+# glides to _focus_point and the state machine is suspended.
+var _focus_active: bool = false
+var _focus_point: Vector2 = Vector2.ZERO
+var _cinematic_tween: Tween = null
+
 
 # ── Init ──────────────────────────────────────────────────────────────────
 
@@ -92,6 +98,12 @@ func _process(delta: float) -> void:
 		return
 
 	var turtle_y := follow_target.global_position.y
+
+	if _focus_active:
+		var k := 1.0 - exp(-6.0 * delta)
+		global_position = global_position.lerp(_focus_point, k)
+		zoom = zoom.lerp(normal_zoom, k)
+		return
 
 	match state:
 
@@ -149,6 +161,7 @@ func _play_cinematic() -> void:
 	  3. Zoom back IN + pan UP to sky_locked_y  (settle into sky gameplay)
 	"""
 	var tween := create_tween()
+	_cinematic_tween = tween
 	tween.set_parallel(false)  # Steps run in sequence
 
 	# ── Beat 1: Zoom OUT ──────────────────────────────────────────
@@ -186,6 +199,27 @@ func _on_cinematic_complete() -> void:
 		zoom                = sky_locked_zoom
 		global_position.y   = sky_locked_y
 		state               = CameraState.SKY_LOCKED
+
+
+# ── Focus Override ────────────────────────────────────────────────────────
+
+## Holds the camera on `point` (global) whatever state it was in — e.g. the
+## whole rainbow while the turtle rides into the bonus rainbow level entrance.
+func focus_on(point: Vector2) -> void:
+	_focus_active = true
+	_focus_point = point
+	if _cinematic_tween and _cinematic_tween.is_valid():
+		_cinematic_tween.kill()
+
+## Back to normal following: sky view if the turtle is up there, otherwise
+## pan back down to the ocean.
+func release_focus() -> void:
+	if not _focus_active:
+		return
+	_focus_active = false
+	cinematic_played = true
+	var in_sky := follow_target and follow_target.global_position.y < ocean_surface_y - sky_exit_threshold
+	state = CameraState.SKY_LOCKED if in_sky else CameraState.RETURNING
 
 
 # ── Per-frame Camera Behaviors ────────────────────────────────────────────

@@ -28,6 +28,7 @@ AlienTechRegistry="*res://global/alien_tech_registry.gd"
 AlienTechManager="*res://global/alien_tech_manager.gd"
 SaveManager="*res://global/save_manager.gd"
 _mcp_game_helper="*res://addons/godot_ai/runtime/game_helper.gd"
+RainbowBonusManager="*res://global/rainbow_bonus_manager.gd"
 
 [debug]
 

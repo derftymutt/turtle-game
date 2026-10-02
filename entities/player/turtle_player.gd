@@ -34,6 +34,9 @@ const HEART_DAMAGE_IFRAME: float = 0.75
 const LOW_HEALTH_TINT := Color(1.0, 0.15, 0.15)
 var current_hearts: int = MAX_HEARTS
 var _heart_iframe_timer: float = 0.0
+## Rainbow shine strength (0–1) while entering the bonus rainbow level; -1 =
+## off. Set by RainbowFishSpawner; top priority in _update_sprite_modulate().
+var rainbow_shine: float = -1.0
 var _last_damage_source: String = ""  # cause clause for the game over screen, e.g. "killed by a crab"
 
 # Super Speed System
@@ -616,6 +619,15 @@ func _update_sprite_modulate():
 	var sprite = $AnimatedSprite2D
 	if not sprite or not is_instance_valid(sprite):
 		return
+	if rainbow_shine >= 0.0:
+		# Entering the bonus rainbow level: cycles the rainbow (like the
+		# Rainbow Fish timer), overbright so it reads on the green sprite,
+		# building toward white as the screen fades out
+		var hue := fmod(Time.get_ticks_msec() * 0.0015, 1.0)
+		var shine := Color.from_hsv(hue, lerpf(0.8, 0.3, rainbow_shine), 1.0) * lerpf(1.6, 3.0, rainbow_shine)
+		shine.a = 1.0
+		sprite.modulate = shine
+		return
 	var transporter := _tech_effects[AlienTechRegistry.TRANSPORTER] as TransporterEffect
 	var quantum_mirror := _tech_effects[AlienTechRegistry.QUANTUM_MIRROR] as QuantumMirrorEffect
 	var dermal_regen := _tech_effects[AlienTechRegistry.DERMAL_REGEN] as DermalRegenEffect
@@ -993,6 +1005,13 @@ func grant_bravado_iframe() -> void:
 	_bravado_iframe_active = true
 	_bravado_iframe_timer = BRAVADO_HIT_IFRAME_DURATION
 
+## Blinking grace window that blocks all damage — e.g. coming back from the
+## bonus rainbow level, dropped from the sky into whatever's below.
+func grant_grace_iframes(duration: float) -> void:
+	_heart_iframe_timer = maxf(_heart_iframe_timer, duration)
+	_contact_iframes_active = true
+	_contact_iframes_timer = maxf(_contact_iframes_timer, duration)
+
 func die():
 	var final_score = 0
 	if hud:
@@ -1320,6 +1339,9 @@ func deactivate_rapid_fire():
 # ---------------------------------------------------------------------------
 
 func _on_alien_tech_activated(slot_index: int, tech_id: String):
+	# Set aside while the bonus rainbow level runs (RainbowBonusManager)
+	if not is_inside_tree():
+		return
 	if _tech_effects.has(tech_id):
 		_tech_effects[tech_id].activate(self, slot_index)
 
@@ -1439,6 +1461,9 @@ func _clamp_to_boundaries(target_pos: Vector2) -> Vector2:
 	)
 
 func _on_alien_tech_slots_changed_player(_slot_a: Dictionary, _slot_b: Dictionary):
+	# Set aside while the bonus rainbow level runs (RainbowBonusManager)
+	if not is_inside_tree():
+		return
 	if AlienTechManager.is_tech_active(AlienTechRegistry.BUBBLE_SHIELD):
 		if bubble_shield_hp == 0.0 and bubble_shield_regen_timer <= 0.0:
 			bubble_shield_hp = 1.0

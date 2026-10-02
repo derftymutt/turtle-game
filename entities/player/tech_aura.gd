@@ -111,6 +111,9 @@ func _on_powerup_replicator_changed() -> void:
 	_pulse_tech(AlienTechRegistry.POWERUP_REPLICATOR)
 
 func _pulse_slot(slot_index: int) -> void:
+	# Set aside while the bonus rainbow level runs (RainbowBonusManager)
+	if not is_inside_tree():
+		return
 	if slot_index >= 0 and slot_index < 2:
 		_pulse[slot_index] = INSTANT_PULSE
 

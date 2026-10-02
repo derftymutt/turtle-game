@@ -24,8 +24,8 @@ signal round_started
 signal round_failed
 signal rainbow_completed
 ## The turtle rode a rainbow current up into the glowing apex — the way into
-## the secret level.
-signal secret_entrance_reached
+## the bonus rainbow level.
+signal bonus_rainbow_level_entrance_reached
 
 const _FISH_SCENE = preload("res://entities/npcs/rainbow_fish/rainbow_fish.tscn")
 const _CURRENT_SCENE = preload("res://entities/environment/current/current.tscn")
@@ -54,15 +54,19 @@ const _CURRENT_SCENE = preload("res://entities/environment/current/current.tscn"
 ## Fish spawn at least this far from the ocean's edges
 @export var spawn_edge_margin: float = 24.0
 
-@export_group("Secret Entrance")
+@export_group("Bonus Rainbow Level Entrance")
 ## How far below the surface the two rainbow currents start, so the turtle can
 ## swim into them from the water
 @export var entrance_current_depth: float = 32.0
 ## Current strength — same tuning as the levels' Hydro Funnel currents
 @export var entrance_propulsion_force: float = 1600.0
 @export var entrance_centering_force: float = 800.0
-## Turtle within this distance of the apex glow enters the secret level
+## Turtle within this distance of the apex glow enters the bonus rainbow level
 @export var entrance_radius: float = 20.0
+## Once caught, the turtle glides into the centre of the glow over this long…
+@export var entrance_center_time: float = 0.35
+## …then shines like a rainbow this long before the fade to white
+@export var entrance_shine_time: float = 1.0
 
 enum Phase { WAITING, ACTIVE, COMPLETE, OUT_OF_ROUNDS }
 var phase: Phase = Phase.WAITING
@@ -82,6 +86,12 @@ var _fish: Array[RainbowFish] = []
 var _arc: RainbowArc = null
 var _entrance_open: bool = false
 var _entrance_reached: bool = false
+var _entrance_currents: Array[OceanCurrent] = []
+## Time since the turtle was caught by the entrance, and where it was then
+var _entry_time: float = 0.0
+var _entry_start: Vector2 = Vector2.ZERO
+var _bonus_started: bool = false
+var _camera_focused: bool = false
 
 ## Ocean interior for spawning and the rainbow's span: x = wall to wall,
 ## y = surface to floor
@@ -197,16 +207,16 @@ func _win() -> void:
 	_hide_timer()
 	print("🌈 Rainbow complete!")
 	rainbow_completed.emit()
-	_open_secret_entrance()
+	_open_bonus_rainbow_level_entrance()
 
 # ---------------------------------------------------------------------------
-# SECRET ENTRANCE
+# BONUS RAINBOW LEVEL ENTRANCE
 # ---------------------------------------------------------------------------
 
 ## Two OceanCurrents, one per end of the rainbow: each starts under the water
 ## below its end, climbs to the surface and rides the middle of the rainbow
 ## band up to the apex, where the entrance glows.
-func _open_secret_entrance() -> void:
+func _open_bonus_rainbow_level_entrance() -> void:
 	if not is_instance_valid(_arc):
 		return
 	_arc.open_portal()
@@ -229,6 +239,7 @@ func _open_secret_entrance() -> void:
 		current.get_node("Path2D").curve = _entrance_curve(from_left)
 		current.modulate.a = 0.0
 		_level().add_child(current)
+		_entrance_currents.append(current)
 		current.position = Vector2.ZERO
 		current.create_tween().tween_property(current, "modulate:a", 1.0, 0.8)
 	_entrance_open = true
@@ -247,21 +258,78 @@ func _entrance_curve(from_left: bool) -> Curve2D:
 		curve.add_point(level.to_local(p) if level else p)
 	return curve
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	if not _entrance_open or not is_instance_valid(_arc):
 		return
 	var player := get_tree().get_first_node_in_group("player") as RigidBody2D
 	if not player:
 		return
 	if _entrance_reached:
-		# Holds the turtle in the entrance until the secret level takes over
-		player.global_position = _arc.apex()
-		player.linear_velocity = Vector2.ZERO
+		_update_entry(player, delta)
 		return
+	_update_camera_focus(player)
 	if player.global_position.distance_to(_arc.apex()) < entrance_radius:
 		_entrance_reached = true
-		print("🌈 Secret entrance reached!")
-		secret_entrance_reached.emit()
+		_entry_time = 0.0
+		_entry_start = player.global_position
+		print("🌈 Bonus rainbow level entrance reached!")
+		bonus_rainbow_level_entrance_reached.emit()
+
+## Caught by the entrance: glide into the centre of the glow, shine like a
+## rainbow, then hand over to RainbowBonusManager (which fades to white).
+func _update_entry(player: RigidBody2D, delta: float) -> void:
+	_entry_time += delta
+	var apex := _arc.apex()
+	var t := clampf(_entry_time / entrance_center_time, 0.0, 1.0)
+	player.global_position = _entry_start.lerp(apex, ease(t, -2.0))
+	player.linear_velocity = Vector2.ZERO
+	var shine_t := clampf((_entry_time - entrance_center_time) / entrance_shine_time, 0.0, 1.0)
+	player.set("rainbow_shine", shine_t)
+	if shine_t >= 1.0 and not _bonus_started:
+		_bonus_started = true
+		RainbowBonusManager.enter(_on_back_from_bonus_rainbow_level)
+
+## While the turtle rides an entrance current, the level camera frames the
+## whole rainbow (apex to both ends), whatever it was doing before.
+func _update_camera_focus(player: Node2D) -> void:
+	var riding := false
+	for current in _entrance_currents:
+		if is_instance_valid(current) and current.has_body(player):
+			riding = true
+			break
+	# Up in the sky above the rainbow's base counts too — between the currents
+	# meeting and the catch, the turtle can be out of both for a moment
+	if _camera_focused and player.global_position.y < _arc.center.y:
+		riding = true
+	if riding == _camera_focused:
+		return
+	var camera := get_viewport().get_camera_2d()
+	if not camera or not camera.has_method("focus_on"):
+		return
+	_camera_focused = riding
+	if riding:
+		camera.focus_on(Vector2(_arc.center.x, _arc.center.y - _arc.radius.y * 0.5))
+	else:
+		camera.release_focus()
+
+## Back from the bonus rainbow level: one visit per rainbow, so the entrance
+## closes (the rainbow itself stays) and the turtle drops from the apex.
+func _on_back_from_bonus_rainbow_level() -> void:
+	_entrance_open = false
+	_entrance_reached = false
+	var player := get_tree().get_first_node_in_group("player")
+	if player:
+		player.set("rainbow_shine", -1.0)
+	var camera := get_viewport().get_camera_2d()
+	if _camera_focused and camera and camera.has_method("release_focus"):
+		camera.release_focus()
+	_camera_focused = false
+	for current in _entrance_currents:
+		if is_instance_valid(current):
+			current.queue_free()
+	_entrance_currents.clear()
+	if is_instance_valid(_arc):
+		_arc.close_portal()
 
 ## Pulses the fish of the colour that has to be freed next.
 func _refresh_targets() -> void:

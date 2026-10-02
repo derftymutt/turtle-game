@@ -32,7 +32,7 @@ var colors: Array[Color] = []
 
 var _progress: Array[float] = []
 var _from_left: Array[bool] = []
-## The secret-level entrance glowing at the apex (open_portal())
+## The bonus rainbow level entrance glowing at the apex (open_portal())
 var _portal_open: bool = false
 var _shattered: bool = false
 ## Falling chunks once shattered: {pos, vel, rot, spin, delay, wet, alpha,
@@ -57,11 +57,11 @@ func stripe_point(stripe: int, t: float) -> Vector2:
 	return _ellipse_point(_stripe_radius(stripe, 0.5), t)
 
 ## Global point on the centre line of the whole seven-stripe band — the line
-## the secret-entrance currents ride. `t` as in stripe_point().
+## the bonus rainbow level entrance currents ride. `t` as in stripe_point().
 func band_point(t: float) -> Vector2:
 	return _ellipse_point(radius - Vector2.ONE * STRIPE_WIDTH * STRIPE_COUNT * 0.5, t)
 
-## Top of the band — where the secret entrance opens.
+## Top of the band — where the bonus rainbow level entrance opens.
 func apex() -> Vector2:
 	return band_point(0.5)
 
@@ -69,9 +69,13 @@ func apex() -> Vector2:
 func band_width() -> float:
 	return STRIPE_WIDTH * STRIPE_COUNT
 
-## Lights the pulsing secret-level entrance at the apex.
+## Lights the pulsing bonus rainbow level entrance at the apex.
 func open_portal() -> void:
 	_portal_open = true
+
+func close_portal() -> void:
+	_portal_open = false
+	queue_redraw()
 
 ## Stripe `stripe` painted up to `progress` (0–1) from its left or right end.
 func paint(stripe: int, progress: float, from_left: bool) -> void:
