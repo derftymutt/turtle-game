@@ -1771,6 +1771,10 @@ func _launch_from_flipper_velcro() -> void:
 	if flip_sign < 0:
 		tangent = -tangent
 
+	# Same "hook" correction as FlipperBase.hit_body(): tilt toward the arm's tip.
+	var offset: float = deg_to_rad(flipper.launch_angle_offset_degrees)
+	tangent = (tangent * cos(offset) + rel_dir * sin(offset)).normalized()
+
 	# The swing direction only clears the arm when latched on its leading side. From the
 	# trailing (underside) the tangent points into the arm, and at launch speed (~35px per
 	# physics tick vs a 12px-thick arm) the turtle tunnels straight through. Mirror that
