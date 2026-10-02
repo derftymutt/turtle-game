@@ -32,6 +32,18 @@ func _collectible_ready():
 	# thin wall geometry if it builds up speed from enemy collisions.
 	continuous_cd = RigidBody2D.CCD_MODE_CAST_SHAPE
 
+	# The Crocodile's body is on World_Player so the turtle bounces off it,
+	# which also let a piece dropped on it (e.g. when the croc hits the
+	# turtle) rest on its back just above the surface instead of falling
+	# into the ocean. Pieces pass through enemy bodies instead.
+	contact_monitor = true
+	max_contacts_reported = 4
+	body_entered.connect(_on_body_entered)
+
+	# Never sleep: a piece that came to rest on something that then moved
+	# away would otherwise stay asleep, hanging in mid-air.
+	can_sleep = false
+
 func _process(_delta):
 	"""Follow carrier while being carried"""
 	if not is_carried or carrier == null:
@@ -63,6 +75,11 @@ func _collectible_physics_process(delta):
 
 	# Keep piece inside the play area every frame, not just on intentional drop.
 	_enforce_horizontal_bounds()
+
+func _on_body_entered(body: Node) -> void:
+	if body.is_in_group("enemies") and body is PhysicsBody2D:
+		# Deferred: body_entered can fire mid physics-query-flush.
+		add_collision_exception_with.call_deferred(body)
 
 func _update_air_physics(in_air: bool) -> void:
 	# Water values are captured lazily rather than in _collectible_ready()
@@ -174,7 +191,8 @@ func _restore_physics_after_drop() -> void:
 	var fallback_carrier := _dropped_from
 	_dropped_from = null
 	for body in _get_drop_overlap_bodies(fallback_carrier):
-		add_collision_exception_with(body)
+		# Deferred: body_entered can fire mid physics-query-flush.
+		add_collision_exception_with.call_deferred(body)
 		get_tree().create_timer(_PLAYER_SEPARATION_GRACE).timeout.connect(
 			func():
 				if is_instance_valid(self) and is_instance_valid(body):
