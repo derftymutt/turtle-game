@@ -2,18 +2,6 @@
 
 [ext_resource type="Script" path="res://ui/menus/boss_intro_popup.gd" id="1_bossintro"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bossintropanel"]
-bg_color = Color(0.03, 0.1654902, 0.415, 0.7)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.4, 1.0, 0.45, 1.0)
-content_margin_left = 16.0
-content_margin_top = 14.0
-content_margin_right = 16.0
-content_margin_bottom = 14.0
-
 [node name="BossIntroPopup" type="CanvasLayer"]
 process_mode = 3
 script = ExtResource("1_bossintro")
@@ -44,7 +32,7 @@ grow_vertical = 2
 
 [node name="PanelContainer" type="PanelContainer" parent="Control/CenterContainer"]
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_bossintropanel")
+theme_type_variation = &"PanelBase"
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer"]
 custom_minimum_size = Vector2(560, 0)

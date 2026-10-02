@@ -86,6 +86,10 @@ HUD is instantiated as a child of each level scene (via `LevelBase`). It manages
 - **Alien tech slots**: subscribes to `AlienTechManager` signals; cooldown bars use `AlienTechManager.get_cooldown_ratio()`.
 - **Trash clusters**: every 200 score points, HUD spawns a `TrashCluster` that drifts across the screen.
 
+### Menu Panels
+
+Menu boxes are hand-drawn 9-slice art (`ui/panel_base.png`, 6px corners), registered in `theme/pixel_theme.tres` as theme type variations of `PanelContainer`: `PanelBase` (16/14 content padding, popups), `PanelBaseCompact` (8/14/8/8, the full menus) and `PanelBaseOpaque` (`ui/panel_base_opaque.png`, 16/14 — for dialogs that stack on top of another menu, like `TurtleConfirmDialog`). A menu panel sets `theme_type_variation` to one of these instead of carrying its own `StyleBoxFlat` override — including panels built in code (`TurtleConfirmDialog`). The Alien Tech selection screen and its help dialog are deliberately left on their own flat styles. New panel art = new `StyleBoxTexture` + variation in the theme.
+
 ### Trash Cleanup System
 
 `TrashSequenceSpawner` (in `systems/trash_cleanup/`) periodically spawns `TrashSequence` nodes. Each sequence contains multiple `TrashItem` collectibles in patterns (STRAIGHT, WAVE, DIAGONAL). Completing a sequence awards a powerup.

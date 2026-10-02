@@ -2,18 +2,6 @@
 
 [ext_resource type="Script" uid="uid://5usarut2jj0q" path="res://ui/menus/game_info_screen.gd" id="1_ginfo"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gameinfopanel"]
-bg_color = Color(0, 0.3019608, 1, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.4, 1.0, 0.45, 1.0)
-content_margin_left = 8.0
-content_margin_top = 14.0
-content_margin_right = 8.0
-content_margin_bottom = 8.0
-
 [node name="GameInfoScreen" type="CanvasLayer" unique_id=1110021951]
 script = ExtResource("1_ginfo")
 
@@ -43,7 +31,7 @@ grow_vertical = 2
 
 [node name="PanelContainer" type="PanelContainer" parent="Control/CenterContainer" unique_id=945407248]
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_gameinfopanel")
+theme_type_variation = &"PanelBaseCompact"
 
 [node name="MarginContainer" type="MarginContainer" parent="Control/CenterContainer/PanelContainer" unique_id=945407247]
 layout_mode = 2

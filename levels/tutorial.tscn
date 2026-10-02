@@ -39,14 +39,6 @@ size = Vector2(8.000166, 759.0005)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_4knja"]
 size = Vector2(8.000183, 768.00024)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tutorialprompt"]
-bg_color = Color(0.03, 0.1654902, 0.415, 0.7)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.4, 1.0, 0.45, 1.0)
-
 [sub_resource type="AtlasTexture" id="AtlasTexture_hinticon"]
 atlas = ExtResource("30_turtleicon")
 region = Rect2(48, 0, 24, 24)
@@ -171,7 +163,7 @@ offset_left = 24.0
 offset_top = -100.0
 offset_right = -24.0
 offset_bottom = 160.0
-theme_override_styles/panel = SubResource("StyleBoxFlat_tutorialprompt")
+theme_type_variation = &"PanelBase"
 
 [node name="Margin" type="MarginContainer" parent="TutorialUI/Prompt" index="0" unique_id=1955969009]
 layout_mode = 0

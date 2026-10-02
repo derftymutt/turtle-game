@@ -26,8 +26,6 @@ class_name TurtleConfirmDialog
 const _SFX_MENU_NAV    = preload("res://assets/sounds/sfx/menu nav_1.ogg")
 const _SFX_MENU_SELECT = preload("res://assets/sounds/sfx/menu select_1.ogg")
 
-const _PANEL_BG_COLOR := Color(0.03, 0.1654902, 0.415, 1.0)
-const _PANEL_BORDER_COLOR := Color(0.4, 1.0, 0.45, 1.0)
 const _OVERLAY_COLOR := Color(0, 0.3019608, 1, 0.5)
 
 const _CARD_WIDTH: float = 380.0
@@ -100,15 +98,8 @@ func show_dialog(message: String, options: Array, title: String = "") -> void:
 	control.add_child(center)
 
 	var panel := PanelContainer.new()
-	var style := StyleBoxFlat.new()
-	style.bg_color = _PANEL_BG_COLOR
-	style.set_border_width_all(2)
-	style.border_color = _PANEL_BORDER_COLOR
-	style.content_margin_left = 16.0
-	style.content_margin_top = 14.0
-	style.content_margin_right = 16.0
-	style.content_margin_bottom = 14.0
-	panel.add_theme_stylebox_override("panel", style)
+	# Opaque: this dialog opens on top of other menus, whose text would show through.
+	panel.theme_type_variation = &"PanelBaseOpaque"
 	center.add_child(panel)
 
 	var vbox := VBoxContainer.new()

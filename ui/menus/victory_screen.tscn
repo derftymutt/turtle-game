@@ -2,18 +2,6 @@
 
 [ext_resource type="Script" uid="uid://kduh6etyrlqg" path="res://ui/menus/victory_screen.gd" id="1_victory"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_victorypanel"]
-bg_color = Color(0.03, 0.1654902, 0.415, 0.7)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.4, 1.0, 0.45, 1.0)
-content_margin_left = 8.0
-content_margin_top = 14.0
-content_margin_right = 8.0
-content_margin_bottom = 8.0
-
 [node name="VictoryScreen" type="CanvasLayer"]
 process_mode = 3
 script = ExtResource("1_victory")
@@ -44,7 +32,7 @@ grow_vertical = 2
 
 [node name="PanelContainer" type="PanelContainer" parent="Control/CenterContainer"]
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_victorypanel")
+theme_type_variation = &"PanelBaseCompact"
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer"]
 custom_minimum_size = Vector2(300, 0)

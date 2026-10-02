@@ -2,18 +2,6 @@
 
 [ext_resource type="Script" path="res://ui/menus/rainbow_bonus_summary.gd" id="1_summary"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_summarypanel"]
-bg_color = Color(0, 0, 0, 0.85)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(1, 1, 1, 1)
-content_margin_left = 16.0
-content_margin_top = 14.0
-content_margin_right = 16.0
-content_margin_bottom = 14.0
-
 [node name="RainbowBonusSummary" type="CanvasLayer"]
 process_mode = 3
 layer = 50
@@ -48,7 +36,7 @@ mouse_filter = 2
 
 [node name="PanelContainer" type="PanelContainer" parent="Control/CenterContainer"]
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_summarypanel")
+theme_type_variation = &"PanelBase"
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer"]
 custom_minimum_size = Vector2(360, 0)
