@@ -116,6 +116,18 @@ var mouse_fire_enabled: bool = true
 ## Set by the tutorial to hold the turtle still until the prompt telling the
 ## player to swim is on screen. Only blocks thrust — physics still runs.
 var swim_locked: bool = false
+
+## Set by the Academy for its "super speed only" challenge — shoot() refuses
+## every spit while it's on (same early-out spot as ink).
+var shoot_locked: bool = false
+
+## A regular or phase spit actually left the turtle (Academy counts these).
+signal spit_fired
+## A powerup was just applied to this turtle (Academy waits on this).
+signal powerup_applied(powerup_type: int)
+## A hit actually cost a heart. `source` is the cause clause the enemy passed,
+## e.g. "killed by a crocodile" (Academy checks who landed it).
+signal damaged(source: String)
 var _last_mouse_aim: Vector2 = Vector2.RIGHT
 var _mouse_crosshair: MouseCrosshair
 
@@ -835,7 +847,7 @@ func shoot(direction: Vector2):
 	if bullet_scene == null:
 		push_warning("No bullet scene assigned!")
 		return
-	if is_inked():
+	if is_inked() or shoot_locked:
 		return
 	if (_tech_effects[AlienTechRegistry.COSMIC_MEDITATION] as CosmicMeditationEffect).blocks_shooting():
 		return
@@ -853,6 +865,7 @@ func shoot(direction: Vector2):
 		return_to_idle_after_delay()
 
 	$SfxShoot.play()
+	spit_fired.emit()
 
 	# Phase Shifter: hold slot button while shooting → fire phase bullet instead
 	var _phase_slot := AlienTechManager.get_slot_index_for_tech(AlienTechRegistry.PHASE_SHIFTER)
@@ -975,6 +988,7 @@ func take_damage(amount: float, use_iframes: bool = false, source: String = ""):
 	_heart_iframe_timer = HEART_DAMAGE_IFRAME
 	if not source.is_empty():
 		_last_damage_source = source
+	damaged.emit(source)
 	$SfxDamage.play()
 
 	if hud:
@@ -1295,6 +1309,7 @@ func apply_powerup(powerup_type: int):
 		2:  activate_energy_freeze()
 		3:  activate_rapid_fire()
 		_:  push_error("Unknown powerup type: ", powerup_type)
+	powerup_applied.emit(powerup_type)
 
 func activate_shield():
 	shield_active = true
@@ -1565,6 +1580,18 @@ func _setup_float_energy_bar() -> void:
 	_float_energy_fg.z_as_relative = false
 	_float_energy_fg.z_index = 27
 	add_child(_float_energy_fg)
+	# Start above the turtle: _update_float_energy_bar() only runs from
+	# _process(), and a scene that pauses on its first frame (the Academy's
+	# narration) would otherwise show the bar across the middle of the sprite.
+	for node: Line2D in [_float_energy_bg, _float_energy_sweep, _float_energy_fg]:
+		node.position = Vector2(0.0, FLOAT_BAR_Y_OFFSET)
+
+## Scales the floating energy bar about its centre — the Academy pulses it to
+## point the bar out. 1.0 = normal size.
+func set_float_energy_bar_scale(factor: float) -> void:
+	for node: Line2D in [_float_energy_bg, _float_energy_sweep, _float_energy_fg]:
+		if node:
+			node.scale = Vector2(factor, factor)
 
 func _update_float_energy_bar(delta: float) -> void:
 	if not _float_energy_bg or not _float_energy_fg or not _float_energy_sweep:

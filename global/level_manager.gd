@@ -23,6 +23,9 @@ var is_tutorial: bool = false              # True while the standalone tutorial 
 
 # Standalone tutorial — separate mode, not part of level progression or scoring
 const TUTORIAL_SCENE: String = "res://levels/tutorial.tscn"
+# UFO Repair Turtle Academy — the gamified successor to the tutorial. Shares the
+# is_tutorial training-mode flag (no scoring, saving or progression).
+const ACADEMY_SCENE: String = "res://levels/academy/academy.tscn"
 
 # Time tracking (wall-clock milliseconds)
 var _attempt_start_time_ms: int = 0
@@ -132,6 +135,13 @@ func load_tutorial():
 	GameManager.clear_carried_pieces()
 	print("📘 Loading tutorial")
 	get_tree().change_scene_to_file(TUTORIAL_SCENE)
+
+func load_academy():
+	"""Launch UFO Repair Turtle Academy. Training mode — no scoring, no progression."""
+	is_tutorial = true
+	GameManager.clear_carried_pieces()
+	print("🎓 Loading UFO Repair Turtle Academy")
+	get_tree().change_scene_to_file(ACADEMY_SCENE)
 
 func complete_level():
 	"""Trigger level completion sequence"""

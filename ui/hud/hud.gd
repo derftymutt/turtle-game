@@ -82,6 +82,8 @@ var _trash_clusters := TrashClusterSpawner.new()
 # this timer, so freebies only ever fill the gaps and stay infrequent.
 @export_group("Freebie Trash Clusters")
 @export var freebie_clusters_enabled: bool = true
+## Off in the Academy, which has no trash bags (tech pickups are disabled there).
+@export var score_clusters_enabled: bool = true
 @export var freebie_first_delay: float = 30.0       # first freebie fires around here...
 @export var freebie_first_jitter: float = 8.0       # ...give or take this much
 @export var freebie_interval: float = 60.0          # then roughly this often after that...

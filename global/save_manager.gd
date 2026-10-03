@@ -129,3 +129,16 @@ const _RENAMED_TECH_IDS: Dictionary = {
 
 func _current_tech_id(id: String) -> String:
 	return _RENAMED_TECH_IDS.get(id, id)
+
+
+# ── UFO Repair Turtle Academy ────────────────────────────────────────────────
+
+## Earned once by passing the Academy exam. Kept with the best scores so it
+## survives new games and deleted run saves.
+func is_academy_certified() -> bool:
+	return bool(_load_best_scores().get("academy_certified", false))
+
+func set_academy_certified() -> void:
+	var data := _load_best_scores()
+	data["academy_certified"] = true
+	_save_best_scores(data)

@@ -158,7 +158,10 @@ func deliver_piece(piece: UFOPiece):
 	"""Accept the UFO piece and remove it from world"""
 	print("🛠️ Workshop received UFO piece!")
 
-	var is_final := (LevelManager.pieces_collected + 1 >= LevelManager.pieces_needed)
+	# Training modes (tutorial, Academy) never finish a level by delivery — a
+	# "final" piece there would play the fanfare and mute the HUD's energy
+	# charge sound for the rest of the session.
+	var is_final := not LevelManager.is_tutorial and (LevelManager.pieces_collected + 1 >= LevelManager.pieces_needed)
 	if is_final:
 		# Final piece: play the level-complete fanfare immediately and silence everything else
 		_sfx_beat.play()

@@ -35,6 +35,8 @@ func _schedule_next_freebie(hud) -> void:
 ## Only spawn a cluster when score is actually increasing past a milestone.
 ## Called from HUD.update_score().
 func on_score_updated(hud, new_score: int, previous_score: int) -> void:
+	if not hud.score_clusters_enabled:
+		return
 	if new_score > previous_score and _cluster_threshold_index < CLUSTER_SCORE_THRESHOLDS.size() and new_score >= CLUSTER_SCORE_THRESHOLDS[_cluster_threshold_index]:
 		_cluster_threshold_index += 1
 		spawn(hud)

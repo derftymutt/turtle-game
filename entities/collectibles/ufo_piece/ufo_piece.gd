@@ -23,6 +23,11 @@ var _dropped_from: Node2D = null  # carrier at the moment of drop, for the colli
 var _water_gravity_scale: float = -1.0  # water-physics values captured before air physics overrides them
 var _water_linear_damp: float = -1.0
 
+## Optional veto on pickup: called with (piece, collector) and must return true
+## to allow it. The Academy uses it for its "flipper launches only" challenge.
+## A refused piece stays on the floor; touching it again re-checks.
+var pickup_filter: Callable = Callable()
+
 func _collectible_ready():
 	sink_speed = 0.0
 	sway_amount = 0.0
@@ -103,6 +108,11 @@ func _on_collected(collector):
 	# Intentional-drop grace period: ignore pickup for 2 seconds after player dropped it
 	if _drop_grace_timer > 0.0:
 		collected = false
+		return
+
+	if pickup_filter.is_valid() and not pickup_filter.call(self, collector):
+		collected = false
+		set_deferred("freeze", false)  # undo BaseCollectible.collect()'s freeze
 		return
 
 	# Check if player has room to carry another (normally 1; 2 with hot Graviton Harness)

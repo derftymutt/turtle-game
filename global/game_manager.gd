@@ -9,6 +9,10 @@ const _FloatingScore = preload("res://ui/floating_score/floating_score.gd")
 ## BaseEnemy/BaseEnemyStatic._report_kill(). RainbowFishSpawner counts these.
 signal enemy_killed(enemy: Node)
 
+## A flipper just hit the turtle (a press or release launch, or a Flipper
+## Velcro launch). The Academy uses it to tell a flipper launch from a dive.
+signal flipper_launched
+
 # Set to true to show level-select dev buttons on the main menu
 const DEV_MODE: bool = false
 
@@ -39,6 +43,7 @@ var rainbow_hearts: int = 0
 var has_shown_tech_tutorial: bool = false
 var first_trash_cluster_spawned: bool = false
 var has_used_flipper: bool = false
+var last_flipper_launch_msec: int = -100000  # Time.get_ticks_msec() of the latest flipper_launched
 var has_shown_flipper_reminder: bool = false
 var has_shown_puffer_tutorial: bool = false
 
@@ -72,6 +77,8 @@ func _take_screenshot() -> void:
 
 func mark_flipper_used() -> void:
 	has_used_flipper = true
+	last_flipper_launch_msec = Time.get_ticks_msec()
+	flipper_launched.emit()
 
 func update_high_score(level_name: String, score: int):
 	if score > high_scores.get(level_name, 0):

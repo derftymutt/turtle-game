@@ -22,6 +22,9 @@ class_name HealthPlant
 
 # Internal state
 var collected: bool = false
+
+## Eaten by the player (not emitted when it wilts away — see start_despawn()).
+signal eaten
 var despawning: bool = false
 var age: float = 0.0
 var pulse_offset: float = 0.0
@@ -103,6 +106,7 @@ func collect(collector):
 		return
 
 	collected = true
+	eaten.emit()
 
 	# Reparent SfxCollect to the parent scene so it survives this node's queue_free
 	var sfx = get_node_or_null("SfxCollect")

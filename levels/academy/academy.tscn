@@ -1,0 +1,241 @@
+[gd_scene format=4 uid="uid://hj3pfnkjd1t3"]
+
+[ext_resource type="PackedScene" uid="uid://dgwg5saty0h76" path="res://levels/shared/level_base.tscn" id="1_base"]
+[ext_resource type="Script" uid="uid://ch1b27mtvxueq" path="res://levels/academy/academy_controller.gd" id="2_ctrl"]
+[ext_resource type="PackedScene" uid="uid://b6mqqn1jgl6of" path="res://levels/environment/sky_background.tscn" id="3_sky"]
+[ext_resource type="PackedScene" uid="uid://qd5yfrw7588i" path="res://entities/environment/ocean/ocean.tscn" id="4_ocean"]
+[ext_resource type="PackedScene" uid="uid://dysmgxrg7t1o4" path="res://entities/environment/ocean_background/ocean_background.tscn" id="5_oceanbg"]
+[ext_resource type="Script" uid="uid://c3i3p77jm22vp" path="res://systems/camera_2d.gd" id="6_cam"]
+[ext_resource type="PackedScene" uid="uid://btbnsn74vk1b" path="res://entities/player/turtle_player.tscn" id="7_turtle"]
+[ext_resource type="Texture2D" uid="uid://bm428btwp720u" path="res://entities/environment/ocean_boundaries/ocean_floor.png" id="8_floor"]
+[ext_resource type="TileSet" uid="uid://dyl02kfc4a681" path="res://entities/environment/ocean_boundaries/ocean_wall.tres" id="9_wall"]
+[ext_resource type="Script" uid="uid://cw51fuum4ybk0" path="res://levels/academy/academy_panel.gd" id="10_panel"]
+[ext_resource type="Script" uid="uid://cp0lh15n6yd7s" path="res://levels/academy/academy_director.gd" id="11_dir"]
+[ext_resource type="PackedScene" uid="uid://4het8fdlmvgj" path="res://entities/environment/flippers/flipper_left_down.tscn" id="12_flpl"]
+[ext_resource type="PackedScene" uid="uid://b5olvcks1vnwn" path="res://entities/environment/flippers/flipper_right_down.tscn" id="13_flpr"]
+[ext_resource type="PackedScene" uid="uid://8edo3etakc1a" path="res://entities/environment/walls/dead_wall/dead_wall.tscn" id="14_dwal"]
+[ext_resource type="PackedScene" uid="uid://bp6g8v1jmnruo" path="res://entities/environment/walls/circular_bumper/circular_bumper.tscn" id="15_bump"]
+[ext_resource type="Texture2D" uid="uid://bpk6w8cgnriy6" path="res://levels/academy/academy_instructor.png" id="16_instr"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_floor"]
+texture = ExtResource("8_floor")
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+1:0/0 = 0
+1:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+2:0/0 = 0
+2:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+
+[sub_resource type="TileSet" id="TileSet_floor"]
+physics_layer_0/collision_layer = 1
+sources/0 = SubResource("TileSetAtlasSource_floor")
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bottom"]
+size = Vector2(1916, 10)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_side"]
+size = Vector2(8, 768)
+
+[node name="Academy" unique_id=608901476 instance=ExtResource("1_base")]
+script = ExtResource("2_ctrl")
+
+[node name="SfxLevelSong" parent="." index="0" unique_id=1310977424]
+process_mode = 3
+
+[node name="HUD" parent="." index="1" unique_id=1369229575]
+air_enabled = false
+timer_enabled = false
+freebie_clusters_enabled = false
+score_clusters_enabled = false
+
+[node name="SkyBackground" parent="." index="3" unique_id=2077882170 instance=ExtResource("3_sky")]
+
+[node name="Ocean" parent="." index="6" unique_id=112603885 instance=ExtResource("4_ocean")]
+
+[node name="OceanBackground" parent="." index="7" unique_id=1130738885 instance=ExtResource("5_oceanbg")]
+
+[node name="Camera2D" type="Camera2D" parent="." index="8" unique_id=431461992 node_paths=PackedStringArray("follow_target")]
+script = ExtResource("6_cam")
+follow_target = NodePath("../TurtlePlayer")
+horizontal_follow_enabled = false
+
+[node name="TurtlePlayer" parent="." index="9" unique_id=1099852979 instance=ExtResource("7_turtle")]
+position = Vector2(180, -122)
+
+[node name="OceanFloor" type="TileMapLayer" parent="." index="10" unique_id=977367833]
+position = Vector2(0, 4)
+tile_map_data = PackedByteArray("AAD5/woAAAABAAAAAAD6/woAAAAAAAAAAAD7/woAAAACAAAAAAD8/woAAAAAAAAAAAD9/woAAAAAAAAAAAD+/woAAAAAAAAAAAD//woAAAABAAAAAAAAAAoAAAAAAAAAAAABAAoAAAAAAAAAAAACAAoAAAAAAAAAAAADAAoAAAAAAAAAAAAEAAoAAAACAAAAAAAFAAoAAAACAAAAAAAGAAoAAAAAAAAAAAAHAAoAAAAAAAAAAAAIAAoAAAAAAAAAAAAJAAoAAAACAAAAAAAKAAoAAAAAAAAAAAALAAoAAAAAAAAAAAAMAAoAAAAAAAAAAAANAAoAAAAAAAAAAAAOAAoAAAACAAAAAAAPAAoAAAAAAAAAAAAQAAoAAAAAAAAAAAARAAoAAAAAAAAAAAASAAoAAAAAAAAAAAATAAoAAAABAAAAAAA=")
+tile_set = SubResource("TileSet_floor")
+
+[node name="OceanWallLeft" type="TileMapLayer" parent="." index="11" unique_id=734484758]
+position = Vector2(0, 4)
+tile_map_data = PackedByteArray("AADy//j/AAACAAAAAADy//n/AAAAAAAAAADy//r/AAAAAAAAAADy//v/AAABAAAAAADy//z/AAAAAAAAAADy//3/AAAAAAAAAADy//7/AAAAAAAAAADy////AAABAAAAAADy/wAAAAAAAAAAAADy/wEAAAAAAAAAAADy/wIAAAAAAAAAAADy/wMAAAAAAAAAAADy/wQAAAACAAAAAADy/wUAAAACAAAAAADy/wYAAAABAAAAAADy/wcAAAACAAAAAADy/wgAAAACAAAAAADy/wkAAAABAAAAAAA=")
+tile_set = ExtResource("9_wall")
+
+[node name="OceanWallRight" type="TileMapLayer" parent="." index="12" unique_id=1162881147]
+position = Vector2(632, 4)
+tile_map_data = PackedByteArray("AADY/wkAAAAAAAAAAADY/wgAAAACAAAAAADY/wcAAAABAAAAAADY/wYAAAAAAAAAAADY/wUAAAACAAAAAADY/wQAAAAAAAAAAADY/wMAAAABAAAAAADY/wIAAAACAAAAAADY/wEAAAAAAAAAAADY/wAAAAACAAAAAADY////AAAAAAAAAADY//7/AAAAAAAAAADY//3/AAAAAAAAAADY//z/AAACAAAAAADY//v/AAAAAAAAAADY//r/AAABAAAAAADY//n/AAAAAAAAAADY//j/AAACAAAAAAA=")
+tile_set = ExtResource("9_wall")
+
+[node name="WorldSafetyBoundaries" type="Node2D" parent="." index="13" unique_id=1776393317]
+
+[node name="BoundaryBottom" type="StaticBody2D" parent="WorldSafetyBoundaries" index="0" unique_id=631525287]
+position = Vector2(0, 175)
+collision_layer = 257
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldSafetyBoundaries/BoundaryBottom" index="0" unique_id=583161603]
+shape = SubResource("RectangleShape2D_bottom")
+debug_color = Color(0, 0.6, 0.7, 0.42)
+
+[node name="BoundaryLeft" type="StaticBody2D" parent="WorldSafetyBoundaries" index="1" unique_id=730219315]
+position = Vector2(-108, -204)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldSafetyBoundaries/BoundaryLeft" index="0" unique_id=1735791460]
+shape = SubResource("RectangleShape2D_side")
+debug_color = Color(0, 0.6, 0.7, 0.42)
+
+[node name="BoundaryRight" type="StaticBody2D" parent="WorldSafetyBoundaries" index="2" unique_id=1325065673]
+position = Vector2(316, -204)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldSafetyBoundaries/BoundaryRight" index="0" unique_id=1467883453]
+shape = SubResource("RectangleShape2D_side")
+debug_color = Color(0, 0.6, 0.7, 0.42)
+
+[node name="PinballElements" type="Node2D" parent="." index="14" unique_id=1821168597]
+
+[node name="FlipperLeftTop" type="Node2D" parent="PinballElements" index="0" unique_id=121404705]
+
+[node name="DeadWall" parent="PinballElements/FlipperLeftTop" index="0" unique_id=1887445670 instance=ExtResource("14_dwal")]
+position = Vector2(33, -53)
+angle_preset = 2
+mirrored = true
+
+[node name="Flipper" parent="PinballElements/FlipperLeftTop" index="1" unique_id=1438367086 instance=ExtResource("12_flpl")]
+position = Vector2(59, -80)
+
+[node name="FlipperLeftBottom" type="Node2D" parent="PinballElements" index="1" unique_id=774082121]
+
+[node name="DeadWall" parent="PinballElements/FlipperLeftBottom" index="0" unique_id=1218717243 instance=ExtResource("14_dwal")]
+position = Vector2(-46, 85)
+angle_preset = 2
+mirrored = true
+
+[node name="Flipper" parent="PinballElements/FlipperLeftBottom" index="1" unique_id=1491254254 instance=ExtResource("12_flpl")]
+position = Vector2(-20, 58)
+
+[node name="FlipperRightTop" type="Node2D" parent="PinballElements" index="2" unique_id=1422374452]
+
+[node name="DeadWall" parent="PinballElements/FlipperRightTop" index="0" unique_id=2013908110 instance=ExtResource("14_dwal")]
+position = Vector2(175, -53)
+angle_preset = 2
+
+[node name="Flipper" parent="PinballElements/FlipperRightTop" index="1" unique_id=7516744 instance=ExtResource("13_flpr")]
+position = Vector2(149, -80)
+
+[node name="FlipperRightBottom" type="Node2D" parent="PinballElements" index="3" unique_id=835615518]
+
+[node name="DeadWall" parent="PinballElements/FlipperRightBottom" index="0" unique_id=370352505 instance=ExtResource("14_dwal")]
+position = Vector2(254, 85)
+angle_preset = 2
+
+[node name="Flipper" parent="PinballElements/FlipperRightBottom" index="1" unique_id=239882173 instance=ExtResource("13_flpr")]
+position = Vector2(228, 58)
+
+[node name="CircularBumpers" type="Node2D" parent="PinballElements" index="4" unique_id=733047474]
+
+[node name="BumperCenterMid" parent="PinballElements/CircularBumpers" index="0" unique_id=716150942 instance=ExtResource("15_bump")]
+position = Vector2(104, 92)
+
+[node name="BumperLeft" parent="PinballElements/CircularBumpers" index="1" unique_id=500143894 instance=ExtResource("15_bump")]
+position = Vector2(-46, -50)
+size_preset = 1
+radius = 16.0
+
+[node name="BumperRight" parent="PinballElements/CircularBumpers" index="2" unique_id=1099724547 instance=ExtResource("15_bump")]
+position = Vector2(254, -50)
+size_preset = 1
+radius = 16.0
+
+[node name="BumperLowLeft" parent="PinballElements/CircularBumpers" index="3" unique_id=1789637002 instance=ExtResource("15_bump")]
+position = Vector2(-66, 30)
+variant = "2"
+
+[node name="BumperLowRight" parent="PinballElements/CircularBumpers" index="4" unique_id=467795225 instance=ExtResource("15_bump")]
+position = Vector2(274, 30)
+variant = "3"
+
+[node name="AcademyPanel" type="CanvasLayer" parent="." index="15" unique_id=843213337]
+process_mode = 3
+script = ExtResource("10_panel")
+
+[node name="Panel" type="PanelContainer" parent="AcademyPanel" index="0" unique_id=1943661120]
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = 48.0
+offset_right = 204.0
+offset_bottom = -4.0
+theme_type_variation = &"PanelBaseCompactOpaque"
+
+[node name="VBox" type="VBoxContainer" parent="AcademyPanel/Panel" index="0" unique_id=451189442]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="Title" type="Label" parent="AcademyPanel/Panel/VBox" index="0" unique_id=122699415]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.8980392, 0.3137255, 1)
+theme_override_font_sizes/font_size = 16
+text = "UFO Repair Academy"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="AgendaHeader" type="Label" parent="AcademyPanel/Panel/VBox" index="1" unique_id=560475006]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0, 1)
+theme_override_font_sizes/font_size = 12
+text = "Agenda"
+
+[node name="Agenda" type="VBoxContainer" parent="AcademyPanel/Panel/VBox" index="2" unique_id=1867976771]
+layout_mode = 2
+theme_override_constants/separation = 1
+
+[node name="Separator" type="HSeparator" parent="AcademyPanel/Panel/VBox" index="3" unique_id=1062591881]
+layout_mode = 2
+
+[node name="Instructor" type="TextureRect" parent="AcademyPanel/Panel/VBox/Separator" index="0" unique_id=1733263979]
+layout_mode = 0
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -84.0
+offset_top = -49.0
+offset_bottom = -1.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+texture = ExtResource("16_instr")
+stretch_mode = 2
+
+[node name="LessonTitle" type="Label" parent="AcademyPanel/Panel/VBox" index="4" unique_id=1841027206]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0, 1)
+theme_override_font_sizes/font_size = 14
+autowrap_mode = 2
+
+[node name="Body" type="RichTextLabel" parent="AcademyPanel/Panel/VBox" index="5" unique_id=769281146]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/normal_font_size = 12
+bbcode_enabled = true
+scroll_active = false
+
+[node name="Hint" type="Label" parent="AcademyPanel/Panel/VBox" index="6" unique_id=700523658]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+theme_override_font_sizes/font_size = 12
+vertical_alignment = 2
+autowrap_mode = 2
+
+[node name="AcademyDirector" type="Node" parent="." index="16" unique_id=819342338]
+process_mode = 3
+script = ExtResource("11_dir")

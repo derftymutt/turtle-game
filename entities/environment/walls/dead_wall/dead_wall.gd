@@ -113,6 +113,20 @@ func _process(delta: float) -> void:
 		_sprite.frame = 0
 		_charge_anim_time = 0.0
 
+## Plays the charge animation with no turtle charging against the wall. The
+## Academy points the mechanic out this way while the level is paused (so
+## _process() isn't running): call it every frame, then end_charge_demo().
+func step_charge_demo(delta: float) -> void:
+	if _charge_frames <= 1 or not _sprite:
+		return
+	_charge_anim_time += delta
+	_sprite.frame = 1 + int(_charge_anim_time * charge_anim_fps) % (_charge_frames - 1)
+
+func end_charge_demo() -> void:
+	if _sprite:
+		_sprite.frame = 0
+	_charge_anim_time = 0.0
+
 ## --- Oil Slick ---
 
 func _physics_process(_delta: float) -> void:

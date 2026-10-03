@@ -563,6 +563,9 @@ func _build_buttons(grab_focus: bool = true):
 	# === TUTORIAL (optional, standalone — no scoring or progression) ===
 	_add_selectable_option("Tutorial", _OPTION_FONT_SIZE, _on_tutorial_pressed)
 
+	# === ACADEMY (gamified tutorial, standalone — no scoring or progression) ===
+	_add_selectable_option("Get Certified at UFO Repair Academy!", _OPTION_FONT_SIZE, _on_academy_pressed)
+
 	# === DEV LEVEL SELECT (hidden in release builds) ===
 	if GameManager.DEV_MODE:
 		var dev_row = HBoxContainer.new()
@@ -656,6 +659,13 @@ func _on_tutorial_pressed():
 		_sfx_select.play()
 	GameManager.reset_game()
 	LevelManager.load_tutorial()
+
+
+func _on_academy_pressed():
+	if _sfx_select:
+		_sfx_select.play()
+	GameManager.reset_game()
+	LevelManager.load_academy()
 
 
 func _on_dev_level_selected(level_num: int):
