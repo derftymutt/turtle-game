@@ -107,6 +107,9 @@ const TRASH_REWARDS: Array[int] = [
 	Powerup.PowerupType.RAPID_FIRE,
 ]
 
+## Prefilled on the graduation name prompt the first time (and used if they
+## submit it blank) — gamepad players can't type, so they can accept this.
+const DEFAULT_PLAYER_NAME := "Turtle"
 const RETRY_TEXT := "Ah dang- Give it another go! You'll get it!"
 
 ## Dev aid for tuning: start the course at this lesson (0 = the intro, 1-5 =
@@ -465,8 +468,13 @@ func _lesson_5() -> void:
 	_panel.set_lesson_title("Graduation")
 	_panel.clear_dialogue()
 	_panel.set_hint("")
-	await _panel.play_banner("CERTIFIED!", "UFO Repair Turtle")
-	await _say(["Congratulations! You are now a Certified UFO Repair Turtle!"])
+	# They sign their certificate: the name goes on the banner and is kept for
+	# the scoreboard (SaveManager.get_player_name()).
+	var saved_name := SaveManager.get_player_name()
+	var player_name := await _panel.ask_name(saved_name if saved_name != "" else DEFAULT_PLAYER_NAME)
+	SaveManager.set_player_name(player_name)
+	await _panel.play_banner("CONGRATULATIONS!", "%s, Certified UFO Repair Turtle" % player_name)
+	await _say(["Congratulations, %s! You are now a Certified UFO Repair Turtle!" % player_name])
 	_set_world_paused(false)
 	GameManager.load_main_menu()
 

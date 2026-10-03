@@ -573,3 +573,81 @@ func _banner_label(text: String, font_size: int, color: Color, top: float) -> La
 	label.add_theme_font_size_override("font_size", font_size)
 	label.add_theme_color_override("font_color", color)
 	return label
+
+
+# ── Graduation name prompt ───────────────────────────────────────────────
+
+## Asks the graduate to sign their certificate: a small opaque panel on the
+## banner layer with a name field and a "Certify!" button, prefilled with
+## `default_name`. Enter (in the field) or the button submits. While a gamepad
+## is the active device a VirtualKeyboard replaces the button (its Done key
+## submits) — it shows/hides live if the player switches device. Returns the
+## trimmed name, or `default_name` if it was left blank.
+func ask_name(default_name: String) -> String:
+	var layer := CanvasLayer.new()
+	layer.layer = BANNER_LAYER
+	add_child(layer)
+	var center := _anchored(CenterContainer.new(), Control.PRESET_FULL_RECT)
+	center.mouse_filter = Control.MOUSE_FILTER_PASS
+	layer.add_child(center)
+	var box := PanelContainer.new()
+	box.theme_type_variation = &"PanelBaseOpaque"
+	center.add_child(box)
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 8)
+	box.add_child(column)
+
+	var heading := Label.new()
+	heading.text = "Sign your certificate!"
+	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	heading.add_theme_font_size_override("font_size", 16)
+	heading.add_theme_color_override("font_color", _BANNER_TITLE_COLOR)
+	column.add_child(heading)
+
+	var field := LineEdit.new()
+	field.text = default_name
+	field.placeholder_text = "Your name"
+	field.max_length = SaveManager.PLAYER_NAME_MAX_LENGTH
+	field.custom_minimum_size = Vector2(180, 0)
+	field.alignment = HORIZONTAL_ALIGNMENT_CENTER
+	field.add_theme_font_size_override("font_size", 16)
+	field.select_all_on_focus = true
+	column.add_child(field)
+
+	var button := Button.new()
+	button.text = "Certify!"
+	button.add_theme_font_size_override("font_size", 16)
+	button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	column.add_child(button)
+	field.focus_neighbor_bottom = field.get_path_to(button)
+	button.focus_neighbor_top = button.get_path_to(field)
+
+	var keyboard := VirtualKeyboard.new()
+	keyboard.target = field
+	column.add_child(keyboard)
+
+	var state := {"done": false}
+	var submit := func(_text: String = "") -> void: state.done = true
+	field.text_submitted.connect(submit)
+	button.pressed.connect(submit)
+	keyboard.done.connect(submit)
+	# Gamepad: on-screen keyboard, focus on its keys. Keyboard/mouse: type in
+	# the field, Certify! button.
+	var use_device := func(gamepad: bool) -> void:
+		keyboard.visible = gamepad
+		button.visible = not gamepad
+		if gamepad:
+			keyboard.focus_first_key()
+		else:
+			field.grab_focus()
+			field.caret_column = field.text.length()
+	GameSettings.input_device_changed.connect(use_device)
+	await get_tree().process_frame
+	use_device.call(GameSettings.using_gamepad)
+	while not state.done:
+		await get_tree().process_frame
+	GameSettings.input_device_changed.disconnect(use_device)
+
+	var player_name := field.text.strip_edges()
+	layer.queue_free()
+	return player_name if player_name != "" else default_name

@@ -142,3 +142,15 @@ func set_academy_certified() -> void:
 	var data := _load_best_scores()
 	data["academy_certified"] = true
 	_save_best_scores(data)
+
+## The name the player signed when they graduated from the Academy — the
+## player's name for the (future) scoreboard. Empty until they've graduated.
+const PLAYER_NAME_MAX_LENGTH := 16
+
+func get_player_name() -> String:
+	return str(_load_best_scores().get("player_name", ""))
+
+func set_player_name(player_name: String) -> void:
+	var data := _load_best_scores()
+	data["player_name"] = player_name.strip_edges().left(PLAYER_NAME_MAX_LENGTH)
+	_save_best_scores(data)
