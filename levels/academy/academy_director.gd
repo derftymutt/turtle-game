@@ -396,7 +396,7 @@ func _lesson_3() -> void:
 	await _say(["See what I mean for yourself. Try shooting them. They just shake. Now, bear with me here. Go out and take a damage from the crocodile and a sea urchin on purpose. It'll build character. But don't die. You haven't paid yet!"])
 	await _hazard_hit_challenge()
 
-	await _say(["Scary, right!? Sorry about that, but I had to for your own sake. UFO Repair is no stroll through a coral reef, after all. Now take a breath, and kill a few more piranhas. It'll help you relax, I promise!"])
+	await _say(["Scary, right!? Sorry about that, but I had to for your own sake. UFO Repair is no stroll through the coral reef, after all. Now take a breath, and kill a few more piranhas. It'll help you relax, I promise!"])
 	await _enemy_challenge("Take out the 4 piranhas",
 		func() -> void: _spawn_challenge_piranhas(PIRANHA_SPOTS))
 
@@ -411,7 +411,7 @@ func _lesson_3() -> void:
 func _lesson_4() -> void:
 	await _begin_lesson(3)
 	await _say([" I don't know what's worse, haters or trash. Thankfully, turtle spit deals with both. You'll see clusters of trash floating by. Shoot them all and the ocean will thank you with a power-up."])
-	await _say(["The ocean also grants you points when you clean up trash, and good things come from getting points, trust me. Give it a shot- Try to shoot a whole line of trash and collect the power-up."], false)
+	await _say(["The ocean also gives you points when you shoot trash, and good things come from getting points, trust me. Give it a shot- Try to shoot a whole line of trash and collect the power-up."])
 	var reward := await _trash_challenge()
 	# Same wind-down as any finished challenge, then explain the power-up, then
 	# let them actually enjoy it before the lesson carries on.
@@ -420,7 +420,7 @@ func _lesson_4() -> void:
 	await _wait_seconds(REWARD_PLAY_SECONDS)
 	_set_task("")
 	_complete_lesson(3)
-	await _say(["Very good. FYI, there's also big trash bags.. these contain alien technologies, which are super strong power-ups. But that's the advanced course. I'll let you learn that on your own. Lesson done! It's exam time!"])
+	await _say(["Thrilling! FYI, there's also big trash bags. Those contain alien technologies, which are like super power-ups. But that's the advanced course. I'll let you learn that on your own. Lesson done! It's exam time!"])
 
 
 func _lesson_5() -> void:
@@ -474,7 +474,7 @@ func _lesson_5() -> void:
 	var player_name := await _panel.ask_name(saved_name if saved_name != "" else DEFAULT_PLAYER_NAME)
 	SaveManager.set_player_name(player_name)
 	await _panel.play_banner("CONGRATULATIONS!", "%s, Certified UFO Repair Turtle" % player_name)
-	await _say(["Congratulations, %s! You are now a Certified UFO Repair Turtle!" % player_name])
+	await _say(["Congratulations, %s! You are now a Certified UFO Repair Turtle! Go repair some UFOs!" % player_name])
 	_set_world_paused(false)
 	GameManager.load_main_menu()
 
@@ -1128,7 +1128,7 @@ func _reward_explanation(reward: int) -> String:
 		Powerup.PowerupType.ENERGY_ENDLESS:
 			return "That's an Energy Apple! While your energy bar is blinking, swimming is effortless. Dance!"
 		Powerup.PowerupType.RAPID_FIRE:
-			return "That's Rapid Fire! For a little while you spit bananas, not literally!"
+			return "That's Rapid Fire! For a little while, you spit bananas! not literally!"
 		Powerup.PowerupType.AIR_RESERVE:
-			return "That's an Air Reserve! It lets you hold your breath longer. More on breathing later..."
+			return "That's an Air Reserve! It fills your air and lets you hold your breath longer. More on breathing later..."
 	return "Nice find! Powerups are always worth grabbing."

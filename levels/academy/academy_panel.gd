@@ -57,8 +57,8 @@ const _BANNER_HEIGHT := 70.0
 ## Gap between the banner and each side of the screen — it's a long, narrow
 ## panel inside the screen, not a band running off both edges.
 const _BANNER_SIDE_INSET := 32.0
-## Same pixel-art opaque panel as the info pane.
-const _BANNER_PANEL_STYLE := &"PanelBaseCompactOpaque"
+## The banner's own pixel-art opaque panel (ui/panel_base_banner_opaque.png).
+const _BANNER_PANEL_STYLE := &"PanelBaseBannerOpaque"
 const _BANNER_EDGE_COLOR := Color(1.0, 0.85, 0.0, 1.0)
 const _BANNER_TITLE_COLOR := Color(0.6, 0.8980392, 0.3137255, 1.0)
 

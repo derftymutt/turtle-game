@@ -102,6 +102,7 @@ func _type(ch: String) -> void:
 	if _replace_pending:
 		_replace_pending = false
 		target.clear()
+	_caret_to_end_if_unfocused()
 	if ch.length() == 1 and ch >= "A" and ch <= "Z" and not _upper_next():
 		ch = ch.to_lower()
 	target.insert_text_at_caret(ch)
@@ -114,10 +115,19 @@ func _backspace() -> void:
 	if target == null:
 		return
 	_replace_pending = false
+	_caret_to_end_if_unfocused()
 	var caret := target.caret_column
 	if caret > 0:
 		target.delete_text(caret - 1, caret)
 	_refresh_case()
+
+
+## While the keys have focus the field doesn't, and its caret is wherever it
+## was left — column 0 for a prefilled default, which made Del do nothing and
+## new letters land in front of the old text. Edit at the end instead.
+func _caret_to_end_if_unfocused() -> void:
+	if not target.has_focus():
+		target.caret_column = target.text.length()
 
 
 func _toggle_shift() -> void:
