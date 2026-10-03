@@ -48,6 +48,8 @@ const _OPTIONS_FADE_DURATION: float = 0.5
 const _INDICATOR_MOVE_DURATION: float = 0.15
 const _INDICATOR_GAP: float = 6.0
 const _OPTION_FONT_SIZE: int = 18
+const _ACADEMY_OPTION_TEXT := "UFO Repair Academy - Get Certified!"
+const _ACADEMY_OPTION_TEXT_CERTIFIED := "UFO Repair Academy - Get Re-Certified"
 
 # First-reveal-only entrance: rather than the normal short focus-triggered
 # slide (which starts right next to the option and is easy to miss), the
@@ -552,6 +554,13 @@ func _build_buttons(grab_focus: bool = true):
 	_options_column.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	level_container.add_child(_options_column)
 
+	# === ACADEMY, first for players who aren't certified yet ===
+	# (Gamified tutorial — standalone, no scoring or progression.) Certified
+	# players get it lower down, after Start.
+	var certified := SaveManager.is_academy_certified()
+	if not certified:
+		_add_selectable_option(_ACADEMY_OPTION_TEXT, _OPTION_FONT_SIZE, _on_academy_pressed)
+
 	# === CONTINUE (only when a save exists) ===
 	if SaveManager.has_save():
 		var level = SaveManager.get_save_level()
@@ -560,11 +569,13 @@ func _build_buttons(grab_focus: bool = true):
 	# === NEW GAME ===
 	_add_selectable_option("Start", _OPTION_FONT_SIZE, _on_new_game_pressed)
 
-	# === TUTORIAL (optional, standalone — no scoring or progression) ===
-	_add_selectable_option("Tutorial", _OPTION_FONT_SIZE, _on_tutorial_pressed)
+	# === ACADEMY, after Start for certified players ===
+	if certified:
+		_add_selectable_option(_ACADEMY_OPTION_TEXT_CERTIFIED, _OPTION_FONT_SIZE, _on_academy_pressed)
 
-	# === ACADEMY (gamified tutorial, standalone — no scoring or progression) ===
-	_add_selectable_option("Get Certified at UFO Repair Academy!", _OPTION_FONT_SIZE, _on_academy_pressed)
+	# The old Tutorial option is hidden — the Academy replaces it.
+	# _on_tutorial_pressed() / LevelManager.load_tutorial() stay until the
+	# tutorial itself is removed.
 
 	# === DEV LEVEL SELECT (hidden in release builds) ===
 	if GameManager.DEV_MODE:
@@ -619,6 +630,26 @@ func _on_continue_pressed():
 func _on_new_game_pressed():
 	if _sfx_select:
 		_sfx_select.play()
+	if not SaveManager.is_academy_certified():
+		_suggest_academy()
+	else:
+		_start_or_confirm_overwrite()
+
+
+## Uncertified players are offered the Academy before a new game.
+func _suggest_academy():
+	var dialog := TurtleConfirmDialog.new()
+	add_child(dialog)
+	dialog.show_dialog(
+		"Do you want to get certified first? It may save your life!",
+		[
+			{"text": "Get Certified", "callback": _on_academy_pressed},
+			{"text": "No, start game", "callback": _start_or_confirm_overwrite},
+		]
+	)
+
+
+func _start_or_confirm_overwrite():
 	if SaveManager.has_save():
 		_confirm_overwrite_save()
 	else:

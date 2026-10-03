@@ -76,8 +76,14 @@ func _build_content():
 	var air_tex     = load("res://ui/hud/sprites/air_meter_icon.png")
 	var energy_tex  = load("res://ui/hud/sprites/energy_meter_icon.png")
 
-	# "You are Flip..."
-	content_container.add_child(_label("You are Flip, UFO repair turtle and pinball aficionado."))
+	# "You are Flip..." — or the name they signed at Academy graduation.
+	var intro := "You are Flip, UFO repair turtle and pinball aficionado."
+	if SaveManager.is_academy_certified():
+		var player_name := SaveManager.get_player_name()
+		if player_name.is_empty():
+			player_name = "Flip"
+		intro = "You are %s, Certified UFO Repair Turtle and pinball aficionado." % player_name
+	content_container.add_child(_label(intro))
 	_spacer(8)
 
 	# UFO parts + workshop

@@ -22,7 +22,7 @@ signal _ticked
 enum Outcome { DONE, DIED }
 
 const LESSONS: Array[String] = [
-	"Deep Ocean, meet Deep Space",
+	"Deep Ocean, Deep Space",
 	"The Ancients",
 	"The Haters",
 	"Trash",
@@ -47,7 +47,7 @@ const WORKSHOP_POS := Vector2(40, -138)
 const PIECE_SPOTS: Array[Vector2] = [Vector2(-60, 150), Vector2(104, 150), Vector2(268, 150)]
 ## Lesson 2's flipper challenge: a little in from the walls, and deliberately
 ## not mirrored, so the left and right flippers each need a different angle.
-const FLIPPER_PIECE_SPOTS: Array[Vector2] = [Vector2(-18, 150), Vector2(222, 150)]
+const FLIPPER_PIECE_SPOTS: Array[Vector2] = [Vector2(-10, 150), Vector2(210, 150)]
 const PIRANHA_SPOTS: Array[Vector2] = [Vector2(0, -30), Vector2(210, -30), Vector2(0, 110), Vector2(210, 110)]
 const SUPER_SPEED_PIRANHA_SPOT := Vector2(104, 10)
 # const MIXED_PIRANHA_SPOTS: Array[Vector2] = [Vector2(20, 110), Vector2(200, 110)]
@@ -316,7 +316,7 @@ func _lesson_1() -> bool:
 	await _wait_for_delivery()
 	_set_task("")
 
-	await _say(["Well done! They are damn heavy right?? I guess aliens haven't discovered titanium yet. In a pinch, drop a piece you hold with %s. Dive down to grab another and practice dropping it." % _drop_label()], false)
+	await _say(["Well done! They are damn heavy right?? I guess aliens haven't discovered titanium yet. Anyways, in a pinch, drop a piece you hold with %s. Dive down to grab another and practice dropping it." % _drop_label()], false)
 	if not await _drop_practice():
 		return false
 
@@ -327,10 +327,10 @@ func _lesson_1() -> bool:
 
 func _lesson_2() -> bool:
 	await _begin_lesson(1)
-	await _say(["We don't know who built pinball long ago. We can only purr in awe and gratitude that they did. It makes the job of UFO repair a heck of a lot easier."])
+	await _say(["We don't know who built pinball long ago. We can only purr in awe and gratitude that they did. It makes UFO repair a heck of a lot easier."])
 
 	_reveal_pinball()
-	await _say(["Behold! Thanks to pinball, turtles can repair UFOs without fainting from exhaustion! It's really quite simple. Use %s to flip leftward flippers, and %s to flip rightward ones. Try it!" % [_flipper_label(true), _flipper_label(false)]], false)
+	await _say(["Behold! Thanks to pinball, you can collect UFO pieces without fainting from exhaustion! It's really quite simple. Use %s to flip leftward flippers, and %s to flip rightward ones. Try it!" % [_flipper_label(true), _flipper_label(false)]], false)
 	# Flipper practice happens with the level still paused: only the flippers
 	# themselves run, so the player watches them move without drifting off.
 	_set_flippers_live(true)
@@ -350,7 +350,7 @@ func _lesson_2() -> bool:
 	if not await _pinball_practice():
 		return false
 
-	await _say(["Now use a flipper to pick up a UFO piece. I'm only gonna let you hold it if you got it from a flipper hit, no dives allowed! Bring it to your workshop once you've got it."])
+	await _say(["Now use a flipper to pick up a UFO piece. I'm only gonna let you hold it if you get it from a flipper hit, no dives allowed! Bring it to your workshop once you've got it."])
 	_place_flipper_challenge_pieces()
 	_set_piece_filter(_flipper_pickup_only)
 	_set_task("Flipper into a piece, then deliver it")
@@ -360,10 +360,10 @@ func _lesson_2() -> bool:
 
 	await _say(["Excellent! You probably noticed a few things while you were at it, but I'll go over them for your notes."])
 	_set_wall_charge_demo(true)
-	await _say(["Touching pinball flippers and walls ALSO refills energy fast, just like the surface does."])
+	await _say(["Touching pinball flippers and walls also refills energy fast, just like the surface does."])
 	_set_wall_charge_demo(false)
 	_complete_lesson(1)
-	await _say(["When you shoot off flippers and bumpers you launch at super speed! At that speed nothing can hurt you. In fact, it's you doing the hurting! Which brings us to.. (oh you passed the lesson by the way)"])
+	await _say(["Plus, when you shoot off flippers and bumpers you launch at super speed! At that speed nothing can hurt you. In fact, it's you doing the hurting! Which brings us to... (oh, you passed the lesson by the way)"])
 	return true
 
 
@@ -381,22 +381,22 @@ func _lesson_3() -> void:
 
 	# Enemy challenges wait for the continue press after their intro, so the
 	# player isn't reading and fighting at the same time.
-	await _say(["Got a hater piranha on your tail? Just spit! If they do get you, you'll lose a heart. You only have 7. But don't stress, practice. Spit all these piranhas goodnight."])
+	await _say(["Got a hater piranha on your tail? Just spit! If they do get you, you'll lose a heart. You only have 7. But don't stress, you're here to practice. Spit all these piranhas goodnight."])
 	await _enemy_challenge("Spit all %d piranhas goodnight" % PIRANHA_CHALLENGE_COUNT,
 		func() -> void: _spawn_challenge_piranhas(PIRANHA_SPOTS.slice(0, PIRANHA_CHALLENGE_COUNT)))
 
-	await _say(["Your other weapon? I already told you.. Super Speed! Kill this next piranha using only super speed from pinball flippers or bumpers. No spitting allowed!"])
+	await _say(["Good! Your other weapon? I already told you- Super Speed! Kill this next piranha using only super speed from pinball flippers or bumpers. No spitting allowed!"])
 	_turtle.shoot_locked = true
 	await _enemy_challenge("Super speed only - no spitting!",
 		func() -> void: _spawn_challenge_piranhas([SUPER_SPEED_PIRANHA_SPOT]))
 	_turtle.shoot_locked = false
 
-	await _say(["Well done. Now some more bad news. Not everything is vulnerable to spit or super speed. Crocodiles and sea urchins, for instance. Simply not bothered."])
+	await _say(["Well done! Now some more bad news. Not everything is vulnerable to spit or super speed. Crocodiles and sea urchins, for instance. They're simply not bothered."])
 	_spawn_fixtures()
-	await _say(["See what I mean for yourself. Go take a damage from the crocodile and a sea urchin. But don't die. You still haven't paid."])
+	await _say(["See what I mean for yourself. Try shooting them. They just shake. Now, bear with me here. Go out and take a damage from the crocodile and a sea urchin on purpose. It'll build character. But don't die. You haven't paid yet!"])
 	await _hazard_hit_challenge()
 
-	await _say(["Scary, right!? Sorry about that, but I had to for your own sake. Take a breath, then stroke your ego and kill a few more piranhas, it'll help you relax, I promise!"])
+	await _say(["Scary, right!? Sorry about that, but I had to for your own sake. UFO Repair is no stroll through a coral reef, after all. Now take a breath, and kill a few more piranhas. It'll help you relax, I promise!"])
 	await _enemy_challenge("Take out the 4 piranhas",
 		func() -> void: _spawn_challenge_piranhas(PIRANHA_SPOTS))
 

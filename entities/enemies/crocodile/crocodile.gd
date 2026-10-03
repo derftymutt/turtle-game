@@ -23,6 +23,7 @@ class_name Crocodile
 # Knockback settings
 @export var bounce_speed: float = 300.0  # Horizontal bounce velocity
 @export var upward_boost: float = 200.0  # Extra upward velocity when hit from below
+@export var contact_rehit_interval: float = 0.5  # Seconds between hits while the turtle stays in contact
 
 # Visual
 @export var bob_amount: float = 2.0
@@ -36,6 +37,7 @@ var ocean: Ocean = null
 var bob_offset: float = 0.0
 var is_in_vertical_attack: bool = false
 var current_flip_h: bool = false
+var _contact_rehit_timer: float = 0.0
 
 @onready var patrol_area = $PatrolArea
 
@@ -83,7 +85,7 @@ func _physics_process(delta):
 
 	# Continuously repel any player overlapping the damage area so the turtle
 	# can never get pinned (body_entered only fires once per contact).
-	_repel_overlapping_players()
+	_repel_overlapping_players(delta)
 
 func _calculate_movement(delta: float) -> float:
 	"""Calculate horizontal movement based on current state"""
@@ -195,6 +197,7 @@ func _on_player_lost(body: Node2D):
 
 func _deal_damage_to_player(player_node: Node2D):
 	"""Override BaseEnemyStatic to add bounce effect on contact"""
+	_contact_rehit_timer = contact_rehit_interval
 	player_node.take_damage(contact_damage, false, "killed by " + death_label)
 	
 	if not player_node is RigidBody2D:
@@ -210,18 +213,34 @@ func _deal_damage_to_player(player_node: Node2D):
 	if knockback_dir.y > 0:
 		player_node.linear_velocity.y -= upward_boost
 
-func _repel_overlapping_players():
-	if not damage_area:
+func _repel_overlapping_players(delta: float):
+	_contact_rehit_timer = max(0.0, _contact_rehit_timer - delta)
+	if not damage_area or not damage_area.monitoring:
 		return
-	for body in damage_area.get_overlapping_bodies():
-		if not body.is_in_group("player") or not body is RigidBody2D:
-			continue
+	for body in _players_in_contact():
+		# Still touching after the last hit (resting on the croc's back, wedged
+		# against a workshop, entered during i-frames…) — bite and bounce again.
+		if _contact_rehit_timer <= 0.0 and body.has_method("take_damage"):
+			_deal_damage_to_player(body)
 		var push_dir = body.global_position - global_position
 		if push_dir.length() < 0.1:
 			push_dir = Vector2.UP
 		else:
 			push_dir = push_dir.normalized()
-		(body as RigidBody2D).apply_central_force(push_dir * 3000.0)
+		body.apply_central_force(push_dir * 3000.0)
+
+## Players overlapping the damage area, plus any physically resting against the
+## solid body: the damage area is no bigger than the body, so a turtle sitting
+## on the croc's back touches it without ever entering the area.
+func _players_in_contact() -> Array[RigidBody2D]:
+	var result: Array[RigidBody2D] = []
+	for body in damage_area.get_overlapping_bodies():
+		if body.is_in_group("player") and body is RigidBody2D:
+			result.append(body)
+	if player and is_instance_valid(player) and player is RigidBody2D and not result.has(player):
+		if (player as RigidBody2D).get_colliding_bodies().has(self):
+			result.append(player)
+	return result
 
 func die():
 	"""Custom death animation - spin and sink"""
