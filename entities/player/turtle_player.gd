@@ -293,6 +293,7 @@ func _ready():
 	_tech_effects[AlienTechRegistry.TIMELINE_ALTERNATOR] = TimelineAlternatorEffect.new()
 	_tech_effects[AlienTechRegistry.COSMIC_MEDITATION] = CosmicMeditationEffect.new()
 	_tech_effects[AlienTechRegistry.DILATION_SCOPE] = DilationScopeEffect.new()
+	_tech_effects[AlienTechRegistry.CRADLE_SCOPE] = CradleScopeEffect.new()
 	for effect in _tech_effects.values():
 		(effect as AlienTechEffect).setup(self)
 
@@ -465,6 +466,8 @@ func _physics_process(delta):
 	meditation.physics_process(self, delta)
 
 	dilation_scope.physics_process(self, delta)
+
+	_tech_effects[AlienTechRegistry.CRADLE_SCOPE].physics_process(self, delta)
 
 	multi_beam.physics_process(self, delta)
 
@@ -1409,6 +1412,12 @@ func is_ion_exciter_active() -> bool:
 ## visible in linear_velocity until the next physics step.
 func notify_launch(from_bumper: bool = false, launch_velocity = null) -> void:
 	(_tech_effects[AlienTechRegistry.DILATION_SCOPE] as DilationScopeEffect).on_launch(self, from_bumper, launch_velocity)
+	(_tech_effects[AlienTechRegistry.CRADLE_SCOPE] as CradleScopeEffect).on_launch()
+
+## Public wrapper for FlipperBase: where Cradle Scope was aiming from when
+## `flipper` was pressed (a Vector2), or null if the scope isn't on that flipper.
+func cradle_scope_origin(flipper: FlipperBase):
+	return (_tech_effects[AlienTechRegistry.CRADLE_SCOPE] as CradleScopeEffect).launch_origin(flipper)
 
 ## Never leave the whole game slowed down if we're freed mid bullet time
 ## (death, level change, quit to menu).

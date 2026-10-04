@@ -34,6 +34,7 @@ const FLIPPER_AUTOMATON   := "flipper_automaton"
 const TIMELINE_ALTERNATOR := "timeline_alternator"
 const COSMIC_MEDITATION   := "cosmic_meditation"
 const DILATION_SCOPE      := "dilation_scope"
+const CRADLE_SCOPE        := "cradle_scope"
 
 # ─── Tech definitions ────────────────────────────────────────────────────────
 
@@ -335,6 +336,16 @@ var _definitions: Array[Dictionary] = [
 		"has_passive_bar": true,
 		"color":           Color(0.35, 0.95, 0.75),
 		"hot_description": "Click on, click off — no timer, no cooldown.",
+	},
+	{
+		"id":          CRADLE_SCOPE,
+		"name":        "Cradle Scope",
+		"description": "Cradle on a held flipper to switch on a launch scope.\nIt keeps aiming as you roll down the flipper, and the flipper launches you where it points.",
+		"hook":        "Line up the shot!",
+		"slot_label":  "Cradle Scope",
+		"needs_input": false,
+		"color":       Color(1.0, 0.8, 0.35),
+		"hot_description": "The scope reaches all the way to whatever you'll hit.",
 	},
 ]
 

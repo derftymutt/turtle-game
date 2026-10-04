@@ -32,6 +32,8 @@ const _ENEMY_LAYER_MASK: int = 1 << 2
 ## so the body gets a token nudge (or none at all) instead of a real launch — same
 ## tunneling mechanism as FORCE_FLIP_DELAY_TICKS above, just via the button-press path.
 const OVERSWING_ATTACK_TICKS: int = 3
+## A touching body slower than this counts as resting on the flipper (cradle).
+const CRADLE_REST_SPEED: float = 50.0
 
 ## Accent colours that tell the player which input a flipper uses.
 const _ACCENT_SWAP_SHADER = preload("res://entities/environment/flippers/flipper_accent_swap.gdshader")
@@ -180,7 +182,7 @@ func _physics_process(delta):
 					for body in touching_bodies:
 						if body is RigidBody2D:
 							var body_velocity = body.linear_velocity.length()
-							if body_velocity < 50:
+							if body_velocity < CRADLE_REST_SPEED:
 								body_is_resting = true
 								break
 			
@@ -341,13 +343,29 @@ func hit_body(body: RigidBody2D, is_press_action: bool, was_cradle_release: bool
 	if body.is_in_group("player"):
 		GameManager.mark_flipper_used(self)
 
-	var to_body = body.global_position - global_position
+	# Cradle Scope tech: launch from where the scope was aiming when the flipper
+	# was pressed, not from wherever the swinging arm has shoved the turtle since.
+	var launch_origin: Vector2 = body.global_position
+	if is_press_action and body.has_method("cradle_scope_origin"):
+		var scoped = body.cradle_scope_origin(self)
+		if scoped is Vector2:
+			launch_origin = scoped
+
+	body.linear_velocity += _launch_velocity(launch_origin - global_position, angular_velocity, is_press_action, body)
+	if body.has_method("notify_launch"):
+		body.notify_launch()
+	if _sfx_launch:
+		_sfx_launch.play()
+
+## Velocity a swing at `swing_velocity` (rad/s) adds to a body sitting at
+## `to_body` from the pivot. Shared by hit_body() and predict_press_launch().
+func _launch_velocity(to_body: Vector2, swing_velocity: float, is_press_action: bool, body: Node) -> Vector2:
 	var contact_distance = to_body.length()
-	var surface_velocity = contact_distance * angular_velocity
-	
+	var surface_velocity = contact_distance * swing_velocity
+
 	var tangent = Vector2(-to_body.y, to_body.x).normalized()
-	
-	if angular_velocity < 0:
+
+	if swing_velocity < 0:
 		tangent = -tangent
 
 	# Rotate the tangent toward the tip (outward along the arm), whichever way it swings
@@ -355,20 +373,43 @@ func hit_body(body: RigidBody2D, is_press_action: bool, was_cradle_release: bool
 	tangent = (tangent * cos(offset) + to_body.normalized() * sin(offset)).normalized()
 
 	var impulse_strength = flip_force * abs(surface_velocity) * 0.1
-	
+
 	if not is_press_action:
 		impulse_strength *= 2.0
-	
+
 	impulse_strength = clamp(impulse_strength, flip_force * 0.5, flip_force * 3.0)
-	
+
 	if body.has_method("is_ion_exciter_active") and body.is_ion_exciter_active():
 		impulse_strength *= 2.0
 
-	body.linear_velocity += tangent * impulse_strength
-	if body.has_method("notify_launch"):
-		body.notify_launch()
-	if _sfx_launch:
-		_sfx_launch.play()
+	return tangent * impulse_strength
+
+## Cradle Scope
+
+## True while `body` rests on this flipper held in its flipped position — the
+## same test the release uses for was_cradling, but answerable at any moment.
+func is_cradling(body: RigidBody2D) -> bool:
+	return (is_flipping and not automaton_active and not _is_phased
+			and settled_time >= cradle_threshold
+			and body.linear_velocity.length() < CRADLE_REST_SPEED
+			and is_touching(body))
+
+func is_touching(body: Node2D) -> bool:
+	return area != null and area.monitoring and area.overlaps_body(body)
+
+## True from a press until the arm finishes swinging up.
+func is_press_swinging() -> bool:
+	return is_actively_moving and last_input_was_press
+
+## The velocity pressing this flipper would add to `body` if it sat at
+## `body_position`. A held flipper is treated as swinging its full arc from rest.
+func predict_press_launch(body_position: Vector2, body: Node) -> Vector2:
+	var from_rotation: float = get_rest_angle() if is_flipping else current_rotation
+	var swing: float = angle_difference(from_rotation, get_flip_angle())
+	# The arm's Area2D only reports the move a tick after the press, so the hit
+	# lands on the swing's second tick, once the lerp has already slowed it.
+	var step: float = clampf(flip_speed * get_physics_process_delta_time(), 0.0, 0.9)
+	return _launch_velocity(body_position - global_position, swing * flip_speed * (1.0 - step), true, body)
 
 func play_launch_sound() -> void:
 	if _sfx_launch:

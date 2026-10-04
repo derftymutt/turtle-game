@@ -128,6 +128,9 @@ func _is_slot_active(slot_index: int) -> bool:
 	# Passive techs, and hot always-on ones (Graviton Harness, Magnetic
 	# Repulsion), have no button — they're in effect whenever they aren't
 	# recharging (e.g. a popped Bubble Shield isn't).
+	# Cradle Scope is passive too, but only in effect while its scope is out.
+	if tech.get("id", "") == AlienTechRegistry.CRADLE_SCOPE:
+		return get_parent()._tech_effects[AlienTechRegistry.CRADLE_SCOPE].active
 	if not AlienTechManager.slot_needs_input(slot_index):
 		return not _is_cooling_down(slot_index)
 	if _pulse[slot_index] > 0.0:
