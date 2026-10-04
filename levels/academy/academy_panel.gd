@@ -35,6 +35,15 @@ const CONTINUE_ARM_SECONDS := 0.25
 const CONTINUE_HINT := "Enter / A  →"
 const HINT_BLINK_PERIOD_MSEC: int = 300
 const HINT_BLINK_LOW_ALPHA: float = 0.35
+## Experiment: the task hint is also shown, bigger, over the play area, its
+## bottom edge this far above the sea floor (world y). Set
+## PLAY_AREA_HINT_ENABLED false to go back to the panel line only.
+const PLAY_AREA_HINT_ENABLED := true
+const PLAY_AREA_HINT_FONT_SIZE := 16
+const PLAY_AREA_HINT_FLOOR_Y := 164.0
+const PLAY_AREA_HINT_ABOVE_FLOOR := 20.0
+const PLAY_AREA_HINT_SIDE_MARGIN := 12.0
+const PLAY_AREA_HINT_HEIGHT := 60.0
 
 const _DONE_COLOR := Color(0.4, 1.0, 0.45, 1.0)
 const _CURRENT_COLOR := Color(1.0, 0.85, 0.0, 1.0)
@@ -91,6 +100,7 @@ var _reveal_skip := false
 var _banner_active := false
 var _banner_skip := false
 var _banner_hint: Label = null  # the banner's blinking "Enter / A" prompt
+var _play_hint: Label = null  # the task hint again, over the play area
 
 
 ## Pixel-art checkbox for an agenda row: an outlined square, filled with a
@@ -122,6 +132,17 @@ func _ready() -> void:
 	_body.visible_characters_behavior = TextServer.VC_CHARS_AFTER_SHAPING
 	_body.text = ""
 	_hint.text = ""
+	if PLAY_AREA_HINT_ENABLED:
+		_play_hint = Label.new()
+		_play_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_play_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_play_hint.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
+		_play_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_play_hint.add_theme_font_size_override("font_size", PLAY_AREA_HINT_FONT_SIZE)
+		_play_hint.add_theme_color_override("font_color", _hint.get_theme_color("font_color"))
+		_play_hint.add_theme_color_override("font_outline_color", Color.BLACK)
+		_play_hint.add_theme_constant_override("outline_size", 4)
+		add_child(_play_hint)
 	# The header starts hidden — reveal_header() types it out when the
 	# Academy opens, rather than everything appearing at once.
 	for label: Label in [_title, _agenda_header]:
@@ -399,9 +420,20 @@ func _process(delta: float) -> void:
 		var banner_blink_on := int(Time.get_ticks_msec() / HINT_BLINK_PERIOD_MSEC) % 2 == 0
 		_banner_hint.modulate.a = 1.0 if banner_blink_on else HINT_BLINK_LOW_ALPHA
 
+	var blink_on := int(Time.get_ticks_msec() / HINT_BLINK_PERIOD_MSEC) % 2 == 0
 	if _hint.text != "":
-		var blink_on := int(Time.get_ticks_msec() / HINT_BLINK_PERIOD_MSEC) % 2 == 0
 		_hint.modulate.a = 1.0 if blink_on else HINT_BLINK_LOW_ALPHA
+
+	if _play_hint:
+		_play_hint.text = _task_hint
+		_play_hint.modulate.a = 1.0 if blink_on else HINT_BLINK_LOW_ALPHA
+		# Placed from the camera each frame: across the play area, bottom edge
+		# PLAY_AREA_HINT_ABOVE_FLOOR above the sea floor.
+		var floor_on_screen: Vector2 = get_viewport().get_canvas_transform() * Vector2(0.0, PLAY_AREA_HINT_FLOOR_Y)
+		var bottom: float = floor_on_screen.y - PLAY_AREA_HINT_ABOVE_FLOOR
+		var left: float = PLAY_AREA_LEFT_X + PLAY_AREA_HINT_SIDE_MARGIN
+		_play_hint.position = Vector2(left, bottom - PLAY_AREA_HINT_HEIGHT)
+		_play_hint.size = Vector2(get_viewport().get_visible_rect().size.x - PLAY_AREA_HINT_SIDE_MARGIN - left, PLAY_AREA_HINT_HEIGHT)
 
 
 ## Seconds to wait after revealing the letter at `index`. Sentence punctuation

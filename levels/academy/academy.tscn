@@ -112,6 +112,12 @@ mirrored = true
 
 [node name="Flipper" parent="PinballElements/FlipperLeftTop" index="1" unique_id=1438367086 instance=ExtResource("12_flpl")]
 position = Vector2(59, -80)
+rest_angle_degrees = -30.0
+flip_angle_degrees = 60.0
+flip_force = 300.0
+flip_speed = 40.0
+flip_input = "flipper_left"
+collision_rotation_scale = 0.85
 
 [node name="FlipperLeftBottom" type="Node2D" parent="PinballElements" index="1" unique_id=774082121]
 
@@ -122,6 +128,12 @@ mirrored = true
 
 [node name="Flipper" parent="PinballElements/FlipperLeftBottom" index="1" unique_id=1491254254 instance=ExtResource("12_flpl")]
 position = Vector2(-20, 58)
+rest_angle_degrees = -30.0
+flip_angle_degrees = 60.0
+flip_force = 300.0
+flip_speed = 40.0
+flip_input = "flipper_left"
+collision_rotation_scale = 0.85
 
 [node name="FlipperRightTop" type="Node2D" parent="PinballElements" index="2" unique_id=1422374452]
 
@@ -239,4 +251,4 @@ autowrap_mode = 2
 [node name="AcademyDirector" type="Node" parent="." index="16" unique_id=819342338]
 process_mode = 3
 script = ExtResource("11_dir")
-start_lesson = 5
+start_lesson = 2

@@ -13,6 +13,7 @@
 [ext_resource type="PackedScene" uid="uid://b8qdolphin001" path="res://entities/npcs/dolphin/dolphin.tscn" id="11_m516p"]
 [ext_resource type="PackedScene" uid="uid://b8qcmvufo0001" path="res://entities/community_ufo/community_ufo.tscn" id="12_l3m5x"]
 [ext_resource type="PackedScene" uid="uid://c5hxjkqojl37o" path="res://scenes/water_disturbance.tscn" id="13_m516p"]
+[ext_resource type="PackedScene" path="res://entities/enemies/squid/squid_spawner.tscn" id="14_l3m5x"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_kx1xp"]
 texture = ExtResource("6_nu44e")
@@ -161,6 +162,12 @@ mirrored = true
 
 [node name="FlipperLeftDown" parent="FlipperLeftTop" index="1" unique_id=1447591536 instance=ExtResource("9_v2dqh")]
 position = Vector2(330, -54)
+rest_angle_degrees = -30.0
+flip_angle_degrees = 60.0
+flip_force = 300.0
+flip_speed = 40.0
+flip_input = "flipper_left"
+collision_rotation_scale = 0.85
 
 [node name="DeadWall4" parent="." index="16" unique_id=1111125313 instance=ExtResource("8_3t5n2")]
 position = Vector2(-3, -8)
@@ -169,3 +176,5 @@ angle_preset = 4
 mirrored = true
 
 [node name="WaterDisturbance" parent="." index="19" unique_id=1393418955 instance=ExtResource("13_m516p")]
+
+[node name="SquidSpawner" parent="." index="23" unique_id=604661283 instance=ExtResource("14_l3m5x")]

@@ -44,6 +44,7 @@ var has_shown_tech_tutorial: bool = false
 var first_trash_cluster_spawned: bool = false
 var has_used_flipper: bool = false
 var last_flipper_launch_msec: int = -100000  # Time.get_ticks_msec() of the latest flipper_launched
+var last_launch_flipper: Node = null  # the flipper behind the latest flipper_launched — check is_instance_valid()
 var has_shown_flipper_reminder: bool = false
 var has_shown_puffer_tutorial: bool = false
 
@@ -75,8 +76,9 @@ func _take_screenshot() -> void:
 	image.save_png(path)
 	print("📸 Screenshot saved: ", path)
 
-func mark_flipper_used() -> void:
+func mark_flipper_used(flipper: Node = null) -> void:
 	has_used_flipper = true
+	last_launch_flipper = flipper
 	last_flipper_launch_msec = Time.get_ticks_msec()
 	flipper_launched.emit()
 

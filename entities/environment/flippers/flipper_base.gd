@@ -339,7 +339,7 @@ func hit_body(body: RigidBody2D, is_press_action: bool, was_cradle_release: bool
 		return
 
 	if body.is_in_group("player"):
-		GameManager.mark_flipper_used()
+		GameManager.mark_flipper_used(self)
 
 	var to_body = body.global_position - global_position
 	var contact_distance = to_body.length()

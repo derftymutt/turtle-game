@@ -1780,7 +1780,7 @@ func _launch_from_flipper_velcro() -> void:
 
 	var flipper: FlipperBase = _flipper_velcro_target as FlipperBase
 
-	GameManager.mark_flipper_used()
+	GameManager.mark_flipper_used(flipper)
 
 	# Trigger the full flipper animation (force-flip for 0.25s then returns to rest).
 	# The flipper holds its swing back a few ticks so the arm doesn't jump over us, and
