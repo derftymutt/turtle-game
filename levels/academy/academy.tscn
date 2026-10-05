@@ -251,4 +251,3 @@ autowrap_mode = 2
 [node name="AcademyDirector" type="Node" parent="." index="16" unique_id=819342338]
 process_mode = 3
 script = ExtResource("11_dir")
-start_lesson = 3

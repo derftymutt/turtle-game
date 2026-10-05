@@ -33,6 +33,7 @@ const TYPE_START_DELAY := 0.2
 const CONTINUE_ARM_SECONDS := 0.25
 
 const CONTINUE_HINT := "Enter / A  →"
+const AGENDA_BOTTOM_SPACE := 10.0
 const HINT_BLINK_PERIOD_MSEC: int = 300
 const HINT_BLINK_LOW_ALPHA: float = 0.35
 ## Experiment: the task hint is also shown, bigger, dead centre of the play
@@ -218,6 +219,12 @@ func set_agenda(lesson_titles: Array) -> void:
 		row.add_child(label)
 		_agenda.add_child(row)
 		_agenda_rows.append({"check": check, "label": label})
+	# Empty space under the last row: pushes the divider down so the
+	# instructor, who stands on it beside the agenda, isn't squeezed.
+	var spacer := Control.new()
+	spacer.custom_minimum_size = Vector2(0, AGENDA_BOTTOM_SPACE)
+	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_agenda.add_child(spacer)
 	set_agenda_state(-1, 0)
 
 

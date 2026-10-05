@@ -64,7 +64,7 @@ const CROC_PATROL_SPEED := 60.0
 const CROC_CHASE_SPEED := 85.0
 const URCHIN_SPOTS: Array[Vector2] = [Vector2(-22, -5), Vector2(230, -5)]
 
-const SWIM_PRACTICE_SECONDS := 4.5
+const SWIM_PRACTICE_SECONDS := 3.5
 ## After the first surface sparkle, the lesson waits this long before moving on
 ## so the player actually sees (and hears) it. A flat delay, since energy
 ## refills too fast at the surface to require sparkling for a while.
@@ -95,7 +95,7 @@ const HUD_METER_PULSE_MAX_SCALE := 1.25
 const TIRED_ENERGY_FRACTION := 0.2
 ## Free play after grabbing the trash reward, before the lesson moves on.
 const REWARD_PLAY_SECONDS := 8.0
-const TRASH_TASK := "Shoot a group of trash to reveal a power-up"
+const TRASH_TASK := "Spit at every trash in a group to reveal a power-up"
 const TRASH_COLLECT_TASK := "Collect the power-up"
 ## Lesson 2's pinball practice: launches off flippers and bounces off bumpers
 ## needed, the minimum time it runs even once they're done, and how long each
@@ -106,9 +106,11 @@ const PINBALL_PRACTICE_COUNT := 2
 ## for it. Pass = drop the piece with the drop input and go DROP_SAFE_SECONDS
 ## without the croc hurting them; not dropping within DROP_TIMEOUT_SECONDS fails.
 const DROP_TURTLE_POS := Vector2(292, -112)
-const DROP_CROC_POS := Vector2(170, -126)
+const DROP_CROC_POS := Vector2(175, -126)
 const DROP_SAFE_SECONDS := 3.0
 const DROP_TIMEOUT_SECONDS := 10.0
+## The croc is this much faster (patrol and chase) for the drop challenge only.
+const DROP_CROC_SPEED_SCALE := 1.4
 ## Lesson 2's cradle challenge: rest in a held flipper's nook for this long,
 ## in one go. A turtle moving faster than CRADLE_MAX_SPEED isn't resting.
 const CRADLE_SECONDS := 2.0
@@ -373,10 +375,10 @@ func _lesson_1() -> bool:
 	_set_task("")
 
 	_set_hud_meter_pulse(true)
-	await _say(["The energy meter is also supersized on the top right for the turtles in the back."])
+	await _say(["Your energy meter is also supersized on the top right for the turtles in the back."])
 	_set_hud_meter_pulse(false)
 
-	await _say(["As you probably noticed, it's tiring to swim, and slow to recover. But fresh air helps! At the surface you refill energy faster. You sparkle yellow, and there's a weird sound too. Swim until your energy is in the red and then go to the surface to see what I mean."])
+	await _say(["As you probably noticed, it's tiring to swim, and slow to recover. But fresh air helps! At the surface you refill energy faster. You sparkle yellow, and there's a weird sound too. Swim until your energy is in the red and then float to the surface to see what I mean."])
 	# Two steps, in order: actually get tired (swimming at the surface refills
 	# about as fast as it drains, so the hint says to go deep), then recharge
 	# at the surface. A sparkle on a nearly-full bar doesn't count. The bar is
@@ -386,7 +388,7 @@ func _lesson_1() -> bool:
 	_set_task("Swim deep until your energy bar turns red")
 	while not _energy_tired():
 		await _ticked
-	_set_task("Now go to the surface!")
+	_set_task("Now float to the surface!")
 	while not _surface_sparkling():
 		await _ticked
 	await _wait_seconds(SURFACE_WATCH_SECONDS)
@@ -426,27 +428,25 @@ func _lesson_2() -> bool:
 	_set_flippers_live(false)
 	_set_task("")
 
-	await _say(["Very nice. If there's one thing all academy graduates agree on, it's that pinball is essential. Without it, you just can't get this type of work done."])
-
-	await _say(["But it takes practice! Go explore pinball, the ancients' gift. Try the flippers. Try the bumpers. Go use both at least twice."])
+	await _say(["Good! Let's get started by just exploring pinball, the ancients' gift. Try the flippers. Bump off the bumpers. Go interact with both at least twice."])
 	if not await _pinball_practice():
 		return false
 
-	await _say(["The writings of the ancients teach us 2 timeless pinball techniques- The first is Cradling. That's when you rest in the nook of a flipper while holding the flipper active, so you can sit in the space between the flipper and the wall. Now cradle for %d seconds." % int(CRADLE_SECONDS)])
+	await _say(["Good. The ancients have 2 sacred teachings - The first is Cradling. That's when you rest in the nook of a flipper while holding the flipper active, so you can sit in the space between the flipper and the wall. Now cradle for %d seconds." % int(CRADLE_SECONDS)])
 	await _cradle_challenge()
 	# Paused again after the cradle: every wall shows its charge animation
 	# while the instructor explains what they just felt.
 	_set_wall_charge_demo(true)
-	await _say(["Cradling isn't just a calm respite. Being in contact with the pinball walls and flippers also refills your energy fast, just like the surface air does. A cradle centers and energizes you."])
+	await _say(["Good! Cradling isn't just a way to nap. Write this down! [color=#ffd94d]Being in contact with the pinball walls and flippers also refills your energy fast[/color], just like the surface air does. Cradling energizes and centers you."])
 	_set_wall_charge_demo(false)
 
-	await _say(["The second technique they call The Flowing Dance. They write that ocean pinball is a flowing dance where you, pinball and the ocean are all equal partners in movement."])
-	await _say(["Inexperienced turtles only know how to move from here to there by actively swimming. They ignore pinball and ocean forces. To teach you the flowing dance, I will guide you to swim less and dance more."])
+	await _say(["The second teaching they call the Flowing Dance. They write that ocean pinball is a flowing dance where you, pinball and the ocean are all equal partners in movement."])
+	await _say(["Inexperienced turtles only know how to move by actively swimming. They ignore pinball and ocean forces. To teach you the Flowing Dance, I will guide you to swim less and dance more."])
 	# The rule is on from here to the exam; the pie is shown (full) while this
 	# line is up so they can actually see what it's talking about.
 	_swim_hold_start(SWIM_HOLD_LIMIT_SECONDS)
 	_swim_pie_demo = true
-	await _say(["For the rest of this training, your swimming will be limited. See that little pie by your head? Hold %s too long and it runs out, and we start over. Your first flowing dance goal is to fling off each of the 4 flippers. Short swims only!" % _swim_label()])
+	await _say(["Starting now, your swimming time will be limited. See that little pie by your head? Holding %s to swim will drain it, and if it runs out, you have swam for too long and we will start over. Your first goal as a flowing dancer is to reach and use all 4 flippers. Remember, short swims only!" % _swim_label()])
 	_swim_pie_demo = false
 	await _nudge_challenge()
 	_swim_hold_start(EXAM_SWIM_HOLD_LIMIT_SECONDS)  # the longer pie from here on
@@ -494,11 +494,11 @@ func _lesson_3() -> void:
 
 	# Enemy challenges wait for the continue press after their intro, so the
 	# player isn't reading and fighting at the same time.
-	await _say(["Got a hater on your tail? Just spit! If they do get you, you'll lose a heart. You only have 7. But don't stress, you're here to practice. Spit all these piranhas goodnight."])
-	await _enemy_challenge("Spit all %d piranhas goodnight" % PIRANHA_CHALLENGE_COUNT,
+	await _say(["Got a hater on your tail? Just spit! If they do get you, you'll lose a heart. You only have 7. But don't stress, you're here to practice. Spit at all these piranhas."])
+	await _enemy_challenge("Spit at all %d piranhas" % PIRANHA_CHALLENGE_COUNT,
 		func() -> void: _spawn_challenge_piranhas(PIRANHA_SPOTS.slice(0, PIRANHA_CHALLENGE_COUNT)))
 
-	await _say(["Good! Your other weapon is super speed. That's when you shoot fast off flippers and bumpers. With enough energy you can also achieve super speed swimming in the shallows. You'll see a trail behind you, like a super hero. Kill this next piranha using only super speed from pinball flippers or bumpers. No spitting allowed!"])
+	await _say(["Good! Your other weapon is super speed. That's when you fling fast off flippers and bumpers. With enough energy you can also achieve super speed when swimming in the shallows. You'll see a trail behind you, like a super hero. Kill this next piranha using only super speed from flinging off flippers or bumpers. No spitting allowed, and maintain the dance!"])
 	_turtle.shoot_locked = true
 	await _enemy_challenge("Super speed only - no spitting!",
 		func() -> void: _spawn_challenge_piranhas([SUPER_SPEED_PIRANHA_SPOT]))
@@ -521,7 +521,6 @@ func _lesson_3() -> void:
 	await _drop_challenge()
 	_remove_urchins()  # gone for good: not in the trash lesson or the exam
 	_complete_lesson(2)
-	await _say(["Lesson 3 complete!"])
 
 
 func _lesson_4() -> void:
@@ -538,14 +537,14 @@ func _lesson_4() -> void:
 	await _wait_seconds(REWARD_PLAY_SECONDS)
 	_set_task("")
 	_complete_lesson(3)
-	await _say(["Thrilling! FYI, there's also big trash bags. Those contain alien technologies, which are like super power-ups. But that's the advanced course. I'll let you learn that on your own. Lesson done! It's exam time!"])
+	await _say(["Bravo. FYI, there's also big trash bags. Those contain alien technologies, which are like super power-ups. But that's the advanced course. I'll let you learn that on your own. Lesson done! It's exam time!"])
 
 
 func _lesson_5() -> void:
-	_swim_hold_stop()  # the exam only brings the rule back for its second piece
+	_swim_hold_stop()  # the exam turns the rule on itself, for its first piece only
 	await _begin_lesson(4)
 	await _say(["Pass this exam and you'll be certified!"])
-	await _say(["It's simple- You just gotta bring two UFO pieces from the ocean floor to the UFO workshop without dying. When you're ready, go ahead and start."], false)
+	await _say(["It's simple- You just gotta bring two UFO pieces from the ocean floor to the UFO workshop without dying. When you're ready, go ahead and start. Flowing Dance rules STILL apply!"], false)
 
 	var first_attempt := true
 	while true:
@@ -563,21 +562,23 @@ func _lesson_5() -> void:
 		_start_exam_spawner()
 		var outcome := Outcome.DONE
 		for delivered in EXAM_DELIVERIES:
-			# The second piece has to be fetched on nudges: the swim-hold limit
-			# (and its pie) from Lesson 2 comes back.
-			var limit_swim := delivered == EXAM_DELIVERIES - 1
+			# The flowing dance swim limit (and its pie) applies to the first
+			# piece only; it's lifted for the rest.
+			var limit_swim := delivered == 0
 			if limit_swim:
-				await _say(["One down! Now, remember the flowing dance? You must use the flowing dance to deliver the second piece. Hold %s too long, the pie runs out, and you start this piece over." % _swim_label()])
 				_swim_hold_start(EXAM_SWIM_HOLD_LIMIT_SECONDS)
+			else:
+				_swim_hold_stop()
+				await _say(["One down! Now I'll stop enforcing the flowing dance swim limit. You are free! One more piece!"])
 			var task := "Deliver %d pieces (%d/%d)" % [EXAM_DELIVERIES, delivered, EXAM_DELIVERIES]
 			task = task + " - short swims only!" if limit_swim else task
 			_set_task(task)
 			outcome = await _wait_for_delivery()
 			# Out-swimming the pie only restarts this piece: back to the
-			# middle, empty-flippered, with the first delivery still banked.
+			# middle, empty-flippered.
 			while outcome == Outcome.SWAM:
 				_set_task("")
-				await _say(["Too much swimming! Nudge, flip, drift. Take that last piece again."])
+				await _say(["Too much swimming! Remember the flowing dance. Try that piece again."])
 				_center_turtle()
 				_set_task(task)
 				outcome = await _wait_for_delivery()
@@ -753,7 +754,7 @@ func _drop_challenge() -> void:
 			state.dropped = true
 	_turtle.damaged.connect(on_damaged)
 	var use_drop_text := "You've gotta let go of it yourself! Drop the piece with %s, then swim away. Again!" % _drop_label()
-	var intro := "There's one more thing to know related to UFO repair and haters. Sometimes you need to drop a heavy UFO piece you are carrying, especially if the croc is on your tail. You do this with %s. Practice now- The croc will be on your left, boxing you in. Drop the piece, so that you can swim away more easily. Don't let the croc get you." % _drop_label()
+	var intro := "There's one more thing to know about UFO repair and haters. You can drop a UFO piece you carry. This may save your life, especially if the croc is on your tail. Drop it with %s. Practice now- I put you in the right corner with the croc on your left. Drop the piece and swim away without the croc hurting you." % _drop_label()
 	while true:
 		await _pause_after_play()
 		_stage_drop_challenge().dropped.connect(on_dropped)
@@ -795,7 +796,11 @@ func _drop_challenge() -> void:
 		if passed:
 			break
 	_turtle.damaged.disconnect(on_damaged)
-	await _say(["Nice evasion!"])
+	var slowed_croc := _croc()
+	if slowed_croc:  # back to the usual Academy speeds
+		slowed_croc.patrol_speed = CROC_PATROL_SPEED
+		slowed_croc.chase_speed = CROC_CHASE_SPEED
+	await _say(["Nice evasion! Lesson 3 complete!"])
 	_clear_pieces()
 
 
@@ -805,7 +810,9 @@ func _drop_challenge() -> void:
 func _stage_drop_challenge() -> UFOPiece:
 	_clear_pieces()
 	_turtle.restore_hearts(99)
-	_refill_energy()
+	# Experiment: start with an empty energy bar (it recovers as normal).
+	_hud.current_energy = 0.0
+	_hud.update_energy(20.0, _hud.max_energy)
 	_place_turtle(DROP_TURTLE_POS)
 	# A brand new croc every attempt, so each one starts exactly the same: a
 	# croc that was mid-chase would otherwise turn away when it "loses" the
@@ -816,6 +823,8 @@ func _stage_drop_challenge() -> UFOPiece:
 	if croc:
 		croc.global_position = DROP_CROC_POS
 		croc.current_state = Crocodile.State.PATROL_RIGHT
+		croc.patrol_speed = CROC_PATROL_SPEED * DROP_CROC_SPEED_SCALE
+		croc.chase_speed = CROC_CHASE_SPEED * DROP_CROC_SPEED_SCALE
 	var piece: UFOPiece = UFO_PIECE_SCENE.instantiate()
 	piece.position = DROP_TURTLE_POS
 	_level.add_child(piece)
