@@ -123,6 +123,9 @@ const SWIM_HOLD_LIMIT_SECONDS := 1.3
 ## Every challenge after that, up to the exam, and the exam's second delivery,
 ## gets this longer pie. ← tune here
 const EXAM_SWIM_HOLD_LIMIT_SECONDS := 2.5
+## Where the turtle waits when the Academy opens: a little north of the centre
+## of the play area.
+const COURSE_TURTLE_START := Vector2(104, -15)
 ## Centre of the play area: where the turtle starts every exam attempt.
 const EXAM_TURTLE_START := Vector2(104, 19)
 const SWIM_PIE_OFFSET := Vector2(15, -15)  # from the turtle, world px
@@ -327,6 +330,7 @@ func _run() -> void:
 	# Mouse-mode auto-fire stays off until spitting is taught (Lesson 3).
 	_turtle.mouse_fire_enabled = false
 	_hide_hud_piece_counter()
+	_place_turtle(COURSE_TURTLE_START)
 
 	_set_world_paused(true)
 	await _panel.play_banner("WELCOME TO THE", "UFO Repair Academy!", _start_prompt())
