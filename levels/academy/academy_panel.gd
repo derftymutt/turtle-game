@@ -106,6 +106,7 @@ var _instructor_frames: AtlasTexture = null
 var _instructor_frame := 0
 var _voice: AudioStreamPlayer = null
 var _voice_gain := 0.0  # 0..1, eased towards 1 while typing
+var _voice_held := false  # paused under the pause menu
 var _talk_time := 0.0
 var _reveal_active := false
 var _click_continues := false
@@ -200,12 +201,22 @@ func _setup_voice() -> void:
 	add_child(_voice)
 
 
+## Pauses / resumes the voice, writing stream_paused only when it changes:
+## on web every un-pause restarts the sample on a new audio node, so
+## un-pausing each frame stacks up endless copies of the looped voice.
+func _hold_voice(held: bool) -> void:
+	if _voice == null or held == _voice_held:
+		return
+	_voice_held = held
+	_voice.stream_paused = held
+
+
 ## Fades the voice in from a random point when typing starts and out (then
 ## stops it) when typing ends.
 func _update_voice(delta: float) -> void:
 	if _voice == null:
 		return
-	_voice.stream_paused = false
+	_hold_voice(false)
 	if _typing and not _voice.playing:
 		_voice_gain = 0.0
 		_voice.play(randf() * _voice.stream.get_length())
@@ -453,8 +464,7 @@ static func pause_menu_open(tree: SceneTree) -> bool:
 
 func _process(delta: float) -> void:
 	if pause_menu_open(get_tree()):
-		if _voice:
-			_voice.stream_paused = true  # hold the voice under the pause menu
+		_hold_voice(true)  # hold the voice under the pause menu
 		return
 	_animate_instructor(delta)
 	if _typing:
