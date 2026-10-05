@@ -33,7 +33,7 @@ const URCHIN_MUTATION := "urchin_mutation"
 const FLIPPER_AUTOMATON   := "flipper_automaton"
 const TIMELINE_ALTERNATOR := "timeline_alternator"
 const COSMIC_MEDITATION   := "cosmic_meditation"
-const DILATION_SCOPE      := "dilation_scope"
+const TEMPORAL_FOCUS      := "dilation_scope"  # id predates the rename — kept so existing saves still load
 const CRADLE_SCOPE        := "cradle_scope"
 
 # ─── Tech definitions ────────────────────────────────────────────────────────
@@ -327,11 +327,11 @@ var _definitions: Array[Dictionary] = [
 		"hot_description": "Spit while meditating. Stays suspended at full energy until you swim away.",
 	},
 	{
-		"id":              DILATION_SCOPE,
-		"name":            "Dilation Scope",
+		"id":              TEMPORAL_FOCUS,
+		"name":            "Temporal Focus",
 		"description":     "Launches into super speed slow time to a stop. Steer to bend your trajectory. 5s active, 8s cooldown.",
 		"hook":            "I've seen that movie!",
-		"slot_label":      "Dilation Scope",
+		"slot_label":      "Temporal Focus",
 		"needs_input":     true,
 		"has_passive_bar": true,
 		"color":           Color(0.35, 0.95, 0.75),

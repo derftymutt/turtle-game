@@ -35,13 +35,14 @@ const CONTINUE_ARM_SECONDS := 0.25
 const CONTINUE_HINT := "Enter / A  →"
 const HINT_BLINK_PERIOD_MSEC: int = 300
 const HINT_BLINK_LOW_ALPHA: float = 0.35
-## Experiment: the task hint is also shown, bigger, over the play area, its
-## bottom edge this far above the sea floor (world y). Set
-## PLAY_AREA_HINT_ENABLED false to go back to the panel line only.
+## Experiment: the task hint is also shown, bigger, dead centre of the play
+## area — across it horizontally, and midway between the ocean surface and the
+## sea floor (world y). Set PLAY_AREA_HINT_ENABLED false to go back to the
+## panel line only.
 const PLAY_AREA_HINT_ENABLED := true
 const PLAY_AREA_HINT_FONT_SIZE := 16
+const PLAY_AREA_HINT_SURFACE_Y := -126.0
 const PLAY_AREA_HINT_FLOOR_Y := 164.0
-const PLAY_AREA_HINT_ABOVE_FLOOR := 20.0
 const PLAY_AREA_HINT_SIDE_MARGIN := 12.0
 const PLAY_AREA_HINT_HEIGHT := 60.0
 
@@ -136,7 +137,7 @@ func _ready() -> void:
 		_play_hint = Label.new()
 		_play_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_play_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		_play_hint.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
+		_play_hint.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		_play_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		_play_hint.add_theme_font_size_override("font_size", PLAY_AREA_HINT_FONT_SIZE)
 		_play_hint.add_theme_color_override("font_color", _hint.get_theme_color("font_color"))
@@ -427,12 +428,12 @@ func _process(delta: float) -> void:
 	if _play_hint:
 		_play_hint.text = _task_hint
 		_play_hint.modulate.a = 1.0 if blink_on else HINT_BLINK_LOW_ALPHA
-		# Placed from the camera each frame: across the play area, bottom edge
-		# PLAY_AREA_HINT_ABOVE_FLOOR above the sea floor.
-		var floor_on_screen: Vector2 = get_viewport().get_canvas_transform() * Vector2(0.0, PLAY_AREA_HINT_FLOOR_Y)
-		var bottom: float = floor_on_screen.y - PLAY_AREA_HINT_ABOVE_FLOOR
+		# Placed from the camera each frame: across the play area, centred
+		# midway between the surface and the sea floor.
+		var middle_on_screen: Vector2 = get_viewport().get_canvas_transform() \
+			* Vector2(0.0, (PLAY_AREA_HINT_SURFACE_Y + PLAY_AREA_HINT_FLOOR_Y) * 0.5)
 		var left: float = PLAY_AREA_LEFT_X + PLAY_AREA_HINT_SIDE_MARGIN
-		_play_hint.position = Vector2(left, bottom - PLAY_AREA_HINT_HEIGHT)
+		_play_hint.position = Vector2(left, middle_on_screen.y - PLAY_AREA_HINT_HEIGHT * 0.5)
 		_play_hint.size = Vector2(get_viewport().get_visible_rect().size.x - PLAY_AREA_HINT_SIDE_MARGIN - left, PLAY_AREA_HINT_HEIGHT)
 
 

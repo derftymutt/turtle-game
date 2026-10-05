@@ -5,6 +5,10 @@ class_name UFOPiece
 ## UFO piece collectible - NO points on pickup, only on delivery
 ## Can be picked up, carried, and dropped
 
+## Let go of by its carrier. `intentional` is true when the player chose to
+## (the drop input), false when it was knocked loose (damage, respawn).
+signal dropped(intentional: bool)
+
 const _MAX_SPEED := 200.0
 
 const _PLAYER_SEPARATION_GRACE := 0.5  # see _restore_physics_after_drop()
@@ -157,6 +161,7 @@ func drop_piece(intentional: bool = false):
 	GameManager.remove_carried_piece(self)
 	_dropped_from = carrier
 	carrier = null
+	dropped.emit(intentional)
 
 	# Intentional drops get a long grace period so the player doesn't
 	# instantly re-collect what they just chose to let go of. Involuntary

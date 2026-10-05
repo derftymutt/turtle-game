@@ -159,21 +159,21 @@ position = Vector2(228, 58)
 position = Vector2(104, 92)
 
 [node name="BumperLeft" parent="PinballElements/CircularBumpers" index="1" unique_id=500143894 instance=ExtResource("15_bump")]
-position = Vector2(-46, -50)
+position = Vector2(-46, -70)
 size_preset = 1
 radius = 16.0
 
 [node name="BumperRight" parent="PinballElements/CircularBumpers" index="2" unique_id=1099724547 instance=ExtResource("15_bump")]
-position = Vector2(254, -50)
+position = Vector2(254, -70)
 size_preset = 1
 radius = 16.0
 
 [node name="BumperLowLeft" parent="PinballElements/CircularBumpers" index="3" unique_id=1789637002 instance=ExtResource("15_bump")]
-position = Vector2(-66, 30)
+position = Vector2(-66, 15)
 variant = "2"
 
 [node name="BumperLowRight" parent="PinballElements/CircularBumpers" index="4" unique_id=467795225 instance=ExtResource("15_bump")]
-position = Vector2(274, 30)
+position = Vector2(274, 15)
 variant = "3"
 
 [node name="AcademyPanel" type="CanvasLayer" parent="." index="15" unique_id=843213337]
@@ -251,4 +251,4 @@ autowrap_mode = 2
 [node name="AcademyDirector" type="Node" parent="." index="16" unique_id=819342338]
 process_mode = 3
 script = ExtResource("11_dir")
-start_lesson = 2
+start_lesson = 3

@@ -127,7 +127,7 @@ func _apply_game_speed() -> void:
 	Engine.physics_ticks_per_second = roundi(_BASE_PHYSICS_TICKS * GAME_SPEED)
 	AudioServer.playback_speed_scale = maxf(_effective_dilation(), _AUDIO_DILATION_FLOOR)
 
-# ── Time dilation (Dilation Scope bullet time) ───────────────────────────────
+# ── Time dilation (Temporal Focus bullet time) ───────────────────────────────
 
 ## Lowest the audio is slowed (and pitched down) while time is dilated —
 ## anything lower is an unrecognisable rumble.
