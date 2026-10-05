@@ -113,7 +113,7 @@ const DROP_TIMEOUT_SECONDS := 10.0
 const DROP_CROC_SPEED_SCALE := 1.4
 ## Lesson 2's cradle challenge: rest in a held flipper's nook for this long,
 ## in one go. A turtle moving faster than CRADLE_MAX_SPEED isn't resting.
-const CRADLE_SECONDS := 2.0
+const CRADLE_SECONDS := 1.0
 const CRADLE_MAX_SPEED := 50.0
 ## The swim-hold limit ("the flowing dance"): holding a swim direction longer
 ## than the limit, in one go, restarts whatever challenge is running. The pie
@@ -137,6 +137,10 @@ const RESULT_PLAYOUT_SECONDS := 1.2
 ## A piece only counts as "grabbed off a flipper hit" this soon after the
 ## flipper launch (real ms — GameManager.last_flipper_launch_msec).
 const FLIPPER_PICKUP_WINDOW_MSEC := 3000
+## ...and only if the turtle has swum (held a direction) for no more than this
+## long, in total, since that launch: a nudge to line up is fine, swimming
+## over to the piece is a dive. ← tune here
+const FLIPPER_PICKUP_MAX_SWIM_SECONDS := 0.5
 const FLASH_HINT_SECONDS := 2.0
 ## Gap before a missed trash line is replaced by a fresh one.
 const TRASH_RESPAWN_DELAY := 1.5
@@ -151,6 +155,7 @@ const TRASH_REWARDS: Array[int] = [
 ## Prefilled on the graduation name prompt the first time (and used if they
 ## submit it blank) — gamepad players can't type, so they can accept this.
 const DEFAULT_PLAYER_NAME := "Turtle"
+const MOVE_ACTIONS: Array[StringName] = [&"move_up", &"move_down", &"move_left", &"move_right"]
 const SWAM_TEXT := "Too much swimming! Remember the flowing dance: short swims only. Try that again."
 const RETRY_TEXT := "Ah dang- Give it another go! You'll get it!"
 
@@ -199,6 +204,9 @@ var _swim_limit := SWIM_HOLD_LIMIT_SECONDS  # set by _swim_hold_start()
 ## Set (from _process()) when a swim hold outlasts the limit; the challenge
 ## loops clear it when they start and restart themselves when they see it.
 var _swam := false
+## Seconds a swim direction has been held since the latest flipper launch
+## (see _flipper_pickup_only()).
+var _swim_since_launch := 0.0
 ## Shows the pie, full, while the level is paused — for the line that
 ## introduces it.
 var _swim_pie_demo := false
@@ -239,6 +247,7 @@ class SwimPie extends Node2D:
 func _ready() -> void:
 	_level.player_respawned.connect(func() -> void: _died = true)
 	LevelManager.piece_delivered.connect(_on_piece_delivered)
+	GameManager.flipper_launched.connect(func() -> void: _swim_since_launch = 0.0)
 	# Pinball arrives in Lesson 2. Disabled rather than just hidden, so the
 	# flippers don't flip (or click) on input and nothing collides.
 	_pinball.visible = false
@@ -270,6 +279,8 @@ func _process(delta: float) -> void:
 		meter.scale = Vector2(k, k)
 	if is_instance_valid(_exam_spawner) and not get_tree().paused:
 		_exam_tick(delta)
+	if not get_tree().paused and _any_pressed(MOVE_ACTIONS):
+		_swim_since_launch += delta
 	# The swim-hold rule, whenever it's on (the pie exists): counted only
 	# while the level is actually running.
 	if is_instance_valid(_swim_pie):
@@ -432,7 +443,7 @@ func _lesson_2() -> bool:
 	if not await _pinball_practice():
 		return false
 
-	await _say(["Good. The ancients have 2 sacred teachings - The first is Cradling. That's when you rest in the nook of a flipper while holding the flipper active, so you can sit in the space between the flipper and the wall. Now cradle for %d seconds." % int(CRADLE_SECONDS)])
+	await _say(["Good. The ancients have 2 sacred teachings - The first is Cradling. That's when you rest in the nook of a flipper while holding the flipper active, so you can sit in the space between the flipper and the wall. Go cradle for %d second." % int(CRADLE_SECONDS)])
 	await _cradle_challenge()
 	# Paused again after the cradle: every wall shows its charge animation
 	# while the instructor explains what they just felt.
@@ -441,17 +452,17 @@ func _lesson_2() -> bool:
 	_set_wall_charge_demo(false)
 
 	await _say(["The second teaching they call the Flowing Dance. They write that ocean pinball is a flowing dance where you, pinball and the ocean are all equal partners in movement."])
-	await _say(["Inexperienced turtles only know how to move by actively swimming. They ignore pinball and ocean forces. To teach you the Flowing Dance, I will guide you to swim less and dance more."])
+	await _say(["Inexperienced turtles only know how to swim constantly to move. They ignore pinball and ocean forces. To teach you the Flowing Dance, I will guide you to swim less and dance more."])
 	# The rule is on from here to the exam; the pie is shown (full) while this
 	# line is up so they can actually see what it's talking about.
 	_swim_hold_start(SWIM_HOLD_LIMIT_SECONDS)
 	_swim_pie_demo = true
-	await _say(["Starting now, your swimming time will be limited. See that little pie by your head? Holding %s to swim will drain it, and if it runs out, you have swam for too long and we will start over. Your first goal as a flowing dancer is to reach and use all 4 flippers. Remember, short swims only!" % _swim_label()])
+	await _say(["Starting now, your swimming time will be limited. See that little pie by your head? Holding %s to swim will drain it, and if it runs out, you swam for too long and we start over. Your first goal as a flowing dancer is to reach and use all 4 flippers. Remember, short swims only!" % _swim_label()])
 	_swim_pie_demo = false
 	await _nudge_challenge()
 	_swim_hold_start(EXAM_SWIM_HOLD_LIMIT_SECONDS)  # the longer pie from here on
 
-	await _say(["Now use a flipper to pick up a UFO piece. I'm only gonna let you hold it if you get it from a flipper hit, no swimming dives allowed! Bring it to your workshop once you've got it. Flowing dance rules still apply!"])
+	await _say(["Nice! Now use a flipper to pick up a UFO piece. I'm only gonna let you hold it if you get it from a flipper hit, no swimming dives allowed! Bring it to your workshop once you've got it. Flowing dance rules still apply!"])
 	# Out-swimming the pie starts the beat over with fresh pieces.
 	while true:
 		_place_flipper_challenge_pieces()
@@ -528,7 +539,7 @@ func _lesson_4() -> void:
 	_reset_health_plants(0)
 	await _begin_lesson(3)
 	await _say([" I don't know what's worse, haters or trash. Thankfully, turtle spit deals with both. You'll see clusters of trash floating by. Evaporate all of them with your spit and the ocean will thank you with a power-up."])
-	await _say(["You get points for spitting at trash too, and good things come from getting points, trust me. Try now to spit at and evaporate a whole line of trash and collect the power-up."])
+	await _say(["You get points for spitting at trash too, and good things come from getting points, trust me. Try now to spit at a whole line of trash and collect the power-up."])
 	var reward := await _trash_challenge()
 	# Same wind-down as any finished challenge, then explain the power-up, then
 	# let them actually enjoy it before the lesson carries on.
@@ -628,10 +639,10 @@ func _begin_lesson(index: int) -> void:
 	_panel.set_agenda_state(index, index)
 	if index >= AGENDA_LESSON_COUNT:
 		_panel.set_lesson_title(LESSONS[index])
-		await _panel.play_banner("LAST STOP",LESSONS[index])
+		await _panel.play_banner("LAST STOP", LESSONS[index], AcademyPanel.CONTINUE_HINT, true)
 		return
 	_panel.set_lesson_title("Lesson %d: %s" % [index + 1, LESSONS[index]])
-	await _panel.play_banner("LESSON %d" % (index + 1), LESSONS[index])
+	await _panel.play_banner("LESSON %d" % (index + 1), LESSONS[index], AcademyPanel.CONTINUE_HINT, true)
 
 
 func _complete_lesson(index: int) -> void:
@@ -1006,7 +1017,7 @@ func _cradle_challenge() -> void:
 	_clear_pieces()
 	var flippers: Array = _pinball.find_children("*", "", true, false).filter(
 		func(n: Node) -> bool: return n is FlipperBase)
-	_set_task("Cradle for %d seconds: rest on a flipper and hold %s / %s" % [
+	_set_task("Cradle for %d second: rest on a flipper and hold %s / %s" % [
 		int(CRADLE_SECONDS), _flipper_label(true), _flipper_label(false)])
 	var cradled := 0.0
 	while cradled < CRADLE_SECONDS:
@@ -1083,8 +1094,7 @@ func _swim_hold_start(limit: float = SWIM_HOLD_LIMIT_SECONDS) -> void:
 ## direction is held and refills the moment it's let go. Returns true (and
 ## resets) when a single hold has lasted the limit given to _swim_hold_start().
 func _swim_hold_tick() -> bool:
-	var move_actions: Array[StringName] = [&"move_up", &"move_down", &"move_left", &"move_right"]
-	_swim_held = _swim_held + get_process_delta_time() if _any_pressed(move_actions) else 0.0
+	_swim_held = _swim_held + get_process_delta_time() if _any_pressed(MOVE_ACTIONS) else 0.0
 	var exhausted := _swim_held >= _swim_limit
 	if exhausted:
 		_swim_held = 0.0
@@ -1138,8 +1148,12 @@ func _surface_sparkling() -> bool:
 	return depth <= SURFACE_DEPTH
 
 
+## Lesson 2's pickup filter: the piece is only picked up if a flipper launch
+## carried the turtle to it — launched within FLIPPER_PICKUP_WINDOW_MSEC, and
+## barely swum since (FLIPPER_PICKUP_MAX_SWIM_SECONDS).
 func _flipper_pickup_only(_piece: Node, _collector: Node) -> bool:
-	if Time.get_ticks_msec() - GameManager.last_flipper_launch_msec <= FLIPPER_PICKUP_WINDOW_MSEC:
+	var launched_recently := Time.get_ticks_msec() - GameManager.last_flipper_launch_msec <= FLIPPER_PICKUP_WINDOW_MSEC
+	if launched_recently and _swim_since_launch <= FLIPPER_PICKUP_MAX_SWIM_SECONDS:
 		return true
 	_flash_hint("No dives allowed! Flipper hits only.")
 	return false

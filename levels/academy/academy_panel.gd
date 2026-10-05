@@ -57,10 +57,19 @@ const _AGENDA_FONT_SIZE := 12
 ## the frames cycle at INSTRUCTOR_TALK_FPS so the instructor looks like they're
 ## talking.
 const INSTRUCTOR_FRAMES := 2
+## The instructor's voice: one long babble, looped, picked up at a random
+## point every time they start talking and stopped when the typing ends —
+## in step with the talking animation. Short fades hide the cut points.
+const INSTRUCTOR_VOICE_PATH := "res://assets/sounds/sfx/instructor_vox.ogg"
+const INSTRUCTOR_VOICE_DB := -4.0
+const INSTRUCTOR_VOICE_FADE_SECONDS := 0.08
 const INSTRUCTOR_TALK_FPS := 6.0
 
 # ── Lesson banner (play_banner()) ──
 const _BANNER_SFX := preload("res://assets/sounds/sfx/deliver ufo piece.ogg")
+## Lesson banners (play_banner(..., lesson_sound = true)) play this instead;
+## loaded at runtime, so a missing file just falls back to _BANNER_SFX.
+const _LESSON_BANNER_SFX_PATH := "res://assets/sounds/sfx/lesson_banner.ogg"
 ## Banners get their own CanvasLayer this high, above the panel, HUD and pause
 ## menu (8), so nothing in the level draws over them.
 const BANNER_LAYER := 20
@@ -95,6 +104,8 @@ var _continue_arm := 0.0
 var _task_hint := ""
 var _instructor_frames: AtlasTexture = null
 var _instructor_frame := 0
+var _voice: AudioStreamPlayer = null
+var _voice_gain := 0.0  # 0..1, eased towards 1 while typing
 var _talk_time := 0.0
 var _reveal_active := false
 var _click_continues := false
@@ -152,6 +163,7 @@ func _ready() -> void:
 		label.visible_characters = 0
 	_separator.modulate.a = 0.0
 	_setup_instructor()
+	_setup_voice()
 	var hud := get_tree().get_first_node_in_group("hud")
 	if hud:
 		_hud_bar = hud.get_node_or_null("MarginContainer")
@@ -174,6 +186,38 @@ func _setup_instructor() -> void:
 
 
 ## Talking (cycling frames) only while dialogue is typing; frame 0 otherwise.
+## load(), not preload(): a missing or not-yet-imported file just means a
+## silent instructor rather than a script that won't parse.
+func _setup_voice() -> void:
+	var stream := load(INSTRUCTOR_VOICE_PATH) as AudioStream
+	if stream == null:
+		push_warning("AcademyPanel: no instructor voice at %s" % INSTRUCTOR_VOICE_PATH)
+		return
+	if stream is AudioStreamOggVorbis:
+		(stream as AudioStreamOggVorbis).loop = true
+	_voice = AudioStreamPlayer.new()
+	_voice.stream = stream
+	add_child(_voice)
+
+
+## Fades the voice in from a random point when typing starts and out (then
+## stops it) when typing ends.
+func _update_voice(delta: float) -> void:
+	if _voice == null:
+		return
+	_voice.stream_paused = false
+	if _typing and not _voice.playing:
+		_voice_gain = 0.0
+		_voice.play(randf() * _voice.stream.get_length())
+	var step := delta / INSTRUCTOR_VOICE_FADE_SECONDS
+	_voice_gain = move_toward(_voice_gain, 1.0 if _typing else 0.0, step)
+	if _voice.playing:
+		if _voice_gain <= 0.0:
+			_voice.stop()
+		else:
+			_voice.volume_db = INSTRUCTOR_VOICE_DB + linear_to_db(_voice_gain)
+
+
 func _animate_instructor(delta: float) -> void:
 	if _instructor_frames == null:
 		return
@@ -409,6 +453,8 @@ static func pause_menu_open(tree: SceneTree) -> bool:
 
 func _process(delta: float) -> void:
 	if pause_menu_open(get_tree()):
+		if _voice:
+			_voice.stream_paused = true  # hold the voice under the pause menu
 		return
 	_animate_instructor(delta)
 	if _typing:
@@ -423,6 +469,8 @@ func _process(delta: float) -> void:
 				_type_cost = _char_cost(shown - 1)
 	elif _waiting_continue:
 		_continue_arm -= delta
+
+	_update_voice(delta)
 
 	if is_instance_valid(_banner_hint):
 		var banner_blink_on := int(Time.get_ticks_msec() / HINT_BLINK_PERIOD_MSEC) % 2 == 0
@@ -514,7 +562,7 @@ static func _is_continue_event(event: InputEvent) -> bool:
 ## the screen really is (letterboxing, window size).
 ## `prompt` replaces the usual "Enter / A" line (the opening welcome banner
 ## uses a call to action).
-func play_banner(kicker: String, title: String, prompt: String = CONTINUE_HINT) -> void:
+func play_banner(kicker: String, title: String, prompt: String = CONTINUE_HINT, lesson_sound: bool = false) -> void:
 	var layer := CanvasLayer.new()
 	layer.layer = BANNER_LAYER
 	add_child(layer)
@@ -555,7 +603,10 @@ func play_banner(kicker: String, title: String, prompt: String = CONTINUE_HINT) 
 	band.add_child(hint)
 
 	var sfx := AudioStreamPlayer.new()
-	sfx.stream = _BANNER_SFX
+	# Lesson banners have their own sound; the welcome and graduation banners
+	# keep the delivery jingle.
+	var banner_sfx := load(_LESSON_BANNER_SFX_PATH) as AudioStream if lesson_sound else null
+	sfx.stream = banner_sfx if banner_sfx else _BANNER_SFX
 	sfx.volume_db = -6.0
 	add_child(sfx)  # not under the banner, so the sound isn't cut off when it goes
 	sfx.finished.connect(sfx.queue_free)
