@@ -16,7 +16,7 @@ class_name TimeCrawlEffect
 ## LAUNCH_COMPENSATION sets how much of the distance they get back.
 ##
 ## The slow-down is global (GameSettings.set_time_crawl(), its own channel so
-## it can't fight Temporal Focus's bullet time — the slower of the two wins),
+## it can't fight Acceleration Focus's bullet time — the slower of the two wins),
 ## so the window is timed in REAL seconds, off the physics tick length, not
 ## the dilated delta. The cooldown is held (see _HOLD_COOLDOWN_TECHS) and runs
 ## from the end of the crawl, at normal game speed. shutdown() (from

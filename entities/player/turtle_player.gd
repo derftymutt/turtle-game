@@ -292,7 +292,7 @@ func _ready():
 	_tech_effects[AlienTechRegistry.FLIPPER_AUTOMATON] = FlipperAutomatonEffect.new()
 	_tech_effects[AlienTechRegistry.TIMELINE_ALTERNATOR] = TimelineAlternatorEffect.new()
 	_tech_effects[AlienTechRegistry.COSMIC_MEDITATION] = CosmicMeditationEffect.new()
-	_tech_effects[AlienTechRegistry.TEMPORAL_FOCUS] = TemporalFocusEffect.new()
+	_tech_effects[AlienTechRegistry.ACCELERATION_FOCUS] = AccelerationFocusEffect.new()
 	_tech_effects[AlienTechRegistry.CRADLE_SCOPE] = CradleScopeEffect.new()
 	_tech_effects[AlienTechRegistry.TIME_CRAWL] = TimeCrawlEffect.new()
 	for effect in _tech_effects.values():
@@ -340,8 +340,8 @@ func _physics_process(delta):
 	# Cosmic Meditation: holds the turtle in place (ocean physics off) and
 	# forces the fast wall/surface energy recharge while active.
 	var meditation := _tech_effects[AlienTechRegistry.COSMIC_MEDITATION] as CosmicMeditationEffect
-	# Temporal Focus: bullet time after a launch — the stick aims instead of swimming.
-	var temporal_focus := _tech_effects[AlienTechRegistry.TEMPORAL_FOCUS] as TemporalFocusEffect
+	# Acceleration Focus: bullet time after a launch — the stick aims instead of swimming.
+	var acceleration_focus := _tech_effects[AlienTechRegistry.ACCELERATION_FOCUS] as AccelerationFocusEffect
 	# Time Crawl: the world is slowed; the turtle's clock runs faster than game
 	# time to make up part of it, on top of whatever Stim Shot is doing.
 	var time_crawl := _tech_effects[AlienTechRegistry.TIME_CRAWL] as TimeCrawlEffect
@@ -470,7 +470,7 @@ func _physics_process(delta):
 
 	meditation.physics_process(self, delta)
 
-	temporal_focus.physics_process(self, delta)
+	acceleration_focus.physics_process(self, delta)
 
 	_tech_effects[AlienTechRegistry.CRADLE_SCOPE].physics_process(self, delta)
 
@@ -582,7 +582,7 @@ func _physics_process(delta):
 	# Hot meditation at full energy breaks on swim input (and lets it through).
 	var meditation_blocks_swim := meditation.blocks_movement(self, movement_input)
 
-	if movement_input.length() > 0.1 and can_actually_thrust and not swim_locked and not multi_beam.pulling and not multi_beam.aiming and not meditation_blocks_swim and not temporal_focus.blocks_swim():
+	if movement_input.length() > 0.1 and can_actually_thrust and not swim_locked and not multi_beam.pulling and not multi_beam.aiming and not meditation_blocks_swim and not acceleration_focus.blocks_swim():
 		apply_thrust(movement_input.normalized())
 
 	if shoot_input != Vector2.ZERO and can_shoot:
@@ -866,7 +866,7 @@ func shoot(direction: Vector2):
 		return
 	if (_tech_effects[AlienTechRegistry.COSMIC_MEDITATION] as CosmicMeditationEffect).blocks_shooting():
 		return
-	if (_tech_effects[AlienTechRegistry.TEMPORAL_FOCUS] as TemporalFocusEffect).blocks_shooting():
+	if (_tech_effects[AlienTechRegistry.ACCELERATION_FOCUS] as AccelerationFocusEffect).blocks_shooting():
 		return
 
 	is_player_controlling_rotation = true
@@ -993,7 +993,7 @@ func take_damage(amount: float, use_iframes: bool = false, source: String = ""):
 	_tech_effects[AlienTechRegistry.BUMPER_MAGNET].cancel_on_damage(self)
 	_tech_effects[AlienTechRegistry.MULTI_BEAM].cancel_on_damage(self)
 	meditation.cancel_on_damage(self)
-	_tech_effects[AlienTechRegistry.TEMPORAL_FOCUS].cancel_on_damage(self)
+	_tech_effects[AlienTechRegistry.ACCELERATION_FOCUS].cancel_on_damage(self)
 	if _flipper_velcro_latched:
 		_cancel_flipper_velcro()
 
@@ -1426,7 +1426,7 @@ func is_ion_exciter_active() -> bool:
 
 ## Called by flippers, bumpers (incl. Bumper Magnet's release), the puffer
 ## fish and ocean-current ejection right after they launch this turtle.
-## Temporal Focus decides from there whether it's a super-speed launch worth
+## Acceleration Focus decides from there whether it's a super-speed launch worth
 ## bullet time. `from_bumper` gets the bigger bumper punch on the way out.
 ## Impulse-based launchers pass `launch_velocity`, since an impulse isn't
 ## visible in linear_velocity until the next physics step.
@@ -1441,7 +1441,7 @@ func notify_launch(from_bumper: bool = false, launch_velocity = null) -> void:
 			launch_velocity *= crawl_scale
 		else:
 			linear_velocity *= crawl_scale
-	(_tech_effects[AlienTechRegistry.TEMPORAL_FOCUS] as TemporalFocusEffect).on_launch(self, from_bumper, launch_velocity)
+	(_tech_effects[AlienTechRegistry.ACCELERATION_FOCUS] as AccelerationFocusEffect).on_launch(self, from_bumper, launch_velocity)
 	(_tech_effects[AlienTechRegistry.CRADLE_SCOPE] as CradleScopeEffect).on_launch()
 
 ## Public wrapper for FlipperBase: where Cradle Scope was aiming from when
@@ -1452,8 +1452,8 @@ func cradle_scope_origin(flipper: FlipperBase):
 ## Never leave the whole game slowed down if we're freed mid bullet time
 ## (death, level change, quit to menu).
 func _exit_tree() -> void:
-	if _tech_effects.has(AlienTechRegistry.TEMPORAL_FOCUS):
-		(_tech_effects[AlienTechRegistry.TEMPORAL_FOCUS] as TemporalFocusEffect).shutdown()
+	if _tech_effects.has(AlienTechRegistry.ACCELERATION_FOCUS):
+		(_tech_effects[AlienTechRegistry.ACCELERATION_FOCUS] as AccelerationFocusEffect).shutdown()
 	if _tech_effects.has(AlienTechRegistry.TIME_CRAWL):
 		(_tech_effects[AlienTechRegistry.TIME_CRAWL] as TimeCrawlEffect).shutdown()
 

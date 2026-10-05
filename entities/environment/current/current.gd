@@ -274,7 +274,7 @@ func _apply_current_to(body: RigidBody2D) -> void:
 		var exit_dir := Vector2(cos(end_angle), sin(end_angle))
 		var exit_dir_global: Vector2 = _path.global_transform.basis_xform(exit_dir)
 		body.apply_central_impulse(exit_dir_global * exit_impulse)
-		# Ejection only (not entering or riding) can trigger Temporal Focus.
+		# Ejection only (not entering or riding) can trigger Acceleration Focus.
 		# The impulse doesn't reach linear_velocity until the next physics
 		# step, so hand over the velocity it's about to produce.
 		if body.has_method("notify_launch"):

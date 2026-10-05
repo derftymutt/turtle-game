@@ -16,7 +16,7 @@ class_name DevTechSeeder
 	"Graviton Harness", "Plasma Spit", "Magnetic Repulsion", "Hydro Funnel",
 	"Quantum Mirror", "Ion Exciter", "Stim Shot", "Multi-Beam",
 	"Urchin Mutation", "Flipper Automaton", "Timeline Alternator",
-	"Cosmic Meditation", "Temporal Focus", "Cradle Scope", "Time Crawl"
+	"Cosmic Meditation", "Acceleration Focus", "Cradle Scope", "Time Crawl"
 ) var slot_a: int = 0
 
 @export_enum(
@@ -28,7 +28,7 @@ class_name DevTechSeeder
 	"Graviton Harness", "Plasma Spit", "Magnetic Repulsion", "Hydro Funnel",
 	"Quantum Mirror", "Ion Exciter", "Stim Shot", "Multi-Beam",
 	"Urchin Mutation", "Flipper Automaton", "Timeline Alternator",
-	"Cosmic Meditation", "Temporal Focus", "Cradle Scope", "Time Crawl"
+	"Cosmic Meditation", "Acceleration Focus", "Cradle Scope", "Time Crawl"
 ) var slot_b: int = 0
 
 ## Force the seeded slot straight to HOT state, for testing hot effects without
@@ -66,7 +66,7 @@ const _TECH_IDS: Array[String] = [
 	AlienTechRegistry.FLIPPER_AUTOMATON,
 	AlienTechRegistry.TIMELINE_ALTERNATOR,
 	AlienTechRegistry.COSMIC_MEDITATION,
-	AlienTechRegistry.TEMPORAL_FOCUS,
+	AlienTechRegistry.ACCELERATION_FOCUS,
 	AlienTechRegistry.CRADLE_SCOPE,
 	AlienTechRegistry.TIME_CRAWL,
 ]

@@ -1,7 +1,7 @@
 extends AlienTechEffect
-class_name TemporalFocusEffect
+class_name AccelerationFocusEffect
 
-## Temporal Focus — bullet time. While the tech window is open (`active`), a
+## Acceleration Focus — bullet time. While the tech window is open (`active`), a
 ## flipper, bumper (incl. Bumper Magnet release), puffer-spit or ocean-current
 ## ejection launch that
 ## reaches super speed reports itself through TurtlePlayer.notify_launch(),
@@ -80,9 +80,9 @@ var _cone_a: Line2D = null
 var _cone_b: Line2D = null
 
 func setup(player) -> void:
-	_line = _make_line(player, "TemporalFocusLine", LINE_COLOR, 1.0)
-	_cone_a = _make_line(player, "TemporalFocusConeA", CONE_COLOR, 1.0)
-	_cone_b = _make_line(player, "TemporalFocusConeB", CONE_COLOR, 1.0)
+	_line = _make_line(player, "AccelerationFocusLine", LINE_COLOR, 1.0)
+	_cone_a = _make_line(player, "AccelerationFocusConeA", CONE_COLOR, 1.0)
+	_cone_b = _make_line(player, "AccelerationFocusConeB", CONE_COLOR, 1.0)
 
 func _make_line(player, line_name: String, color: Color, width: float) -> Line2D:
 	var line := Line2D.new()
@@ -97,19 +97,19 @@ func _make_line(player, line_name: String, color: Color, width: float) -> Line2D
 	return line
 
 func activate(_player, _slot_index: int) -> void:
-	if AlienTechManager.is_tech_hot(AlienTechRegistry.TEMPORAL_FOCUS):
+	if AlienTechManager.is_tech_hot(AlienTechRegistry.ACCELERATION_FOCUS):
 		# Hot: click on, click off — no timer, no cooldown (see _effective_cooldown_max).
 		active = not active
 		if active:
-			AlienTechManager.set_passive_bar(AlienTechRegistry.TEMPORAL_FOCUS, 1.0)
+			AlienTechManager.set_passive_bar(AlienTechRegistry.ACCELERATION_FOCUS, 1.0)
 		else:
-			AlienTechManager.clear_passive_bar(AlienTechRegistry.TEMPORAL_FOCUS)
+			AlienTechManager.clear_passive_bar(AlienTechRegistry.ACCELERATION_FOCUS)
 		return
 	active = true
-	_timer = AlienTechManager.TEMPORAL_FOCUS_ACTIVE_DURATION
+	_timer = AlienTechManager.ACCELERATION_FOCUS_ACTIVE_DURATION
 
 func physics_process(player, delta: float) -> void:
-	if active and not AlienTechManager.is_tech_hot(AlienTechRegistry.TEMPORAL_FOCUS):
+	if active and not AlienTechManager.is_tech_hot(AlienTechRegistry.ACCELERATION_FOCUS):
 		_timer -= delta
 		if _timer <= 0.0:
 			active = false
@@ -221,7 +221,7 @@ func cancel_on_damage(_player) -> void:
 		_start_ricochet(_current_dilation())
 
 func on_slots_changed(_player) -> void:
-	if not AlienTechManager.has_tech(AlienTechRegistry.TEMPORAL_FOCUS):
+	if not AlienTechManager.has_tech(AlienTechRegistry.ACCELERATION_FOCUS):
 		active = false
 		_timer = 0.0
 

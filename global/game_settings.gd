@@ -127,7 +127,7 @@ func _apply_game_speed() -> void:
 	Engine.physics_ticks_per_second = roundi(_BASE_PHYSICS_TICKS * GAME_SPEED)
 	AudioServer.playback_speed_scale = maxf(_effective_dilation(), _AUDIO_DILATION_FLOOR)
 
-# ── Time dilation (Temporal Focus bullet time) ───────────────────────────────
+# ── Time dilation (Acceleration Focus bullet time) ───────────────────────────────
 
 ## Lowest the audio is slowed (and pitched down) while time is dilated —
 ## anything lower is an unrecognisable rumble.
@@ -137,7 +137,7 @@ const _AUDIO_DILATION_FLOOR := 0.4
 ## are NOT reduced with it — each tick just covers less game time — so
 ## per-tick effects must go through drag_step() to stay framerate-correct.
 var _time_dilation: float = 1.0
-## Time Crawl's own slow-down, kept apart from Temporal Focus's bullet time so
+## Time Crawl's own slow-down, kept apart from Acceleration Focus's bullet time so
 ## neither tech undoes the other — the slower of the two is what applies.
 var _time_crawl: float = 1.0
 

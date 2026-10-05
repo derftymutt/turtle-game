@@ -12,7 +12,7 @@ class_name CradleScopeEffect
 ## press and FlipperBase.hit_body() launches from it (launch_origin()). What
 ## the scope showed is what the flipper does.
 ##
-## The line is straight (the launch heading), like Temporal Focus's — it does
+## The line is straight (the launch heading), like Acceleration Focus's — it does
 ## not bend for gravity or drag.
 ##
 ## Cold: a short line. Hot: the line runs on to the first thing in its way.
