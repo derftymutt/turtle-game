@@ -294,6 +294,7 @@ func _ready():
 	_tech_effects[AlienTechRegistry.COSMIC_MEDITATION] = CosmicMeditationEffect.new()
 	_tech_effects[AlienTechRegistry.TEMPORAL_FOCUS] = TemporalFocusEffect.new()
 	_tech_effects[AlienTechRegistry.CRADLE_SCOPE] = CradleScopeEffect.new()
+	_tech_effects[AlienTechRegistry.TIME_CRAWL] = TimeCrawlEffect.new()
 	for effect in _tech_effects.values():
 		(effect as AlienTechEffect).setup(self)
 
@@ -341,16 +342,20 @@ func _physics_process(delta):
 	var meditation := _tech_effects[AlienTechRegistry.COSMIC_MEDITATION] as CosmicMeditationEffect
 	# Temporal Focus: bullet time after a launch — the stick aims instead of swimming.
 	var temporal_focus := _tech_effects[AlienTechRegistry.TEMPORAL_FOCUS] as TemporalFocusEffect
+	# Time Crawl: the world is slowed; the turtle's clock runs faster than game
+	# time to make up part of it, on top of whatever Stim Shot is doing.
+	var time_crawl := _tech_effects[AlienTechRegistry.TIME_CRAWL] as TimeCrawlEffect
+	var clock_scale: float = stim_shot.scale_factor * time_crawl.scale_factor
 
 	# Update cooldown timers
 	if not can_thrust:
-		thrust_timer -= delta * stim_shot.scale_factor
+		thrust_timer -= delta * clock_scale
 		if thrust_timer <= 0:
 			can_thrust = true
 			is_player_controlling_rotation = false
 
 	if not can_shoot:
-		shoot_timer -= delta * stim_shot.scale_factor
+		shoot_timer -= delta * clock_scale
 		if shoot_timer <= 0:
 			can_shoot = true
 			is_player_controlling_rotation = false
@@ -473,6 +478,8 @@ func _physics_process(delta):
 
 	stim_shot.physics_process(self, delta)
 
+	time_crawl.physics_process(self, delta)
+
 	# Ocean physics — suppressed while pinned to a bumper or flipper, inside a puffer, or meditating
 	if not (_tech_effects[AlienTechRegistry.BUMPER_MAGNET] as BumperMagnetEffect).attached and not _flipper_velcro_latched and not multi_beam.pulling_player and not captor_puffer and not meditation.active:
 		if ocean:
@@ -486,7 +493,7 @@ func _physics_process(delta):
 	var animated_sprite = $AnimatedSprite2D
 	if animated_sprite:
 		animated_sprite.rotation = -rotation
-		animated_sprite.speed_scale = stim_shot.scale_factor
+		animated_sprite.speed_scale = clock_scale
 
 	# HUD systems
 	if hud:
@@ -510,7 +517,7 @@ func _physics_process(delta):
 		# energy_recovery_scale outpaces scale_factor on purpose — see
 		# StimShotEffect's ENERGY_RECOVERY_BOOST — so the tech is actually
 		# sustainable away from walls, not just break-even.
-		hud.recover_energy(delta * stim_shot.energy_recovery_scale, ((touching_walls.size() > 0 or at_surface) and not (_tech_effects[AlienTechRegistry.BUMPER_MAGNET] as BumperMagnetEffect).attached) or meditation.active)
+		hud.recover_energy(delta * stim_shot.energy_recovery_scale * time_crawl.scale_factor, ((touching_walls.size() > 0 or at_surface) and not (_tech_effects[AlienTechRegistry.BUMPER_MAGNET] as BumperMagnetEffect).attached) or meditation.active)
 
 	_update_rest_particles()
 
@@ -746,7 +753,8 @@ func apply_ocean_effects(delta: float):
 	# the decay-per-turtle-second the same as at 1x. Buoyancy is scaled the
 	# same way since it's also an ambient force integrated by the engine's
 	# own fixed tick rather than our local clock. See stim_shot_effect.gd.
-	var time_scale: float = (_tech_effects[AlienTechRegistry.STIM_SHOT] as StimShotEffect).scale_factor
+	var time_scale: float = (_tech_effects[AlienTechRegistry.STIM_SHOT] as StimShotEffect).scale_factor \
+			* (_tech_effects[AlienTechRegistry.TIME_CRAWL] as TimeCrawlEffect).scale_factor
 
 	# Inertia Dampener in air: skip gravity calculation entirely and treat air
 	# as shallow ocean so the turtle can swim freely above the surface.
@@ -840,6 +848,10 @@ func apply_thrust(direction: Vector2):
 			thrust_strength = upward_thrust
 		elif kick_direction.y > 0:
 			thrust_strength = downward_thrust
+
+	# Time Crawl: each kick is stronger as well as sooner, so the turtle really
+	# does cover ground faster than the slowed world.
+	thrust_strength *= (_tech_effects[AlienTechRegistry.TIME_CRAWL] as TimeCrawlEffect).scale_factor
 
 	linear_velocity += kick_direction * thrust_strength
 
@@ -1419,6 +1431,16 @@ func is_ion_exciter_active() -> bool:
 ## Impulse-based launchers pass `launch_velocity`, since an impulse isn't
 ## visible in linear_velocity until the next physics step.
 func notify_launch(from_bumper: bool = false, launch_velocity = null) -> void:
+	# Time Crawl: the turtle's drag runs on its faster clock, which would cut a
+	# launch short — speed the launch up to win some of that distance back.
+	var crawl_scale: float = (_tech_effects[AlienTechRegistry.TIME_CRAWL] as TimeCrawlEffect).launch_scale()
+	if crawl_scale > 1.0:
+		if launch_velocity is Vector2:
+			# Impulse launch, not in linear_velocity yet — top the impulse up.
+			apply_central_impulse(launch_velocity * (crawl_scale - 1.0) * mass)
+			launch_velocity *= crawl_scale
+		else:
+			linear_velocity *= crawl_scale
 	(_tech_effects[AlienTechRegistry.TEMPORAL_FOCUS] as TemporalFocusEffect).on_launch(self, from_bumper, launch_velocity)
 	(_tech_effects[AlienTechRegistry.CRADLE_SCOPE] as CradleScopeEffect).on_launch()
 
@@ -1432,6 +1454,8 @@ func cradle_scope_origin(flipper: FlipperBase):
 func _exit_tree() -> void:
 	if _tech_effects.has(AlienTechRegistry.TEMPORAL_FOCUS):
 		(_tech_effects[AlienTechRegistry.TEMPORAL_FOCUS] as TemporalFocusEffect).shutdown()
+	if _tech_effects.has(AlienTechRegistry.TIME_CRAWL):
+		(_tech_effects[AlienTechRegistry.TIME_CRAWL] as TimeCrawlEffect).shutdown()
 
 ## True while the wall/surface fast energy recharge is actually filling the bar.
 ## DeadWall pairs this with touching_walls to play its charge animation.

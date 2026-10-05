@@ -85,6 +85,11 @@ const COSMIC_MEDITATION_COOLDOWN_DURATION: float = 4.0
 const TEMPORAL_FOCUS_ACTIVE_DURATION:   float = 5.0
 const TEMPORAL_FOCUS_COOLDOWN_DURATION: float = 8.0
 
+# The 3s window is real time, timed by TimeCrawlEffect itself (game time is
+# slowed while it runs); the cooldown is held until the crawl ends.
+const TIME_CRAWL_ACTIVE_DURATION:   float = 3.0
+const TIME_CRAWL_COOLDOWN_DURATION: float = 5.0
+
 const _COOLDOWN_DURATIONS: Dictionary = {
 	AlienTechRegistry.INERTIA_DAMPENER: INERTIA_DAMPENER_ACTIVE_DURATION + INERTIA_DAMPENER_COOLDOWN_DURATION,
 	AlienTechRegistry.LATERAL_THRUST:   5.0,
@@ -106,6 +111,7 @@ const _COOLDOWN_DURATIONS: Dictionary = {
 	AlienTechRegistry.TIMELINE_ALTERNATOR: TIMELINE_ALTERNATOR_ACTIVE_DURATION + TIMELINE_ALTERNATOR_COOLDOWN_DURATION,
 	AlienTechRegistry.COSMIC_MEDITATION: COSMIC_MEDITATION_COOLDOWN_DURATION,
 	AlienTechRegistry.TEMPORAL_FOCUS: TEMPORAL_FOCUS_ACTIVE_DURATION + TEMPORAL_FOCUS_COOLDOWN_DURATION,
+	AlienTechRegistry.TIME_CRAWL: TIME_CRAWL_COOLDOWN_DURATION,
 }
 
 # Techs whose cooldown doesn't start draining on press: try_activate_slot()
@@ -116,6 +122,7 @@ const _HOLD_COOLDOWN_TECHS: Array[String] = [
 	AlienTechRegistry.MULTI_BEAM,
 	AlienTechRegistry.DERMAL_REGEN,  # only runs if the heal lands — a cancelled channel releases with 0
 	AlienTechRegistry.COSMIC_MEDITATION,  # runs from when meditation ends; a refused press releases with 0
+	AlienTechRegistry.TIME_CRAWL,  # runs from when time is back to normal speed
 ]
 
 # Per slot index (not tech id) so it travels with swap_slots().
@@ -140,6 +147,7 @@ const _TWO_PHASE_BAR_DURATIONS: Dictionary = {
 	AlienTechRegistry.FLIPPER_AUTOMATON: {"active": FLIPPER_AUTOMATON_ACTIVE_DURATION, "cooldown": FLIPPER_AUTOMATON_COOLDOWN_DURATION},
 	AlienTechRegistry.TIMELINE_ALTERNATOR: {"active": TIMELINE_ALTERNATOR_ACTIVE_DURATION, "cooldown": TIMELINE_ALTERNATOR_COOLDOWN_DURATION},
 	AlienTechRegistry.TEMPORAL_FOCUS: {"active": TEMPORAL_FOCUS_ACTIVE_DURATION, "cooldown": TEMPORAL_FOCUS_COOLDOWN_DURATION},
+	AlienTechRegistry.TIME_CRAWL: {"active": TIME_CRAWL_ACTIVE_DURATION, "cooldown": TIME_CRAWL_COOLDOWN_DURATION},
 }
 
 # Techs whose HOT behavior is a manual on/off toggle (via set_passive_bar in
@@ -464,7 +472,7 @@ func _effective_cooldown_max(slot_index: int, tech_id: String) -> float:
 		AlienTechRegistry.MAGNETIC_REPULSION, AlienTechRegistry.HYDRO_FUNNEL, \
 		AlienTechRegistry.ION_EXCITER, AlienTechRegistry.URCHIN_MUTATION, \
 		AlienTechRegistry.FLIPPER_AUTOMATON, AlienTechRegistry.TIMELINE_ALTERNATOR, \
-		AlienTechRegistry.TEMPORAL_FOCUS:
+		AlienTechRegistry.TEMPORAL_FOCUS, AlienTechRegistry.TIME_CRAWL:
 			return 0.0  # hot: no cooldown
 		AlienTechRegistry.TIME_FREEZE:
 			# Hot: active duration doubled, post-active recovery halved.

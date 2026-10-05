@@ -137,6 +137,9 @@ const _AUDIO_DILATION_FLOOR := 0.4
 ## are NOT reduced with it — each tick just covers less game time — so
 ## per-tick effects must go through drag_step() to stay framerate-correct.
 var _time_dilation: float = 1.0
+## Time Crawl's own slow-down, kept apart from Temporal Focus's bullet time so
+## neither tech undoes the other — the slower of the two is what applies.
+var _time_crawl: float = 1.0
 
 func set_time_dilation(factor: float) -> void:
 	_time_dilation = clampf(factor, 0.0, 1.0)
@@ -146,15 +149,21 @@ func reset_time_dilation() -> void:
 	if _time_dilation != 1.0:
 		set_time_dilation(1.0)
 
+func set_time_crawl(factor: float) -> void:
+	factor = clampf(factor, 0.0, 1.0)
+	if factor != _time_crawl:
+		_time_crawl = factor
+		_apply_game_speed()
+
 func is_time_dilated() -> bool:
-	return _time_dilation < 1.0
+	return minf(_time_dilation, _time_crawl) < 1.0
 
 ## While paused (pause menu, popups) menus run at normal speed even if the
 ## game was frozen mid bullet time; the dilation comes back on unpause.
 func _effective_dilation() -> float:
 	if is_inside_tree() and get_tree().paused:
 		return 1.0
-	return _time_dilation
+	return minf(_time_dilation, _time_crawl)
 
 var _was_paused: bool = false
 
@@ -162,7 +171,7 @@ func _process(_delta: float) -> void:
 	var paused := get_tree().paused
 	if paused != _was_paused:
 		_was_paused = paused
-		if _time_dilation != 1.0:
+		if is_time_dilated():
 			_apply_game_speed()
 
 ## Per-physics-tick velocity multiplier for a drag `factor` tuned at one tick

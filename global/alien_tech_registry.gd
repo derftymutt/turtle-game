@@ -35,6 +35,7 @@ const TIMELINE_ALTERNATOR := "timeline_alternator"
 const COSMIC_MEDITATION   := "cosmic_meditation"
 const TEMPORAL_FOCUS      := "dilation_scope"  # id predates the rename — kept so existing saves still load
 const CRADLE_SCOPE        := "cradle_scope"
+const TIME_CRAWL          := "time_crawl"
 
 # ─── Tech definitions ────────────────────────────────────────────────────────
 
@@ -346,6 +347,17 @@ var _definitions: Array[Dictionary] = [
 		"needs_input": false,
 		"color":       Color(1.0, 0.8, 0.35),
 		"hot_description": "The scope reaches all the way to whatever you'll hit.",
+	},
+	{
+		"id":              TIME_CRAWL,
+		"name":            "Time Crawl",
+		"description":     "Slow the whole world to a crawl while you stay quick. 3s active, 5s cooldown.",
+		"hook":            "Everyone else is so slow!",
+		"slot_label":      "Time Crawl",
+		"needs_input":     true,
+		"has_passive_bar": true,
+		"color":           Color(0.55, 0.7, 1.0),
+		"hot_description": "No cooldown.",
 	},
 ]
 
