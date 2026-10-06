@@ -92,7 +92,7 @@ sources/0 = SubResource("TileSetAtlasSource_4gw27")
 
 [sub_resource type="Curve2D" id="Curve2D_mb3d3"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, -13, 2, 0, 0, 0, 0, -19, 22, 0, 0, 0, 0, -26, 41, 0, 0, 0, 0, -27, 66, 0, 0, 0, 0, -11, 96)
+"points": PackedVector2Array(0, 0, 0, 0, -13, 2, 0, 0, 0, 0, -19, 22, 0, 0, 0, 0, -26, 41, 0, 0, 0, 0, -23, 69, 0, 0, 0, 0, -9, 89)
 }
 point_count = 5
 
@@ -413,10 +413,13 @@ tile_set = ExtResource("29_wgvos")
 [node name="OceanCurrent" parent="." index="54" unique_id=1683655070 instance=ExtResource("26_jqt73")]
 position = Vector2(-119, -88)
 propulsion_force = 1200.0
-exit_impulse = 600.0
+centering_force = 100.0
+lateral_damping = 1.0
+exit_impulse = 500.0
 show_debug_arrows = false
 
 [node name="Path2D" parent="OceanCurrent" index="0" unique_id=1461068862]
+position = Vector2(1, 0)
 curve = SubResource("Curve2D_mb3d3")
 
 [node name="Area2D" parent="OceanCurrent/Path2D" index="0" unique_id=719841149]
