@@ -29,7 +29,6 @@
 [ext_resource type="TileSet" uid="uid://dyl02kfc4a681" path="res://entities/environment/ocean_boundaries/ocean_wall.tres" id="28_kyq6o"]
 [ext_resource type="PackedScene" uid="uid://ko8xdpxfr5ej" path="res://entities/environment/current/current.tscn" id="31_4gw27"]
 [ext_resource type="PackedScene" uid="uid://c41fis6pd8gh2" path="res://systems/space_debris/space_debris_group.tscn" id="31_q26s8"]
-[ext_resource type="Script" uid="uid://d22ywt1ov84p1" path="res://systems/dev/dev_tech_seeder.gd" id="32_mb3d3"]
 [ext_resource type="PackedScene" uid="uid://dq7r6j7ritsv7" path="res://entities/collectibles/powerup/powerup.tscn" id="32_o87u6"]
 [ext_resource type="PackedScene" uid="uid://q614lo3kanxc" path="res://systems/space_debris/space_debris.tscn" id="33_h3b7p"]
 [ext_resource type="PackedScene" path="res://systems/rainbow_fish/rainbow_fish_spawner.tscn" id="33_q26s8"]
@@ -531,10 +530,7 @@ curve = SubResource("Curve2D_q26s8")
 [node name="Visuals" parent="HydroFunnel3" index="1" unique_id=2005124627]
 position = Vector2(-89, -27)
 
-[node name="DevTechSeeder2" type="Node" parent="." index="51" unique_id=1666723360]
-script = ExtResource("32_mb3d3")
-
-[node name="RainbowFishSpawner" parent="." index="52" unique_id=1256303568 instance=ExtResource("33_q26s8")]
+[node name="RainbowFishSpawner" parent="." index="51" unique_id=1256303568 instance=ExtResource("33_q26s8")]
 kill_triggers = Array[int]([20, 20, 15])
 
 [editable path="OceanCurrentLeft"]
