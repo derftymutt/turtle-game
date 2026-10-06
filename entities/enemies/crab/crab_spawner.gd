@@ -37,15 +37,17 @@ func _ready() -> void:
 func _random_x_clear_of(taken: Array[float], min_sep: float) -> float:
 	for _attempt in range(30):
 		var x := randf_range(spawn_area_min_x, spawn_area_max_x)
-		var ok := true
+		# Never on top of the turtle
+		var ok := EnemySpawnSafety.is_clear(get_tree(), Vector2(x, floor_y))
 		for tx in taken:
 			if abs(x - tx) < min_sep:
 				ok = false
 				break
 		if ok:
 			return x
-	# Fallback: just pick a random position if the floor is too crowded
-	return randf_range(spawn_area_min_x, spawn_area_max_x)
+	# Fallback: the floor is too crowded to keep the crabs apart — still stay off the turtle
+	return EnemySpawnSafety.random_point(get_tree(),
+		Vector2(spawn_area_min_x, floor_y), Vector2(spawn_area_max_x, floor_y)).x
 
 func spawn_crab(at_position: Vector2 = Vector2.ZERO, is_super: bool = false) -> Crab:
 	"""Spawn a new crab at the specified position, or random if Vector2.ZERO"""

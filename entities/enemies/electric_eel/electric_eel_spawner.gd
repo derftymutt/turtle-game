@@ -32,10 +32,8 @@ func _ready():
 
 func spawn_with_animation():
 	"""Spawn an eel with electric warning animation"""
-	var pos = Vector2(
-		randf_range(spawn_area_min.x, spawn_area_max.x),
-		randf_range(spawn_area_min.y, spawn_area_max.y)
-	)
+	# Never on top of the turtle
+	var pos: Vector2 = EnemySpawnSafety.random_point(get_tree(), spawn_area_min, spawn_area_max)
 	
 	# === PHASE 1: Electric ripples ===
 	for i in range(warning_ripple_count):
@@ -81,6 +79,9 @@ func spawn_with_animation():
 		if flash:
 			flash.queue_free()
 		return
+
+	# The turtle may have swum onto the spot during the warning — step aside
+	pos = EnemySpawnSafety.move_clear(get_tree(), pos, spawn_area_min, spawn_area_max)
 
 	# Spawn real eel
 	var eel = eel_scene.instantiate()

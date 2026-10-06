@@ -5,7 +5,8 @@ class_name BossIntroPopup
 ## Full-screen warning shown when a boss level starts, on top of the loaded
 ## level and after its transition cut scene has finished. Pauses the game
 ## until dismissed by any input, same convention as the level transition
-## cutscene's "press any key to continue" prompt.
+## cutscene's "press any key to continue" prompt. Dismissing it hands over to
+## the level's "Press any button to start" prompt (LevelBase.show_start_prompt()).
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -15,6 +16,14 @@ func _ready() -> void:
 func _on_boss_level_started(_level_number: int) -> void:
 	visible = true
 	get_tree().paused = true
+	var level := _level()
+	if level:
+		level.hold_start_prompt()
+
+## The level this popup sits in. Not current_scene: that isn't set yet while
+## the level's _ready() (which emits boss_level_started) is still running.
+func _level() -> LevelBase:
+	return get_parent() as LevelBase
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not visible:
@@ -28,4 +37,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	if is_dismiss_input:
 		get_viewport().set_input_as_handled()
 		visible = false
-		get_tree().paused = false
+		var level := _level()
+		if level:
+			level.show_start_prompt()
+		else:
+			get_tree().paused = false

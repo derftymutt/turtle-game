@@ -33,6 +33,9 @@ func _ready() -> void:
 	if turtle is Node2D:
 		_player_spawn = (turtle as Node2D).global_position
 
+func _wants_start_prompt() -> bool:
+	return false
+
 ## Called by the turtle when it dies. The academy has no game over — put the
 ## player back at the spawn point, fully healed, with a moment of invulnerability.
 func on_player_died(final_score: int, death_cause: String = "") -> void:

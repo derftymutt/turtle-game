@@ -32,6 +32,8 @@ These singletons are registered in `project.godot` and available everywhere:
 
 All levels (`levels/level_N.tscn`) inherit from `LevelBase` (`levels/shared/level_base.gd`). `LevelBase` handles HUD, GameOver screen, and PauseMenu as `@onready` children. Each level sets its `level_number` export in the Inspector. `LevelManager.start_level()` is called in `LevelBase._ready()`.
 
+**Start prompt**: every level opens frozen behind a blinking "Press any button to start" (`LevelStartPrompt`, `ui/menus/level_start_prompt.gd`, built in code) so the player can plan first. `LevelBase.show_start_prompt()` pauses the tree straight from `_ready()`, before the level runs a frame; the level song keeps playing through the wait (its `process_mode` is `ALWAYS` until the press). Anything that should be visible for planning must therefore appear without the tree running (SceneTreeTimers and `TWEEN_PAUSE_PROCESS` tweens do run — the squid/puffer spawn fade-ins use that). The tutorial and the Academy opt out by overriding `_wants_start_prompt()`. A popup that is up at level load (`BossIntroPopup`) calls `hold_start_prompt()` and then `show_start_prompt()` when dismissed.
+
 ### Player (`entities/player/turtle_player.gd`)
 
 `TurtlePlayer` extends `RigidBody2D`. Key design decisions:
@@ -60,6 +62,8 @@ All levels (`levels/level_N.tscn`) inherit from `LevelBase` (`levels/shared/leve
 ### Enemies (`entities/enemies/base_enemy.gd`)
 
 All enemies extend `BaseEnemy` (which extends `RigidBody2D`). Override `_enemy_ready()` for per-enemy setup. Key behaviors inherited: `take_damage()`, `die()` (with 2% chance to drop an alien tech piece), `phase_shift()` (used by Phase Shifter tech), contact-damage area via a child `DamageArea` node.
+
+**Spawn clearance**: no spawner may put an enemy on top of the turtle. `EnemySpawnSafety` (`entities/enemies/enemy_spawn_safety.gd`) has the shared radius (`MIN_TURTLE_DISTANCE`) and helpers: `random_point()` to pick the spot, and `move_clear()` again when the enemy actually appears, since the turtle moves during the spawn telegraph. Puffer and squid spawners use their own (larger) `min_player_distance`. A new spawner needs the same two checks.
 
 An enemy that defines `on_super_speed_contact(turtle)` gets that call from the turtle's `SuperSpeedArea` instead of `take_damage(super_speed_damage)`. `PufferFish` uses it to swallow the turtle: `TurtlePlayer.enter_puffer()` hides the turtle, disables its collision and hands its physics tick to `PufferFish.update_capture()` (so the capture keeps running under Time Freeze / shock) until `exit_puffer()` launches it out of the mouth. While `captor_puffer` is set the turtle is invulnerable and super speed / ocean physics are off, the same way they are during a Bumper Magnet attach.
 

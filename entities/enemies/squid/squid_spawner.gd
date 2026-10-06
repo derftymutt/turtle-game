@@ -55,7 +55,9 @@ func _spawn_all() -> void:
 		taken.append(squid.claimed_spot)
 
 		squid.modulate.a = 0.0
-		squid.create_tween().tween_property(squid, "modulate:a", 1.0, 0.4)
+		# Fades in even while the level is held by the start prompt
+		squid.create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)\
+			.tween_property(squid, "modulate:a", 1.0, 0.4)
 
 func _find_spot(taken: Array[Vector2], player: Node2D, min_y: float) -> Dictionary:
 	var space := get_world_2d().direct_space_state

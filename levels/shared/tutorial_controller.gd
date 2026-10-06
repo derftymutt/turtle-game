@@ -22,6 +22,9 @@ func _ready() -> void:
 	if turtle is Node2D:
 		_player_spawn = (turtle as Node2D).global_position
 
+func _wants_start_prompt() -> bool:
+	return false
+
 ## Called by the turtle when it dies. In the tutorial there's no fail state —
 ## just put the player back where they started, fully healed, with a moment of
 ## invulnerability so they aren't instantly re-hit.

@@ -136,6 +136,17 @@ func _spawn_one(pos: Vector2, delay: float) -> void:
 	if AlienTechManager.time_freeze_active or not is_inside_tree():
 		return
 
+	# The turtle may have swum onto the spot during the warning — pick again
+	var player := get_tree().get_first_node_in_group("player") as Node2D
+	if player and pos.distance_to(player.global_position) < min_player_distance:
+		var taken: Array[Vector2] = []
+		for node in get_tree().get_nodes_in_group("puffers"):
+			taken.append((node as Node2D).global_position)
+		var new_pos: Variant = _find_spawn_position(taken, player)
+		if new_pos == null:
+			return
+		pos = new_pos
+
 	# Position before add_child — PufferFish takes its patrol center from
 	# global_position in _ready()
 	var puffer := puffer_scene.instantiate() as Node2D
@@ -146,7 +157,8 @@ func _spawn_one(pos: Vector2, delay: float) -> void:
 	# Fade/grow in
 	puffer.modulate.a = 0.0
 	var sprite := puffer.get_node_or_null("AnimatedSprite2D") as Node2D
-	var tween := puffer.create_tween().set_parallel(true)
+	# Fades in even while the level is held by the start prompt
+	var tween := puffer.create_tween().set_parallel(true).set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 	tween.tween_property(puffer, "modulate:a", 1.0, 0.3)
 	if sprite:
 		sprite.scale = Vector2.ONE * 0.2

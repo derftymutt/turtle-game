@@ -89,6 +89,14 @@ func _ready() -> void:
 	target_x = global_position.x
 	if follow_target:
 		target_x = follow_target.global_position.x
+		# A turtle that starts in the sky is framed there from the first
+		# frame — the level opens paused (LevelStartPrompt), so the camera
+		# can't wait for _process() to find it.
+		if follow_target.global_position.y < ocean_surface_y - sky_entry_threshold:
+			state = CameraState.SKY_LOCKED
+			cinematic_played = true
+			zoom = sky_locked_zoom
+			global_position.y = sky_locked_y
 
 
 # ── Main Loop ─────────────────────────────────────────────────────────────

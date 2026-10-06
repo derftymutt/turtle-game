@@ -83,10 +83,8 @@ func _apply_frenzy_interval() -> void:
 	_spawn_timer.wait_time = maxf(frenzy_min_interval, _base_interval / rate_multiplier)
 
 func spawn_with_animation():
-	var pos = Vector2(
-		randf_range(spawn_area_min.x, spawn_area_max.x),
-		randf_range(spawn_area_min.y, spawn_area_max.y)
-	)
+	# Never on top of the turtle
+	var pos: Vector2 = EnemySpawnSafety.random_point(get_tree(), spawn_area_min, spawn_area_max)
 
 	# Decide if this is a super piranha (only if we have the scene!)
 	var is_super = false
@@ -164,6 +162,9 @@ func spawn_with_animation():
 	if AlienTechManager.time_freeze_active:
 		approach_sprite.queue_free()
 		return
+
+	# The turtle may have swum onto the spot during the warning — step aside
+	pos = EnemySpawnSafety.move_clear(get_tree(), pos, spawn_area_min, spawn_area_max)
 
 	# Spawn real piranha (normal or super)
 	var piranha = scene_to_spawn.instantiate()
