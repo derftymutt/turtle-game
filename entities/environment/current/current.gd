@@ -148,6 +148,9 @@ var _state: _State = _State.ACTIVE
 var _cycle_timer: float = 0.0
 var _bodies_inside: Array[RigidBody2D] = []
 var _is_ready: bool = false
+# Set by shut_down(); one blink of its warning flicker is twice this long
+const _SHUTDOWN_BLINK_SECONDS := 0.15
+var _shutting_down: bool = false
 
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -506,6 +509,24 @@ func turn_off() -> void:
 	if _state == _State.INACTIVE or _state == _State.FADING_OUT:
 		return
 	_begin_fade_out()
+
+
+## Switches this current off for good: it flickers for `warn_seconds` (still
+## pushing, so the player can see it's about to go), then fades out. The
+## bonus rainbow level retires its currents this way as time runs on.
+func shut_down(warn_seconds: float = 0.0) -> void:
+	if _shutting_down:
+		return
+	_shutting_down = true
+	cycle_active = false
+	var blinks: int = int(warn_seconds / (_SHUTDOWN_BLINK_SECONDS * 2.0))
+	if blinks > 0 and (_state == _State.ACTIVE or _state == _State.FADING_IN):
+		var tween := create_tween().set_loops(blinks)
+		tween.tween_property(self, "modulate:a", 0.25, _SHUTDOWN_BLINK_SECONDS)
+		tween.tween_property(self, "modulate:a", 1.0, _SHUTDOWN_BLINK_SECONDS)
+		await tween.finished
+	if _state != _State.INACTIVE and _state != _State.FADING_OUT:
+		_begin_fade_out()
 
 
 func _enable_collision() -> void:

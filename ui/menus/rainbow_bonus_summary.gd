@@ -47,25 +47,45 @@ func _ready() -> void:
 	_shown_msec = Time.get_ticks_msec()
 	get_tree().paused = true
 
+## One table row per colour with fruit: name, amount collected, that colour's
+## multiplier (in its colour) and the points. Numbers are right-aligned so the
+## columns line up down the rainbow.
 func _build_text() -> String:
-	var lines: Array[String] = ["[center][rainbow freq=0.6 sat=0.75 val=1.0]Rainbow Bonus![/rainbow]", ""]
+	var lines: Array[String] = [
+		"[center][rainbow freq=0.6 sat=0.75 val=1.0]Rainbow Bonus![/rainbow]",
+		"[font_size=11][color=#a0a0b0]%d pts per fruit[/color][/font_size]" % Fruit.BASE_POINTS,
+		"",
+	]
 	var total := 0
-	var any := false
-	for band in RainbowFish.COLORS.size():
+	var rows: Array[String] = []
+	var band_count := RainbowFish.COLORS.size()
+	for band in band_count:
 		var count: int = _counts[band] if band < _counts.size() else 0
 		var pts: int = _points[band] if band < _points.size() else 0
 		total += pts
 		if count == 0:
 			continue
-		any = true
 		var color := RainbowFish.COLORS[band].lerp(Color.WHITE, 0.25).to_html(false)
-		lines.append("[color=#%s]%s[/color]   fruit x%d   %d" % [color, RainbowFish.COLOR_NAMES[band].capitalize(), count, pts])
-	if not any:
+		# Same value as RainbowBonusLevel.level_value(): red 7 … violet 1
+		var multiplier := band_count - band
+		rows.append(_cell("[color=#%s]%s[/color]" % [color, RainbowFish.COLOR_NAMES[band].capitalize()], false)
+				+ _cell(str(count))
+				+ _cell("[color=#%s]x%d[/color]" % [color, multiplier])
+				+ _cell(str(pts)))
+	if rows.is_empty():
 		lines.append("No fruit collected")
-	lines.append("")
-	lines.append("Total   %d" % total)
+		lines.append("")
+		lines.append("Total   0")
+	else:
+		rows.append(_cell("", false) + _cell("") + _cell("") + _cell(""))
+		rows.append(_cell("Total", false) + _cell("") + _cell("") + _cell(str(total)))
+		lines.append("[table=4]%s[/table]" % "".join(rows))
 	lines.append("[/center]")
 	return "\n".join(lines) + "\n"
+
+func _cell(text: String, right_aligned: bool = true) -> String:
+	text = ("[right]%s[/right]" if right_aligned else "[left]%s[/left]") % text
+	return "[cell padding=7,0,7,0]%s[/cell]" % text
 
 func _process(_delta: float) -> void:
 	var blink_on := int(Time.get_ticks_msec() / _BLINK_PERIOD_MSEC) % 2 == 0

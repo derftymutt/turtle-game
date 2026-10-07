@@ -41,6 +41,20 @@ const _FRUIT_SCENE = preload("res://entities/collectibles/fruit/fruit.tscn")
 ## Keeps fruit out of the launch lane on the right (x beyond this)
 @export var fruit_max_x: float = 270.0
 
+@export_group("Current Shutdown")
+## Every this many seconds one colour's currents (ladders and nets) switch
+## off for good, so the level gets harder the longer the turtle lasts.
+## 0 = never.
+@export var current_shutdown_interval: float = 30.0
+## The currents flicker for this long before they go
+@export var current_shutdown_warning: float = 3.0
+## Nodes whose OceanCurrent children are switched off, in order — one per
+## interval. Orange first, working down to violet.
+@export var current_shutdown_order: Array[String] = [
+	"Orange Currents", "Yellow Currents", "Green Currents",
+	"Blue Currents", "Indigo Currents", "Violet Currents",
+]
+
 ## Default launch current path (level space): up the right-edge lane from
 ## below violet, curving left over the top of LaunchWall into red.
 const DEFAULT_LAUNCH_PATH: Array[Vector2] = [
@@ -53,6 +67,9 @@ var _fruit_counts: Array[int] = []
 var _fruit_points: Array[int] = []
 ## Uncollected fruit per band
 var _live_fruit: Array[int] = []
+## Seconds played, and how many entries of current_shutdown_order are gone
+var _shutdown_clock: float = 0.0
+var _shutdown_index: int = 0
 
 ## Runs before the children's _ready, so OceanCurrent builds its collision and
 ## bubbles from the curve. Fills in the launch path if the scene has none —
@@ -144,12 +161,30 @@ func fruit_total() -> int:
 func level_height() -> float:
 	return SCREEN_SIZE.y * SCREEN_COUNT
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	if _ended:
 		return
+	_update_current_shutdown(delta)
 	var player := get_tree().get_first_node_in_group("player") as Node2D
 	if player and player.global_position.y > level_height() + fall_out_margin:
 		_end()
+
+## Starts the next colour's currents flickering `current_shutdown_warning`
+## seconds ahead of its turn, so they go dark right on the interval.
+func _update_current_shutdown(delta: float) -> void:
+	if current_shutdown_interval <= 0.0 or _shutdown_index >= current_shutdown_order.size():
+		return
+	_shutdown_clock += delta
+	var warning: float = minf(current_shutdown_warning, current_shutdown_interval)
+	if _shutdown_clock < current_shutdown_interval * (_shutdown_index + 1) - warning:
+		return
+	var group := get_node_or_null(current_shutdown_order[_shutdown_index])
+	_shutdown_index += 1
+	if group == null:
+		return
+	for child in group.get_children():
+		if child is OceanCurrent:
+			child.shut_down(warning)
 
 ## TurtlePlayer calls this when it dies — the bonus level just ends.
 func on_player_died(_final_score: int, _death_cause: String = "") -> void:

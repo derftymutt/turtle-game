@@ -10,8 +10,6 @@
 [ext_resource type="PackedScene" uid="uid://bpm3u1q2wx5y" path="res://ui/menus/pause_menu.tscn" id="8_pause"]
 [ext_resource type="PackedScene" uid="uid://tselect001" path="res://ui/alien_tech/alien_tech_selection_screen.tscn" id="9_select"]
 [ext_resource type="PackedScene" uid="uid://bp6g8v1jmnruo" path="res://entities/environment/walls/circular_bumper/circular_bumper.tscn" id="10_ys2d3"]
-[ext_resource type="PackedScene" uid="uid://ntfpaqi03yfr" path="res://entities/environment/flippers/flipper_left_up.tscn" id="11_3mf0h"]
-[ext_resource type="PackedScene" uid="uid://jylpdfwgd8wo" path="res://entities/environment/flippers/flipper_right_up.tscn" id="12_cb12r"]
 [ext_resource type="PackedScene" uid="uid://u02ifu2255ot" path="res://entities/environment/flippers/cloud_flipper_left_up.tscn" id="13_3ar3m"]
 [ext_resource type="PackedScene" uid="uid://8edo3etakc1a" path="res://entities/environment/walls/dead_wall/dead_wall.tscn" id="13_3mf0h"]
 [ext_resource type="PackedScene" uid="uid://p32a3utahssn" path="res://entities/environment/flippers/cloud_flipper_right_up.tscn" id="14_dpahy"]
@@ -22,11 +20,107 @@ size = Vector2(8, 3600)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_launchwall"]
 size = Vector2(8, 2510)
 
-[sub_resource type="Curve2D" id="Curve2D_3ar3m"]
+[sub_resource type="Curve2D" id="Curve2D_netorange"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, 15, 443, 0, 0, 0, 0, -43, 443, 0, 0, 0, 0, -96, 439, 0, 0, 0, 0, -142, 437, 0, 0, 0, 0, -197, 435, 0, 0, 0, 0, -240, 427, 0, 0, 0, 0, -270, 403, 0, 0, 0, 0, -298, 379, 0, 0, 0, 0, -310, 344, 0, 0, 0, 0, -311, 287)
+"points": PackedVector2Array(0, 0, 0, 0, -40, 727, 0, 0, 0, 0, -130, 727, 0, 0, 0, 0, -150, 707, 0, 0, 0, 0, -150, 640)
 }
-point_count = 10
+point_count = 4
+
+[sub_resource type="Curve2D" id="Curve2D_ladderyellowtoorange"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, -260, 990, 0, 0, 0, 0, -200, 700)
+}
+point_count = 2
+
+[sub_resource type="Curve2D" id="Curve2D_netyellow"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 90, 1088, 0, 0, 0, 0, 215, 1088, 0, 0, 0, 0, 240, 1068, 0, 0, 0, 0, 240, 985)
+}
+point_count = 4
+
+[sub_resource type="Curve2D" id="Curve2D_laddergreentoyellow"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, -20, 1175, 0, 0, 0, 0, -20, 1090, 0, 0, 0, 0, -45, 1060)
+}
+point_count = 3
+
+[sub_resource type="Curve2D" id="Curve2D_netgreencentre"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 50, 1452, 0, 0, 0, 0, -10, 1452, 0, 0, 0, 0, -28, 1436, 0, 0, 0, 0, -34, 1400, 0, 0, 0, 0, -52, 1378)
+}
+point_count = 5
+
+[sub_resource type="Curve2D" id="Curve2D_netgreenright"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 60, 1452, 0, 0, 0, 0, 230, 1452, 0, 0, 0, 0, 254, 1428, 0, 0, 0, 0, 254, 1340)
+}
+point_count = 4
+
+[sub_resource type="Curve2D" id="Curve2D_ladderbluetogreen"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, -294, 1640, 0, 0, 0, 0, -294, 1440, 0, 0, 0, 0, -285, 1415)
+}
+point_count = 3
+
+[sub_resource type="Curve2D" id="Curve2D_netblueleft"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, -250, 1808, 0, 0, 0, 0, -160, 1808, 0, 0, 0, 0, -140, 1790, 0, 0, 0, 0, -150, 1740)
+}
+point_count = 4
+
+[sub_resource type="Curve2D" id="Curve2D_netbluecentre"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 10, 1810, 0, 0, 0, 0, -70, 1810, 0, 0, 0, 0, -90, 1792, 0, 0, 0, 0, -100, 1740)
+}
+point_count = 4
+
+[sub_resource type="Curve2D" id="Curve2D_ladderindigotoblue"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 205, 2005, 0, 0, 0, 0, 75, 1785)
+}
+point_count = 2
+
+[sub_resource type="Curve2D" id="Curve2D_netindigocentre"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 30, 2170, 0, 0, 0, 0, -50, 2170, 0, 0, 0, 0, -70, 2150, 0, 0, 0, 0, -70, 2080)
+}
+point_count = 4
+
+[sub_resource type="Curve2D" id="Curve2D_netindigoright"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 225, 2170, 0, 0, 0, 0, 170, 2170, 0, 0, 0, 0, 150, 2150, 0, 0, 0, 0, 150, 2080)
+}
+point_count = 4
+
+[sub_resource type="Curve2D" id="Curve2D_ladderviolettoindigo"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, -294, 2390, 0, 0, 0, 0, -294, 2090)
+}
+point_count = 2
+
+[sub_resource type="Curve2D" id="Curve2D_expressviolettoblue"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 254, 2360, 0, 0, 0, 0, 254, 1830, 0, 0, 0, 0, 244, 1795)
+}
+point_count = 3
+
+[sub_resource type="Curve2D" id="Curve2D_netvioletleft"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, -130, 2494, 0, 0, 0, 0, -200, 2494, 0, 0, 0, 0, -222, 2476, 0, 0, 0, 0, -240, 2440)
+}
+point_count = 4
+
+[sub_resource type="Curve2D" id="Curve2D_netvioletcentre"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, -60, 2494, 0, 0, 0, 0, 10, 2494, 0, 0, 0, 0, 28, 2476, 0, 0, 0, 0, 30, 2440)
+}
+point_count = 4
+
+[sub_resource type="Curve2D" id="Curve2D_netvioletright"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 90, 2494, 0, 0, 0, 0, 160, 2494, 0, 0, 0, 0, 182, 2476, 0, 0, 0, 0, 200, 2440)
+}
+point_count = 4
 
 [node name="RainbowBonusLevel" type="Node2D" unique_id=1780710026 groups=["level"]]
 script = ExtResource("1_level")
@@ -94,124 +188,1158 @@ visible = false
 [node name="AlienTechSelectionScreen" parent="." unique_id=204285887 instance=ExtResource("9_select")]
 visible = false
 
-[node name="Red Bumpers" type="Node" parent="." unique_id=1015417943]
+[node name="Red Bumpers" type="Node" parent="." unique_id=491570532]
 
-[node name="CircularBumper" parent="Red Bumpers" unique_id=2098876600 instance=ExtResource("10_ys2d3")]
-position = Vector2(-87, 162)
+[node name="CircularBumper" parent="Red Bumpers" unique_id=1753004167 instance=ExtResource("10_ys2d3")]
+position = Vector2(-100, 120)
 
-[node name="CircularBumper5" parent="Red Bumpers" unique_id=2110325118 instance=ExtResource("10_ys2d3")]
-position = Vector2(-162, 216)
+[node name="CircularBumper2" parent="Red Bumpers" unique_id=1775521360 instance=ExtResource("10_ys2d3")]
+position = Vector2(-20, 120)
 
-[node name="CircularBumper6" parent="Red Bumpers" unique_id=492635087 instance=ExtResource("10_ys2d3")]
-position = Vector2(-234, 167)
+[node name="CircularBumper3" parent="Red Bumpers" unique_id=762656104 instance=ExtResource("10_ys2d3")]
+position = Vector2(-60, 160)
+size_preset = 1
+radius = 16.0
 
-[node name="CircularBumper7" parent="Red Bumpers" unique_id=157330980 instance=ExtResource("10_ys2d3")]
-position = Vector2(-288, 218)
+[node name="CircularBumper4" parent="Red Bumpers" unique_id=164789621 instance=ExtResource("10_ys2d3")]
+position = Vector2(-100, 200)
 
-[node name="CircularBumper2" parent="Red Bumpers" unique_id=596607851 instance=ExtResource("10_ys2d3")]
-position = Vector2(93, 156)
+[node name="CircularBumper5" parent="Red Bumpers" unique_id=626493165 instance=ExtResource("10_ys2d3")]
+position = Vector2(-20, 200)
 
-[node name="CircularBumper4" parent="Red Bumpers" unique_id=864078035 instance=ExtResource("10_ys2d3")]
-position = Vector2(167, 219)
+[node name="CircularBumper6" parent="Red Bumpers" unique_id=1308657835 instance=ExtResource("10_ys2d3")]
+position = Vector2(170, 140)
+variant = "2"
 
-[node name="CircularBumper8" parent="Red Bumpers" unique_id=1575957390 instance=ExtResource("10_ys2d3")]
-position = Vector2(233, 161)
+[node name="CircularBumper7" parent="Red Bumpers" unique_id=1337702528 instance=ExtResource("10_ys2d3")]
+position = Vector2(-255, 140)
+variant = "2"
 
-[node name="CircularBumper3" parent="Red Bumpers" unique_id=2027125479 instance=ExtResource("10_ys2d3")]
-position = Vector2(-1, 214)
+[node name="CircularBumper8" parent="Red Bumpers" unique_id=1512296218 instance=ExtResource("10_ys2d3")]
+position = Vector2(235, 250)
+variant = "3"
 
-[node name="Red Flippers" type="Node" parent="." unique_id=1505136908]
+[node name="Red Flippers" type="Node" parent="." unique_id=1747830366]
 
-[node name="FlipperLeftUp" parent="Red Flippers" unique_id=1447591536 instance=ExtResource("11_3mf0h")]
-position = Vector2(-60, 338)
+[node name="CloudFlipperLeftUp" parent="Red Flippers" unique_id=1212628396 instance=ExtResource("13_3ar3m")]
+position = Vector2(-130, 322)
 
-[node name="FlipperLeftUp2" parent="Red Flippers" unique_id=870789141 instance=ExtResource("11_3mf0h")]
-position = Vector2(-266, 336)
+[node name="CloudFlipperRightUp" parent="Red Flippers" unique_id=1602766008 instance=ExtResource("14_dpahy")]
+position = Vector2(-10, 322)
 
-[node name="FlipperLeftUp3" parent="Red Flippers" unique_id=1545855874 instance=ExtResource("11_3mf0h")]
-position = Vector2(122, 336)
+[node name="CloudFlipperRightUp2" parent="Red Flippers" unique_id=218701772 instance=ExtResource("14_dpahy")]
+position = Vector2(150, 318)
 
-[node name="FlipperRightUp" parent="Red Flippers" unique_id=1992100196 instance=ExtResource("12_cb12r")]
-position = Vector2(33, 337)
+[node name="CloudFlipperLeftUp2" parent="Red Flippers" unique_id=602425954 instance=ExtResource("13_3ar3m")]
+position = Vector2(-262, 318)
 
-[node name="FlipperRightUp2" parent="Red Flippers" unique_id=780975871 instance=ExtResource("12_cb12r")]
-position = Vector2(227, 337)
+[node name="CloudFlipperLeftUp3" parent="Red Flippers" unique_id=1858281560 instance=ExtResource("13_3ar3m")]
+position = Vector2(-215, 215)
 
-[node name="FlipperRightUp3" parent="Red Flippers" unique_id=446494921 instance=ExtResource("12_cb12r")]
-position = Vector2(-171, 335)
+[node name="CloudFlipperRightUp3" parent="Red Flippers" unique_id=1751905168 instance=ExtResource("14_dpahy")]
+position = Vector2(90, 215)
 
-[node name="CloudFlipperLeftUp" parent="Red Flippers" unique_id=1849248407 instance=ExtResource("13_3ar3m")]
-position = Vector2(-172, 165)
+[node name="Red Walls" type="Node" parent="." unique_id=276640542]
 
-[node name="CloudFlipperLeftUp2" parent="Red Flippers" unique_id=781371752 instance=ExtResource("13_3ar3m")]
-position = Vector2(-45, 168)
-
-[node name="CloudFlipperRightUp" parent="Red Flippers" unique_id=2058772081 instance=ExtResource("14_dpahy")]
-position = Vector2(173, 166)
-
-[node name="CloudFlipperRightUp2" parent="Red Flippers" unique_id=1475292147 instance=ExtResource("14_dpahy")]
-position = Vector2(48, 166)
-
-[node name="Red Walls" type="Node" parent="." unique_id=829254583]
-
-[node name="DeadWall" parent="Red Walls" unique_id=797132162 instance=ExtResource("13_3mf0h")]
-position = Vector2(-282, 319)
+[node name="DeadWall" parent="Red Walls" unique_id=1076131489 instance=ExtResource("13_3mf0h")]
+position = Vector2(-146, 305)
 angle_preset = 2
 length_units = 1
 
-[node name="DeadWall2" parent="Red Walls" unique_id=800911113 instance=ExtResource("13_3mf0h")]
-position = Vector2(-79, 321)
-angle_preset = 2
-length_units = 1
+[node name="CollisionShape2D" parent="Red Walls/DeadWall" index="0" unique_id=1644951480]
+one_way_collision = true
 
-[node name="DeadWall3" parent="Red Walls" unique_id=20616199 instance=ExtResource("13_3mf0h")]
-position = Vector2(106, 319)
-angle_preset = 2
-length_units = 1
-
-[node name="DeadWall4" parent="Red Walls" unique_id=1138777206 instance=ExtResource("13_3mf0h")]
-position = Vector2(243, 319)
+[node name="DeadWall2" parent="Red Walls" unique_id=1194673925 instance=ExtResource("13_3mf0h")]
+position = Vector2(6, 305)
 angle_preset = 2
 length_units = 1
 mirrored = true
 
-[node name="DeadWall5" parent="Red Walls" unique_id=1547612696 instance=ExtResource("13_3mf0h")]
-position = Vector2(50, 318)
+[node name="CollisionShape2D" parent="Red Walls/DeadWall2" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall3" parent="Red Walls" unique_id=1769224842 instance=ExtResource("13_3mf0h")]
+position = Vector2(178, 289)
 angle_preset = 2
-length_units = 1
 mirrored = true
 
-[node name="DeadWall6" parent="Red Walls" unique_id=269378446 instance=ExtResource("13_3mf0h")]
-position = Vector2(-154, 317)
+[node name="CollisionShape2D" parent="Red Walls/DeadWall3" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall4" parent="Red Walls" unique_id=1615388542 instance=ExtResource("13_3mf0h")]
+position = Vector2(-290, 289)
+angle_preset = 2
+
+[node name="CollisionShape2D" parent="Red Walls/DeadWall4" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall5" parent="Red Walls" unique_id=219636777 instance=ExtResource("13_3mf0h")]
+position = Vector2(-231, 198)
 angle_preset = 2
 length_units = 1
+
+[node name="CollisionShape2D" parent="Red Walls/DeadWall5" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall6" parent="Red Walls" unique_id=1765198226 instance=ExtResource("13_3mf0h")]
+position = Vector2(118, 186)
+angle_preset = 2
 mirrored = true
 
-[node name="Orange Bumpers" type="Node" parent="." unique_id=1639304806]
+[node name="CollisionShape2D" parent="Red Walls/DeadWall6" index="0" unique_id=1644951480]
+one_way_collision = true
 
-[node name="CircularBumper9" parent="Orange Bumpers" unique_id=305297461 instance=ExtResource("10_ys2d3")]
-position = Vector2(-122, 387)
+[node name="Red Currents" type="Node" parent="." unique_id=222604568]
 
-[node name="CircularBumper11" parent="Orange Bumpers" unique_id=1667074824 instance=ExtResource("10_ys2d3")]
-position = Vector2(-220, 386)
+[node name="Orange Bumpers" type="Node" parent="." unique_id=1020219966]
 
-[node name="CircularBumper12" parent="Orange Bumpers" unique_id=2069531449 instance=ExtResource("10_ys2d3")]
-position = Vector2(175, 387)
+[node name="CircularBumper" parent="Orange Bumpers" unique_id=1899661722 instance=ExtResource("10_ys2d3")]
+position = Vector2(-280, 490)
+variant = "2"
 
-[node name="CircularBumper10" parent="Orange Bumpers" unique_id=812352527 instance=ExtResource("10_ys2d3")]
-position = Vector2(74, 387)
+[node name="CircularBumper2" parent="Orange Bumpers" unique_id=2136046936 instance=ExtResource("10_ys2d3")]
+position = Vector2(-225, 490)
+variant = "2"
 
-[node name="Red Currents" type="Node" parent="." unique_id=1990957627]
+[node name="CircularBumper3" parent="Orange Bumpers" unique_id=13305042 instance=ExtResource("10_ys2d3")]
+position = Vector2(-252, 535)
+variant = "2"
 
-[node name="OceanCurrent" parent="Red Currents" unique_id=1683655070 instance=ExtResource("5_current")]
+[node name="CircularBumper4" parent="Orange Bumpers" unique_id=1358287491 instance=ExtResource("10_ys2d3")]
+position = Vector2(150, 530)
+
+[node name="CircularBumper5" parent="Orange Bumpers" unique_id=410000841 instance=ExtResource("10_ys2d3")]
+position = Vector2(110, 575)
+
+[node name="CircularBumper6" parent="Orange Bumpers" unique_id=1965310128 instance=ExtResource("10_ys2d3")]
+position = Vector2(190, 575)
+
+[node name="CircularBumper7" parent="Orange Bumpers" unique_id=1552713262 instance=ExtResource("10_ys2d3")]
+position = Vector2(150, 620)
+variant = "3"
+
+[node name="Orange Flippers" type="Node" parent="." unique_id=258207442]
+
+[node name="CloudFlipperLeftUp" parent="Orange Flippers" unique_id=2071751790 instance=ExtResource("13_3ar3m")]
+position = Vector2(-270, 682)
+
+[node name="CloudFlipperLeftUp2" parent="Orange Flippers" unique_id=2140692795 instance=ExtResource("13_3ar3m")]
+position = Vector2(-185, 616)
+
+[node name="CloudFlipperLeftUp3" parent="Orange Flippers" unique_id=1164942854 instance=ExtResource("13_3ar3m")]
+position = Vector2(-100, 550)
+
+[node name="CloudFlipperLeftUp4" parent="Orange Flippers" unique_id=357768724 instance=ExtResource("13_3ar3m")]
+position = Vector2(-15, 484)
+
+[node name="CloudFlipperLeftUp5" parent="Orange Flippers" unique_id=379087221 instance=ExtResource("13_3ar3m")]
+position = Vector2(70, 422)
+
+[node name="CloudFlipperRightUp" parent="Orange Flippers" unique_id=237080218 instance=ExtResource("14_dpahy")]
+position = Vector2(-200, 440)
+
+[node name="CloudFlipperRightUp2" parent="Orange Flippers" unique_id=678721083 instance=ExtResource("14_dpahy")]
+position = Vector2(-60, 685)
+
+[node name="CloudFlipperLeftUp6" parent="Orange Flippers" unique_id=1493611892 instance=ExtResource("13_3ar3m")]
+position = Vector2(90, 685)
+
+[node name="CloudFlipperRightUp3" parent="Orange Flippers" unique_id=424213450 instance=ExtResource("14_dpahy")]
+position = Vector2(200, 685)
+
+[node name="Orange Walls" type="Node" parent="." unique_id=2115548809]
+
+[node name="DeadWall" parent="Orange Walls" unique_id=779635164 instance=ExtResource("13_3mf0h")]
+position = Vector2(-298, 653)
+angle_preset = 2
+
+[node name="CollisionShape2D" parent="Orange Walls/DeadWall" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall2" parent="Orange Walls" unique_id=1290002940 instance=ExtResource("13_3mf0h")]
+position = Vector2(-213, 587)
+angle_preset = 2
+
+[node name="CollisionShape2D" parent="Orange Walls/DeadWall2" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall3" parent="Orange Walls" unique_id=1039093928 instance=ExtResource("13_3mf0h")]
+position = Vector2(-128, 521)
+angle_preset = 2
+
+[node name="CollisionShape2D" parent="Orange Walls/DeadWall3" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall4" parent="Orange Walls" unique_id=1917094613 instance=ExtResource("13_3mf0h")]
+position = Vector2(-43, 455)
+angle_preset = 2
+
+[node name="CollisionShape2D" parent="Orange Walls/DeadWall4" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall5" parent="Orange Walls" unique_id=504774362 instance=ExtResource("13_3mf0h")]
+position = Vector2(42, 393)
+angle_preset = 2
+
+[node name="CollisionShape2D" parent="Orange Walls/DeadWall5" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall6" parent="Orange Walls" unique_id=6713828 instance=ExtResource("13_3mf0h")]
+position = Vector2(-172, 411)
+angle_preset = 2
+mirrored = true
+
+[node name="CollisionShape2D" parent="Orange Walls/DeadWall6" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall7" parent="Orange Walls" unique_id=1212136035 instance=ExtResource("13_3mf0h")]
+position = Vector2(-32, 656)
+angle_preset = 2
+mirrored = true
+
+[node name="CollisionShape2D" parent="Orange Walls/DeadWall7" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall8" parent="Orange Walls" unique_id=726124074 instance=ExtResource("13_3mf0h")]
+position = Vector2(62, 656)
+angle_preset = 2
+
+[node name="CollisionShape2D" parent="Orange Walls/DeadWall8" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall9" parent="Orange Walls" unique_id=570541430 instance=ExtResource("13_3mf0h")]
+position = Vector2(228, 656)
+angle_preset = 2
+mirrored = true
+
+[node name="CollisionShape2D" parent="Orange Walls/DeadWall9" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="Orange Currents" type="Node" parent="." unique_id=1591423725]
+
+[node name="Net Orange" parent="Orange Currents" unique_id=1172688926 instance=ExtResource("5_current")]
 propulsion_force = 2000.0
 centering_force = 1000.0
 lateral_damping = 1.0
+exit_impulse = 200.0
+particles_per_emitter = 6
 
-[node name="Path2D" parent="Red Currents/OceanCurrent" index="0" unique_id=1461068862]
-curve = SubResource("Curve2D_3ar3m")
+[node name="Path2D" parent="Orange Currents/Net Orange" index="0" unique_id=1461068862]
+curve = SubResource("Curve2D_netorange")
 
-[node name="Visuals" parent="Red Currents/OceanCurrent" index="1" unique_id=2005124627]
-position = Vector2(-291, 384)
+[node name="Yellow Bumpers" type="Node" parent="." unique_id=1415399896]
 
-[editable path="Red Currents/OceanCurrent"]
+[node name="CircularBumper" parent="Yellow Bumpers" unique_id=102634708 instance=ExtResource("10_ys2d3")]
+position = Vector2(-20, 900)
+size_preset = 1
+radius = 16.0
+
+[node name="CircularBumper2" parent="Yellow Bumpers" unique_id=459402659 instance=ExtResource("10_ys2d3")]
+position = Vector2(45, 938)
+variant = "3"
+
+[node name="CircularBumper3" parent="Yellow Bumpers" unique_id=1175081870 instance=ExtResource("10_ys2d3")]
+position = Vector2(-20, 975)
+variant = "3"
+
+[node name="CircularBumper4" parent="Yellow Bumpers" unique_id=125661217 instance=ExtResource("10_ys2d3")]
+position = Vector2(-85, 938)
+variant = "3"
+
+[node name="CircularBumper5" parent="Yellow Bumpers" unique_id=104970592 instance=ExtResource("10_ys2d3")]
+position = Vector2(-85, 862)
+variant = "3"
+
+[node name="CircularBumper6" parent="Yellow Bumpers" unique_id=1564790569 instance=ExtResource("10_ys2d3")]
+position = Vector2(-20, 825)
+variant = "3"
+
+[node name="CircularBumper7" parent="Yellow Bumpers" unique_id=188122174 instance=ExtResource("10_ys2d3")]
+position = Vector2(45, 862)
+variant = "3"
+
+[node name="Yellow Flippers" type="Node" parent="." unique_id=86747766]
+
+[node name="CloudFlipperLeftUp" parent="Yellow Flippers" unique_id=37181053 instance=ExtResource("13_3ar3m")]
+position = Vector2(-140, 800)
+
+[node name="CloudFlipperRightUp" parent="Yellow Flippers" unique_id=2122949752 instance=ExtResource("14_dpahy")]
+position = Vector2(160, 800)
+
+[node name="CloudFlipperLeftUp2" parent="Yellow Flippers" unique_id=79769638 instance=ExtResource("13_3ar3m")]
+position = Vector2(-170, 925)
+
+[node name="CloudFlipperRightUp2" parent="Yellow Flippers" unique_id=1098468978 instance=ExtResource("14_dpahy")]
+position = Vector2(130, 925)
+
+[node name="CloudFlipperRightUp3" parent="Yellow Flippers" unique_id=1991672218 instance=ExtResource("14_dpahy")]
+position = Vector2(250, 935)
+
+[node name="CloudFlipperLeftUp3" parent="Yellow Flippers" unique_id=2051949804 instance=ExtResource("13_3ar3m")]
+position = Vector2(-190, 1042)
+
+[node name="CloudFlipperRightUp4" parent="Yellow Flippers" unique_id=57603964 instance=ExtResource("14_dpahy")]
+position = Vector2(-90, 1042)
+
+[node name="CloudFlipperLeftUp4" parent="Yellow Flippers" unique_id=977059160 instance=ExtResource("13_3ar3m")]
+position = Vector2(50, 1042)
+
+[node name="CloudFlipperRightUp5" parent="Yellow Flippers" unique_id=247262229 instance=ExtResource("14_dpahy")]
+position = Vector2(150, 1042)
+
+[node name="Yellow Walls" type="Node" parent="." unique_id=1373590013]
+
+[node name="DeadWall" parent="Yellow Walls" unique_id=1837583259 instance=ExtResource("13_3mf0h")]
+position = Vector2(-168, 771)
+angle_preset = 2
+
+[node name="CollisionShape2D" parent="Yellow Walls/DeadWall" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall2" parent="Yellow Walls" unique_id=621285575 instance=ExtResource("13_3mf0h")]
+position = Vector2(188, 771)
+angle_preset = 2
+mirrored = true
+
+[node name="CollisionShape2D" parent="Yellow Walls/DeadWall2" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall3" parent="Yellow Walls" unique_id=104496612 instance=ExtResource("13_3mf0h")]
+position = Vector2(-186, 908)
+angle_preset = 2
+length_units = 1
+
+[node name="CollisionShape2D" parent="Yellow Walls/DeadWall3" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall4" parent="Yellow Walls" unique_id=1924488319 instance=ExtResource("13_3mf0h")]
+position = Vector2(146, 908)
+angle_preset = 2
+length_units = 1
+mirrored = true
+
+[node name="CollisionShape2D" parent="Yellow Walls/DeadWall4" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall5" parent="Yellow Walls" unique_id=694970887 instance=ExtResource("13_3mf0h")]
+position = Vector2(-218, 1013)
+angle_preset = 2
+
+[node name="CollisionShape2D" parent="Yellow Walls/DeadWall5" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall6" parent="Yellow Walls" unique_id=1350456030 instance=ExtResource("13_3mf0h")]
+position = Vector2(-62, 1013)
+angle_preset = 2
+mirrored = true
+
+[node name="CollisionShape2D" parent="Yellow Walls/DeadWall6" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall7" parent="Yellow Walls" unique_id=114780425 instance=ExtResource("13_3mf0h")]
+position = Vector2(22, 1013)
+angle_preset = 2
+
+[node name="CollisionShape2D" parent="Yellow Walls/DeadWall7" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall8" parent="Yellow Walls" unique_id=109378985 instance=ExtResource("13_3mf0h")]
+position = Vector2(178, 1013)
+angle_preset = 2
+mirrored = true
+
+[node name="CollisionShape2D" parent="Yellow Walls/DeadWall8" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="Yellow Currents" type="Node" parent="." unique_id=1587284092]
+
+[node name="Ladder Yellow to Orange" parent="Yellow Currents" unique_id=990161268 instance=ExtResource("5_current")]
+propulsion_force = 2000.0
+centering_force = 1000.0
+lateral_damping = 1.0
+highlight_color = Color(1, 0.85, 0.2, 0.95)
+
+[node name="Path2D" parent="Yellow Currents/Ladder Yellow to Orange" index="0" unique_id=1461068862]
+curve = SubResource("Curve2D_ladderyellowtoorange")
+
+[node name="Net Yellow" parent="Yellow Currents" unique_id=414217019 instance=ExtResource("5_current")]
+propulsion_force = 2000.0
+centering_force = 1000.0
+lateral_damping = 1.0
+exit_impulse = 200.0
+particles_per_emitter = 6
+
+[node name="Path2D" parent="Yellow Currents/Net Yellow" index="0" unique_id=1461068862]
+curve = SubResource("Curve2D_netyellow")
+
+[node name="Green Bumpers" type="Node" parent="." unique_id=1090852526]
+
+[node name="CircularBumper" parent="Green Bumpers" unique_id=1994016127 instance=ExtResource("10_ys2d3")]
+position = Vector2(-75, 1220)
+
+[node name="CircularBumper2" parent="Green Bumpers" unique_id=818559533 instance=ExtResource("10_ys2d3")]
+position = Vector2(-20, 1220)
+variant = "2"
+
+[node name="CircularBumper3" parent="Green Bumpers" unique_id=1081579005 instance=ExtResource("10_ys2d3")]
+position = Vector2(35, 1220)
+
+[node name="CircularBumper4" parent="Green Bumpers" unique_id=1576001646 instance=ExtResource("10_ys2d3")]
+position = Vector2(-47, 1268)
+variant = "2"
+
+[node name="CircularBumper5" parent="Green Bumpers" unique_id=1962655509 instance=ExtResource("10_ys2d3")]
+position = Vector2(8, 1268)
+variant = "2"
+
+[node name="Green Flippers" type="Node" parent="." unique_id=849367204]
+
+[node name="CloudFlipperLeftUp" parent="Green Flippers" unique_id=283515946 instance=ExtResource("13_3ar3m")]
+position = Vector2(-62, 1402)
+
+[node name="CloudFlipperRightUp" parent="Green Flippers" unique_id=479141013 instance=ExtResource("14_dpahy")]
+position = Vector2(22, 1402)
+
+[node name="CloudFlipperLeftUp2" parent="Green Flippers" unique_id=1156051418 instance=ExtResource("13_3ar3m")]
+position = Vector2(-180, 1160)
+
+[node name="CloudFlipperRightUp2" parent="Green Flippers" unique_id=2081213877 instance=ExtResource("14_dpahy")]
+position = Vector2(140, 1160)
+
+[node name="CloudFlipperLeftUp3" parent="Green Flippers" unique_id=1179168149 instance=ExtResource("13_3ar3m")]
+position = Vector2(-300, 1285)
+
+[node name="CloudFlipperRightUp3" parent="Green Flippers" unique_id=838814263 instance=ExtResource("14_dpahy")]
+position = Vector2(260, 1285)
+
+[node name="CloudFlipperLeftUp4" parent="Green Flippers" unique_id=1351583663 instance=ExtResource("13_3ar3m")]
+position = Vector2(-262, 1405)
+
+[node name="CloudFlipperRightUp4" parent="Green Flippers" unique_id=2052684092 instance=ExtResource("14_dpahy")]
+position = Vector2(-165, 1405)
+
+[node name="CloudFlipperLeftUp5" parent="Green Flippers" unique_id=296735785 instance=ExtResource("13_3ar3m")]
+position = Vector2(125, 1405)
+
+[node name="CloudFlipperRightUp5" parent="Green Flippers" unique_id=2137708789 instance=ExtResource("14_dpahy")]
+position = Vector2(222, 1405)
+
+[node name="Green Walls" type="Node" parent="." unique_id=191548190]
+
+[node name="DeadWall" parent="Green Walls" unique_id=1082637176 instance=ExtResource("13_3mf0h")]
+position = Vector2(-90, 1373)
+angle_preset = 2
+
+[node name="CollisionShape2D" parent="Green Walls/DeadWall" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall2" parent="Green Walls" unique_id=1192805593 instance=ExtResource("13_3mf0h")]
+position = Vector2(-141, 1336)
+angle_preset = 3
+
+[node name="CollisionShape2D" parent="Green Walls/DeadWall2" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall3" parent="Green Walls" unique_id=1359126841 instance=ExtResource("13_3mf0h")]
+position = Vector2(-198, 1308)
+angle_preset = 3
+
+[node name="CollisionShape2D" parent="Green Walls/DeadWall3" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall4" parent="Green Walls" unique_id=799736342 instance=ExtResource("13_3mf0h")]
+position = Vector2(50, 1373)
+angle_preset = 2
+mirrored = true
+
+[node name="CollisionShape2D" parent="Green Walls/DeadWall4" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall5" parent="Green Walls" unique_id=69278059 instance=ExtResource("13_3mf0h")]
+position = Vector2(101, 1336)
+angle_preset = 3
+mirrored = true
+
+[node name="CollisionShape2D" parent="Green Walls/DeadWall5" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall6" parent="Green Walls" unique_id=2080244404 instance=ExtResource("13_3mf0h")]
+position = Vector2(158, 1308)
+angle_preset = 3
+mirrored = true
+
+[node name="CollisionShape2D" parent="Green Walls/DeadWall6" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall7" parent="Green Walls" unique_id=993871220 instance=ExtResource("13_3mf0h")]
+position = Vector2(-208, 1131)
+angle_preset = 2
+
+[node name="CollisionShape2D" parent="Green Walls/DeadWall7" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall8" parent="Green Walls" unique_id=602631789 instance=ExtResource("13_3mf0h")]
+position = Vector2(168, 1131)
+angle_preset = 2
+mirrored = true
+
+[node name="CollisionShape2D" parent="Green Walls/DeadWall8" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall9" parent="Green Walls" unique_id=747037680 instance=ExtResource("13_3mf0h")]
+position = Vector2(-278, 1388)
+angle_preset = 2
+length_units = 1
+
+[node name="CollisionShape2D" parent="Green Walls/DeadWall9" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall10" parent="Green Walls" unique_id=946712284 instance=ExtResource("13_3mf0h")]
+position = Vector2(-149, 1388)
+angle_preset = 2
+length_units = 1
+mirrored = true
+
+[node name="CollisionShape2D" parent="Green Walls/DeadWall10" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall11" parent="Green Walls" unique_id=1307376097 instance=ExtResource("13_3mf0h")]
+position = Vector2(109, 1388)
+angle_preset = 2
+length_units = 1
+
+[node name="CollisionShape2D" parent="Green Walls/DeadWall11" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall12" parent="Green Walls" unique_id=2069552187 instance=ExtResource("13_3mf0h")]
+position = Vector2(238, 1388)
+angle_preset = 2
+length_units = 1
+mirrored = true
+
+[node name="CollisionShape2D" parent="Green Walls/DeadWall12" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="Green Currents" type="Node" parent="." unique_id=131356776]
+
+[node name="Ladder Green to Yellow" parent="Green Currents" unique_id=1681633431 instance=ExtResource("5_current")]
+propulsion_force = 2000.0
+centering_force = 1000.0
+lateral_damping = 1.0
+highlight_color = Color(1, 0.85, 0.2, 0.95)
+
+[node name="Path2D" parent="Green Currents/Ladder Green to Yellow" index="0" unique_id=1461068862]
+curve = SubResource("Curve2D_laddergreentoyellow")
+
+[node name="Net Green Centre" parent="Green Currents" unique_id=875292318 instance=ExtResource("5_current")]
+propulsion_force = 2000.0
+centering_force = 1000.0
+lateral_damping = 1.0
+exit_impulse = 200.0
+particles_per_emitter = 6
+
+[node name="Path2D" parent="Green Currents/Net Green Centre" index="0" unique_id=1461068862]
+curve = SubResource("Curve2D_netgreencentre")
+
+[node name="Net Green Right" parent="Green Currents" unique_id=741608446 instance=ExtResource("5_current")]
+propulsion_force = 2000.0
+centering_force = 1000.0
+lateral_damping = 1.0
+exit_impulse = 200.0
+particles_per_emitter = 6
+
+[node name="Path2D" parent="Green Currents/Net Green Right" index="0" unique_id=1461068862]
+curve = SubResource("Curve2D_netgreenright")
+
+[node name="Blue Bumpers" type="Node" parent="." unique_id=748715491]
+
+[node name="CircularBumper" parent="Blue Bumpers" unique_id=1578761627 instance=ExtResource("10_ys2d3")]
+position = Vector2(-110, 1560)
+
+[node name="CircularBumper2" parent="Blue Bumpers" unique_id=1931994978 instance=ExtResource("10_ys2d3")]
+position = Vector2(-50, 1560)
+
+[node name="CircularBumper3" parent="Blue Bumpers" unique_id=1879246153 instance=ExtResource("10_ys2d3")]
+position = Vector2(10, 1560)
+
+[node name="CircularBumper4" parent="Blue Bumpers" unique_id=500190927 instance=ExtResource("10_ys2d3")]
+position = Vector2(70, 1560)
+
+[node name="CircularBumper5" parent="Blue Bumpers" unique_id=1003059753 instance=ExtResource("10_ys2d3")]
+position = Vector2(-80, 1605)
+variant = "3"
+
+[node name="CircularBumper6" parent="Blue Bumpers" unique_id=1019580498 instance=ExtResource("10_ys2d3")]
+position = Vector2(-20, 1605)
+variant = "3"
+
+[node name="CircularBumper7" parent="Blue Bumpers" unique_id=421104779 instance=ExtResource("10_ys2d3")]
+position = Vector2(40, 1605)
+variant = "3"
+
+[node name="CircularBumper8" parent="Blue Bumpers" unique_id=637493314 instance=ExtResource("10_ys2d3")]
+position = Vector2(-50, 1650)
+variant = "2"
+
+[node name="CircularBumper9" parent="Blue Bumpers" unique_id=1914134159 instance=ExtResource("10_ys2d3")]
+position = Vector2(10, 1650)
+variant = "2"
+
+[node name="Blue Flippers" type="Node" parent="." unique_id=861481258]
+
+[node name="CloudFlipperLeftUp" parent="Blue Flippers" unique_id=893908776 instance=ExtResource("13_3ar3m")]
+position = Vector2(-175, 1520)
+
+[node name="CloudFlipperRightUp" parent="Blue Flippers" unique_id=162003545 instance=ExtResource("14_dpahy")]
+position = Vector2(135, 1520)
+
+[node name="CloudFlipperLeftUp2" parent="Blue Flippers" unique_id=1194182830 instance=ExtResource("13_3ar3m")]
+position = Vector2(-230, 1645)
+
+[node name="CloudFlipperRightUp2" parent="Blue Flippers" unique_id=915919631 instance=ExtResource("14_dpahy")]
+position = Vector2(215, 1645)
+
+[node name="CloudFlipperLeftUp3" parent="Blue Flippers" unique_id=1742362623 instance=ExtResource("13_3ar3m")]
+position = Vector2(-255, 1762)
+
+[node name="CloudFlipperRightUp3" parent="Blue Flippers" unique_id=103798419 instance=ExtResource("14_dpahy")]
+position = Vector2(-165, 1762)
+
+[node name="CloudFlipperLeftUp4" parent="Blue Flippers" unique_id=4720040 instance=ExtResource("13_3ar3m")]
+position = Vector2(-65, 1762)
+
+[node name="CloudFlipperRightUp4" parent="Blue Flippers" unique_id=1408052917 instance=ExtResource("14_dpahy")]
+position = Vector2(25, 1762)
+
+[node name="CloudFlipperLeftUp5" parent="Blue Flippers" unique_id=290370688 instance=ExtResource("13_3ar3m")]
+position = Vector2(115, 1762)
+
+[node name="CloudFlipperRightUp5" parent="Blue Flippers" unique_id=720216258 instance=ExtResource("14_dpahy")]
+position = Vector2(205, 1762)
+
+[node name="Blue Walls" type="Node" parent="." unique_id=1159278280]
+
+[node name="DeadWall" parent="Blue Walls" unique_id=199810489 instance=ExtResource("13_3mf0h")]
+position = Vector2(-203, 1491)
+angle_preset = 2
+
+[node name="CollisionShape2D" parent="Blue Walls/DeadWall" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall2" parent="Blue Walls" unique_id=1057188526 instance=ExtResource("13_3mf0h")]
+position = Vector2(163, 1491)
+angle_preset = 2
+mirrored = true
+
+[node name="CollisionShape2D" parent="Blue Walls/DeadWall2" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall3" parent="Blue Walls" unique_id=103367922 instance=ExtResource("13_3mf0h")]
+position = Vector2(-246, 1628)
+angle_preset = 2
+length_units = 1
+
+[node name="CollisionShape2D" parent="Blue Walls/DeadWall3" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall4" parent="Blue Walls" unique_id=1325929445 instance=ExtResource("13_3mf0h")]
+position = Vector2(231, 1628)
+angle_preset = 2
+length_units = 1
+mirrored = true
+
+[node name="CollisionShape2D" parent="Blue Walls/DeadWall4" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall5" parent="Blue Walls" unique_id=232387610 instance=ExtResource("13_3mf0h")]
+position = Vector2(-271, 1745)
+angle_preset = 2
+length_units = 1
+
+[node name="CollisionShape2D" parent="Blue Walls/DeadWall5" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall6" parent="Blue Walls" unique_id=407077683 instance=ExtResource("13_3mf0h")]
+position = Vector2(-149, 1745)
+angle_preset = 2
+length_units = 1
+mirrored = true
+
+[node name="CollisionShape2D" parent="Blue Walls/DeadWall6" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall7" parent="Blue Walls" unique_id=579722099 instance=ExtResource("13_3mf0h")]
+position = Vector2(-93, 1733)
+angle_preset = 2
+
+[node name="CollisionShape2D" parent="Blue Walls/DeadWall7" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall8" parent="Blue Walls" unique_id=1744916334 instance=ExtResource("13_3mf0h")]
+position = Vector2(53, 1733)
+angle_preset = 2
+mirrored = true
+
+[node name="CollisionShape2D" parent="Blue Walls/DeadWall8" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall9" parent="Blue Walls" unique_id=800603856 instance=ExtResource("13_3mf0h")]
+position = Vector2(99, 1745)
+angle_preset = 2
+length_units = 1
+
+[node name="CollisionShape2D" parent="Blue Walls/DeadWall9" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall10" parent="Blue Walls" unique_id=13222449 instance=ExtResource("13_3mf0h")]
+position = Vector2(221, 1745)
+angle_preset = 2
+length_units = 1
+mirrored = true
+
+[node name="CollisionShape2D" parent="Blue Walls/DeadWall10" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="Blue Currents" type="Node" parent="." unique_id=2057836821]
+
+[node name="Ladder Blue to Green" parent="Blue Currents" unique_id=2053959901 instance=ExtResource("5_current")]
+propulsion_force = 2000.0
+centering_force = 1000.0
+lateral_damping = 1.0
+highlight_color = Color(1, 0.85, 0.2, 0.95)
+
+[node name="Path2D" parent="Blue Currents/Ladder Blue to Green" index="0" unique_id=1461068862]
+curve = SubResource("Curve2D_ladderbluetogreen")
+
+[node name="Net Blue Left" parent="Blue Currents" unique_id=2126837172 instance=ExtResource("5_current")]
+propulsion_force = 2000.0
+centering_force = 1000.0
+lateral_damping = 1.0
+exit_impulse = 200.0
+particles_per_emitter = 6
+
+[node name="Path2D" parent="Blue Currents/Net Blue Left" index="0" unique_id=1461068862]
+curve = SubResource("Curve2D_netblueleft")
+
+[node name="Net Blue Centre" parent="Blue Currents" unique_id=1818776720 instance=ExtResource("5_current")]
+propulsion_force = 2000.0
+centering_force = 1000.0
+lateral_damping = 1.0
+exit_impulse = 200.0
+particles_per_emitter = 6
+
+[node name="Path2D" parent="Blue Currents/Net Blue Centre" index="0" unique_id=1461068862]
+curve = SubResource("Curve2D_netbluecentre")
+
+[node name="Indigo Bumpers" type="Node" parent="." unique_id=1091854323]
+
+[node name="CircularBumper" parent="Indigo Bumpers" unique_id=559699214 instance=ExtResource("10_ys2d3")]
+position = Vector2(-150, 1970)
+size_preset = 1
+radius = 16.0
+
+[node name="CircularBumper2" parent="Indigo Bumpers" unique_id=636957532 instance=ExtResource("10_ys2d3")]
+position = Vector2(-98, 1970)
+variant = "2"
+
+[node name="CircularBumper3" parent="Indigo Bumpers" unique_id=126470353 instance=ExtResource("10_ys2d3")]
+position = Vector2(-124, 2015)
+variant = "2"
+
+[node name="CircularBumper4" parent="Indigo Bumpers" unique_id=1789123539 instance=ExtResource("10_ys2d3")]
+position = Vector2(-176, 2015)
+variant = "2"
+
+[node name="CircularBumper5" parent="Indigo Bumpers" unique_id=313392916 instance=ExtResource("10_ys2d3")]
+position = Vector2(-202, 1970)
+variant = "2"
+
+[node name="CircularBumper6" parent="Indigo Bumpers" unique_id=253484180 instance=ExtResource("10_ys2d3")]
+position = Vector2(-176, 1925)
+variant = "2"
+
+[node name="CircularBumper7" parent="Indigo Bumpers" unique_id=133404439 instance=ExtResource("10_ys2d3")]
+position = Vector2(-124, 1925)
+variant = "2"
+
+[node name="Indigo Flippers" type="Node" parent="." unique_id=1568943979]
+
+[node name="CloudFlipperLeftUp" parent="Indigo Flippers" unique_id=1648274862 instance=ExtResource("13_3ar3m")]
+position = Vector2(-235, 1880)
+
+[node name="CloudFlipperRightUp" parent="Indigo Flippers" unique_id=294791855 instance=ExtResource("14_dpahy")]
+position = Vector2(200, 1880)
+
+[node name="CloudFlipperLeftUp2" parent="Indigo Flippers" unique_id=1661834062 instance=ExtResource("13_3ar3m")]
+position = Vector2(-300, 1990)
+
+[node name="CloudFlipperRightUp2" parent="Indigo Flippers" unique_id=1390489506 instance=ExtResource("14_dpahy")]
+position = Vector2(-30, 2000)
+
+[node name="CloudFlipperLeftUp3" parent="Indigo Flippers" unique_id=401773547 instance=ExtResource("13_3ar3m")]
+position = Vector2(90, 1990)
+
+[node name="CloudFlipperLeftUp4" parent="Indigo Flippers" unique_id=1727694545 instance=ExtResource("13_3ar3m")]
+position = Vector2(-40, 2125)
+
+[node name="CloudFlipperRightUp3" parent="Indigo Flippers" unique_id=1366205060 instance=ExtResource("14_dpahy")]
+position = Vector2(50, 2125)
+
+[node name="Indigo Walls" type="Node" parent="." unique_id=1090443058]
+
+[node name="DeadWall" parent="Indigo Walls" unique_id=703831802 instance=ExtResource("13_3mf0h")]
+position = Vector2(-263, 1851)
+angle_preset = 2
+
+[node name="CollisionShape2D" parent="Indigo Walls/DeadWall" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall2" parent="Indigo Walls" unique_id=1831293132 instance=ExtResource("13_3mf0h")]
+position = Vector2(216, 1863)
+angle_preset = 2
+length_units = 1
+mirrored = true
+
+[node name="CollisionShape2D" parent="Indigo Walls/DeadWall2" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall3" parent="Indigo Walls" unique_id=1719153867 instance=ExtResource("13_3mf0h")]
+position = Vector2(-14, 1983)
+angle_preset = 2
+length_units = 1
+mirrored = true
+
+[node name="CollisionShape2D" parent="Indigo Walls/DeadWall3" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall4" parent="Indigo Walls" unique_id=902132053 instance=ExtResource("13_3mf0h")]
+position = Vector2(74, 1973)
+angle_preset = 2
+length_units = 1
+
+[node name="CollisionShape2D" parent="Indigo Walls/DeadWall4" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall5" parent="Indigo Walls" unique_id=2079496835 instance=ExtResource("13_3mf0h")]
+position = Vector2(-74, 2105)
+angle_preset = 3
+
+[node name="CollisionShape2D" parent="Indigo Walls/DeadWall5" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall6" parent="Indigo Walls" unique_id=847285572 instance=ExtResource("13_3mf0h")]
+position = Vector2(-131, 2076)
+angle_preset = 3
+
+[node name="CollisionShape2D" parent="Indigo Walls/DeadWall6" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall7" parent="Indigo Walls" unique_id=774397799 instance=ExtResource("13_3mf0h")]
+position = Vector2(84, 2105)
+angle_preset = 3
+mirrored = true
+
+[node name="CollisionShape2D" parent="Indigo Walls/DeadWall7" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall8" parent="Indigo Walls" unique_id=1126828548 instance=ExtResource("13_3mf0h")]
+position = Vector2(141, 2076)
+angle_preset = 3
+mirrored = true
+
+[node name="CollisionShape2D" parent="Indigo Walls/DeadWall8" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="Indigo Currents" type="Node" parent="." unique_id=1096142270]
+
+[node name="Ladder Indigo to Blue" parent="Indigo Currents" unique_id=1618663087 instance=ExtResource("5_current")]
+propulsion_force = 2000.0
+centering_force = 1000.0
+lateral_damping = 1.0
+highlight_color = Color(1, 0.85, 0.2, 0.95)
+
+[node name="Path2D" parent="Indigo Currents/Ladder Indigo to Blue" index="0" unique_id=1461068862]
+curve = SubResource("Curve2D_ladderindigotoblue")
+
+[node name="Net Indigo Centre" parent="Indigo Currents" unique_id=1713922177 instance=ExtResource("5_current")]
+propulsion_force = 2000.0
+centering_force = 1000.0
+lateral_damping = 1.0
+exit_impulse = 200.0
+particles_per_emitter = 6
+
+[node name="Path2D" parent="Indigo Currents/Net Indigo Centre" index="0" unique_id=1461068862]
+curve = SubResource("Curve2D_netindigocentre")
+
+[node name="Net Indigo Right" parent="Indigo Currents" unique_id=59445633 instance=ExtResource("5_current")]
+propulsion_force = 2000.0
+centering_force = 1000.0
+lateral_damping = 1.0
+exit_impulse = 200.0
+particles_per_emitter = 6
+
+[node name="Path2D" parent="Indigo Currents/Net Indigo Right" index="0" unique_id=1461068862]
+curve = SubResource("Curve2D_netindigoright")
+
+[node name="Violet Bumpers" type="Node" parent="." unique_id=622084141]
+
+[node name="CircularBumper" parent="Violet Bumpers" unique_id=369470189 instance=ExtResource("10_ys2d3")]
+position = Vector2(-155, 2350)
+size_preset = 1
+radius = 16.0
+
+[node name="CircularBumper2" parent="Violet Bumpers" unique_id=874506305 instance=ExtResource("10_ys2d3")]
+position = Vector2(-103, 2380)
+variant = "3"
+
+[node name="CircularBumper3" parent="Violet Bumpers" unique_id=1307190253 instance=ExtResource("10_ys2d3")]
+position = Vector2(-207, 2380)
+variant = "3"
+
+[node name="CircularBumper4" parent="Violet Bumpers" unique_id=1963781811 instance=ExtResource("10_ys2d3")]
+position = Vector2(-155, 2290)
+variant = "3"
+
+[node name="CircularBumper5" parent="Violet Bumpers" unique_id=29019911 instance=ExtResource("10_ys2d3")]
+position = Vector2(115, 2350)
+size_preset = 1
+radius = 16.0
+
+[node name="CircularBumper6" parent="Violet Bumpers" unique_id=68110588 instance=ExtResource("10_ys2d3")]
+position = Vector2(167, 2380)
+variant = "3"
+
+[node name="CircularBumper7" parent="Violet Bumpers" unique_id=1601095991 instance=ExtResource("10_ys2d3")]
+position = Vector2(63, 2380)
+variant = "3"
+
+[node name="CircularBumper8" parent="Violet Bumpers" unique_id=363417802 instance=ExtResource("10_ys2d3")]
+position = Vector2(115, 2290)
+variant = "3"
+
+[node name="CircularBumper9" parent="Violet Bumpers" unique_id=1766307282 instance=ExtResource("10_ys2d3")]
+position = Vector2(-20, 2460)
+variant = "2"
+
+[node name="Violet Flippers" type="Node" parent="." unique_id=1203311797]
+
+[node name="CloudFlipperLeftUp" parent="Violet Flippers" unique_id=589871722 instance=ExtResource("13_3ar3m")]
+position = Vector2(-200, 2240)
+
+[node name="CloudFlipperRightUp" parent="Violet Flippers" unique_id=533542887 instance=ExtResource("14_dpahy")]
+position = Vector2(-90, 2240)
+
+[node name="CloudFlipperLeftUp2" parent="Violet Flippers" unique_id=1801426755 instance=ExtResource("13_3ar3m")]
+position = Vector2(60, 2240)
+
+[node name="CloudFlipperRightUp2" parent="Violet Flippers" unique_id=136390377 instance=ExtResource("14_dpahy")]
+position = Vector2(170, 2240)
+
+[node name="CloudFlipperLeftUp3" parent="Violet Flippers" unique_id=253541123 instance=ExtResource("13_3ar3m")]
+position = Vector2(-52, 2375)
+
+[node name="CloudFlipperRightUp3" parent="Violet Flippers" unique_id=1977818153 instance=ExtResource("14_dpahy")]
+position = Vector2(12, 2375)
+
+[node name="CloudFlipperLeftUp4" parent="Violet Flippers" unique_id=854782298 instance=ExtResource("13_3ar3m")]
+position = Vector2(-190, 2480)
+
+[node name="CloudFlipperRightUp4" parent="Violet Flippers" unique_id=305009363 instance=ExtResource("14_dpahy")]
+position = Vector2(-120, 2480)
+
+[node name="CloudFlipperLeftUp5" parent="Violet Flippers" unique_id=632605697 instance=ExtResource("13_3ar3m")]
+position = Vector2(80, 2480)
+
+[node name="CloudFlipperRightUp5" parent="Violet Flippers" unique_id=1884973721 instance=ExtResource("14_dpahy")]
+position = Vector2(150, 2480)
+
+[node name="Violet Walls" type="Node" parent="." unique_id=944100110]
+
+[node name="DeadWall" parent="Violet Walls" unique_id=846627150 instance=ExtResource("13_3mf0h")]
+position = Vector2(-228, 2211)
+angle_preset = 2
+
+[node name="CollisionShape2D" parent="Violet Walls/DeadWall" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall2" parent="Violet Walls" unique_id=1327830924 instance=ExtResource("13_3mf0h")]
+position = Vector2(-62, 2211)
+angle_preset = 2
+mirrored = true
+
+[node name="CollisionShape2D" parent="Violet Walls/DeadWall2" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall3" parent="Violet Walls" unique_id=1214333653 instance=ExtResource("13_3mf0h")]
+position = Vector2(32, 2211)
+angle_preset = 2
+
+[node name="CollisionShape2D" parent="Violet Walls/DeadWall3" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall4" parent="Violet Walls" unique_id=1865246373 instance=ExtResource("13_3mf0h")]
+position = Vector2(198, 2211)
+angle_preset = 2
+mirrored = true
+
+[node name="CollisionShape2D" parent="Violet Walls/DeadWall4" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall5" parent="Violet Walls" unique_id=376217386 instance=ExtResource("13_3mf0h")]
+position = Vector2(-224, 2460)
+angle_preset = 3
+
+[node name="CollisionShape2D" parent="Violet Walls/DeadWall5" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall6" parent="Violet Walls" unique_id=1355139451 instance=ExtResource("13_3mf0h")]
+position = Vector2(-86, 2460)
+angle_preset = 3
+mirrored = true
+
+[node name="CollisionShape2D" parent="Violet Walls/DeadWall6" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall7" parent="Violet Walls" unique_id=453878870 instance=ExtResource("13_3mf0h")]
+position = Vector2(46, 2460)
+angle_preset = 3
+
+[node name="CollisionShape2D" parent="Violet Walls/DeadWall7" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="DeadWall8" parent="Violet Walls" unique_id=1335744202 instance=ExtResource("13_3mf0h")]
+position = Vector2(184, 2460)
+angle_preset = 3
+mirrored = true
+
+[node name="CollisionShape2D" parent="Violet Walls/DeadWall8" index="0" unique_id=1644951480]
+one_way_collision = true
+
+[node name="Violet Currents" type="Node" parent="." unique_id=2059717945]
+
+[node name="Ladder Violet to Indigo" parent="Violet Currents" unique_id=122161794 instance=ExtResource("5_current")]
+propulsion_force = 2000.0
+centering_force = 1000.0
+lateral_damping = 1.0
+highlight_color = Color(1, 0.85, 0.2, 0.95)
+
+[node name="Path2D" parent="Violet Currents/Ladder Violet to Indigo" index="0" unique_id=1461068862]
+curve = SubResource("Curve2D_ladderviolettoindigo")
+
+[node name="Express Violet to Blue" parent="Violet Currents" unique_id=133250235 instance=ExtResource("5_current")]
+propulsion_force = 2000.0
+centering_force = 1000.0
+lateral_damping = 1.0
+highlight_color = Color(1, 0.85, 0.2, 0.95)
+
+[node name="Path2D" parent="Violet Currents/Express Violet to Blue" index="0" unique_id=1461068862]
+curve = SubResource("Curve2D_expressviolettoblue")
+
+[node name="Net Violet Left" parent="Violet Currents" unique_id=762157190 instance=ExtResource("5_current")]
+propulsion_force = 2000.0
+centering_force = 1000.0
+lateral_damping = 1.0
+exit_impulse = 200.0
+particles_per_emitter = 6
+
+[node name="Path2D" parent="Violet Currents/Net Violet Left" index="0" unique_id=1461068862]
+curve = SubResource("Curve2D_netvioletleft")
+
+[node name="Net Violet Centre" parent="Violet Currents" unique_id=208403720 instance=ExtResource("5_current")]
+propulsion_force = 2000.0
+centering_force = 1000.0
+lateral_damping = 1.0
+exit_impulse = 200.0
+particles_per_emitter = 6
+
+[node name="Path2D" parent="Violet Currents/Net Violet Centre" index="0" unique_id=1461068862]
+curve = SubResource("Curve2D_netvioletcentre")
+
+[node name="Net Violet Right" parent="Violet Currents" unique_id=563681065 instance=ExtResource("5_current")]
+propulsion_force = 2000.0
+centering_force = 1000.0
+lateral_damping = 1.0
+exit_impulse = 200.0
+particles_per_emitter = 6
+
+[node name="Path2D" parent="Violet Currents/Net Violet Right" index="0" unique_id=1461068862]
+curve = SubResource("Curve2D_netvioletright")
+
+[editable path="Red Walls/DeadWall"]
+[editable path="Red Walls/DeadWall2"]
+[editable path="Red Walls/DeadWall3"]
+[editable path="Red Walls/DeadWall4"]
+[editable path="Red Walls/DeadWall5"]
+[editable path="Red Walls/DeadWall6"]
+[editable path="Orange Walls/DeadWall"]
+[editable path="Orange Walls/DeadWall2"]
+[editable path="Orange Walls/DeadWall3"]
+[editable path="Orange Walls/DeadWall4"]
+[editable path="Orange Walls/DeadWall5"]
+[editable path="Orange Walls/DeadWall6"]
+[editable path="Orange Walls/DeadWall7"]
+[editable path="Orange Walls/DeadWall8"]
+[editable path="Orange Walls/DeadWall9"]
+[editable path="Orange Currents/Net Orange"]
+[editable path="Yellow Walls/DeadWall"]
+[editable path="Yellow Walls/DeadWall2"]
+[editable path="Yellow Walls/DeadWall3"]
+[editable path="Yellow Walls/DeadWall4"]
+[editable path="Yellow Walls/DeadWall5"]
+[editable path="Yellow Walls/DeadWall6"]
+[editable path="Yellow Walls/DeadWall7"]
+[editable path="Yellow Walls/DeadWall8"]
+[editable path="Yellow Currents/Ladder Yellow to Orange"]
+[editable path="Yellow Currents/Net Yellow"]
+[editable path="Green Walls/DeadWall"]
+[editable path="Green Walls/DeadWall2"]
+[editable path="Green Walls/DeadWall3"]
+[editable path="Green Walls/DeadWall4"]
+[editable path="Green Walls/DeadWall5"]
+[editable path="Green Walls/DeadWall6"]
+[editable path="Green Walls/DeadWall7"]
+[editable path="Green Walls/DeadWall8"]
+[editable path="Green Walls/DeadWall9"]
+[editable path="Green Walls/DeadWall10"]
+[editable path="Green Walls/DeadWall11"]
+[editable path="Green Walls/DeadWall12"]
+[editable path="Green Currents/Ladder Green to Yellow"]
+[editable path="Green Currents/Net Green Centre"]
+[editable path="Green Currents/Net Green Right"]
+[editable path="Blue Walls/DeadWall"]
+[editable path="Blue Walls/DeadWall2"]
+[editable path="Blue Walls/DeadWall3"]
+[editable path="Blue Walls/DeadWall4"]
+[editable path="Blue Walls/DeadWall5"]
+[editable path="Blue Walls/DeadWall6"]
+[editable path="Blue Walls/DeadWall7"]
+[editable path="Blue Walls/DeadWall8"]
+[editable path="Blue Walls/DeadWall9"]
+[editable path="Blue Walls/DeadWall10"]
+[editable path="Blue Currents/Ladder Blue to Green"]
+[editable path="Blue Currents/Net Blue Left"]
+[editable path="Blue Currents/Net Blue Centre"]
+[editable path="Indigo Walls/DeadWall"]
+[editable path="Indigo Walls/DeadWall2"]
+[editable path="Indigo Walls/DeadWall3"]
+[editable path="Indigo Walls/DeadWall4"]
+[editable path="Indigo Walls/DeadWall5"]
+[editable path="Indigo Walls/DeadWall6"]
+[editable path="Indigo Walls/DeadWall7"]
+[editable path="Indigo Walls/DeadWall8"]
+[editable path="Indigo Currents/Ladder Indigo to Blue"]
+[editable path="Indigo Currents/Net Indigo Centre"]
+[editable path="Indigo Currents/Net Indigo Right"]
+[editable path="Violet Walls/DeadWall"]
+[editable path="Violet Walls/DeadWall2"]
+[editable path="Violet Walls/DeadWall3"]
+[editable path="Violet Walls/DeadWall4"]
+[editable path="Violet Walls/DeadWall5"]
+[editable path="Violet Walls/DeadWall6"]
+[editable path="Violet Walls/DeadWall7"]
+[editable path="Violet Walls/DeadWall8"]
+[editable path="Violet Currents/Ladder Violet to Indigo"]
+[editable path="Violet Currents/Express Violet to Blue"]
+[editable path="Violet Currents/Net Violet Left"]
+[editable path="Violet Currents/Net Violet Centre"]
+[editable path="Violet Currents/Net Violet Right"]

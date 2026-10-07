@@ -1,26 +1,25 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://ceah0n2x0tsbk"]
 
-[ext_resource type="Script" path="res://entities/collectibles/fruit/fruit.gd" id="1_fruit"]
+[ext_resource type="Script" uid="uid://o2xu87yrb3xp" path="res://entities/collectibles/fruit/fruit.gd" id="1_fruit"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_body"]
 radius = 6.0
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_pickup"]
-radius = 8.0
 
-[node name="Fruit" type="RigidBody2D"]
+[node name="Fruit" type="RigidBody2D" unique_id=995383219]
 collision_layer = 2
 collision_mask = 0
 script = ExtResource("1_fruit")
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1654620657]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=833109629]
 shape = SubResource("CircleShape2D_body")
 
-[node name="Area2D" type="Area2D" parent="."]
+[node name="Area2D" type="Area2D" parent="." unique_id=8499449]
 collision_layer = 2
 collision_mask = 32
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=944006685]
 shape = SubResource("CircleShape2D_pickup")
