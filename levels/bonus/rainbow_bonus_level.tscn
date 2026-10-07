@@ -13,6 +13,11 @@
 [ext_resource type="PackedScene" uid="uid://u02ifu2255ot" path="res://entities/environment/flippers/cloud_flipper_left_up.tscn" id="13_3ar3m"]
 [ext_resource type="PackedScene" uid="uid://8edo3etakc1a" path="res://entities/environment/walls/dead_wall/dead_wall.tscn" id="13_3mf0h"]
 [ext_resource type="PackedScene" uid="uid://p32a3utahssn" path="res://entities/environment/flippers/cloud_flipper_right_up.tscn" id="14_dpahy"]
+[ext_resource type="Texture2D" uid="uid://8det4aydy3r5" path="res://entities/environment/walls/dead_wall/sprites/wall_diagonal_2u.png" id="16_fmh0u"]
+[ext_resource type="Texture2D" uid="uid://bq2m8w5vouuyn" path="res://entities/environment/walls/dead_wall/sprites/wall_diagonal_1u.png" id="16_y6ecd"]
+[ext_resource type="Texture2D" uid="uid://b5t4nkkpj4kch" path="res://entities/environment/walls/dead_wall/sprites/wall_shallow_1u.png" id="17_crv7d"]
+[ext_resource type="PackedScene" path="res://entities/environment/rotating_launcher/rotating_launcher.tscn" id="17_fmh0u"]
+[ext_resource type="Texture2D" uid="uid://cnjgq882a81c5" path="res://entities/environment/walls/dead_wall/sprites/wall_shallow_2u.png" id="17_y6ecd"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_boundary"]
 size = Vector2(8, 3600)
@@ -20,11 +25,149 @@ size = Vector2(8, 3600)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_launchwall"]
 size = Vector2(8, 2510)
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_y6ecd"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_crv7d"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_t1j7e"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_vdxn6"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_fnn04"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_d6761"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_io6ll"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_gwi4f"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_dvc0u"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_41dlg"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_tj624"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_h3wwt"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_n3tic"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_k50ir"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_tbe0w"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_lljku"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_fl1jf"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_tdom5"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_s2u1i"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_8653d"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_x02wh"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_s03yg"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_joesb"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_iqe64"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_c2rss"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rrvv2"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_2qmfr"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_0xn3v"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_86tgw"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_mof3h"]
+size = Vector2(64, 8)
+
 [sub_resource type="Curve2D" id="Curve2D_netorange"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, -40, 727, 0, 0, 0, 0, -130, 727, 0, 0, 0, 0, -150, 707, 0, 0, 0, 0, -150, 640)
+"points": PackedVector2Array(0, 0, 0, 0, -99, 727, 0, 0, 0, 0, -130, 727, 0, 0, 0, 0, -150, 707, 0, 0, 0, 0, -150, 640)
 }
 point_count = 4
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_i6xjp"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ha5es"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_i0dru"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rhnrs"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_srqfq"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_q8s7a"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_8xury"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_u2kvy"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_jmsht"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_tp6uv"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_4h373"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_42aud"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xrad5"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_2jjya"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_3eked"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_6rotc"]
+size = Vector2(64, 8)
 
 [sub_resource type="Curve2D" id="Curve2D_ladderyellowtoorange"]
 _data = {
@@ -34,9 +177,81 @@ point_count = 2
 
 [sub_resource type="Curve2D" id="Curve2D_netyellow"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, 90, 1088, 0, 0, 0, 0, 215, 1088, 0, 0, 0, 0, 240, 1068, 0, 0, 0, 0, 240, 985)
+"points": PackedVector2Array(0, 0, 0, 0, 215, 1088, 0, 0, 0, 0, 240, 1068, 0, 0, 0, 0, 240, 985)
 }
-point_count = 4
+point_count = 3
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_6br3a"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_6cruh"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5yn38"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_uck8y"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_vgtxf"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_05vbx"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rymy4"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_3m0p1"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_vb1sm"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_s8dqi"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_odhx1"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_jrqbp"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_13qua"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_fixn0"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_mq716"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_o48b8"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_yc5xv"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_dbvr5"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ruxty"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_kbn1a"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1lkdd"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_l17ll"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_o0xyd"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_quoss"]
+size = Vector2(32, 8)
 
 [sub_resource type="Curve2D" id="Curve2D_laddergreentoyellow"]
 _data = {
@@ -46,15 +261,75 @@ point_count = 3
 
 [sub_resource type="Curve2D" id="Curve2D_netgreencentre"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, 50, 1452, 0, 0, 0, 0, -10, 1452, 0, 0, 0, 0, -28, 1436, 0, 0, 0, 0, -34, 1400, 0, 0, 0, 0, -52, 1378)
+"points": PackedVector2Array(0, 0, 0, 0, -10, 1452, 0, 0, 0, 0, -28, 1436, 0, 0, 0, 0, -29, 1400, 0, 0, 0, 0, -30, 1380)
 }
-point_count = 5
+point_count = 4
 
 [sub_resource type="Curve2D" id="Curve2D_netgreenright"]
 _data = {
 "points": PackedVector2Array(0, 0, 0, 0, 60, 1452, 0, 0, 0, 0, 230, 1452, 0, 0, 0, 0, 254, 1428, 0, 0, 0, 0, 254, 1340)
 }
 point_count = 4
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_2w864"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_u4st5"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_2dl3j"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_n6c7u"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xtqx0"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_blpwo"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_n7m2b"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_jqw2u"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ayxep"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_jo3gi"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bv680"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_48rby"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xq6p4"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_2pje0"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5cymv"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_isgow"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_8egjx"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5uxsm"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_4iqsb"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5h6by"]
+size = Vector2(32, 8)
 
 [sub_resource type="Curve2D" id="Curve2D_ladderbluetogreen"]
 _data = {
@@ -64,15 +339,63 @@ point_count = 3
 
 [sub_resource type="Curve2D" id="Curve2D_netblueleft"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, -250, 1808, 0, 0, 0, 0, -160, 1808, 0, 0, 0, 0, -140, 1790, 0, 0, 0, 0, -150, 1740)
+"points": PackedVector2Array(0, 0, 0, 0, -160, 1808, 0, 0, 0, 0, -140, 1790, 0, 0, 0, 0, -150, 1740)
 }
-point_count = 4
+point_count = 3
 
 [sub_resource type="Curve2D" id="Curve2D_netbluecentre"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, 10, 1810, 0, 0, 0, 0, -70, 1810, 0, 0, 0, 0, -90, 1792, 0, 0, 0, 0, -100, 1740)
+"points": PackedVector2Array(0, 0, 0, 0, -70, 1810, 0, 0, 0, 0, -90, 1792, 0, 0, 0, 0, -100, 1740)
 }
-point_count = 4
+point_count = 3
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_sc8ym"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_34ubu"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_byv1j"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_lbomf"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_vuist"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_b0rer"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_36kp0"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bx11x"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_r25ml"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_2gaj0"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_oea3j"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_o473j"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_byp32"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_e6ei1"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_2j0ce"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_4b1wg"]
+size = Vector2(64, 8)
 
 [sub_resource type="Curve2D" id="Curve2D_ladderindigotoblue"]
 _data = {
@@ -82,7 +405,7 @@ point_count = 2
 
 [sub_resource type="Curve2D" id="Curve2D_netindigocentre"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, 30, 2170, 0, 0, 0, 0, -50, 2170, 0, 0, 0, 0, -70, 2150, 0, 0, 0, 0, -70, 2080)
+"points": PackedVector2Array(0, 0, 0, 0, -18, 2170, 0, 0, 0, 0, -50, 2170, 0, 0, 0, 0, -70, 2150, 0, 0, 0, 0, -70, 2116)
 }
 point_count = 4
 
@@ -92,9 +415,69 @@ _data = {
 }
 point_count = 4
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_m2fvw"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_vcyat"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5xy1h"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_7k4j5"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_js36v"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5g86v"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_qfp68"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_qahk8"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_fyij1"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_2yd2c"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_3d5y0"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xjskw"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_e0jb8"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ebfpm"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_g4abw"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1rm5m"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_3mon7"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_2ecv5"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ftks6"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_vugwi"]
+size = Vector2(32, 8)
+
 [sub_resource type="Curve2D" id="Curve2D_ladderviolettoindigo"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, -294, 2390, 0, 0, 0, 0, -294, 2090)
+"points": PackedVector2Array(0, 0, 0, 0, -294, 2403, 0, 0, 0, 0, -294, 2090)
 }
 point_count = 2
 
@@ -106,7 +489,7 @@ point_count = 3
 
 [sub_resource type="Curve2D" id="Curve2D_netvioletleft"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, -130, 2494, 0, 0, 0, 0, -200, 2494, 0, 0, 0, 0, -222, 2476, 0, 0, 0, 0, -240, 2440)
+"points": PackedVector2Array(0, 0, 0, 0, -130, 2494, 0, 0, 0, 0, -200, 2494, 0, 0, 0, 0, -222, 2476, 0, 0, 0, 0, -237, 2446)
 }
 point_count = 4
 
@@ -118,9 +501,9 @@ point_count = 4
 
 [sub_resource type="Curve2D" id="Curve2D_netvioletright"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, 90, 2494, 0, 0, 0, 0, 160, 2494, 0, 0, 0, 0, 182, 2476, 0, 0, 0, 0, 200, 2440)
+"points": PackedVector2Array(0, 0, 0, 0, 107, 2493, 0, 0, 0, 0, 156, 2494, 0, 0, 0, 0, 192, 2485, 0, 0, 0, 0, 209, 2474, 0, 0, 0, 0, 213, 2457, 0, 0, 0, 0, 211, 2439)
 }
-point_count = 4
+point_count = 6
 
 [node name="RainbowBonusLevel" type="Node2D" unique_id=1780710026 groups=["level"]]
 script = ExtResource("1_level")
@@ -173,7 +556,7 @@ particles_per_emitter = 12
 show_debug_arrows = false
 
 [node name="TurtlePlayer" parent="." unique_id=1560208226 instance=ExtResource("6_turtle")]
-position = Vector2(304, 2490)
+position = Vector2(43, 2426)
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=501755283]
 script = ExtResource("3_cam")
@@ -247,7 +630,21 @@ angle_preset = 2
 length_units = 1
 
 [node name="CollisionShape2D" parent="Red Walls/DeadWall" index="0" unique_id=1644951480]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_y6ecd")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Red Walls/DeadWall" index="1" unique_id=804434373]
+texture = ExtResource("16_y6ecd")
+hframes = 5
+
+[node name="Polygon2D" parent="Red Walls/DeadWall" index="2" unique_id=138368735]
+rotation = 0.7853982
+polygon = PackedVector2Array(-16, -4, 16, -4, 16, 4, -16, 4)
+
+[node name="CollisionShape2D" parent="Red Walls/DeadWall/SlipperyArea" parent_id_path=PackedInt32Array(1076131489, 773978709) index="0" unique_id=2040614053]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_crv7d")
 
 [node name="DeadWall2" parent="Red Walls" unique_id=1194673925 instance=ExtResource("13_3mf0h")]
 position = Vector2(6, 305)
@@ -256,7 +653,22 @@ length_units = 1
 mirrored = true
 
 [node name="CollisionShape2D" parent="Red Walls/DeadWall2" index="0" unique_id=1644951480]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_t1j7e")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Red Walls/DeadWall2" index="1" unique_id=804434373]
+texture = ExtResource("16_y6ecd")
+flip_h = true
+hframes = 5
+
+[node name="Polygon2D" parent="Red Walls/DeadWall2" index="2" unique_id=138368735]
+rotation = -0.7853982
+polygon = PackedVector2Array(-16, -4, 16, -4, 16, 4, -16, 4)
+
+[node name="CollisionShape2D" parent="Red Walls/DeadWall2/SlipperyArea" parent_id_path=PackedInt32Array(1194673925, 773978709) index="0" unique_id=2040614053]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_vdxn6")
 
 [node name="DeadWall3" parent="Red Walls" unique_id=1769224842 instance=ExtResource("13_3mf0h")]
 position = Vector2(178, 289)
@@ -264,14 +676,41 @@ angle_preset = 2
 mirrored = true
 
 [node name="CollisionShape2D" parent="Red Walls/DeadWall3" index="0" unique_id=1644951480]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_fnn04")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Red Walls/DeadWall3" index="1" unique_id=804434373]
+texture = ExtResource("16_fmh0u")
+flip_h = true
+hframes = 7
+
+[node name="Polygon2D" parent="Red Walls/DeadWall3" index="2" unique_id=138368735]
+rotation = -0.7853982
+
+[node name="CollisionShape2D" parent="Red Walls/DeadWall3/SlipperyArea" parent_id_path=PackedInt32Array(1769224842, 773978709) index="0" unique_id=2040614053]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_d6761")
 
 [node name="DeadWall4" parent="Red Walls" unique_id=1615388542 instance=ExtResource("13_3mf0h")]
 position = Vector2(-290, 289)
 angle_preset = 2
 
 [node name="CollisionShape2D" parent="Red Walls/DeadWall4" index="0" unique_id=1644951480]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_io6ll")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Red Walls/DeadWall4" index="1" unique_id=804434373]
+texture = ExtResource("16_fmh0u")
+hframes = 7
+
+[node name="Polygon2D" parent="Red Walls/DeadWall4" index="2" unique_id=138368735]
+rotation = 0.7853982
+
+[node name="CollisionShape2D" parent="Red Walls/DeadWall4/SlipperyArea" parent_id_path=PackedInt32Array(1615388542, 773978709) index="0" unique_id=2040614053]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_gwi4f")
 
 [node name="DeadWall5" parent="Red Walls" unique_id=219636777 instance=ExtResource("13_3mf0h")]
 position = Vector2(-231, 198)
@@ -279,7 +718,21 @@ angle_preset = 2
 length_units = 1
 
 [node name="CollisionShape2D" parent="Red Walls/DeadWall5" index="0" unique_id=1644951480]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_dvc0u")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Red Walls/DeadWall5" index="1" unique_id=804434373]
+texture = ExtResource("16_y6ecd")
+hframes = 5
+
+[node name="Polygon2D" parent="Red Walls/DeadWall5" index="2" unique_id=138368735]
+rotation = 0.7853982
+polygon = PackedVector2Array(-16, -4, 16, -4, 16, 4, -16, 4)
+
+[node name="CollisionShape2D" parent="Red Walls/DeadWall5/SlipperyArea" parent_id_path=PackedInt32Array(219636777, 773978709) index="0" unique_id=2040614053]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_41dlg")
 
 [node name="DeadWall6" parent="Red Walls" unique_id=1765198226 instance=ExtResource("13_3mf0h")]
 position = Vector2(118, 186)
@@ -287,7 +740,21 @@ angle_preset = 2
 mirrored = true
 
 [node name="CollisionShape2D" parent="Red Walls/DeadWall6" index="0" unique_id=1644951480]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_tj624")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Red Walls/DeadWall6" index="1" unique_id=804434373]
+texture = ExtResource("16_fmh0u")
+flip_h = true
+hframes = 7
+
+[node name="Polygon2D" parent="Red Walls/DeadWall6" index="2" unique_id=138368735]
+rotation = -0.7853982
+
+[node name="CollisionShape2D" parent="Red Walls/DeadWall6/SlipperyArea" parent_id_path=PackedInt32Array(1765198226, 773978709) index="0" unique_id=2040614053]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_h3wwt")
 
 [node name="Red Currents" type="Node" parent="." unique_id=222604568]
 
@@ -354,35 +821,100 @@ position = Vector2(-298, 653)
 angle_preset = 2
 
 [node name="CollisionShape2D" parent="Orange Walls/DeadWall" index="0" unique_id=1644951480]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_n3tic")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Orange Walls/DeadWall" index="1" unique_id=804434373]
+texture = ExtResource("16_fmh0u")
+hframes = 7
+
+[node name="Polygon2D" parent="Orange Walls/DeadWall" index="2" unique_id=138368735]
+rotation = 0.7853982
+
+[node name="CollisionShape2D" parent="Orange Walls/DeadWall/SlipperyArea" parent_id_path=PackedInt32Array(779635164, 773978709) index="0" unique_id=2040614053]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_k50ir")
 
 [node name="DeadWall2" parent="Orange Walls" unique_id=1290002940 instance=ExtResource("13_3mf0h")]
 position = Vector2(-213, 587)
 angle_preset = 2
 
 [node name="CollisionShape2D" parent="Orange Walls/DeadWall2" index="0" unique_id=1644951480]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_tbe0w")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Orange Walls/DeadWall2" index="1" unique_id=804434373]
+texture = ExtResource("16_fmh0u")
+hframes = 7
+
+[node name="Polygon2D" parent="Orange Walls/DeadWall2" index="2" unique_id=138368735]
+rotation = 0.7853982
+
+[node name="CollisionShape2D" parent="Orange Walls/DeadWall2/SlipperyArea" parent_id_path=PackedInt32Array(1290002940, 773978709) index="0" unique_id=2040614053]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_lljku")
 
 [node name="DeadWall3" parent="Orange Walls" unique_id=1039093928 instance=ExtResource("13_3mf0h")]
 position = Vector2(-128, 521)
 angle_preset = 2
 
 [node name="CollisionShape2D" parent="Orange Walls/DeadWall3" index="0" unique_id=1644951480]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_fl1jf")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Orange Walls/DeadWall3" index="1" unique_id=804434373]
+texture = ExtResource("16_fmh0u")
+hframes = 7
+
+[node name="Polygon2D" parent="Orange Walls/DeadWall3" index="2" unique_id=138368735]
+rotation = 0.7853982
+
+[node name="CollisionShape2D" parent="Orange Walls/DeadWall3/SlipperyArea" parent_id_path=PackedInt32Array(1039093928, 773978709) index="0" unique_id=2040614053]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_tdom5")
 
 [node name="DeadWall4" parent="Orange Walls" unique_id=1917094613 instance=ExtResource("13_3mf0h")]
 position = Vector2(-43, 455)
 angle_preset = 2
 
 [node name="CollisionShape2D" parent="Orange Walls/DeadWall4" index="0" unique_id=1644951480]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_s2u1i")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Orange Walls/DeadWall4" index="1" unique_id=804434373]
+texture = ExtResource("16_fmh0u")
+hframes = 7
+
+[node name="Polygon2D" parent="Orange Walls/DeadWall4" index="2" unique_id=138368735]
+rotation = 0.7853982
+
+[node name="CollisionShape2D" parent="Orange Walls/DeadWall4/SlipperyArea" parent_id_path=PackedInt32Array(1917094613, 773978709) index="0" unique_id=2040614053]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_8653d")
 
 [node name="DeadWall5" parent="Orange Walls" unique_id=504774362 instance=ExtResource("13_3mf0h")]
 position = Vector2(42, 393)
 angle_preset = 2
 
 [node name="CollisionShape2D" parent="Orange Walls/DeadWall5" index="0" unique_id=1644951480]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_x02wh")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Orange Walls/DeadWall5" index="1" unique_id=804434373]
+texture = ExtResource("16_fmh0u")
+hframes = 7
+
+[node name="Polygon2D" parent="Orange Walls/DeadWall5" index="2" unique_id=138368735]
+rotation = 0.7853982
+
+[node name="CollisionShape2D" parent="Orange Walls/DeadWall5/SlipperyArea" parent_id_path=PackedInt32Array(504774362, 773978709) index="0" unique_id=2040614053]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_s03yg")
 
 [node name="DeadWall6" parent="Orange Walls" unique_id=6713828 instance=ExtResource("13_3mf0h")]
 position = Vector2(-172, 411)
@@ -390,7 +922,21 @@ angle_preset = 2
 mirrored = true
 
 [node name="CollisionShape2D" parent="Orange Walls/DeadWall6" index="0" unique_id=1644951480]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_joesb")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Orange Walls/DeadWall6" index="1" unique_id=804434373]
+texture = ExtResource("16_fmh0u")
+flip_h = true
+hframes = 7
+
+[node name="Polygon2D" parent="Orange Walls/DeadWall6" index="2" unique_id=138368735]
+rotation = -0.7853982
+
+[node name="CollisionShape2D" parent="Orange Walls/DeadWall6/SlipperyArea" parent_id_path=PackedInt32Array(6713828, 773978709) index="0" unique_id=2040614053]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_iqe64")
 
 [node name="DeadWall7" parent="Orange Walls" unique_id=1212136035 instance=ExtResource("13_3mf0h")]
 position = Vector2(-32, 656)
@@ -398,14 +944,41 @@ angle_preset = 2
 mirrored = true
 
 [node name="CollisionShape2D" parent="Orange Walls/DeadWall7" index="0" unique_id=1644951480]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_c2rss")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Orange Walls/DeadWall7" index="1" unique_id=804434373]
+texture = ExtResource("16_fmh0u")
+flip_h = true
+hframes = 7
+
+[node name="Polygon2D" parent="Orange Walls/DeadWall7" index="2" unique_id=138368735]
+rotation = -0.7853982
+
+[node name="CollisionShape2D" parent="Orange Walls/DeadWall7/SlipperyArea" parent_id_path=PackedInt32Array(1212136035, 773978709) index="0" unique_id=2040614053]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_rrvv2")
 
 [node name="DeadWall8" parent="Orange Walls" unique_id=726124074 instance=ExtResource("13_3mf0h")]
 position = Vector2(62, 656)
 angle_preset = 2
 
 [node name="CollisionShape2D" parent="Orange Walls/DeadWall8" index="0" unique_id=1644951480]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_2qmfr")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Orange Walls/DeadWall8" index="1" unique_id=804434373]
+texture = ExtResource("16_fmh0u")
+hframes = 7
+
+[node name="Polygon2D" parent="Orange Walls/DeadWall8" index="2" unique_id=138368735]
+rotation = 0.7853982
+
+[node name="CollisionShape2D" parent="Orange Walls/DeadWall8/SlipperyArea" parent_id_path=PackedInt32Array(726124074, 773978709) index="0" unique_id=2040614053]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_0xn3v")
 
 [node name="DeadWall9" parent="Orange Walls" unique_id=570541430 instance=ExtResource("13_3mf0h")]
 position = Vector2(228, 656)
@@ -413,7 +986,21 @@ angle_preset = 2
 mirrored = true
 
 [node name="CollisionShape2D" parent="Orange Walls/DeadWall9" index="0" unique_id=1644951480]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_86tgw")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Orange Walls/DeadWall9" index="1" unique_id=804434373]
+texture = ExtResource("16_fmh0u")
+flip_h = true
+hframes = 7
+
+[node name="Polygon2D" parent="Orange Walls/DeadWall9" index="2" unique_id=138368735]
+rotation = -0.7853982
+
+[node name="CollisionShape2D" parent="Orange Walls/DeadWall9/SlipperyArea" parent_id_path=PackedInt32Array(570541430, 773978709) index="0" unique_id=2040614053]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_mof3h")
 
 [node name="Orange Currents" type="Node" parent="." unique_id=1591423725]
 
@@ -494,7 +1081,20 @@ position = Vector2(-168, 771)
 angle_preset = 2
 
 [node name="CollisionShape2D" parent="Yellow Walls/DeadWall" index="0" unique_id=1644951480]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_i6xjp")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Yellow Walls/DeadWall" index="1" unique_id=804434373]
+texture = ExtResource("16_fmh0u")
+hframes = 7
+
+[node name="Polygon2D" parent="Yellow Walls/DeadWall" index="2" unique_id=138368735]
+rotation = 0.7853982
+
+[node name="CollisionShape2D" parent="Yellow Walls/DeadWall/SlipperyArea" parent_id_path=PackedInt32Array(1837583259, 773978709) index="0" unique_id=2040614053]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_ha5es")
 
 [node name="DeadWall2" parent="Yellow Walls" unique_id=621285575 instance=ExtResource("13_3mf0h")]
 position = Vector2(188, 771)
@@ -502,7 +1102,21 @@ angle_preset = 2
 mirrored = true
 
 [node name="CollisionShape2D" parent="Yellow Walls/DeadWall2" index="0" unique_id=1644951480]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_i0dru")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Yellow Walls/DeadWall2" index="1" unique_id=804434373]
+texture = ExtResource("16_fmh0u")
+flip_h = true
+hframes = 7
+
+[node name="Polygon2D" parent="Yellow Walls/DeadWall2" index="2" unique_id=138368735]
+rotation = -0.7853982
+
+[node name="CollisionShape2D" parent="Yellow Walls/DeadWall2/SlipperyArea" parent_id_path=PackedInt32Array(621285575, 773978709) index="0" unique_id=2040614053]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_rhnrs")
 
 [node name="DeadWall3" parent="Yellow Walls" unique_id=104496612 instance=ExtResource("13_3mf0h")]
 position = Vector2(-186, 908)
@@ -510,7 +1124,21 @@ angle_preset = 2
 length_units = 1
 
 [node name="CollisionShape2D" parent="Yellow Walls/DeadWall3" index="0" unique_id=1644951480]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_srqfq")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Yellow Walls/DeadWall3" index="1" unique_id=804434373]
+texture = ExtResource("16_y6ecd")
+hframes = 5
+
+[node name="Polygon2D" parent="Yellow Walls/DeadWall3" index="2" unique_id=138368735]
+rotation = 0.7853982
+polygon = PackedVector2Array(-16, -4, 16, -4, 16, 4, -16, 4)
+
+[node name="CollisionShape2D" parent="Yellow Walls/DeadWall3/SlipperyArea" parent_id_path=PackedInt32Array(104496612, 773978709) index="0" unique_id=2040614053]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_q8s7a")
 
 [node name="DeadWall4" parent="Yellow Walls" unique_id=1924488319 instance=ExtResource("13_3mf0h")]
 position = Vector2(146, 908)
@@ -519,14 +1147,42 @@ length_units = 1
 mirrored = true
 
 [node name="CollisionShape2D" parent="Yellow Walls/DeadWall4" index="0" unique_id=1644951480]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_8xury")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Yellow Walls/DeadWall4" index="1" unique_id=804434373]
+texture = ExtResource("16_y6ecd")
+flip_h = true
+hframes = 5
+
+[node name="Polygon2D" parent="Yellow Walls/DeadWall4" index="2" unique_id=138368735]
+rotation = -0.7853982
+polygon = PackedVector2Array(-16, -4, 16, -4, 16, 4, -16, 4)
+
+[node name="CollisionShape2D" parent="Yellow Walls/DeadWall4/SlipperyArea" parent_id_path=PackedInt32Array(1924488319, 773978709) index="0" unique_id=2040614053]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_u2kvy")
 
 [node name="DeadWall5" parent="Yellow Walls" unique_id=694970887 instance=ExtResource("13_3mf0h")]
 position = Vector2(-218, 1013)
 angle_preset = 2
 
 [node name="CollisionShape2D" parent="Yellow Walls/DeadWall5" index="0" unique_id=1644951480]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_jmsht")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Yellow Walls/DeadWall5" index="1" unique_id=804434373]
+texture = ExtResource("16_fmh0u")
+hframes = 7
+
+[node name="Polygon2D" parent="Yellow Walls/DeadWall5" index="2" unique_id=138368735]
+rotation = 0.7853982
+
+[node name="CollisionShape2D" parent="Yellow Walls/DeadWall5/SlipperyArea" parent_id_path=PackedInt32Array(694970887, 773978709) index="0" unique_id=2040614053]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_tp6uv")
 
 [node name="DeadWall6" parent="Yellow Walls" unique_id=1350456030 instance=ExtResource("13_3mf0h")]
 position = Vector2(-62, 1013)
@@ -534,14 +1190,41 @@ angle_preset = 2
 mirrored = true
 
 [node name="CollisionShape2D" parent="Yellow Walls/DeadWall6" index="0" unique_id=1644951480]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_4h373")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Yellow Walls/DeadWall6" index="1" unique_id=804434373]
+texture = ExtResource("16_fmh0u")
+flip_h = true
+hframes = 7
+
+[node name="Polygon2D" parent="Yellow Walls/DeadWall6" index="2" unique_id=138368735]
+rotation = -0.7853982
+
+[node name="CollisionShape2D" parent="Yellow Walls/DeadWall6/SlipperyArea" parent_id_path=PackedInt32Array(1350456030, 773978709) index="0" unique_id=2040614053]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_42aud")
 
 [node name="DeadWall7" parent="Yellow Walls" unique_id=114780425 instance=ExtResource("13_3mf0h")]
 position = Vector2(22, 1013)
 angle_preset = 2
 
 [node name="CollisionShape2D" parent="Yellow Walls/DeadWall7" index="0" unique_id=1644951480]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_xrad5")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Yellow Walls/DeadWall7" index="1" unique_id=804434373]
+texture = ExtResource("16_fmh0u")
+hframes = 7
+
+[node name="Polygon2D" parent="Yellow Walls/DeadWall7" index="2" unique_id=138368735]
+rotation = 0.7853982
+
+[node name="CollisionShape2D" parent="Yellow Walls/DeadWall7/SlipperyArea" parent_id_path=PackedInt32Array(114780425, 773978709) index="0" unique_id=2040614053]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_2jjya")
 
 [node name="DeadWall8" parent="Yellow Walls" unique_id=109378985 instance=ExtResource("13_3mf0h")]
 position = Vector2(178, 1013)
@@ -549,7 +1232,21 @@ angle_preset = 2
 mirrored = true
 
 [node name="CollisionShape2D" parent="Yellow Walls/DeadWall8" index="0" unique_id=1644951480]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_3eked")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Yellow Walls/DeadWall8" index="1" unique_id=804434373]
+texture = ExtResource("16_fmh0u")
+flip_h = true
+hframes = 7
+
+[node name="Polygon2D" parent="Yellow Walls/DeadWall8" index="2" unique_id=138368735]
+rotation = -0.7853982
+
+[node name="CollisionShape2D" parent="Yellow Walls/DeadWall8/SlipperyArea" parent_id_path=PackedInt32Array(109378985, 773978709) index="0" unique_id=2040614053]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_6rotc")
 
 [node name="Yellow Currents" type="Node" parent="." unique_id=1587284092]
 
@@ -631,21 +1328,60 @@ position = Vector2(-90, 1373)
 angle_preset = 2
 
 [node name="CollisionShape2D" parent="Green Walls/DeadWall" index="0" unique_id=1644951480]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_6br3a")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Green Walls/DeadWall" index="1" unique_id=804434373]
+texture = ExtResource("16_fmh0u")
+hframes = 7
+
+[node name="Polygon2D" parent="Green Walls/DeadWall" index="2" unique_id=138368735]
+rotation = 0.7853982
+
+[node name="CollisionShape2D" parent="Green Walls/DeadWall/SlipperyArea" parent_id_path=PackedInt32Array(1082637176, 773978709) index="0" unique_id=2040614053]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_6cruh")
 
 [node name="DeadWall2" parent="Green Walls" unique_id=1192805593 instance=ExtResource("13_3mf0h")]
 position = Vector2(-141, 1336)
 angle_preset = 3
 
 [node name="CollisionShape2D" parent="Green Walls/DeadWall2" index="0" unique_id=1644951480]
+rotation = 0.46373397
+shape = SubResource("RectangleShape2D_5yn38")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Green Walls/DeadWall2" index="1" unique_id=804434373]
+texture = ExtResource("17_y6ecd")
+hframes = 6
+
+[node name="Polygon2D" parent="Green Walls/DeadWall2" index="2" unique_id=138368735]
+rotation = 0.46373397
+
+[node name="CollisionShape2D" parent="Green Walls/DeadWall2/SlipperyArea" parent_id_path=PackedInt32Array(1192805593, 773978709) index="0" unique_id=2040614053]
+rotation = 0.46373397
+shape = SubResource("RectangleShape2D_uck8y")
 
 [node name="DeadWall3" parent="Green Walls" unique_id=1359126841 instance=ExtResource("13_3mf0h")]
 position = Vector2(-198, 1308)
 angle_preset = 3
 
 [node name="CollisionShape2D" parent="Green Walls/DeadWall3" index="0" unique_id=1644951480]
+rotation = 0.46373397
+shape = SubResource("RectangleShape2D_vgtxf")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Green Walls/DeadWall3" index="1" unique_id=804434373]
+texture = ExtResource("17_y6ecd")
+hframes = 6
+
+[node name="Polygon2D" parent="Green Walls/DeadWall3" index="2" unique_id=138368735]
+rotation = 0.46373397
+
+[node name="CollisionShape2D" parent="Green Walls/DeadWall3/SlipperyArea" parent_id_path=PackedInt32Array(1359126841, 773978709) index="0" unique_id=2040614053]
+rotation = 0.46373397
+shape = SubResource("RectangleShape2D_05vbx")
 
 [node name="DeadWall4" parent="Green Walls" unique_id=799736342 instance=ExtResource("13_3mf0h")]
 position = Vector2(50, 1373)
@@ -653,7 +1389,21 @@ angle_preset = 2
 mirrored = true
 
 [node name="CollisionShape2D" parent="Green Walls/DeadWall4" index="0" unique_id=1644951480]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_rymy4")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Green Walls/DeadWall4" index="1" unique_id=804434373]
+texture = ExtResource("16_fmh0u")
+flip_h = true
+hframes = 7
+
+[node name="Polygon2D" parent="Green Walls/DeadWall4" index="2" unique_id=138368735]
+rotation = -0.7853982
+
+[node name="CollisionShape2D" parent="Green Walls/DeadWall4/SlipperyArea" parent_id_path=PackedInt32Array(799736342, 773978709) index="0" unique_id=2040614053]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_3m0p1")
 
 [node name="DeadWall5" parent="Green Walls" unique_id=69278059 instance=ExtResource("13_3mf0h")]
 position = Vector2(101, 1336)
@@ -661,7 +1411,21 @@ angle_preset = 3
 mirrored = true
 
 [node name="CollisionShape2D" parent="Green Walls/DeadWall5" index="0" unique_id=1644951480]
+rotation = -0.46373397
+shape = SubResource("RectangleShape2D_vb1sm")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Green Walls/DeadWall5" index="1" unique_id=804434373]
+texture = ExtResource("17_y6ecd")
+flip_h = true
+hframes = 6
+
+[node name="Polygon2D" parent="Green Walls/DeadWall5" index="2" unique_id=138368735]
+rotation = -0.46373397
+
+[node name="CollisionShape2D" parent="Green Walls/DeadWall5/SlipperyArea" parent_id_path=PackedInt32Array(69278059, 773978709) index="0" unique_id=2040614053]
+rotation = -0.46373397
+shape = SubResource("RectangleShape2D_s8dqi")
 
 [node name="DeadWall6" parent="Green Walls" unique_id=2080244404 instance=ExtResource("13_3mf0h")]
 position = Vector2(158, 1308)
@@ -669,14 +1433,41 @@ angle_preset = 3
 mirrored = true
 
 [node name="CollisionShape2D" parent="Green Walls/DeadWall6" index="0" unique_id=1644951480]
+rotation = -0.46373397
+shape = SubResource("RectangleShape2D_odhx1")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Green Walls/DeadWall6" index="1" unique_id=804434373]
+texture = ExtResource("17_y6ecd")
+flip_h = true
+hframes = 6
+
+[node name="Polygon2D" parent="Green Walls/DeadWall6" index="2" unique_id=138368735]
+rotation = -0.46373397
+
+[node name="CollisionShape2D" parent="Green Walls/DeadWall6/SlipperyArea" parent_id_path=PackedInt32Array(2080244404, 773978709) index="0" unique_id=2040614053]
+rotation = -0.46373397
+shape = SubResource("RectangleShape2D_jrqbp")
 
 [node name="DeadWall7" parent="Green Walls" unique_id=993871220 instance=ExtResource("13_3mf0h")]
 position = Vector2(-208, 1131)
 angle_preset = 2
 
 [node name="CollisionShape2D" parent="Green Walls/DeadWall7" index="0" unique_id=1644951480]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_13qua")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Green Walls/DeadWall7" index="1" unique_id=804434373]
+texture = ExtResource("16_fmh0u")
+hframes = 7
+
+[node name="Polygon2D" parent="Green Walls/DeadWall7" index="2" unique_id=138368735]
+rotation = 0.7853982
+
+[node name="CollisionShape2D" parent="Green Walls/DeadWall7/SlipperyArea" parent_id_path=PackedInt32Array(993871220, 773978709) index="0" unique_id=2040614053]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_fixn0")
 
 [node name="DeadWall8" parent="Green Walls" unique_id=602631789 instance=ExtResource("13_3mf0h")]
 position = Vector2(168, 1131)
@@ -684,7 +1475,21 @@ angle_preset = 2
 mirrored = true
 
 [node name="CollisionShape2D" parent="Green Walls/DeadWall8" index="0" unique_id=1644951480]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_mq716")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Green Walls/DeadWall8" index="1" unique_id=804434373]
+texture = ExtResource("16_fmh0u")
+flip_h = true
+hframes = 7
+
+[node name="Polygon2D" parent="Green Walls/DeadWall8" index="2" unique_id=138368735]
+rotation = -0.7853982
+
+[node name="CollisionShape2D" parent="Green Walls/DeadWall8/SlipperyArea" parent_id_path=PackedInt32Array(602631789, 773978709) index="0" unique_id=2040614053]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_o48b8")
 
 [node name="DeadWall9" parent="Green Walls" unique_id=747037680 instance=ExtResource("13_3mf0h")]
 position = Vector2(-278, 1388)
@@ -692,7 +1497,21 @@ angle_preset = 2
 length_units = 1
 
 [node name="CollisionShape2D" parent="Green Walls/DeadWall9" index="0" unique_id=1644951480]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_yc5xv")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Green Walls/DeadWall9" index="1" unique_id=804434373]
+texture = ExtResource("16_y6ecd")
+hframes = 5
+
+[node name="Polygon2D" parent="Green Walls/DeadWall9" index="2" unique_id=138368735]
+rotation = 0.7853982
+polygon = PackedVector2Array(-16, -4, 16, -4, 16, 4, -16, 4)
+
+[node name="CollisionShape2D" parent="Green Walls/DeadWall9/SlipperyArea" parent_id_path=PackedInt32Array(747037680, 773978709) index="0" unique_id=2040614053]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_dbvr5")
 
 [node name="DeadWall10" parent="Green Walls" unique_id=946712284 instance=ExtResource("13_3mf0h")]
 position = Vector2(-149, 1388)
@@ -701,7 +1520,22 @@ length_units = 1
 mirrored = true
 
 [node name="CollisionShape2D" parent="Green Walls/DeadWall10" index="0" unique_id=1644951480]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_ruxty")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Green Walls/DeadWall10" index="1" unique_id=804434373]
+texture = ExtResource("16_y6ecd")
+flip_h = true
+hframes = 5
+
+[node name="Polygon2D" parent="Green Walls/DeadWall10" index="2" unique_id=138368735]
+rotation = -0.7853982
+polygon = PackedVector2Array(-16, -4, 16, -4, 16, 4, -16, 4)
+
+[node name="CollisionShape2D" parent="Green Walls/DeadWall10/SlipperyArea" parent_id_path=PackedInt32Array(946712284, 773978709) index="0" unique_id=2040614053]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_kbn1a")
 
 [node name="DeadWall11" parent="Green Walls" unique_id=1307376097 instance=ExtResource("13_3mf0h")]
 position = Vector2(109, 1388)
@@ -709,7 +1543,21 @@ angle_preset = 2
 length_units = 1
 
 [node name="CollisionShape2D" parent="Green Walls/DeadWall11" index="0" unique_id=1644951480]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_1lkdd")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Green Walls/DeadWall11" index="1" unique_id=804434373]
+texture = ExtResource("16_y6ecd")
+hframes = 5
+
+[node name="Polygon2D" parent="Green Walls/DeadWall11" index="2" unique_id=138368735]
+rotation = 0.7853982
+polygon = PackedVector2Array(-16, -4, 16, -4, 16, 4, -16, 4)
+
+[node name="CollisionShape2D" parent="Green Walls/DeadWall11/SlipperyArea" parent_id_path=PackedInt32Array(1307376097, 773978709) index="0" unique_id=2040614053]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_l17ll")
 
 [node name="DeadWall12" parent="Green Walls" unique_id=2069552187 instance=ExtResource("13_3mf0h")]
 position = Vector2(238, 1388)
@@ -718,7 +1566,22 @@ length_units = 1
 mirrored = true
 
 [node name="CollisionShape2D" parent="Green Walls/DeadWall12" index="0" unique_id=1644951480]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_o0xyd")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Green Walls/DeadWall12" index="1" unique_id=804434373]
+texture = ExtResource("16_y6ecd")
+flip_h = true
+hframes = 5
+
+[node name="Polygon2D" parent="Green Walls/DeadWall12" index="2" unique_id=138368735]
+rotation = -0.7853982
+polygon = PackedVector2Array(-16, -4, 16, -4, 16, 4, -16, 4)
+
+[node name="CollisionShape2D" parent="Green Walls/DeadWall12/SlipperyArea" parent_id_path=PackedInt32Array(2069552187, 773978709) index="0" unique_id=2040614053]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_quoss")
 
 [node name="Green Currents" type="Node" parent="." unique_id=131356776]
 
@@ -824,7 +1687,20 @@ position = Vector2(-203, 1491)
 angle_preset = 2
 
 [node name="CollisionShape2D" parent="Blue Walls/DeadWall" index="0" unique_id=1644951480]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_2w864")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Blue Walls/DeadWall" index="1" unique_id=804434373]
+texture = ExtResource("16_fmh0u")
+hframes = 7
+
+[node name="Polygon2D" parent="Blue Walls/DeadWall" index="2" unique_id=138368735]
+rotation = 0.7853982
+
+[node name="CollisionShape2D" parent="Blue Walls/DeadWall/SlipperyArea" parent_id_path=PackedInt32Array(199810489, 773978709) index="0" unique_id=2040614053]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_u4st5")
 
 [node name="DeadWall2" parent="Blue Walls" unique_id=1057188526 instance=ExtResource("13_3mf0h")]
 position = Vector2(163, 1491)
@@ -832,7 +1708,21 @@ angle_preset = 2
 mirrored = true
 
 [node name="CollisionShape2D" parent="Blue Walls/DeadWall2" index="0" unique_id=1644951480]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_2dl3j")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Blue Walls/DeadWall2" index="1" unique_id=804434373]
+texture = ExtResource("16_fmh0u")
+flip_h = true
+hframes = 7
+
+[node name="Polygon2D" parent="Blue Walls/DeadWall2" index="2" unique_id=138368735]
+rotation = -0.7853982
+
+[node name="CollisionShape2D" parent="Blue Walls/DeadWall2/SlipperyArea" parent_id_path=PackedInt32Array(1057188526, 773978709) index="0" unique_id=2040614053]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_n6c7u")
 
 [node name="DeadWall3" parent="Blue Walls" unique_id=103367922 instance=ExtResource("13_3mf0h")]
 position = Vector2(-246, 1628)
@@ -840,7 +1730,21 @@ angle_preset = 2
 length_units = 1
 
 [node name="CollisionShape2D" parent="Blue Walls/DeadWall3" index="0" unique_id=1644951480]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_xtqx0")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Blue Walls/DeadWall3" index="1" unique_id=804434373]
+texture = ExtResource("16_y6ecd")
+hframes = 5
+
+[node name="Polygon2D" parent="Blue Walls/DeadWall3" index="2" unique_id=138368735]
+rotation = 0.7853982
+polygon = PackedVector2Array(-16, -4, 16, -4, 16, 4, -16, 4)
+
+[node name="CollisionShape2D" parent="Blue Walls/DeadWall3/SlipperyArea" parent_id_path=PackedInt32Array(103367922, 773978709) index="0" unique_id=2040614053]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_blpwo")
 
 [node name="DeadWall4" parent="Blue Walls" unique_id=1325929445 instance=ExtResource("13_3mf0h")]
 position = Vector2(231, 1628)
@@ -849,7 +1753,22 @@ length_units = 1
 mirrored = true
 
 [node name="CollisionShape2D" parent="Blue Walls/DeadWall4" index="0" unique_id=1644951480]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_n7m2b")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Blue Walls/DeadWall4" index="1" unique_id=804434373]
+texture = ExtResource("16_y6ecd")
+flip_h = true
+hframes = 5
+
+[node name="Polygon2D" parent="Blue Walls/DeadWall4" index="2" unique_id=138368735]
+rotation = -0.7853982
+polygon = PackedVector2Array(-16, -4, 16, -4, 16, 4, -16, 4)
+
+[node name="CollisionShape2D" parent="Blue Walls/DeadWall4/SlipperyArea" parent_id_path=PackedInt32Array(1325929445, 773978709) index="0" unique_id=2040614053]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_jqw2u")
 
 [node name="DeadWall5" parent="Blue Walls" unique_id=232387610 instance=ExtResource("13_3mf0h")]
 position = Vector2(-271, 1745)
@@ -857,7 +1776,21 @@ angle_preset = 2
 length_units = 1
 
 [node name="CollisionShape2D" parent="Blue Walls/DeadWall5" index="0" unique_id=1644951480]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_ayxep")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Blue Walls/DeadWall5" index="1" unique_id=804434373]
+texture = ExtResource("16_y6ecd")
+hframes = 5
+
+[node name="Polygon2D" parent="Blue Walls/DeadWall5" index="2" unique_id=138368735]
+rotation = 0.7853982
+polygon = PackedVector2Array(-16, -4, 16, -4, 16, 4, -16, 4)
+
+[node name="CollisionShape2D" parent="Blue Walls/DeadWall5/SlipperyArea" parent_id_path=PackedInt32Array(232387610, 773978709) index="0" unique_id=2040614053]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_jo3gi")
 
 [node name="DeadWall6" parent="Blue Walls" unique_id=407077683 instance=ExtResource("13_3mf0h")]
 position = Vector2(-149, 1745)
@@ -866,14 +1799,42 @@ length_units = 1
 mirrored = true
 
 [node name="CollisionShape2D" parent="Blue Walls/DeadWall6" index="0" unique_id=1644951480]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_bv680")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Blue Walls/DeadWall6" index="1" unique_id=804434373]
+texture = ExtResource("16_y6ecd")
+flip_h = true
+hframes = 5
+
+[node name="Polygon2D" parent="Blue Walls/DeadWall6" index="2" unique_id=138368735]
+rotation = -0.7853982
+polygon = PackedVector2Array(-16, -4, 16, -4, 16, 4, -16, 4)
+
+[node name="CollisionShape2D" parent="Blue Walls/DeadWall6/SlipperyArea" parent_id_path=PackedInt32Array(407077683, 773978709) index="0" unique_id=2040614053]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_48rby")
 
 [node name="DeadWall7" parent="Blue Walls" unique_id=579722099 instance=ExtResource("13_3mf0h")]
 position = Vector2(-93, 1733)
 angle_preset = 2
 
 [node name="CollisionShape2D" parent="Blue Walls/DeadWall7" index="0" unique_id=1644951480]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_xq6p4")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Blue Walls/DeadWall7" index="1" unique_id=804434373]
+texture = ExtResource("16_fmh0u")
+hframes = 7
+
+[node name="Polygon2D" parent="Blue Walls/DeadWall7" index="2" unique_id=138368735]
+rotation = 0.7853982
+
+[node name="CollisionShape2D" parent="Blue Walls/DeadWall7/SlipperyArea" parent_id_path=PackedInt32Array(579722099, 773978709) index="0" unique_id=2040614053]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_2pje0")
 
 [node name="DeadWall8" parent="Blue Walls" unique_id=1744916334 instance=ExtResource("13_3mf0h")]
 position = Vector2(53, 1733)
@@ -881,7 +1842,21 @@ angle_preset = 2
 mirrored = true
 
 [node name="CollisionShape2D" parent="Blue Walls/DeadWall8" index="0" unique_id=1644951480]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_5cymv")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Blue Walls/DeadWall8" index="1" unique_id=804434373]
+texture = ExtResource("16_fmh0u")
+flip_h = true
+hframes = 7
+
+[node name="Polygon2D" parent="Blue Walls/DeadWall8" index="2" unique_id=138368735]
+rotation = -0.7853982
+
+[node name="CollisionShape2D" parent="Blue Walls/DeadWall8/SlipperyArea" parent_id_path=PackedInt32Array(1744916334, 773978709) index="0" unique_id=2040614053]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_isgow")
 
 [node name="DeadWall9" parent="Blue Walls" unique_id=800603856 instance=ExtResource("13_3mf0h")]
 position = Vector2(99, 1745)
@@ -889,7 +1864,21 @@ angle_preset = 2
 length_units = 1
 
 [node name="CollisionShape2D" parent="Blue Walls/DeadWall9" index="0" unique_id=1644951480]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_8egjx")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Blue Walls/DeadWall9" index="1" unique_id=804434373]
+texture = ExtResource("16_y6ecd")
+hframes = 5
+
+[node name="Polygon2D" parent="Blue Walls/DeadWall9" index="2" unique_id=138368735]
+rotation = 0.7853982
+polygon = PackedVector2Array(-16, -4, 16, -4, 16, 4, -16, 4)
+
+[node name="CollisionShape2D" parent="Blue Walls/DeadWall9/SlipperyArea" parent_id_path=PackedInt32Array(800603856, 773978709) index="0" unique_id=2040614053]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_5uxsm")
 
 [node name="DeadWall10" parent="Blue Walls" unique_id=13222449 instance=ExtResource("13_3mf0h")]
 position = Vector2(221, 1745)
@@ -898,7 +1887,22 @@ length_units = 1
 mirrored = true
 
 [node name="CollisionShape2D" parent="Blue Walls/DeadWall10" index="0" unique_id=1644951480]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_4iqsb")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Blue Walls/DeadWall10" index="1" unique_id=804434373]
+texture = ExtResource("16_y6ecd")
+flip_h = true
+hframes = 5
+
+[node name="Polygon2D" parent="Blue Walls/DeadWall10" index="2" unique_id=138368735]
+rotation = -0.7853982
+polygon = PackedVector2Array(-16, -4, 16, -4, 16, 4, -16, 4)
+
+[node name="CollisionShape2D" parent="Blue Walls/DeadWall10/SlipperyArea" parent_id_path=PackedInt32Array(13222449, 773978709) index="0" unique_id=2040614053]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_5h6by")
 
 [node name="Blue Currents" type="Node" parent="." unique_id=2057836821]
 
@@ -992,7 +1996,20 @@ position = Vector2(-263, 1851)
 angle_preset = 2
 
 [node name="CollisionShape2D" parent="Indigo Walls/DeadWall" index="0" unique_id=1644951480]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_sc8ym")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Indigo Walls/DeadWall" index="1" unique_id=804434373]
+texture = ExtResource("16_fmh0u")
+hframes = 7
+
+[node name="Polygon2D" parent="Indigo Walls/DeadWall" index="2" unique_id=138368735]
+rotation = 0.7853982
+
+[node name="CollisionShape2D" parent="Indigo Walls/DeadWall/SlipperyArea" parent_id_path=PackedInt32Array(703831802, 773978709) index="0" unique_id=2040614053]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_34ubu")
 
 [node name="DeadWall2" parent="Indigo Walls" unique_id=1831293132 instance=ExtResource("13_3mf0h")]
 position = Vector2(216, 1863)
@@ -1001,7 +2018,22 @@ length_units = 1
 mirrored = true
 
 [node name="CollisionShape2D" parent="Indigo Walls/DeadWall2" index="0" unique_id=1644951480]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_byv1j")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Indigo Walls/DeadWall2" index="1" unique_id=804434373]
+texture = ExtResource("16_y6ecd")
+flip_h = true
+hframes = 5
+
+[node name="Polygon2D" parent="Indigo Walls/DeadWall2" index="2" unique_id=138368735]
+rotation = -0.7853982
+polygon = PackedVector2Array(-16, -4, 16, -4, 16, 4, -16, 4)
+
+[node name="CollisionShape2D" parent="Indigo Walls/DeadWall2/SlipperyArea" parent_id_path=PackedInt32Array(1831293132, 773978709) index="0" unique_id=2040614053]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_lbomf")
 
 [node name="DeadWall3" parent="Indigo Walls" unique_id=1719153867 instance=ExtResource("13_3mf0h")]
 position = Vector2(-14, 1983)
@@ -1010,7 +2042,22 @@ length_units = 1
 mirrored = true
 
 [node name="CollisionShape2D" parent="Indigo Walls/DeadWall3" index="0" unique_id=1644951480]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_vuist")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Indigo Walls/DeadWall3" index="1" unique_id=804434373]
+texture = ExtResource("16_y6ecd")
+flip_h = true
+hframes = 5
+
+[node name="Polygon2D" parent="Indigo Walls/DeadWall3" index="2" unique_id=138368735]
+rotation = -0.7853982
+polygon = PackedVector2Array(-16, -4, 16, -4, 16, 4, -16, 4)
+
+[node name="CollisionShape2D" parent="Indigo Walls/DeadWall3/SlipperyArea" parent_id_path=PackedInt32Array(1719153867, 773978709) index="0" unique_id=2040614053]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_b0rer")
 
 [node name="DeadWall4" parent="Indigo Walls" unique_id=902132053 instance=ExtResource("13_3mf0h")]
 position = Vector2(74, 1973)
@@ -1018,21 +2065,61 @@ angle_preset = 2
 length_units = 1
 
 [node name="CollisionShape2D" parent="Indigo Walls/DeadWall4" index="0" unique_id=1644951480]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_36kp0")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Indigo Walls/DeadWall4" index="1" unique_id=804434373]
+texture = ExtResource("16_y6ecd")
+hframes = 5
+
+[node name="Polygon2D" parent="Indigo Walls/DeadWall4" index="2" unique_id=138368735]
+rotation = 0.7853982
+polygon = PackedVector2Array(-16, -4, 16, -4, 16, 4, -16, 4)
+
+[node name="CollisionShape2D" parent="Indigo Walls/DeadWall4/SlipperyArea" parent_id_path=PackedInt32Array(902132053, 773978709) index="0" unique_id=2040614053]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_bx11x")
 
 [node name="DeadWall5" parent="Indigo Walls" unique_id=2079496835 instance=ExtResource("13_3mf0h")]
 position = Vector2(-74, 2105)
 angle_preset = 3
 
 [node name="CollisionShape2D" parent="Indigo Walls/DeadWall5" index="0" unique_id=1644951480]
+rotation = 0.46373397
+shape = SubResource("RectangleShape2D_r25ml")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Indigo Walls/DeadWall5" index="1" unique_id=804434373]
+texture = ExtResource("17_y6ecd")
+hframes = 6
+
+[node name="Polygon2D" parent="Indigo Walls/DeadWall5" index="2" unique_id=138368735]
+rotation = 0.46373397
+
+[node name="CollisionShape2D" parent="Indigo Walls/DeadWall5/SlipperyArea" parent_id_path=PackedInt32Array(2079496835, 773978709) index="0" unique_id=2040614053]
+rotation = 0.46373397
+shape = SubResource("RectangleShape2D_2gaj0")
 
 [node name="DeadWall6" parent="Indigo Walls" unique_id=847285572 instance=ExtResource("13_3mf0h")]
 position = Vector2(-131, 2076)
 angle_preset = 3
 
 [node name="CollisionShape2D" parent="Indigo Walls/DeadWall6" index="0" unique_id=1644951480]
+rotation = 0.46373397
+shape = SubResource("RectangleShape2D_oea3j")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Indigo Walls/DeadWall6" index="1" unique_id=804434373]
+texture = ExtResource("17_y6ecd")
+hframes = 6
+
+[node name="Polygon2D" parent="Indigo Walls/DeadWall6" index="2" unique_id=138368735]
+rotation = 0.46373397
+
+[node name="CollisionShape2D" parent="Indigo Walls/DeadWall6/SlipperyArea" parent_id_path=PackedInt32Array(847285572, 773978709) index="0" unique_id=2040614053]
+rotation = 0.46373397
+shape = SubResource("RectangleShape2D_o473j")
 
 [node name="DeadWall7" parent="Indigo Walls" unique_id=774397799 instance=ExtResource("13_3mf0h")]
 position = Vector2(84, 2105)
@@ -1040,7 +2127,21 @@ angle_preset = 3
 mirrored = true
 
 [node name="CollisionShape2D" parent="Indigo Walls/DeadWall7" index="0" unique_id=1644951480]
+rotation = -0.46373397
+shape = SubResource("RectangleShape2D_byp32")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Indigo Walls/DeadWall7" index="1" unique_id=804434373]
+texture = ExtResource("17_y6ecd")
+flip_h = true
+hframes = 6
+
+[node name="Polygon2D" parent="Indigo Walls/DeadWall7" index="2" unique_id=138368735]
+rotation = -0.46373397
+
+[node name="CollisionShape2D" parent="Indigo Walls/DeadWall7/SlipperyArea" parent_id_path=PackedInt32Array(774397799, 773978709) index="0" unique_id=2040614053]
+rotation = -0.46373397
+shape = SubResource("RectangleShape2D_e6ei1")
 
 [node name="DeadWall8" parent="Indigo Walls" unique_id=1126828548 instance=ExtResource("13_3mf0h")]
 position = Vector2(141, 2076)
@@ -1048,7 +2149,21 @@ angle_preset = 3
 mirrored = true
 
 [node name="CollisionShape2D" parent="Indigo Walls/DeadWall8" index="0" unique_id=1644951480]
+rotation = -0.46373397
+shape = SubResource("RectangleShape2D_2j0ce")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Indigo Walls/DeadWall8" index="1" unique_id=804434373]
+texture = ExtResource("17_y6ecd")
+flip_h = true
+hframes = 6
+
+[node name="Polygon2D" parent="Indigo Walls/DeadWall8" index="2" unique_id=138368735]
+rotation = -0.46373397
+
+[node name="CollisionShape2D" parent="Indigo Walls/DeadWall8/SlipperyArea" parent_id_path=PackedInt32Array(1126828548, 773978709) index="0" unique_id=2040614053]
+rotation = -0.46373397
+shape = SubResource("RectangleShape2D_4b1wg")
 
 [node name="Indigo Currents" type="Node" parent="." unique_id=1096142270]
 
@@ -1084,37 +2199,53 @@ curve = SubResource("Curve2D_netindigoright")
 [node name="Violet Bumpers" type="Node" parent="." unique_id=622084141]
 
 [node name="CircularBumper" parent="Violet Bumpers" unique_id=369470189 instance=ExtResource("10_ys2d3")]
-position = Vector2(-155, 2350)
+position = Vector2(-205, 2330)
 size_preset = 1
 radius = 16.0
 
 [node name="CircularBumper2" parent="Violet Bumpers" unique_id=874506305 instance=ExtResource("10_ys2d3")]
-position = Vector2(-103, 2380)
+position = Vector2(-159, 2372)
+variant = "3"
+
+[node name="CircularBumper12" parent="Violet Bumpers" unique_id=2098876600 instance=ExtResource("10_ys2d3")]
+position = Vector2(-251, 2372)
 variant = "3"
 
 [node name="CircularBumper3" parent="Violet Bumpers" unique_id=1307190253 instance=ExtResource("10_ys2d3")]
-position = Vector2(-207, 2380)
+position = Vector2(-251, 2288)
+variant = "3"
+
+[node name="CircularBumper10" parent="Violet Bumpers" unique_id=940208603 instance=ExtResource("10_ys2d3")]
+position = Vector2(-285, 2485)
 variant = "3"
 
 [node name="CircularBumper4" parent="Violet Bumpers" unique_id=1963781811 instance=ExtResource("10_ys2d3")]
-position = Vector2(-155, 2290)
+position = Vector2(-159, 2288)
 variant = "3"
 
 [node name="CircularBumper5" parent="Violet Bumpers" unique_id=29019911 instance=ExtResource("10_ys2d3")]
-position = Vector2(115, 2350)
+position = Vector2(165, 2330)
 size_preset = 1
 radius = 16.0
 
 [node name="CircularBumper6" parent="Violet Bumpers" unique_id=68110588 instance=ExtResource("10_ys2d3")]
-position = Vector2(167, 2380)
+position = Vector2(211, 2288)
+variant = "3"
+
+[node name="CircularBumper11" parent="Violet Bumpers" unique_id=2122443199 instance=ExtResource("10_ys2d3")]
+position = Vector2(245, 2485)
 variant = "3"
 
 [node name="CircularBumper7" parent="Violet Bumpers" unique_id=1601095991 instance=ExtResource("10_ys2d3")]
-position = Vector2(63, 2380)
+position = Vector2(211, 2372)
+variant = "3"
+
+[node name="CircularBumper13" parent="Violet Bumpers" unique_id=163850485 instance=ExtResource("10_ys2d3")]
+position = Vector2(119, 2372)
 variant = "3"
 
 [node name="CircularBumper8" parent="Violet Bumpers" unique_id=363417802 instance=ExtResource("10_ys2d3")]
-position = Vector2(115, 2290)
+position = Vector2(119, 2288)
 variant = "3"
 
 [node name="CircularBumper9" parent="Violet Bumpers" unique_id=1766307282 instance=ExtResource("10_ys2d3")]
@@ -1130,16 +2261,16 @@ position = Vector2(-200, 2240)
 position = Vector2(-90, 2240)
 
 [node name="CloudFlipperLeftUp2" parent="Violet Flippers" unique_id=1801426755 instance=ExtResource("13_3ar3m")]
-position = Vector2(60, 2240)
+position = Vector2(50, 2240)
 
 [node name="CloudFlipperRightUp2" parent="Violet Flippers" unique_id=136390377 instance=ExtResource("14_dpahy")]
-position = Vector2(170, 2240)
+position = Vector2(160, 2240)
 
 [node name="CloudFlipperLeftUp3" parent="Violet Flippers" unique_id=253541123 instance=ExtResource("13_3ar3m")]
-position = Vector2(-52, 2375)
+position = Vector2(-62, 2375)
 
 [node name="CloudFlipperRightUp3" parent="Violet Flippers" unique_id=1977818153 instance=ExtResource("14_dpahy")]
-position = Vector2(12, 2375)
+position = Vector2(22, 2375)
 
 [node name="CloudFlipperLeftUp4" parent="Violet Flippers" unique_id=854782298 instance=ExtResource("13_3ar3m")]
 position = Vector2(-190, 2480)
@@ -1160,7 +2291,20 @@ position = Vector2(-228, 2211)
 angle_preset = 2
 
 [node name="CollisionShape2D" parent="Violet Walls/DeadWall" index="0" unique_id=1644951480]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_m2fvw")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Violet Walls/DeadWall" index="1" unique_id=804434373]
+texture = ExtResource("16_fmh0u")
+hframes = 7
+
+[node name="Polygon2D" parent="Violet Walls/DeadWall" index="2" unique_id=138368735]
+rotation = 0.7853982
+
+[node name="CollisionShape2D" parent="Violet Walls/DeadWall/SlipperyArea" parent_id_path=PackedInt32Array(846627150, 773978709) index="0" unique_id=2040614053]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_vcyat")
 
 [node name="DeadWall2" parent="Violet Walls" unique_id=1327830924 instance=ExtResource("13_3mf0h")]
 position = Vector2(-62, 2211)
@@ -1168,29 +2312,83 @@ angle_preset = 2
 mirrored = true
 
 [node name="CollisionShape2D" parent="Violet Walls/DeadWall2" index="0" unique_id=1644951480]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_5xy1h")
 one_way_collision = true
 
+[node name="Sprite2D" parent="Violet Walls/DeadWall2" index="1" unique_id=804434373]
+texture = ExtResource("16_fmh0u")
+flip_h = true
+hframes = 7
+
+[node name="Polygon2D" parent="Violet Walls/DeadWall2" index="2" unique_id=138368735]
+rotation = -0.7853982
+
+[node name="CollisionShape2D" parent="Violet Walls/DeadWall2/SlipperyArea" parent_id_path=PackedInt32Array(1327830924, 773978709) index="0" unique_id=2040614053]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_7k4j5")
+
 [node name="DeadWall3" parent="Violet Walls" unique_id=1214333653 instance=ExtResource("13_3mf0h")]
-position = Vector2(32, 2211)
+position = Vector2(22, 2211)
 angle_preset = 2
 
 [node name="CollisionShape2D" parent="Violet Walls/DeadWall3" index="0" unique_id=1644951480]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_js36v")
 one_way_collision = true
 
+[node name="Sprite2D" parent="Violet Walls/DeadWall3" index="1" unique_id=804434373]
+texture = ExtResource("16_fmh0u")
+hframes = 7
+
+[node name="Polygon2D" parent="Violet Walls/DeadWall3" index="2" unique_id=138368735]
+rotation = 0.7853982
+
+[node name="CollisionShape2D" parent="Violet Walls/DeadWall3/SlipperyArea" parent_id_path=PackedInt32Array(1214333653, 773978709) index="0" unique_id=2040614053]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_5g86v")
+
 [node name="DeadWall4" parent="Violet Walls" unique_id=1865246373 instance=ExtResource("13_3mf0h")]
-position = Vector2(198, 2211)
+position = Vector2(188, 2211)
 angle_preset = 2
 mirrored = true
 
 [node name="CollisionShape2D" parent="Violet Walls/DeadWall4" index="0" unique_id=1644951480]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_qfp68")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Violet Walls/DeadWall4" index="1" unique_id=804434373]
+texture = ExtResource("16_fmh0u")
+flip_h = true
+hframes = 7
+
+[node name="Polygon2D" parent="Violet Walls/DeadWall4" index="2" unique_id=138368735]
+rotation = -0.7853982
+
+[node name="CollisionShape2D" parent="Violet Walls/DeadWall4/SlipperyArea" parent_id_path=PackedInt32Array(1865246373, 773978709) index="0" unique_id=2040614053]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_qahk8")
 
 [node name="DeadWall5" parent="Violet Walls" unique_id=376217386 instance=ExtResource("13_3mf0h")]
 position = Vector2(-224, 2460)
 angle_preset = 3
 
 [node name="CollisionShape2D" parent="Violet Walls/DeadWall5" index="0" unique_id=1644951480]
+rotation = 0.46373397
+shape = SubResource("RectangleShape2D_fyij1")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Violet Walls/DeadWall5" index="1" unique_id=804434373]
+texture = ExtResource("17_y6ecd")
+hframes = 6
+
+[node name="Polygon2D" parent="Violet Walls/DeadWall5" index="2" unique_id=138368735]
+rotation = 0.46373397
+
+[node name="CollisionShape2D" parent="Violet Walls/DeadWall5/SlipperyArea" parent_id_path=PackedInt32Array(376217386, 773978709) index="0" unique_id=2040614053]
+rotation = 0.46373397
+shape = SubResource("RectangleShape2D_2yd2c")
 
 [node name="DeadWall6" parent="Violet Walls" unique_id=1355139451 instance=ExtResource("13_3mf0h")]
 position = Vector2(-86, 2460)
@@ -1198,14 +2396,63 @@ angle_preset = 3
 mirrored = true
 
 [node name="CollisionShape2D" parent="Violet Walls/DeadWall6" index="0" unique_id=1644951480]
+rotation = -0.46373397
+shape = SubResource("RectangleShape2D_3d5y0")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Violet Walls/DeadWall6" index="1" unique_id=804434373]
+texture = ExtResource("17_y6ecd")
+flip_h = true
+hframes = 6
+
+[node name="Polygon2D" parent="Violet Walls/DeadWall6" index="2" unique_id=138368735]
+rotation = -0.46373397
+
+[node name="CollisionShape2D" parent="Violet Walls/DeadWall6/SlipperyArea" parent_id_path=PackedInt32Array(1355139451, 773978709) index="0" unique_id=2040614053]
+rotation = -0.46373397
+shape = SubResource("RectangleShape2D_xjskw")
 
 [node name="DeadWall7" parent="Violet Walls" unique_id=453878870 instance=ExtResource("13_3mf0h")]
 position = Vector2(46, 2460)
 angle_preset = 3
 
 [node name="CollisionShape2D" parent="Violet Walls/DeadWall7" index="0" unique_id=1644951480]
+rotation = 0.46373397
+shape = SubResource("RectangleShape2D_e0jb8")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Violet Walls/DeadWall7" index="1" unique_id=804434373]
+texture = ExtResource("17_y6ecd")
+hframes = 6
+
+[node name="Polygon2D" parent="Violet Walls/DeadWall7" index="2" unique_id=138368735]
+rotation = 0.46373397
+
+[node name="CollisionShape2D" parent="Violet Walls/DeadWall7/SlipperyArea" parent_id_path=PackedInt32Array(453878870, 773978709) index="0" unique_id=2040614053]
+rotation = 0.46373397
+shape = SubResource("RectangleShape2D_ebfpm")
+
+[node name="DeadWall10" parent="Violet Walls" unique_id=797132162 instance=ExtResource("13_3mf0h")]
+position = Vector2(-81, 2362)
+angle_preset = 3
+length_units = 1
+
+[node name="CollisionShape2D" parent="Violet Walls/DeadWall10" index="0" unique_id=1644951480]
+rotation = 0.46373397
+shape = SubResource("RectangleShape2D_g4abw")
+one_way_collision = true
+
+[node name="Sprite2D" parent="Violet Walls/DeadWall10" index="1" unique_id=804434373]
+texture = ExtResource("17_crv7d")
+hframes = 5
+
+[node name="Polygon2D" parent="Violet Walls/DeadWall10" index="2" unique_id=138368735]
+rotation = 0.46373397
+polygon = PackedVector2Array(-16, -4, 16, -4, 16, 4, -16, 4)
+
+[node name="CollisionShape2D" parent="Violet Walls/DeadWall10/SlipperyArea" parent_id_path=PackedInt32Array(797132162, 773978709) index="0" unique_id=2040614053]
+rotation = 0.46373397
+shape = SubResource("RectangleShape2D_1rm5m")
 
 [node name="DeadWall8" parent="Violet Walls" unique_id=1335744202 instance=ExtResource("13_3mf0h")]
 position = Vector2(184, 2460)
@@ -1213,7 +2460,45 @@ angle_preset = 3
 mirrored = true
 
 [node name="CollisionShape2D" parent="Violet Walls/DeadWall8" index="0" unique_id=1644951480]
+rotation = -0.46373397
+shape = SubResource("RectangleShape2D_3mon7")
 one_way_collision = true
+
+[node name="Sprite2D" parent="Violet Walls/DeadWall8" index="1" unique_id=804434373]
+texture = ExtResource("17_y6ecd")
+flip_h = true
+hframes = 6
+
+[node name="Polygon2D" parent="Violet Walls/DeadWall8" index="2" unique_id=138368735]
+rotation = -0.46373397
+
+[node name="CollisionShape2D" parent="Violet Walls/DeadWall8/SlipperyArea" parent_id_path=PackedInt32Array(1335744202, 773978709) index="0" unique_id=2040614053]
+rotation = -0.46373397
+shape = SubResource("RectangleShape2D_2ecv5")
+
+[node name="DeadWall9" parent="Violet Walls" unique_id=2107120708 instance=ExtResource("13_3mf0h")]
+position = Vector2(41, 2362)
+angle_preset = 3
+length_units = 1
+mirrored = true
+
+[node name="CollisionShape2D" parent="Violet Walls/DeadWall9" index="0" unique_id=1644951480]
+rotation = -0.46373397
+shape = SubResource("RectangleShape2D_ftks6")
+one_way_collision = true
+
+[node name="Sprite2D" parent="Violet Walls/DeadWall9" index="1" unique_id=804434373]
+texture = ExtResource("17_crv7d")
+flip_h = true
+hframes = 5
+
+[node name="Polygon2D" parent="Violet Walls/DeadWall9" index="2" unique_id=138368735]
+rotation = -0.46373397
+polygon = PackedVector2Array(-16, -4, 16, -4, 16, 4, -16, 4)
+
+[node name="CollisionShape2D" parent="Violet Walls/DeadWall9/SlipperyArea" parent_id_path=PackedInt32Array(2107120708, 773978709) index="0" unique_id=2040614053]
+rotation = -0.46373397
+shape = SubResource("RectangleShape2D_vugwi")
 
 [node name="Violet Currents" type="Node" parent="." unique_id=2059717945]
 
@@ -1243,6 +2528,7 @@ exit_impulse = 200.0
 particles_per_emitter = 6
 
 [node name="Path2D" parent="Violet Currents/Net Violet Left" index="0" unique_id=1461068862]
+position = Vector2(0, 15)
 curve = SubResource("Curve2D_netvioletleft")
 
 [node name="Net Violet Centre" parent="Violet Currents" unique_id=208403720 instance=ExtResource("5_current")]
@@ -1263,7 +2549,26 @@ exit_impulse = 200.0
 particles_per_emitter = 6
 
 [node name="Path2D" parent="Violet Currents/Net Violet Right" index="0" unique_id=1461068862]
+position = Vector2(-6, 17)
 curve = SubResource("Curve2D_netvioletright")
+
+[node name="Green Launchers" type="Node" parent="." unique_id=1639890214]
+
+[node name="RotatingLauncher" parent="Green Launchers" unique_id=1402750544 instance=ExtResource("17_fmh0u")]
+position = Vector2(-150, 1255)
+
+[node name="RotatingLauncher2" parent="Green Launchers" unique_id=1635891979 instance=ExtResource("17_fmh0u")]
+position = Vector2(110, 1255)
+
+[node name="Indigo Launchers" type="Node" parent="." unique_id=2051874010]
+
+[node name="RotatingLauncher" parent="Indigo Launchers" unique_id=869171545 instance=ExtResource("17_fmh0u")]
+position = Vector2(30, 1915)
+
+[node name="Violet Launchers" type="Node" parent="." unique_id=650219866]
+
+[node name="RotatingLauncher" parent="Violet Launchers" unique_id=2138714540 instance=ExtResource("17_fmh0u")]
+position = Vector2(-20, 2300)
 
 [editable path="Red Walls/DeadWall"]
 [editable path="Red Walls/DeadWall2"]
@@ -1337,7 +2642,9 @@ curve = SubResource("Curve2D_netvioletright")
 [editable path="Violet Walls/DeadWall5"]
 [editable path="Violet Walls/DeadWall6"]
 [editable path="Violet Walls/DeadWall7"]
+[editable path="Violet Walls/DeadWall10"]
 [editable path="Violet Walls/DeadWall8"]
+[editable path="Violet Walls/DeadWall9"]
 [editable path="Violet Currents/Ladder Violet to Indigo"]
 [editable path="Violet Currents/Express Violet to Blue"]
 [editable path="Violet Currents/Net Violet Left"]
