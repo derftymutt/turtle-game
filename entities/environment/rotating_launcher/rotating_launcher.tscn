@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://entities/environment/rotating_launcher/rotating_launcher.gd" id="1_launcher"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_launcher"]
-radius = 16.0
+radius = 15.0
 
 [node name="RotatingLauncher" type="Area2D"]
 collision_layer = 0
@@ -12,3 +12,11 @@ script = ExtResource("1_launcher")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_launcher")
+
+[node name="Tail" type="Sprite2D" parent="."]
+centered = false
+offset = Vector2(-15, -15)
+
+[node name="Head" type="Sprite2D" parent="."]
+centered = false
+offset = Vector2(-15, -15)

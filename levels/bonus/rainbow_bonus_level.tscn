@@ -345,7 +345,7 @@ point_count = 3
 
 [sub_resource type="Curve2D" id="Curve2D_netbluecentre"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, -70, 1810, 0, 0, 0, 0, -90, 1792, 0, 0, 0, 0, -100, 1740)
+"points": PackedVector2Array(0, 0, 0, 0, -70, 1810, 0, 0, 0, 0, -90, 1792, 0, 0, 0, 0, -99, 1750)
 }
 point_count = 3
 
@@ -556,7 +556,7 @@ particles_per_emitter = 12
 show_debug_arrows = false
 
 [node name="TurtlePlayer" parent="." unique_id=1560208226 instance=ExtResource("6_turtle")]
-position = Vector2(43, 2426)
+position = Vector2(304, 2490)
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=501755283]
 script = ExtResource("3_cam")
@@ -2556,19 +2556,29 @@ curve = SubResource("Curve2D_netvioletright")
 
 [node name="RotatingLauncher" parent="Green Launchers" unique_id=1402750544 instance=ExtResource("17_fmh0u")]
 position = Vector2(-150, 1255)
+radius = 16.0
 
 [node name="RotatingLauncher2" parent="Green Launchers" unique_id=1635891979 instance=ExtResource("17_fmh0u")]
 position = Vector2(110, 1255)
+radius = 16.0
 
 [node name="Indigo Launchers" type="Node" parent="." unique_id=2051874010]
 
 [node name="RotatingLauncher" parent="Indigo Launchers" unique_id=869171545 instance=ExtResource("17_fmh0u")]
 position = Vector2(30, 1915)
+radius = 16.0
 
 [node name="Violet Launchers" type="Node" parent="." unique_id=650219866]
 
 [node name="RotatingLauncher" parent="Violet Launchers" unique_id=2138714540 instance=ExtResource("17_fmh0u")]
 position = Vector2(-20, 2300)
+radius = 16.0
+
+[node name="Roaming Launchers" type="Node" parent="." unique_id=648798800]
+
+[node name="RoamingLauncher" parent="Roaming Launchers" unique_id=32908530 instance=ExtResource("17_fmh0u")]
+position = Vector2(100, 760)
+roams = true
 
 [editable path="Red Walls/DeadWall"]
 [editable path="Red Walls/DeadWall2"]

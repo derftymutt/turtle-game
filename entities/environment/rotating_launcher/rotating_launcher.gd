@@ -23,23 +23,31 @@ class_name RotatingLauncher
 ## _physics_process.
 ##
 ## SCENE SETUP: the Area2D's collision layer / mask are set in the Inspector
-## (layer 0, mask = Player). The visuals are drawn in code for now — a cloud
-## of puffs with a tail — until there is a sprite.
+## (layer 0, mask = Player).
+##
+## ART: comet.png — frames side by side, each 60×30: a 30px head (the circle,
+## left) with the tail to its right. The sheet is split in code into the head,
+## which never rotates, and the tail, which swings around the head to sit
+## opposite the launch direction (or, while wandering, opposite the way the
+## comet is drifting). See _build_frames().
 
 @export_group("Shape")
-## Radius of the comet's head, in pixels. The CollisionShape2D follows it.
-@export var radius: float = 16.0:
+## Catch radius, in pixels (the head art is 30px across). The
+## CollisionShape2D follows it.
+@export var radius: float = 15.0:
 	set(value):
 		radius = value
 		_sync_shape()
 		queue_redraw()
-## Direction it points while idle, in degrees (0 = right, -90 = up)
+## Direction it aims in the editor and when first caught, in degrees
+## (0 = right, -90 = up)
 @export var rest_angle_degrees: float = -90.0:
 	set(value):
 		rest_angle_degrees = value
 		if _state == State.WANDERING:
 			_angle = deg_to_rad(value)
-		queue_redraw()
+			_tail_angle = _angle + PI
+			_apply_visuals()
 
 @export_group("Wander")
 ## How far from home it drifts, sideways / up and down (pixels). The editor
@@ -50,6 +58,24 @@ class_name RotatingLauncher
 		queue_redraw()
 ## Seconds for one lazy loop around home
 @export var wander_period: float = 9.0
+
+@export_group("Roam")
+## A roaming comet has no home: it drifts all over `roam_area`, and after a
+## flight it rematerialises wherever it evaporated. Wander settings are
+## ignored.
+@export var roams: bool = false:
+	set(value):
+		roams = value
+		queue_redraw()
+## Where it may roam, in level coordinates. The editor outlines it.
+@export var roam_area: Rect2 = Rect2(-290.0, 80.0, 540.0, 2400.0):
+	set(value):
+		roam_area = value
+		queue_redraw()
+## Drift speed, in pixels per second
+@export var roam_speed: float = 40.0
+## How sharply its course meanders (radians per second, at most)
+@export var roam_turn_rate: float = 0.7
 
 @export_group("Launch")
 @export var launch_action: String = "ufo_windup"
@@ -71,8 +97,13 @@ class_name RotatingLauncher
 @export var respawn_seconds: float = 5.0
 
 @export_group("Visual")
-@export var cloud_color: Color = Color(0.86, 0.95, 1.0, 1.0)
-@export var core_color: Color = Color(0.55, 0.85, 1.0, 1.0)
+## Frames per second of the two-frame shimmer
+@export var animation_fps: float = 5.0
+## How quickly the tail swings round to follow a change of direction while
+## wandering (higher = snappier)
+@export var tail_turn_speed: float = 5.0
+## Blinking dots ahead of the comet while the turtle is inside
+@export var show_aim_dots: bool = true
 @export var aim_color: Color = Color(1.0, 0.9, 0.3, 1.0)
 
 enum State { WANDERING, HOLDING, FLYING, GONE }
@@ -80,9 +111,12 @@ var _state: State = State.WANDERING
 
 const _EVAPORATE_SECONDS := 0.45
 const _MATERIALIZE_SECONDS := 0.6
-const _PUFF_COUNT := 9
-## In flight the cloud draws over the turtle (z 1), which shows through it
-const _FLIGHT_Z_INDEX := 2
+const _SHEET = preload("res://entities/environment/rotating_launcher/comet.png")
+const _FRAME_SIZE := Vector2i(60, 30)
+const _HEAD_DIAMETER := 30
+## Split art, built once and shared by every comet: one texture per frame
+static var _head_frames: Array[ImageTexture] = []
+static var _tail_frames: Array[ImageTexture] = []
 
 ## Direction of the aim / tail, in radians
 var _angle: float = -PI * 0.5
@@ -96,22 +130,32 @@ var _launch_dir: Vector2 = Vector2.UP
 var _spin_sign: float = 1.0
 ## 0 = invisible / evaporated, 1 = fully formed
 var _presence: float = 1.0
-var _rest_z_index: int = 0
+## Where the tail points (radians) — eased toward opposite the aim / motion
+var _tail_angle: float = PI * 0.5
+var _last_position: Vector2 = Vector2.ZERO
+## Roaming: current course (radians) and the clock behind its meander
+var _roam_heading: float = 0.0
+var _roam_time: float = 0.0
 var _draw_time: float = 0.0
-## Cloud puffs: Vector3(angle, distance from centre (× radius), size (× radius))
-var _puffs: Array[Vector3] = []
+
+@onready var _tail: Sprite2D = $Tail
+@onready var _head: Sprite2D = $Head
 
 func _ready() -> void:
 	_angle = deg_to_rad(rest_angle_degrees)
+	_tail_angle = _angle + PI
 	_sync_shape()
-	_build_puffs()
+	_build_frames()
+	_apply_visuals()
 	if Engine.is_editor_hint():
 		return
 	add_to_group("rotating_launchers")
 	_home = global_position
-	_rest_z_index = z_index
+	_last_position = global_position
 	# Each comet starts somewhere different on its loop
 	_wander_time = randf() * wander_period
+	_roam_heading = randf() * TAU
+	_roam_time = randf() * 100.0
 	body_entered.connect(_on_body_entered)
 
 func _sync_shape() -> void:
@@ -123,12 +167,49 @@ func _sync_shape() -> void:
 	circle.radius = radius
 	shape_node.shape = circle
 
-func _build_puffs() -> void:
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 11
-	_puffs.clear()
-	for i in _PUFF_COUNT:
-		_puffs.append(Vector3(TAU * i / _PUFF_COUNT + rng.randf_range(-0.2, 0.2), rng.randf_range(0.5, 0.75), rng.randf_range(0.42, 0.6)))
+## Splits each frame of the sheet into a head texture and a tail texture.
+## The tail is drawn hugging the right side of the head, so a straight cut
+## won't do: a pixel belongs to the head if it mirrors an opaque pixel of the
+## head's left half (which the tail never touches). The art has no outline
+## where the tail joins on, so the left outline is mirrored across to close
+## the circle — otherwise the head would show a gap once the tail swings away.
+func _build_frames() -> void:
+	if not _head_frames.is_empty():
+		return
+	var sheet: Image = _SHEET.get_image()
+	if sheet == null:
+		return
+	if sheet.is_compressed():
+		sheet.decompress()
+	sheet.convert(Image.FORMAT_RGBA8)
+	var half: int = _HEAD_DIAMETER / 2
+	for f in sheet.get_width() / _FRAME_SIZE.x:
+		var frame: Image = sheet.get_region(Rect2i(Vector2i(f * _FRAME_SIZE.x, 0), _FRAME_SIZE))
+		var head := Image.create(_HEAD_DIAMETER, _FRAME_SIZE.y, false, Image.FORMAT_RGBA8)
+		var tail: Image = frame.duplicate()
+		for y in _FRAME_SIZE.y:
+			# First opaque pixel from the left = the outline on this row
+			var edge: int = -1
+			for x in half:
+				if frame.get_pixel(x, y).a > 0.0:
+					edge = x
+					break
+			if edge < 0:
+				continue
+			var right_edge: int = _HEAD_DIAMETER - 1 - edge
+			for x in range(edge, right_edge + 1):
+				var mirrored: int = _HEAD_DIAMETER - 1 - x
+				# Outline pixels on the right come from the left side
+				var from_left: bool = x >= half and mirrored <= edge + 1 and _is_outline(frame, mirrored, y, edge)
+				head.set_pixel(x, y, frame.get_pixel(mirrored if from_left else x, y))
+				tail.set_pixel(x, y, Color(0, 0, 0, 0))
+		_head_frames.append(ImageTexture.create_from_image(head))
+		_tail_frames.append(ImageTexture.create_from_image(tail))
+
+## The outline is the first pixel of a row, plus the one after it where the
+## circle's edge is two pixels thick (same colour as the first).
+func _is_outline(frame: Image, x: int, y: int, edge: int) -> bool:
+	return x == edge or frame.get_pixel(x, y).is_equal_approx(frame.get_pixel(edge, y))
 
 # ---------------------------------------------------------------------------
 # STATES
@@ -140,8 +221,18 @@ func _physics_process(delta: float) -> void:
 	match _state:
 		State.WANDERING:
 			_presence = minf(1.0, _presence + delta / _MATERIALIZE_SECONDS)
-			_wander_time += delta
-			global_position = _home + _wander_offset()
+			if roams:
+				_roam(delta)
+			else:
+				_wander_time += delta
+				global_position = _home + _wander_offset()
+			# Tail trails the drift. Turn faster the faster it's moving, so
+			# the slow turnarounds of the loop don't whip it about.
+			var drift: Vector2 = (global_position - _last_position) / maxf(delta, 0.0001)
+			if drift.length() > 0.5:
+				var weight: float = clampf(tail_turn_speed * delta * minf(drift.length() / 12.0, 1.5), 0.0, 1.0)
+				_tail_angle = lerp_angle(_tail_angle, (-drift).angle(), weight)
+			_last_position = global_position
 			# Only catches once fully formed
 			if _presence >= 1.0 and not monitoring:
 				monitoring = true
@@ -157,10 +248,34 @@ func _process(delta: float) -> void:
 	if Engine.is_editor_hint():
 		return
 	_draw_time += delta
-	# Follow the turtle every drawn frame, so the cloud never lags behind it
-	if _state == State.FLYING and is_instance_valid(_passenger):
-		global_position = _passenger.global_position
+	match _state:
+		State.HOLDING:
+			# Directly opposite the aim, eased in from wherever it was trailing
+			_tail_angle = lerp_angle(_tail_angle, _angle + PI, clampf(18.0 * delta, 0.0, 1.0))
+		State.FLYING:
+			# Follow the turtle every drawn frame, so the comet never lags it
+			if is_instance_valid(_passenger):
+				global_position = _passenger.global_position
+			_tail_angle = lerp_angle(_tail_angle, _angle + PI, clampf(14.0 * delta, 0.0, 1.0))
+	_apply_visuals()
 	queue_redraw()
+
+## Drifts on a slowly meandering course, turning back in from the edges of
+## roam_area. Two out-of-step sines make the meander wander without repeating
+## noticeably.
+func _roam(delta: float) -> void:
+	_roam_time += delta
+	_roam_heading += (sin(_roam_time * 0.37) + sin(_roam_time * 0.83 + 1.3)) * 0.5 * roam_turn_rate * delta
+	var course := Vector2.from_angle(_roam_heading)
+	# Near an edge (or outside): steer back toward the middle of the area
+	var margin := 40.0
+	var inner := roam_area.grow(-margin)
+	if not inner.has_point(global_position):
+		var inward: Vector2 = (global_position.clamp(inner.position, inner.end) - global_position).normalized()
+		# Quick enough to come about within the margin, whatever the speed
+		course = course.lerp(inward, clampf(roam_speed / margin * 3.0 * delta, 0.0, 1.0)).normalized()
+		_roam_heading = course.angle()
+	global_position = (global_position + course * roam_speed * delta).clamp(roam_area.position, roam_area.end)
 
 ## A slow figure-of-eight-ish loop around home.
 func _wander_offset() -> Vector2:
@@ -198,7 +313,6 @@ func _launch(turtle: Node2D) -> void:
 	_launch_dir = Vector2.from_angle(_angle)
 	_state = State.FLYING
 	_flight_timer = 0.0
-	z_index = _FLIGHT_Z_INDEX
 	set_deferred("monitoring", false)
 	turtle.exit_puffer(global_position, _launch_dir * launch_speed)
 
@@ -225,8 +339,12 @@ func _rematerialize() -> void:
 	_state = State.WANDERING
 	_presence = 0.0
 	_angle = deg_to_rad(rest_angle_degrees)
-	global_position = _home + _wander_offset()
-	z_index = _rest_z_index
+	if roams:
+		# No home: carries on from wherever the flight ended
+		global_position = global_position.clamp(roam_area.position, roam_area.end)
+	else:
+		global_position = _home + _wander_offset()
+	_last_position = global_position
 
 ## The turtle is going away without launching (PufferFish API).
 func release_captured() -> void:
@@ -240,54 +358,38 @@ func _exit_tree() -> void:
 		turtle.exit_puffer(global_position, Vector2.ZERO)
 
 # ---------------------------------------------------------------------------
-# DRAWING
+# VISUALS
 # ---------------------------------------------------------------------------
+
+## Head stays upright; the tail swings around the head's centre. Fading in
+## and out (materialise / evaporate) is the whole node's alpha.
+func _apply_visuals() -> void:
+	if _head == null or _tail == null or _head_frames.is_empty():
+		return
+	var frame: int = int(_draw_time * animation_fps) % _head_frames.size()
+	_head.texture = _head_frames[frame]
+	_tail.texture = _tail_frames[frame]
+	# The tail art points right (angle 0) from the head
+	_tail.rotation = _tail_angle
+	modulate.a = _presence
+	# Evaporating: swells a little as it fades
+	var swell: float = 1.0 + (1.0 - _presence) * 0.35 if _state == State.GONE else 1.0
+	_head.scale = Vector2.ONE * swell
+	_tail.scale = Vector2.ONE * swell
 
 func _draw() -> void:
 	if Engine.is_editor_hint():
-		# Where it wanders
+		# Where it wanders / roams
+		if roams:
+			draw_rect(Rect2(roam_area.position - global_position, roam_area.size), Color(1, 1, 1, 0.35), false)
+			return
 		draw_set_transform(Vector2.ZERO, 0.0, wander_range + Vector2.ONE * radius)
 		draw_arc(Vector2.ZERO, 1.0, 0.0, TAU, 40, Color(1, 1, 1, 0.35), -1.0)
 		draw_set_transform(Vector2.ZERO)
-	if _presence <= 0.0:
 		return
-
-	var dir := Vector2.from_angle(_angle)
-	var holding := _state == State.HOLDING
-	var flying := _state == State.FLYING
-	# Puffed up around the turtle while it's inside
-	var size: float = radius * (1.25 if holding else 1.0)
-	# Evaporating: the puffs drift apart as they fade
-	var spread: float = 1.0 + (1.0 - _presence) * 1.2
-	# See-through in flight so the turtle shows inside the cloud
-	var alpha: float = _presence * (0.55 if flying else 0.9)
-
-	# Tail: streams out behind the aim (holding) or the flight; a stub at rest
-	var tail_length: float = size * (3.2 if flying else (2.2 if holding else 1.1))
-	var tail_puffs: int = 7
-	for i in tail_puffs:
-		var f: float = float(i + 1) / tail_puffs
-		var wobble: float = sin(_draw_time * 9.0 - f * 5.0) * size * 0.14 * f
-		var p: Vector2 = -dir * (size * 0.5 + tail_length * f) + dir.orthogonal() * wobble
-		draw_circle(p * spread, size * lerpf(0.5, 0.12, f), Color(cloud_color, alpha * (1.0 - f) * 0.7))
-
-	# Head: a ring of soft puffs that breathe a little, over a brighter core
-	for i in _puffs.size():
-		var puff: Vector3 = _puffs[i]
-		var breathe: float = 1.0 + sin(_draw_time * 2.4 + i * 1.7) * 0.08
-		var p: Vector2 = Vector2.from_angle(puff.x + _draw_time * 0.25) * puff.y * size * spread
-		draw_circle(p, puff.z * size * breathe, Color(cloud_color, alpha * 0.75))
-	draw_circle(Vector2.ZERO, size * 0.6, Color(core_color, alpha * 0.8))
-	draw_circle(dir * size * 0.2, size * 0.32, Color(1, 1, 1, alpha))
-
-	# Aim: arrow on the leading edge plus a dotted line out ahead
-	if holding:
-		var side := dir.orthogonal()
-		var tip := dir * (size + 9.0)
-		var base := dir * (size - 1.0)
-		draw_colored_polygon(PackedVector2Array([tip, base + side * 6.0, base - side * 6.0]), aim_color)
+	# Aim: blinking dots out ahead, opposite the tail
+	if _state == State.HOLDING and show_aim_dots:
+		var dir := Vector2.from_angle(_angle)
 		for i in 3:
 			var blink: float = 0.45 + 0.55 * absf(sin(_draw_time * 6.0 - i * 0.9))
-			draw_circle(dir * (size + 17.0 + i * 9.0), 2.0 - i * 0.4, Color(aim_color, blink))
-	elif _state == State.WANDERING:
-		draw_circle(dir * (size * 0.9), 2.0, Color(aim_color, _presence))
+			draw_circle(dir * (radius + 7.0 + i * 8.0), 2.0 - i * 0.4, Color(aim_color, blink))
