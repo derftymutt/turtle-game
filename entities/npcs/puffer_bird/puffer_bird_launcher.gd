@@ -5,7 +5,7 @@ class_name PufferBirdLauncher
 ## puffer_bird_launcher.tscn anywhere in a level, placed where the bird should
 ## be holding the turtle when the level opens (top middle of the opening
 ## screen, just above the water). LevelBase finds it and runs it instead of
-## the "Press any button to start" prompt.
+## the start countdown.
 ##
 ## The level stays frozen (tree paused) the whole time, exactly as it does
 ## behind the start prompt; this node runs with PROCESS_MODE_ALWAYS and moves
@@ -16,7 +16,10 @@ class_name PufferBirdLauncher
 ##   HOLDING  — grab_turtle(): the bird has the turtle and the Picky Puffer's
 ##              sea urchin is glowing, but the countdown hasn't begun (a
 ##              BossIntroPopup is still up).
-##   AIMING   — begin(): the countdown runs. Left / right pivots the plunge
+##   SPOTTING — begin(): a yellow twinkle shoots from the bird's eye to its
+##              urchin, which starts glowing as it lands. Skipped if the
+##              level has no urchin for it.
+##   AIMING   — the countdown runs. Left / right pivots the plunge
 ##              angle, holding the launch button sweeps the power up and down
 ##              and releasing it plunges — the same inputs as the community
 ##              UFO. The bird itself stays put. The countdown reaching zero
@@ -86,7 +89,7 @@ signal plunge_finished(ate_urchin: bool)
 @export var aim_color: Color = Color(1.0, 1.0, 1.0, 1.0)
 @export var flap_fps: float = 6.0
 
-enum State { IDLE, HOLDING, AIMING, PLUNGING, LEAVING }
+enum State { IDLE, HOLDING, SPOTTING, AIMING, PLUNGING, LEAVING }
 var _state: State = State.IDLE
 
 ## Presses this soon after the countdown starts are ignored — the player may
@@ -103,11 +106,31 @@ const _UI_LAYER: int = 5
 const _BIRD_LAYER: int = 2
 ## The power gauge, relative to this node: right of the bird, clear of the HUD
 const _POWER_METER := Rect2(28.0, -16.0, 8.0, 56.0)
-const _COUNTDOWN_SIZE := Vector2(36.0, 32.0)
-## The two text lines sit this far under the ocean surface, one in each half
-## of the screen so the bird's aim runs down between them
-const _TEXT_BELOW_SURFACE: float = 6.0
+const _COUNTDOWN_SIZE := Vector2(40.0, 32.0)
+## How far below the bird's centre the text line sits — clear of the HUD's
+## top bar, which the bird itself overlaps
+const _TEXT_LINE_DROP: float = 11.0
+const _YUM_TEXT: String = "Yum!"
+const _YUM_SIZE := Vector2(48.0, 16.0)
+## From the bird's centre to the middle of the "Yum!"
+const _YUM_DISTANCE: float = 46.0
+## Spotting the urchin: a beat for the screen to be seen, the twinkle's
+## flight, then its burst on the urchin
+const _SPOT_DELAY: float = 0.35
+const _SPOT_FLIGHT_SECONDS: float = 0.75
+const _SPOT_BURST_SECONDS: float = 0.35
+## The bird's eye, from the centre of its sprite (art facing right)
+const _EYE_OFFSET := Vector2(13.0, -5.0)
+## Space between the power gauge and the countdown right of it
+const _GAUGE_GAP: float = 4.0
+## Space between the end of the urchin line and the bird's centre line
+const _TARGET_TEXT_GAP: float = 30.0
 const _TEXT_HEIGHT: float = 16.0
+## Hint line: prefix, the button name (which blinks), suffix. Same blink as
+## the alien tech key prompts on the HUD (tech_slot_ui.gd).
+const _HINT_TEXT: Array[String] = ["Hold ", " to charge"]
+const _HINT_BLINK_PERIOD_MSEC: float = 350.0
+const _HINT_BLINK_COLOR := Color(0.65, 0.12, 1.0)
 const _TARGET_TEXT: String = "Picky Puffer wants her sea urchin!"
 
 ## The TurtlePlayer (it has no class_name, so its own methods go through call())
@@ -129,6 +152,13 @@ var _leave_timer: float = 0.0
 var _facing: float = 1.0
 var _draw_time: float = 0.0
 var _eat_tween: Tween = null
+var _yum_label: Label = null
+## Which side of the bird the "Yum!" rides on (-1 left, 1 right)
+var _yum_side: float = 1.0
+## The urchin only glows once the bird's twinkle has landed on it
+var _target_lit: bool = false
+var _spot_time: float = 0.0
+var _twinkle: Array[Polygon2D] = []
 ## The urchin the bird caught, on its way out of the level with it
 var _carried_urchin: SeaUrchin = null
 ## The viewport-following layer over the HUD that the bird sprite lives on
@@ -138,9 +168,30 @@ var _bird_offset: Vector2 = Vector2.ZERO
 
 var _ui: CanvasLayer = null
 var _countdown_label: Label = null
-var _hint_label: Label = null
+var _hint_button_label: Label = null
 
 @onready var _bird: Sprite2D = $Bird
+
+const SCENE_PATH: String = "res://entities/npcs/puffer_bird/puffer_bird_launcher.tscn"
+const BIRD_TEXTURE = preload("res://entities/npcs/puffer_bird/puffer_bird.png")
+## Frames side by side on BIRD_TEXTURE
+const BIRD_FRAMES: int = 2
+
+## Whether the level scene at `level_path` has a launcher placed in it — for
+## the cut scene before it, which shows the bird heading off to make the
+## catch. Reads the packed scene; nothing is instanced.
+static func level_has_launcher(level_path: String) -> bool:
+	if level_path.is_empty() or not ResourceLoader.exists(level_path):
+		return false
+	var packed := load(level_path) as PackedScene
+	if packed == null:
+		return false
+	var state := packed.get_state()
+	for i in state.get_node_count():
+		var instance := state.get_node_instance(i)
+		if instance and instance.resource_path == SCENE_PATH:
+			return true
+	return false
 
 func _ready() -> void:
 	add_to_group("plunge_launchers")
@@ -206,10 +257,18 @@ func begin() -> void:
 		started.emit()
 		return
 	get_tree().paused = true
-	_state = State.AIMING
 	_remaining = countdown_seconds
-	_begin_msec = Time.get_ticks_msec()
 	_build_ui()
+	if is_instance_valid(_target):
+		_state = State.SPOTTING
+		_spot_time = 0.0
+		_build_twinkle()
+	else:
+		_start_aiming()
+
+func _start_aiming() -> void:
+	_state = State.AIMING
+	_begin_msec = Time.get_ticks_msec()
 
 # ---------------------------------------------------------------------------
 # STATES
@@ -220,6 +279,9 @@ func _process(delta: float) -> void:
 	match _state:
 		State.HOLDING:
 			_carry_turtle()
+		State.SPOTTING:
+			_carry_turtle()
+			_spot_tick(delta)
 		State.AIMING:
 			# Everything waits while the pause menu is open over it
 			var pause_menu := get_tree().get_first_node_in_group("pause_menu") as CanvasLayer
@@ -235,6 +297,46 @@ func _process(delta: float) -> void:
 	_throb_target()
 	queue_redraw()
 
+## The bird spots its urchin: after a beat for the screen to be seen, a
+## twinkle flies from its eye to the urchin, bursts there and lights it up.
+## Then the countdown starts.
+func _spot_tick(delta: float) -> void:
+	_spot_time += delta
+	var flight: float = clampf((_spot_time - _SPOT_DELAY) / _SPOT_FLIGHT_SECONDS, 0.0, 1.0)
+	var burst: float = clampf((_spot_time - _SPOT_DELAY - _SPOT_FLIGHT_SECONDS) / _SPOT_BURST_SECONDS, 0.0, 1.0)
+	if not is_instance_valid(_target) or burst >= 1.0:
+		_target_lit = true
+		for star in _twinkle:
+			star.queue_free()
+		_twinkle.clear()
+		_start_aiming()
+		return
+	_target_lit = flight >= 1.0
+	var eye: Vector2 = _bird.global_position + Vector2(_EYE_OFFSET.x * _facing, _EYE_OFFSET.y)
+	for i in _twinkle.size():
+		# Each star after the first trails a little behind it
+		var t: float = clampf(flight - i * 0.08, 0.0, 1.0)
+		var star: Polygon2D = _twinkle[i]
+		star.visible = _spot_time >= _SPOT_DELAY and (i == 0 or burst <= 0.0)
+		star.global_position = eye.lerp(_target.global_position, smoothstep(0.0, 1.0, t))
+		star.rotation = _spot_time * 9.0
+		star.scale = Vector2.ONE * ((1.0 - i * 0.25) * (1.0 + sin(_spot_time * 30.0) * 0.15) + burst * 2.5)
+		star.modulate.a = (1.0 - i * 0.3) * (1.0 - burst)
+
+## The twinkle: a four-pointed yellow star and two fainter ones trailing it,
+## on the bird's layer so it starts over the HUD like the bird does.
+func _build_twinkle() -> void:
+	var points := PackedVector2Array()
+	for i in 8:
+		points.append(Vector2.from_angle(i * TAU / 8.0) * (7.0 if i % 2 == 0 else 2.0))
+	for i in 3:
+		var star := Polygon2D.new()
+		star.polygon = points
+		star.color = target_glow_color
+		star.visible = false
+		_bird_layer.add_child(star)
+		_twinkle.append(star)
+
 func _aim_tick(delta: float) -> void:
 	# Left / right swings the aim that way; the bird stays where it is
 	var pivot: float = Input.get_axis("move_left", "move_right")
@@ -246,8 +348,10 @@ func _aim_tick(delta: float) -> void:
 
 	_remaining -= delta
 	_countdown_label.text = str(maxi(1, ceili(_remaining)))
-	_place_countdown()
-	_hint_label.text = "Hold %s for power, release to plunge" % ("A" if GameSettings.using_gamepad else "Z")
+	# The button name blinks the way the HUD's alien tech key prompts do
+	_hint_button_label.text = "A" if GameSettings.using_gamepad else "Z"
+	var blink_on: bool = int(Time.get_ticks_msec() / _HINT_BLINK_PERIOD_MSEC) % 2 == 0
+	_hint_button_label.add_theme_color_override("font_color", Color.WHITE if blink_on else _HINT_BLINK_COLOR)
 
 	if Time.get_ticks_msec() - _begin_msec >= _ARM_DELAY_MSEC:
 		if not _charging:
@@ -327,8 +431,28 @@ func _eat(urchin: SeaUrchin) -> void:
 	if urchin.sprite:
 		urchin.sprite.position = Vector2.ZERO
 	urchin.rotation = 0.0
+	_show_yum()
 	_eat_tween = create_tween()
 	_eat_tween.tween_property(urchin, "global_position", global_position + _TURTLE_OFFSET, _EAT_SECONDS)
+
+## "Yum!" beside the bird, on whichever side has more screen, riding out with
+## it (placed every frame by _update_bird()).
+func _show_yum() -> void:
+	if _bird_layer == null:
+		return
+	_yum_label = Label.new()
+	_yum_label.text = _YUM_TEXT
+	_yum_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_yum_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_yum_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_yum_label.size = _YUM_SIZE
+	_yum_label.add_theme_font_size_override("font_size", 16)
+	_yum_label.add_theme_color_override("font_color", target_glow_color)
+	_yum_label.add_theme_color_override("font_outline_color", Color.BLACK)
+	_yum_label.add_theme_constant_override("outline_size", 4)
+	_bird_layer.add_child(_yum_label)
+	var on_screen_x: float = get_global_transform_with_canvas().origin.x
+	_yum_side = -1.0 if on_screen_x > get_viewport_rect().size.x * 0.5 else 1.0
 
 func _leave_tick(delta: float) -> void:
 	# Get a grip on the urchin first
@@ -429,7 +553,7 @@ func _pick_target() -> SeaUrchin:
 	return candidates.pick_random()
 
 func _throb_target() -> void:
-	if _state == State.LEAVING or not is_instance_valid(_target) or _target.sprite == null:
+	if not _target_lit or _state == State.LEAVING or not is_instance_valid(_target) or _target.sprite == null:
 		return
 	_target.sprite.scale = Vector2.ONE * (1.0 + target_throb * _pulse())
 
@@ -440,6 +564,9 @@ func _update_bird() -> void:
 	_bird.global_position = global_position + _bird_offset
 	_bird.modulate.a = modulate.a
 	_bird.flip_h = _facing < 0.0
+	if _yum_label:
+		_yum_label.position = _bird.global_position + Vector2(_yum_side * _YUM_DISTANCE, 0.0) - _YUM_SIZE * 0.5
+		_yum_label.modulate.a = modulate.a
 	match _state:
 		State.PLUNGING:
 			_bird.frame = 0
@@ -452,30 +579,37 @@ func _build_ui() -> void:
 	_ui = CanvasLayer.new()
 	_ui.layer = _UI_LAYER
 	add_child(_ui)
-	# Just under the water line: controls left of centre, the urchin right
-	var screen: Vector2 = get_viewport_rect().size
-	var ocean := get_tree().get_first_node_in_group("ocean") as Ocean
-	var surface_y: float = ocean.surface_y if ocean else global_position.y
-	var text_y: float = (get_viewport().get_canvas_transform() * Vector2(0.0, surface_y)).y + _TEXT_BELOW_SURFACE
-	_hint_label = _make_label(16)
-	_hint_label.position = Vector2(0.0, text_y)
-	_hint_label.size = Vector2(screen.x * 0.5, _TEXT_HEIGHT)
+	# Everything on one line with the bird: the urchin text ending just left
+	# of it, and right of the power gauge the countdown, a dash, then the
+	# controls hint.
+	var here: Vector2 = get_global_transform_with_canvas().origin
+	var line_y: float = here.y + _bird_offset.y + _TEXT_LINE_DROP
 	if is_instance_valid(_target):
 		var target_label := _make_label(16)
 		target_label.text = _TARGET_TEXT
-		target_label.position = Vector2(screen.x * 0.5, text_y)
-		target_label.size = Vector2(screen.x * 0.5, _TEXT_HEIGHT)
-	# The countdown rides beside the bird, where the player is looking
+		target_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		target_label.size = Vector2(here.x - _TARGET_TEXT_GAP, _COUNTDOWN_SIZE.y)
+		target_label.position = Vector2(0.0, line_y - _COUNTDOWN_SIZE.y * 0.5)
+	# Separate labels in a row, so only the button name blinks
+	var row := HBoxContainer.new()
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_theme_constant_override("separation", 0)
+	row.position = Vector2(here.x + _POWER_METER.end.x + _GAUGE_GAP, line_y - _COUNTDOWN_SIZE.y * 0.5)
+	row.size = Vector2(0.0, _COUNTDOWN_SIZE.y)
+	_ui.add_child(row)
 	_countdown_label = _make_label(32)
-	_countdown_label.size = _COUNTDOWN_SIZE
-	_place_countdown()
-
-## Left of the bird (the power bar is on its right), or right of it when the
-## bird is up against the left edge of the screen.
-func _place_countdown() -> void:
-	var bird_on_screen: Vector2 = get_global_transform_with_canvas().origin + _bird_offset
-	var side: float = -1.0 if bird_on_screen.x > _COUNTDOWN_SIZE.x * 2.0 else 1.6
-	_countdown_label.position = bird_on_screen + Vector2(side * _COUNTDOWN_SIZE.x, 0.0) - _COUNTDOWN_SIZE * 0.5
+	_countdown_label.text = str(ceili(countdown_seconds))
+	# Wide enough for "10", so the hint doesn't shift when it drops to one
+	# digit; right-aligned so the number always sits the same distance from
+	# the dash as the hint does
+	_countdown_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_countdown_label.custom_minimum_size = _COUNTDOWN_SIZE
+	_countdown_label.reparent(row)
+	for text in [" - " + _HINT_TEXT[0], "A" if GameSettings.using_gamepad else "Z", _HINT_TEXT[1]]:
+		var part := _make_label(16)
+		part.text = text
+		part.reparent(row)
+	_hint_button_label = row.get_child(2) as Label
 
 func _make_label(font_size: int) -> Label:
 	var label := Label.new()
@@ -491,7 +625,7 @@ func _make_label(font_size: int) -> Label:
 
 func _draw() -> void:
 	# The Picky Puffer's urchin
-	if _state != State.LEAVING and is_instance_valid(_target):
+	if _target_lit and _state != State.LEAVING and is_instance_valid(_target):
 		var at: Vector2 = to_local(_target.global_position)
 		var pulse: float = _pulse()
 		for i in 3:

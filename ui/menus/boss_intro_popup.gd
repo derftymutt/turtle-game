@@ -6,7 +6,7 @@ class_name BossIntroPopup
 ## level and after its transition cut scene has finished. Pauses the game
 ## until dismissed by any input, same convention as the level transition
 ## cutscene's "press any key to continue" prompt. Dismissing it hands over to
-## the level's "Press any button to start" prompt (LevelBase.show_start_prompt()).
+## the level's start countdown (LevelBase.show_start_prompt()).
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS

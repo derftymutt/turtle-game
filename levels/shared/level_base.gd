@@ -51,7 +51,7 @@ func _ready():
 
 	print("📍 Level %d ready (%s)" % [level_number, scene_file_path])
 
-## Whether the level opens frozen behind "Press any button to start". The
+## Whether the level opens frozen behind the start countdown. The
 ## tutorial and the Academy run their own scripted openings and turn it off.
 func _wants_start_prompt() -> bool:
 	return true
@@ -62,8 +62,8 @@ func _wants_start_prompt() -> bool:
 func hold_start_prompt() -> void:
 	_start_prompt_held = true
 
-## Freezes the level until the player presses something (LevelStartPrompt),
-## or, in a level with a PufferBirdLauncher, until the plunge has landed.
+## Freezes the level until the start countdown ends or the player presses
+## something (LevelStartPrompt), or, in a level with a PufferBirdLauncher, until the plunge has landed.
 ## Only the game holds still — the level song plays through the wait.
 func show_start_prompt() -> void:
 	if not _wants_start_prompt():

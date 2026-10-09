@@ -117,6 +117,7 @@ _data = {
 point_count = 16
 
 [node name="LevelBase2" unique_id=519430445 instance=ExtResource("1_lrvbd")]
+metadata/_edit_group_ = true
 
 [node name="SkyBackground" parent="." index="3" unique_id=967020750 instance=ExtResource("2_ntdhj")]
 
