@@ -27,6 +27,7 @@ class_name UFOPieceSeeder
 
 var spawn_points: Array[Node2D] = []
 var placed_positions: Array[Vector2] = []
+var _unused_points: Array[Node2D] = []
 
 func _ready():
 	if use_fixed_points:
@@ -61,6 +62,7 @@ func seed_floor():
 		print("🔧 Using manual count: %d pieces (range: %d-%d)" % [count, seed_count_min, seed_count_max])
 	
 	placed_positions.clear()
+	_unused_points.clear()
 	
 	print("🔧 Seeding ocean floor with %d UFO pieces..." % count)
 	
@@ -80,8 +82,7 @@ func spawn_ufo_piece():
 	# Determine spawn position
 	var spawn_pos: Vector2
 	if use_fixed_points and not spawn_points.is_empty():
-		var point = spawn_points.pick_random()
-		spawn_pos = point.global_position
+		spawn_pos = _take_spawn_point().global_position
 	else:
 		spawn_pos = get_spaced_floor_position()
 	
@@ -94,6 +95,21 @@ func spawn_ufo_piece():
 	piece.angular_velocity = 0.0
 	piece.linear_damp = 20.0
 	piece.gravity_scale = 0.1  # Slight gravity to settle
+
+## Each spawn point is used once per seeding (they only repeat when there are
+## more pieces than points), preferring points placement_spacing away from the
+## pieces already placed.
+func _take_spawn_point() -> Node2D:
+	if _unused_points.is_empty():
+		_unused_points = spawn_points.duplicate()
+	var pool: Array = _unused_points.filter(func(p: Node2D) -> bool:
+		return is_position_valid(p.global_position))
+	if pool.is_empty():
+		pool = _unused_points
+	var point: Node2D = pool.pick_random()
+	_unused_points.erase(point)
+	placed_positions.append(point.global_position)
+	return point
 
 func get_spaced_floor_position() -> Vector2:
 	var max_attempts = 20

@@ -8,12 +8,23 @@
 [ext_resource type="Texture2D" uid="uid://bm428btwp720u" path="res://entities/environment/ocean_boundaries/ocean_floor.png" id="6_nu44e"]
 [ext_resource type="TileSet" uid="uid://dyl02kfc4a681" path="res://entities/environment/ocean_boundaries/ocean_wall.tres" id="7_fpvgn"]
 [ext_resource type="PackedScene" uid="uid://8edo3etakc1a" path="res://entities/environment/walls/dead_wall/dead_wall.tscn" id="8_3t5n2"]
-[ext_resource type="PackedScene" uid="uid://4het8fdlmvgj" path="res://entities/environment/flippers/flipper_left_down.tscn" id="9_v2dqh"]
+[ext_resource type="Texture2D" uid="uid://8det4aydy3r5" path="res://entities/environment/walls/dead_wall/sprites/wall_diagonal_2u.png" id="10_2essh"]
 [ext_resource type="PackedScene" uid="uid://b8qcufospawn1" path="res://systems/community_ufo_event/community_ufo_spawner.tscn" id="10_kx1xp"]
 [ext_resource type="PackedScene" uid="uid://b8qdolphin001" path="res://entities/npcs/dolphin/dolphin.tscn" id="11_m516p"]
+[ext_resource type="Texture2D" uid="uid://bq2m8w5vouuyn" path="res://entities/environment/walls/dead_wall/sprites/wall_diagonal_1u.png" id="11_ny68a"]
 [ext_resource type="PackedScene" uid="uid://b8qcmvufo0001" path="res://entities/community_ufo/community_ufo.tscn" id="12_l3m5x"]
+[ext_resource type="Texture2D" uid="uid://cnjgq882a81c5" path="res://entities/environment/walls/dead_wall/sprites/wall_shallow_2u.png" id="12_ra7rw"]
+[ext_resource type="Texture2D" uid="uid://ccrfay05ag4r3" path="res://entities/environment/walls/dead_wall/sprites/wall_horizontal_1u.png" id="13_72dv4"]
 [ext_resource type="PackedScene" uid="uid://c5hxjkqojl37o" path="res://scenes/water_disturbance.tscn" id="13_m516p"]
 [ext_resource type="PackedScene" path="res://entities/enemies/squid/squid_spawner.tscn" id="14_l3m5x"]
+[ext_resource type="PackedScene" uid="uid://bp6g8v1jmnruo" path="res://entities/environment/walls/circular_bumper/circular_bumper.tscn" id="l6_bumper"]
+[ext_resource type="PackedScene" uid="uid://u02ifu2255ot" path="res://entities/environment/flippers/cloud_flipper_left_up.tscn" id="l6_cloud_left"]
+[ext_resource type="PackedScene" uid="uid://p32a3utahssn" path="res://entities/environment/flippers/cloud_flipper_right_up.tscn" id="l6_cloud_right"]
+[ext_resource type="PackedScene" uid="uid://ko8xdpxfr5ej" path="res://entities/environment/current/current.tscn" id="l6_current"]
+[ext_resource type="PackedScene" uid="uid://bwyt5nkmne05h" path="res://entities/collectibles/ufo_piece/ufo_piece_seeder.tscn" id="l6_seeder"]
+[ext_resource type="PackedScene" uid="uid://b6mqqn1jgl6of" path="res://levels/environment/sky_background.tscn" id="l6_sky"]
+[ext_resource type="PackedScene" uid="uid://b8df8qps2nshf" path="res://entities/collectibles/star/sky_star_seeder.tscn" id="l6_stars"]
+[ext_resource type="PackedScene" uid="uid://cxt44kcegt0ah" path="res://entities/environment/ufo_workshop/ufo_workshop.tscn" id="l6_workshop"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_kx1xp"]
 texture = ExtResource("6_nu44e")
@@ -42,42 +53,99 @@ size = Vector2(8.000166, 747.00055)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xn6mk"]
 size = Vector2(9, 1916.0011)
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_nu44e"]
-friction = 0.0
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_n32i3"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_am872"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_7qnd8"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_lg4k0"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_543sx"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_uu8kc"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_kxd2r"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_e0yvo"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_gnxnq"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_qrqi0"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_nfqkv"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_mcn6t"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wyj1r"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_binf7"]
+size = Vector2(64, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_fgij4"]
+size = Vector2(32, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_nf5iv"]
+size = Vector2(32, 8)
+
+[sub_resource type="Curve2D" id="Curve2D_JetStream"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -15.9, -4.2, 0, 0, 0, 0, -37.4, -10.2, 0, 0, 0, 0, -63.1, -17.2, 0, 0, 0, 0, -91.5, -24.3, 0, 0, 0, 0, -120.9, -30.5, 0, 0, 0, 0, -150, -35, 0, 0, 0, 0, -175, -37.6, 0, 0, 0, 0, -201.4, -39.5, 0, 0, 0, 0, -228.6, -40.8, 0, 0, 0, 0, -256.5, -41.5, 0, 0, 0, 0, -284.5, -41.6, 0, 0, 0, 0, -312.5, -41.1, 0, 0, 0, 0, -340, -40, 0, 0, 0, 0, -367.9, -37.9, 0, 0, 0, 0, -396.9, -34.8, 0, 0, 0, 0, -426.2, -30.9, 0, 0, 0, 0, -454.9, -26.6, 0, 0, 0, 0, -482.3, -22.3, 0, 0, 0, 0, -507.6, -18.3, 0, 0, 0, 0, -530, -15, 0, 0, 0, 0, -563.7, -10.2, 0, 0, 0, 0, -591.9, -5.9, 0, 0, 0, 0, -614.1, -2.5, 0, 0, 0, 0, -630, 0)
+}
+point_count = 25
 
 [node name="LevelBase" unique_id=1013451131 instance=ExtResource("1_rqsg2")]
 level_number = 6
 
-[node name="Ocean" parent="." index="5" unique_id=1274260941 instance=ExtResource("2_fpvgn")]
+[node name="Ocean" parent="." index="10" unique_id=1274260941 instance=ExtResource("2_fpvgn")]
 
-[node name="OceanBackground" parent="." index="6" unique_id=593268214 instance=ExtResource("3_xn6mk")]
+[node name="OceanBackground" parent="." index="11" unique_id=593268214 instance=ExtResource("3_xn6mk")]
 
-[node name="Camera2D" type="Camera2D" parent="." index="7" unique_id=2085525576 node_paths=PackedStringArray("follow_target")]
+[node name="OceanBackgroundWest" parent="." index="12" unique_id=2051461913 instance=ExtResource("3_xn6mk")]
+position = Vector2(-700, -126)
+
+[node name="OceanBackgroundEast" parent="." index="13" unique_id=1970603418 instance=ExtResource("3_xn6mk")]
+position = Vector2(700, -126)
+
+[node name="Camera2D" type="Camera2D" parent="." index="14" unique_id=2085525576 node_paths=PackedStringArray("follow_target")]
 limit_left = -960
 limit_right = 960
 script = ExtResource("4_3t5n2")
 follow_target = NodePath("../TurtlePlayer")
 
-[node name="TurtlePlayer" parent="." index="8" unique_id=1971009088 instance=ExtResource("5_v2dqh")]
-position = Vector2(0, 11)
+[node name="TurtlePlayer" parent="." index="15" unique_id=1971009088 instance=ExtResource("5_v2dqh")]
+position = Vector2(-60, 20)
 super_speed_color = Color(0.778, 1.504, 0, 1)
 
-[node name="OceanFloor" type="TileMapLayer" parent="." index="9" unique_id=408362771]
+[node name="OceanFloor" type="TileMapLayer" parent="." index="16" unique_id=408362771]
 position = Vector2(0, 4)
 tile_map_data = PackedByteArray("AADs/woAAAABAAAAAADt/woAAAAAAAAAAADu/woAAAACAAAAAADv/woAAAABAAAAAADw/woAAAAAAAAAAADx/woAAAAAAAAAAADy/woAAAAAAAAAAADz/woAAAAAAAAAAAD0/woAAAACAAAAAAD1/woAAAAAAAAAAAD2/woAAAAAAAAAAAD3/woAAAAAAAAAAAD4/woAAAAAAAAAAAD5/woAAAACAAAAAAD6/woAAAAAAAAAAAD7/woAAAABAAAAAAD8/woAAAACAAAAAAD9/woAAAABAAAAAAD+/woAAAAAAAAAAAD//woAAAAAAAAAAAAAAAoAAAACAAAAAAABAAoAAAAAAAAAAAACAAoAAAABAAAAAAADAAoAAAAAAAAAAAAEAAoAAAAAAAAAAAAFAAoAAAABAAAAAAAGAAoAAAACAAAAAAAHAAoAAAAAAAAAAAAIAAoAAAABAAAAAAAJAAoAAAABAAAAAAAKAAoAAAAAAAAAAAALAAoAAAABAAAAAAAMAAoAAAAAAAAAAAANAAoAAAAAAAAAAAAOAAoAAAACAAAAAAAPAAoAAAAAAAAAAAAQAAoAAAABAAAAAAARAAoAAAAAAAAAAAASAAoAAAACAAAAAAATAAoAAAACAAAAAADr/woAAAAAAAAAAADq/woAAAAAAAAAAADp/woAAAAAAAAAAADo/woAAAABAAAAAADn/woAAAABAAAAAADm/woAAAABAAAAAADl/woAAAABAAAAAADk/woAAAACAAAAAADj/woAAAABAAAAAADi/woAAAACAAAAAADh/woAAAABAAAAAADg/woAAAACAAAAAADf/woAAAACAAAAAADe/woAAAABAAAAAADd/woAAAABAAAAAADc/woAAAAAAAAAAADb/woAAAABAAAAAADa/woAAAAAAAAAAADZ/woAAAAAAAAAAADY/woAAAABAAAAAADX/woAAAABAAAAAADW/woAAAAAAAAAAADV/woAAAABAAAAAADU/woAAAABAAAAAADT/woAAAABAAAAAADS/woAAAABAAAAAADR/woAAAABAAAAAADQ/woAAAABAAAAAADP/woAAAAAAAAAAADO/woAAAACAAAAAADN/woAAAAAAAAAAADM/woAAAACAAAAAADL/woAAAAAAAAAAADK/woAAAAAAAAAAADJ/woAAAACAAAAAADI/woAAAACAAAAAADH/woAAAAAAAAAAADG/woAAAACAAAAAADF/woAAAAAAAAAAADE/woAAAACAAAAAAAUAAoAAAABAAAAAAAVAAoAAAABAAAAAAAWAAoAAAAAAAAAAAAXAAoAAAACAAAAAAAYAAoAAAABAAAAAAAZAAoAAAAAAAAAAAAaAAoAAAACAAAAAAAbAAoAAAABAAAAAAAcAAoAAAABAAAAAAAdAAoAAAAAAAAAAAAeAAoAAAACAAAAAAAfAAoAAAAAAAAAAAAgAAoAAAABAAAAAAAhAAoAAAAAAAAAAAAiAAoAAAAAAAAAAAAjAAoAAAABAAAAAAAkAAoAAAABAAAAAAAlAAoAAAAAAAAAAAAmAAoAAAABAAAAAAAnAAoAAAAAAAAAAAAoAAoAAAABAAAAAAApAAoAAAAAAAAAAAAqAAoAAAAAAAAAAAArAAoAAAABAAAAAAAsAAoAAAAAAAAAAAAtAAoAAAACAAAAAAAuAAoAAAABAAAAAAAvAAoAAAABAAAAAAAwAAoAAAACAAAAAAAxAAoAAAAAAAAAAAAyAAoAAAAAAAAAAAAzAAoAAAACAAAAAAA0AAoAAAABAAAAAAA1AAoAAAABAAAAAAA2AAoAAAACAAAAAAA3AAoAAAABAAAAAAA4AAoAAAAAAAAAAAA5AAoAAAABAAAAAAA6AAoAAAABAAAAAAA7AAoAAAACAAAAAAA=")
 tile_set = SubResource("TileSet_m516p")
 
-[node name="OceanWallLeft" type="TileMapLayer" parent="." index="10" unique_id=1316001881]
+[node name="OceanWallLeft" type="TileMapLayer" parent="." index="17" unique_id=1316001881]
 position = Vector2(0, 4)
 tile_map_data = PackedByteArray("AACI/wkAAAAAAAAAAACI/wgAAAAAAAAAAACI/wcAAAABAAAAAACI/wYAAAABAAAAAACI/wUAAAACAAAAAACI/wQAAAABAAAAAACI/wMAAAABAAAAAACI//7/AAABAAAAAACI////AAACAAAAAACI/wAAAAAAAAAAAACI/wEAAAACAAAAAACI/wIAAAAAAAAAAACI//3/AAACAAAAAACI//z/AAAAAAAAAACI//v/AAACAAAAAACI//r/AAAAAAAAAACI//n/AAACAAAAAACI//j/AAAAAAAAAAA=")
 tile_set = ExtResource("7_fpvgn")
 
-[node name="OceanWallRight" type="TileMapLayer" parent="." index="11" unique_id=160236925]
+[node name="OceanWallRight" type="TileMapLayer" parent="." index="18" unique_id=160236925]
 position = Vector2(632, 4)
 tile_map_data = PackedByteArray("AAAoAAkAAAACAAAAAAAoAAgAAAACAAAAAAAoAAcAAAAAAAAAAAAoAAYAAAAAAAAAAAAoAAUAAAACAAAAAAAoAAQAAAAAAAAAAAAoAAMAAAAAAAAAAAAoAAIAAAACAAAAAAAoAPj/AAACAAAAAAAoAPn/AAAAAAAAAAAoAPr/AAACAAAAAAAoAPv/AAABAAAAAAAoAPz/AAAAAAAAAAAoAP3/AAABAAAAAAAoAP7/AAACAAAAAAAoAP//AAABAAAAAAAoAAAAAAAAAAAAAAAoAAEAAAAAAAAAAAA=")
 tile_set = ExtResource("7_fpvgn")
 
-[node name="WorldSafetyBoundaries" type="Node2D" parent="." index="12" unique_id=1479579443]
+[node name="WorldSafetyBoundaries" type="Node2D" parent="." index="19" unique_id=1479579443]
 
 [node name="BoundaryLeft" type="StaticBody2D" parent="WorldSafetyBoundaries" index="0" unique_id=1230030157]
 position = Vector2(-596, -364)
@@ -143,38 +211,330 @@ offset_right = -323.4816
 offset_bottom = 62.268524
 color = Color(0.1764706, 0.12156863, 0.023529412, 1)
 
-[node name="levelWalls" type="TileMapLayer" parent="." index="13" unique_id=1604126855]
+[node name="SkyBackground" parent="." index="20" unique_id=1271558089 instance=ExtResource("l6_sky")]
+
+[node name="levelWalls" type="TileMapLayer" parent="." index="21" unique_id=363822574]
 position = Vector2(0, 4)
-tile_map_data = PackedByteArray("AADs/woAAAABAAAAAADt/woAAAAAAAAAAADu/woAAAACAAAAAADv/woAAAABAAAAAADw/woAAAAAAAAAAADx/woAAAAAAAAAAADy/woAAAAAAAAAAADz/woAAAAAAAAAAAD0/woAAAACAAAAAAD1/woAAAAAAAAAAAD2/woAAAAAAAAAAAD3/woAAAAAAAAAAAD4/woAAAAAAAAAAAD5/woAAAACAAAAAAD6/woAAAAAAAAAAAD7/woAAAABAAAAAAD8/woAAAACAAAAAAD9/woAAAABAAAAAAD+/woAAAAAAAAAAAD//woAAAAAAAAAAAAAAAoAAAACAAAAAAABAAoAAAAAAAAAAAACAAoAAAABAAAAAAADAAoAAAAAAAAAAAAEAAoAAAAAAAAAAAAFAAoAAAABAAAAAAAGAAoAAAACAAAAAAAHAAoAAAAAAAAAAAAIAAoAAAABAAAAAAAJAAoAAAABAAAAAAAKAAoAAAAAAAAAAAALAAoAAAABAAAAAAAMAAoAAAAAAAAAAAANAAoAAAAAAAAAAAAOAAoAAAACAAAAAAAPAAoAAAAAAAAAAAAQAAoAAAABAAAAAAARAAoAAAAAAAAAAAASAAoAAAACAAAAAAATAAoAAAACAAAAAADr/woAAAAAAAAAAADq/woAAAAAAAAAAADp/woAAAAAAAAAAADo/woAAAABAAAAAADn/woAAAABAAAAAADm/woAAAABAAAAAADl/woAAAABAAAAAADk/woAAAACAAAAAADj/woAAAABAAAAAADi/woAAAACAAAAAADh/woAAAABAAAAAADg/woAAAACAAAAAADf/woAAAACAAAAAADe/woAAAABAAAAAADd/woAAAABAAAAAADc/woAAAAAAAAAAADb/woAAAABAAAAAADa/woAAAAAAAAAAADZ/woAAAAAAAAAAADY/woAAAABAAAAAADX/woAAAABAAAAAADW/woAAAAAAAAAAADV/woAAAABAAAAAADU/woAAAABAAAAAADT/woAAAABAAAAAADS/woAAAABAAAAAADR/woAAAABAAAAAADQ/woAAAABAAAAAADP/woAAAAAAAAAAADO/woAAAACAAAAAADN/woAAAAAAAAAAADM/woAAAACAAAAAADL/woAAAAAAAAAAADK/woAAAAAAAAAAADJ/woAAAACAAAAAADI/woAAAACAAAAAADH/woAAAAAAAAAAADG/woAAAACAAAAAADF/woAAAAAAAAAAADE/woAAAACAAAAAAAUAAoAAAABAAAAAAAVAAoAAAABAAAAAAAWAAoAAAAAAAAAAAAXAAoAAAACAAAAAAAYAAoAAAABAAAAAAAZAAoAAAAAAAAAAAAaAAoAAAACAAAAAAAbAAoAAAABAAAAAAAcAAoAAAABAAAAAAAdAAoAAAAAAAAAAAAeAAoAAAACAAAAAAAfAAoAAAAAAAAAAAAgAAoAAAABAAAAAAAhAAoAAAAAAAAAAAAiAAoAAAAAAAAAAAAjAAoAAAABAAAAAAAkAAoAAAABAAAAAAAlAAoAAAAAAAAAAAAmAAoAAAABAAAAAAAnAAoAAAAAAAAAAAAoAAoAAAABAAAAAAApAAoAAAAAAAAAAAAqAAoAAAAAAAAAAAArAAoAAAABAAAAAAAsAAoAAAAAAAAAAAAtAAoAAAACAAAAAAAuAAoAAAABAAAAAAAvAAoAAAABAAAAAAAwAAoAAAACAAAAAAAxAAoAAAAAAAAAAAAyAAoAAAAAAAAAAAAzAAoAAAACAAAAAAA0AAoAAAABAAAAAAA1AAoAAAABAAAAAAA2AAoAAAACAAAAAAA3AAoAAAABAAAAAAA4AAoAAAAAAAAAAAA5AAoAAAABAAAAAAA6AAoAAAABAAAAAAA7AAoAAAACAAAAAAALAPr/AAAFAAAAAAALAPn/AAADAAAAAAAKAPr/AAAGAAAAAAAKAPn/AAAEAAAAAAAKAP//AAAEAAAAAAALAP7/AAAEAAAAAAAMAP3/AAAEAAAAAAANAPz/AAAEAAAAAAALAP//AAAAAAAAAAAMAP7/AAAAAAAAAAANAP3/AAAAAAAAAAALAAAAAAAFAAAAAAAMAP//AAAFAAAAAAANAP7/AAAFAAAAAAAOAP3/AAAFAAAAAAAKAAAAAAAGAAAAAAAOAPz/AAADAAAAAADs//j/AAAAAAAAAADs//n/AAAAAAAAAADs//r/AAAAAAAAAADs//v/AAAAAAAAAADs//z/AAAAAAAAAADs//3/AAAAAAAAAADs//7/AAAAAAAAAADs/wIAAAAAAAAAAADs/wMAAAAAAAAAAADs/wQAAAAAAAAAAADs/wkAAAACAAAAAAATAPj/AAAAAAAAAAATAPn/AAAAAAAAAAATAPr/AAAAAAAAAAATAPv/AAAAAAAAAAATAPz/AAAAAAAAAAATAP3/AAAAAAAAAAATAP7/AAAAAAAAAAATAAkAAAAAAAAAAADs/wEAAAABAAAAAADs/wAAAAABAAAAAADs////AAABAAAAAAATAP//AAACAAAAAAATAAAAAAACAAAAAAATAAEAAAACAAAAAAATAAIAAAACAAAAAAATAAMAAAACAAAAAAATAAQAAAACAAAAAAATAAUAAAACAAAAAAATAAYAAAAGAAAAAADs//f/AAABAAAAAADs//b/AAABAAAAAADs//X/AAABAAAAAAATAPf/AAABAAAAAAATAPb/AAABAAAAAAATAPX/AAABAAAAAAATAAgAAAAEAAAAAADs/wgAAAADAAAAAAAUAAYAAAAFAAAAAAAUAAgAAAADAAAAAAAUAAkAAAABAAAAAAAUAAUAAAADAAAAAADr/wgAAAAEAAAAAADr/wkAAAACAAAAAADs/wUAAAABAAAAAADs/wYAAAAFAAAAAADr/wYAAAAGAAAAAADr/wUAAAAEAAAAAAA=")
+tile_map_data = PackedByteArray("AADa//r/AAAEAAAAAADa//v/AAAGAAAAAADb//r/AAADAAAAAADb//v/AAAFAAAAAADb/wcAAAAEAAAAAADb/wgAAAABAAAAAADb/wkAAAACAAAAAADc/wcAAAADAAAAAADc/wgAAAACAAAAAADc/wkAAAAAAAAAAADy/wcAAAAEAAAAAADy/wgAAAAAAAAAAADy/wkAAAABAAAAAADz/wcAAAADAAAAAADz/wgAAAABAAAAAADz/wkAAAACAAAAAAAJAPr/AAAEAAAAAAAJAPv/AAAGAAAAAAAKAPn/AAAEAAAAAAAKAPr/AAABAAAAAAAKAPv/AAACAAAAAAAKAPz/AAAGAAAAAAAKAAcAAAAEAAAAAAAKAAgAAAAAAAAAAAAKAAkAAAABAAAAAAALAPn/AAADAAAAAAALAPr/AAACAAAAAAALAPv/AAAAAAAAAAALAPz/AAAFAAAAAAALAAcAAAADAAAAAAALAAgAAAABAAAAAAALAAkAAAACAAAAAAAMAPr/AAADAAAAAAAMAPv/AAAFAAAAAAAiAPv/AAAEAAAAAAAiAPz/AAAGAAAAAAAjAPv/AAADAAAAAAAjAPz/AAAFAAAAAAAjAAcAAAAEAAAAAAAjAAgAAAABAAAAAAAjAAkAAAACAAAAAAAkAAcAAAADAAAAAAAkAAgAAAACAAAAAAAkAAkAAAAAAAAAAAA=")
 tile_set = SubResource("TileSet_m516p")
 
-[node name="CommunityUFOSpawner" parent="." index="14" unique_id=1776540152 instance=ExtResource("10_kx1xp")]
-dolphin_scene = ExtResource("11_m516p")
-community_ufo_scene = ExtResource("12_l3m5x")
+[node name="SkyCentral" type="Node2D" parent="." index="22" unique_id=1703840280]
 
-[node name="FlipperLeftTop" type="Node" parent="." index="15" unique_id=1031217924]
+[node name="Wall81" parent="SkyCentral" index="0" unique_id=441359265 instance=ExtResource("8_3t5n2")]
+position = Vector2(-175, -240)
+angle_preset = 2
 
-[node name="DeadWall4" parent="FlipperLeftTop" index="0" unique_id=797132162 instance=ExtResource("8_3t5n2")]
-position = Vector2(-250, 19)
-physics_material_override = SubResource("PhysicsMaterial_nu44e")
+[node name="CollisionShape2D" parent="SkyCentral/Wall81" index="0" unique_id=1644951480]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_n32i3")
+one_way_collision = true
+
+[node name="Sprite2D" parent="SkyCentral/Wall81" index="1" unique_id=804434373]
+texture = ExtResource("10_2essh")
+hframes = 7
+
+[node name="Polygon2D" parent="SkyCentral/Wall81" index="2" unique_id=138368735]
+rotation = 0.7853982
+
+[node name="CollisionShape2D" parent="SkyCentral/Wall81/SlipperyArea" parent_id_path=PackedInt32Array(441359265, 773978709) index="0" unique_id=2040614053]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_am872")
+
+[node name="Wall83" parent="SkyCentral" index="1" unique_id=256963222 instance=ExtResource("8_3t5n2")]
+position = Vector2(-115, -345)
+angle_preset = 2
+length_units = 1
+mirrored = true
+
+[node name="CollisionShape2D" parent="SkyCentral/Wall83" index="0" unique_id=1644951480]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_7qnd8")
+one_way_collision = true
+
+[node name="Sprite2D" parent="SkyCentral/Wall83" index="1" unique_id=804434373]
+texture = ExtResource("11_ny68a")
+flip_h = true
+hframes = 5
+
+[node name="Polygon2D" parent="SkyCentral/Wall83" index="2" unique_id=138368735]
+rotation = -0.7853982
+polygon = PackedVector2Array(-16, -4, 16, -4, 16, 4, -16, 4)
+
+[node name="CollisionShape2D" parent="SkyCentral/Wall83/SlipperyArea" parent_id_path=PackedInt32Array(256963222, 773978709) index="0" unique_id=2040614053]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_lg4k0")
+
+[node name="Wall85" parent="SkyCentral" index="2" unique_id=118715543 instance=ExtResource("8_3t5n2")]
+position = Vector2(-90, -290)
+angle_preset = 2
+
+[node name="CollisionShape2D" parent="SkyCentral/Wall85" index="0" unique_id=1644951480]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_543sx")
+one_way_collision = true
+
+[node name="Sprite2D" parent="SkyCentral/Wall85" index="1" unique_id=804434373]
+texture = ExtResource("10_2essh")
+hframes = 7
+
+[node name="Polygon2D" parent="SkyCentral/Wall85" index="2" unique_id=138368735]
+rotation = 0.7853982
+
+[node name="CollisionShape2D" parent="SkyCentral/Wall85/SlipperyArea" parent_id_path=PackedInt32Array(118715543, 773978709) index="0" unique_id=2040614053]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_uu8kc")
+
+[node name="Wall87" parent="SkyCentral" index="3" unique_id=1773845604 instance=ExtResource("8_3t5n2")]
+position = Vector2(50, -290)
 angle_preset = 2
 mirrored = true
 
-[node name="FlipperLeftDown" parent="FlipperLeftTop" index="1" unique_id=1447591536 instance=ExtResource("9_v2dqh")]
-position = Vector2(-224, -8)
-rest_angle_degrees = -30.0
-flip_angle_degrees = 60.0
-flip_force = 300.0
-flip_speed = 40.0
-flip_input = "flipper_left"
-collision_rotation_scale = 0.85
+[node name="CollisionShape2D" parent="SkyCentral/Wall87" index="0" unique_id=1644951480]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_kxd2r")
+one_way_collision = true
 
-[node name="DeadWall4" parent="." index="16" unique_id=1111125313 instance=ExtResource("8_3t5n2")]
-position = Vector2(-3, -8)
-physics_material_override = SubResource("PhysicsMaterial_nu44e")
+[node name="Sprite2D" parent="SkyCentral/Wall87" index="1" unique_id=804434373]
+texture = ExtResource("10_2essh")
+flip_h = true
+hframes = 7
+
+[node name="Polygon2D" parent="SkyCentral/Wall87" index="2" unique_id=138368735]
+rotation = -0.7853982
+
+[node name="CollisionShape2D" parent="SkyCentral/Wall87/SlipperyArea" parent_id_path=PackedInt32Array(1773845604, 773978709) index="0" unique_id=2040614053]
+rotation = -0.7853982
+shape = SubResource("RectangleShape2D_e0yvo")
+
+[node name="Wall89" parent="SkyCentral" index="4" unique_id=1452621821 instance=ExtResource("8_3t5n2")]
+position = Vector2(205, -230)
+angle_preset = 2
+
+[node name="CollisionShape2D" parent="SkyCentral/Wall89" index="0" unique_id=1644951480]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_gnxnq")
+one_way_collision = true
+
+[node name="Sprite2D" parent="SkyCentral/Wall89" index="1" unique_id=804434373]
+texture = ExtResource("10_2essh")
+hframes = 7
+
+[node name="Polygon2D" parent="SkyCentral/Wall89" index="2" unique_id=138368735]
+rotation = 0.7853982
+
+[node name="CollisionShape2D" parent="SkyCentral/Wall89/SlipperyArea" parent_id_path=PackedInt32Array(1452621821, 773978709) index="0" unique_id=2040614053]
+rotation = 0.7853982
+shape = SubResource("RectangleShape2D_qrqi0")
+
+[node name="Wall90" parent="SkyCentral" index="5" unique_id=1501489686 instance=ExtResource("8_3t5n2")]
+position = Vector2(300, -262)
+angle_preset = 3
+
+[node name="CollisionShape2D" parent="SkyCentral/Wall90" index="0" unique_id=1644951480]
+rotation = 0.46373397
+shape = SubResource("RectangleShape2D_nfqkv")
+one_way_collision = true
+
+[node name="Sprite2D" parent="SkyCentral/Wall90" index="1" unique_id=804434373]
+texture = ExtResource("12_ra7rw")
+hframes = 6
+
+[node name="Polygon2D" parent="SkyCentral/Wall90" index="2" unique_id=138368735]
+rotation = 0.46373397
+
+[node name="CollisionShape2D" parent="SkyCentral/Wall90/SlipperyArea" parent_id_path=PackedInt32Array(1501489686, 773978709) index="0" unique_id=2040614053]
+rotation = 0.46373397
+shape = SubResource("RectangleShape2D_mcn6t")
+
+[node name="Wall91" parent="SkyCentral" index="6" unique_id=723856742 instance=ExtResource("8_3t5n2")]
+position = Vector2(357, -233)
+angle_preset = 3
+
+[node name="CollisionShape2D" parent="SkyCentral/Wall91" index="0" unique_id=1644951480]
+rotation = 0.46373397
+shape = SubResource("RectangleShape2D_wyj1r")
+one_way_collision = true
+
+[node name="Sprite2D" parent="SkyCentral/Wall91" index="1" unique_id=804434373]
+texture = ExtResource("12_ra7rw")
+hframes = 6
+
+[node name="Polygon2D" parent="SkyCentral/Wall91" index="2" unique_id=138368735]
+rotation = 0.46373397
+
+[node name="CollisionShape2D" parent="SkyCentral/Wall91/SlipperyArea" parent_id_path=PackedInt32Array(723856742, 773978709) index="0" unique_id=2040614053]
+rotation = 0.46373397
+shape = SubResource("RectangleShape2D_binf7")
+
+[node name="Wall95" parent="SkyCentral" index="7" unique_id=136814099 instance=ExtResource("8_3t5n2")]
+position = Vector2(160, -285)
 angle_preset = 4
-mirrored = true
+length_units = 1
 
-[node name="WaterDisturbance" parent="." index="19" unique_id=1393418955 instance=ExtResource("13_m516p")]
+[node name="CollisionShape2D" parent="SkyCentral/Wall95" index="0" unique_id=1644951480]
+rotation = 0.0
+shape = SubResource("RectangleShape2D_fgij4")
+one_way_collision = true
 
-[node name="SquidSpawner" parent="." index="23" unique_id=604661283 instance=ExtResource("14_l3m5x")]
+[node name="Sprite2D" parent="SkyCentral/Wall95" index="1" unique_id=804434373]
+texture = ExtResource("13_72dv4")
+hframes = 6
+
+[node name="Polygon2D" parent="SkyCentral/Wall95" index="2" unique_id=138368735]
+rotation = 0.0
+polygon = PackedVector2Array(-16, -4, 16, -4, 16, 4, -16, 4)
+
+[node name="CollisionShape2D" parent="SkyCentral/Wall95/SlipperyArea" parent_id_path=PackedInt32Array(136814099, 773978709) index="0" unique_id=2040614053]
+rotation = 0.0
+shape = SubResource("RectangleShape2D_nf5iv")
+
+[node name="Flipper80" parent="SkyCentral" index="8" unique_id=2073572449 instance=ExtResource("l6_cloud_left")]
+position = Vector2(-150, -215)
+
+[node name="Flipper82" parent="SkyCentral" index="9" unique_id=340446486 instance=ExtResource("l6_cloud_right")]
+position = Vector2(-130, -330)
+
+[node name="Flipper84" parent="SkyCentral" index="10" unique_id=1480038955 instance=ExtResource("l6_cloud_left")]
+position = Vector2(-65, -265)
+
+[node name="Flipper86" parent="SkyCentral" index="11" unique_id=162936657 instance=ExtResource("l6_cloud_right")]
+position = Vector2(25, -265)
+
+[node name="Flipper88" parent="SkyCentral" index="12" unique_id=1561991121 instance=ExtResource("l6_cloud_left")]
+position = Vector2(230, -205)
+
+[node name="Bumper92" parent="SkyCentral" index="13" unique_id=848085859 instance=ExtResource("l6_bumper")]
+position = Vector2(-20, -345)
+size_preset = 1
+radius = 16.0
+
+[node name="Bumper93" parent="SkyCentral" index="14" unique_id=764753822 instance=ExtResource("l6_bumper")]
+position = Vector2(60, -400)
+
+[node name="Bumper94" parent="SkyCentral" index="15" unique_id=848086845 instance=ExtResource("l6_bumper")]
+position = Vector2(150, -340)
+
+[node name="JetStream" parent="SkyCentral" index="16" unique_id=138307542 instance=ExtResource("l6_current")]
+position = Vector2(300, -385)
+propulsion_force = 3000.0
+centering_force = 1000.0
+lateral_damping = 1.0
+show_debug_arrows = false
+
+[node name="Path2D" parent="SkyCentral/JetStream" index="0" unique_id=1461068862]
+curve = SubResource("Curve2D_JetStream")
+
+[node name="Workshops" type="Node2D" parent="." index="23" unique_id=10002618]
+visible = false
+
+[node name="UfoWorkshop1" parent="Workshops" index="0" unique_id=65797145 instance=ExtResource("l6_workshop")]
+position = Vector2(-585, -5)
+relocate_on_delivery = true
+offscreen_pointer = true
+
+[node name="UfoWorkshop2" parent="Workshops" index="1" unique_id=2042891 instance=ExtResource("l6_workshop")]
+position = Vector2(-210, -138)
+
+[node name="UfoWorkshop3" parent="Workshops" index="2" unique_id=869382018 instance=ExtResource("l6_workshop")]
+position = Vector2(-205, 90)
+
+[node name="UfoWorkshop4" parent="Workshops" index="3" unique_id=308417276 instance=ExtResource("l6_workshop")]
+position = Vector2(175, -10)
+
+[node name="UfoWorkshop5" parent="Workshops" index="4" unique_id=855908034 instance=ExtResource("l6_workshop")]
+position = Vector2(565, 0)
+
+[node name="UfoWorkshop6" parent="Workshops" index="5" unique_id=1871007253 instance=ExtResource("l6_workshop")]
+position = Vector2(930, 125)
+
+[node name="UfoWorkshop7" parent="Workshops" index="6" unique_id=1509172015 instance=ExtResource("l6_workshop")]
+position = Vector2(-405, -385)
+
+[node name="UfoWorkshop8" parent="Workshops" index="7" unique_id=960182545 instance=ExtResource("l6_workshop")]
+position = Vector2(110, -300)
+
+[node name="UfoWorkshop9" parent="Workshops" index="8" unique_id=1308111748 instance=ExtResource("l6_workshop")]
+position = Vector2(700, -250)
+
+[node name="UfoPieceSeederFloor" parent="." index="24" unique_id=61859232 instance=ExtResource("l6_seeder")]
+use_level_manager_count = false
+seed_count_max = 3
+use_fixed_points = true
+placement_spacing = 300.0
+spawn_point_paths = Array[NodePath]([NodePath("Spot1"), NodePath("Spot2"), NodePath("Spot3"), NodePath("Spot4"), NodePath("Spot5"), NodePath("Spot6"), NodePath("Spot7"), NodePath("Spot8"), NodePath("Spot9"), NodePath("Spot10")])
+
+[node name="Spot1" type="Marker2D" parent="UfoPieceSeederFloor" index="0" unique_id=51836697]
+position = Vector2(-840, 156)
+
+[node name="Spot2" type="Marker2D" parent="UfoPieceSeederFloor" index="1" unique_id=1653841145]
+position = Vector2(-700, 156)
+
+[node name="Spot3" type="Marker2D" parent="UfoPieceSeederFloor" index="2" unique_id=23883812]
+position = Vector2(-470, 156)
+
+[node name="Spot4" type="Marker2D" parent="UfoPieceSeederFloor" index="3" unique_id=1530541170]
+position = Vector2(-330, 156)
+
+[node name="Spot5" type="Marker2D" parent="UfoPieceSeederFloor" index="4" unique_id=1769233954]
+position = Vector2(-110, 156)
+
+[node name="Spot6" type="Marker2D" parent="UfoPieceSeederFloor" index="5" unique_id=1415036770]
+position = Vector2(60, 156)
+
+[node name="Spot7" type="Marker2D" parent="UfoPieceSeederFloor" index="6" unique_id=559681317]
+position = Vector2(300, 156)
+
+[node name="Spot8" type="Marker2D" parent="UfoPieceSeederFloor" index="7" unique_id=1159104041]
+position = Vector2(440, 156)
+
+[node name="Spot9" type="Marker2D" parent="UfoPieceSeederFloor" index="8" unique_id=359313120]
+position = Vector2(680, 156)
+
+[node name="Spot10" type="Marker2D" parent="UfoPieceSeederFloor" index="9" unique_id=1289358261]
+position = Vector2(900, 156)
+
+[node name="UfoPieceSeederSpecial" parent="." index="25" unique_id=815372483 instance=ExtResource("l6_seeder")]
+use_level_manager_count = false
+seed_count_min = 2
+seed_count_max = 2
+use_fixed_points = true
+spawn_point_paths = Array[NodePath]([NodePath("Spot1"), NodePath("Spot2"), NodePath("Spot3")])
+
+[node name="Spot1" type="Marker2D" parent="UfoPieceSeederSpecial" index="0" unique_id=674541287]
+position = Vector2(-800, -445)
+
+[node name="Spot2" type="Marker2D" parent="UfoPieceSeederSpecial" index="1" unique_id=1821844897]
+position = Vector2(880, -415)
+
+[node name="Spot3" type="Marker2D" parent="UfoPieceSeederSpecial" index="2" unique_id=1264824459]
+position = Vector2(160, -300)
+
+[node name="SkyStarSeeder" parent="." index="26" unique_id=605226818 instance=ExtResource("l6_stars")]
+initial_count = 24
+respawn_threshold = 8
+sky_min_x = -900.0
+sky_max_x = 900.0
+sky_min_y = -440.0
+sky_max_y = -170.0
+min_spacing = 60.0
+
+[node name="CommunityUFOSpawner" parent="." index="27" unique_id=1776540152 instance=ExtResource("10_kx1xp")]
+dolphin_scene = ExtResource("11_m516p")
+community_ufo_scene = ExtResource("12_l3m5x")
+
+[node name="WaterDisturbance" parent="." index="28" unique_id=1393418955 instance=ExtResource("13_m516p")]
+
+[node name="SquidSpawner" parent="." index="29" unique_id=604661283 instance=ExtResource("14_l3m5x")]
+squid_count = 5
+spawn_area_min = Vector2(-930, -90)
+spawn_area_max = Vector2(930, 150)
+
+[editable path="SkyCentral/Wall81"]
+[editable path="SkyCentral/Wall83"]
+[editable path="SkyCentral/Wall85"]
+[editable path="SkyCentral/Wall87"]
+[editable path="SkyCentral/Wall89"]
+[editable path="SkyCentral/Wall90"]
+[editable path="SkyCentral/Wall91"]
+[editable path="SkyCentral/Wall95"]
+[editable path="SkyCentral/JetStream"]

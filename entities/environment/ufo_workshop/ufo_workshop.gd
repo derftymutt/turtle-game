@@ -16,6 +16,21 @@ const _SFX_BEAT_LEVEL = preload("res://assets/sounds/sfx/beat level_1.ogg")
 ## the one that stays. Levels with a single instance are unaffected.
 @export var selection_weight: float = 1.0
 
+## Relocation (Level 6)
+## After every delivery but the last, the workshop hops to another of the
+## level's placed spots, at least relocate_min_distance away (the farthest one
+## if none is that far). Set these on any one instance — the election hands
+## them to whichever workshop survives.
+@export_group("Relocation")
+@export var relocate_on_delivery: bool = false
+@export var relocate_min_distance: float = 640.0
+## Arrow at the screen edge pointing to the workshop while it is off-screen.
+@export var offscreen_pointer: bool = false
+@export_group("")
+
+## Seconds the delivery animation gets at the old spot before the hop starts.
+const _RELOCATE_DELAY: float = 0.6
+
 # Visual feedback
 @export var idle_color: Color = Color(1.0, 1.0, 1.0, 1.0)  # Blue glow
 @export var active_color: Color = Color(1.0, 0.8, 0.0, 1.0)  # Gold when player nearby
@@ -45,6 +60,8 @@ var timeline_positions: Array[Vector2] = []
 var _hop_tween: Tween
 var _hopping: bool = false
 var _level_done: bool = false
+var _elected: bool = false
+var _relocate_pending: bool = false
 
 func _ready():
 	add_to_group("ufo_workshop_candidate")
@@ -88,7 +105,8 @@ func _elect_single_workshop() -> void:
 	candidates = candidates.filter(func(w: Node) -> bool:
 		return is_instance_valid(w) and not w.is_queued_for_deletion())
 	if candidates.size() <= 1:
-		return  # Single instance (or none) — nothing to cull
+		_on_elected()  # Single instance (or the survivor's own turn) — nothing to cull
+		return
 
 	# Only the leader (lowest instance id) runs the pick, so every instance's
 	# deferred call resolves to the same outcome.
@@ -116,10 +134,24 @@ func _elect_single_workshop() -> void:
 	chosen.timeline_positions = positions
 
 	for w in candidates:
+		if w.relocate_on_delivery:
+			chosen.relocate_on_delivery = true
+			chosen.relocate_min_distance = w.relocate_min_distance
+		if w.offscreen_pointer:
+			chosen.offscreen_pointer = true
 		if w != chosen:
 			w.queue_free()
+	chosen._on_elected()
 
 	print("🛠️ UFO Workshop: %d candidates, kept '%s'" % [candidates.size(), chosen.name])
+
+## Runs once on the workshop that stays, after the election has settled.
+func _on_elected() -> void:
+	if _elected:
+		return
+	_elected = true
+	if offscreen_pointer:
+		add_child(WorkshopPointer.new())
 
 func _process(delta):
 	# Visual pulsing when player nearby with piece
@@ -240,11 +272,37 @@ func _apply_idle_visuals():
 func _on_piece_delivered(pieces_collected: int, pieces_needed: int):
 	"""React to piece delivery (visual feedback)"""
 	print("🛠️ Workshop: %d/%d pieces" % [pieces_collected, pieces_needed])
+	# LevelManager also emits this with 0 delivered when the level starts
+	if relocate_on_delivery and pieces_collected > 0 and pieces_collected < pieces_needed:
+		_relocate_after_delivery()
 
 func _on_level_complete():
 	"""React to level completion"""
 	_level_done = true
 	print("🛠️ Workshop: Level complete! UFO assembled!")
+
+# ─── Relocation ──────────────────────────────────────────────────────────────
+
+func _relocate_after_delivery() -> void:
+	if _relocate_pending:
+		return  # two pieces delivered at once (hot Graviton Harness): one hop
+	_relocate_pending = true
+	await get_tree().create_timer(_RELOCATE_DELAY).timeout
+	_relocate_pending = false
+	if not is_inside_tree() or _level_done:
+		return
+	hop_to(_pick_relocation_target())
+
+func _pick_relocation_target() -> Vector2:
+	var far_enough: Array[Vector2] = []
+	var farthest: Vector2 = global_position
+	for pos in get_alternate_positions():
+		var dist: float = pos.distance_to(global_position)
+		if dist >= relocate_min_distance:
+			far_enough.append(pos)
+		if dist > farthest.distance_to(global_position):
+			farthest = pos
+	return far_enough.pick_random() if not far_enough.is_empty() else farthest
 
 # ─── Timeline Alternator ─────────────────────────────────────────────────────
 

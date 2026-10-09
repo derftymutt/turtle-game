@@ -46,7 +46,8 @@ var pieces_needed_by_level: Dictionary = {
 	1: 3,
 	2: 3,
 	3: 3,
-	4: 3
+	4: 3,
+	6: 5
 	# etc...
 }
 
