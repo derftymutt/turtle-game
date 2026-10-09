@@ -81,6 +81,8 @@ signal plunge_finished(ate_urchin: bool)
 @export var eat_radius: float = 24.0
 ## How much bigger the glowing urchin swells at the top of each throb
 @export var target_throb: float = 0.35
+## Seconds after a catch before its bonus trash bag drifts in
+@export var trash_bag_delay: float = 2.0
 @export var target_glow_color: Color = Color(1.0, 0.9, 0.3, 1.0)
 
 @export_group("Visual")
@@ -174,6 +176,8 @@ var _hint_button_label: Label = null
 
 const SCENE_PATH: String = "res://entities/npcs/puffer_bird/puffer_bird_launcher.tscn"
 const BIRD_TEXTURE = preload("res://entities/npcs/puffer_bird/puffer_bird.png")
+const _SFX_LAUNCH = preload("res://assets/sounds/sfx/puffer bird launch.ogg")
+const _SFX_GETS_URCHIN = preload("res://assets/sounds/sfx/puffer bird gets urchin.ogg")
 ## Frames side by side on BIRD_TEXTURE
 const BIRD_FRAMES: int = 2
 
@@ -370,6 +374,12 @@ func _aim_tick(delta: float) -> void:
 
 func _plunge(power: float) -> void:
 	_state = State.PLUNGING
+	# A child of this node, so it plays while the level is still paused
+	var sfx := AudioStreamPlayer.new()
+	sfx.stream = _SFX_LAUNCH
+	sfx.finished.connect(sfx.queue_free)
+	add_child(sfx)
+	sfx.play()
 	_velocity = _aim_direction() * _launch_speed(power)
 	if absf(_velocity.x) > 1.0:
 		_facing = signf(_velocity.x)
@@ -402,6 +412,12 @@ func _finish() -> void:
 		_target.sprite.scale = Vector2.ONE
 	if ate:
 		GameManager.record_puffer_skill_shot()
+		# And a trash bag drifts in, a few seconds on so its sound doesn't
+		# land on the catch sound. The timer calls the HUD directly (this node
+		# is gone by then) and waits while the game is paused.
+		var hud := get_tree().get_first_node_in_group("hud")
+		if hud and hud.has_method("spawn_bonus_trash_cluster"):
+			get_tree().create_timer(trash_bag_delay, false).timeout.connect(hud.spawn_bonus_trash_cluster)
 		_eat(_target)
 	_target = null
 
@@ -423,6 +439,13 @@ func _finish() -> void:
 ## instead; _leave_tick() then carries it off.
 func _eat(urchin: SeaUrchin) -> void:
 	urchin.be_eaten()
+	# On the level rather than this node, which frees itself once the bird has
+	# flown off — the sound plays out regardless
+	var sfx := AudioStreamPlayer.new()
+	sfx.stream = _SFX_GETS_URCHIN
+	sfx.finished.connect(sfx.queue_free)
+	get_parent().add_child(sfx)
+	sfx.play()
 	_carried_urchin = urchin
 	# Onto the bird's layer, behind the bird, so the pair cross the HUD together
 	if _bird_layer:
@@ -633,12 +656,13 @@ func _draw() -> void:
 		draw_arc(at, 13.0 + pulse * 4.0, 0.0, TAU, 24, Color(target_glow_color, 0.9), 1.0)
 	if _state != State.AIMING:
 		return
-	# Aim: blinking dots down the plunge line
+	_draw_power_meter()
+	# Aim: blinking dots down the plunge line — drawn after the gauge, so they
+	# stay visible when the aim swings across it
 	var dir := _aim_direction()
 	for i in 5:
 		var blink: float = 0.45 + 0.55 * absf(sin(_draw_time * 6.0 - i * 0.9))
 		draw_circle(_TURTLE_OFFSET + dir * (16.0 + i * 9.0), 2.0 - i * 0.25, Color(aim_color, blink))
-	_draw_power_meter()
 	if not _charging:
 		return
 	if show_landing_preview:
