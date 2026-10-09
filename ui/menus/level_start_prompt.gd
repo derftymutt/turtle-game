@@ -6,7 +6,8 @@ class_name LevelStartPrompt
 ## can look the level over and make a plan before anything moves. Each number
 ## plunges in from the top of the screen and lands with a little overshoot,
 ## as the number before it quickly fades out of the spot; the last one fades
-## away.
+## away. As the level starts, "Go!" takes the spot: its letters roll like an
+## ocean wave while it turns the blue of the water behind it and fades.
 ## Any button
 ## skips the rest of the countdown and starts at once. It pauses the tree the
 ## moment it is added — from LevelBase._ready(), so the level never runs a
@@ -22,14 +23,28 @@ const _ARM_DELAY_MSEC: int = 400
 const _COUNTDOWN_SECONDS: float = 3.0
 ## A beat before the first number drops, so the screen is seen first and
 ## the "3" isn't missed
-const _START_DELAY: float = 0.5
+const _START_DELAY: float = 0.2
 ## How much of each number's second it spends plunging in from above
-const _PLUNGE_PORTION: float = 0.3
+const _PLUNGE_PORTION: float = 0.4
 const _PLUNGE_HEIGHT: float = 260.0
 ## The number before it fades out over this much of the new one's plunge
 const _REPLACE_FADE: float = 0.5
 ## How much of the last number's second it spends fading out
 const _FADE_PORTION: float = 0.35
+## "Go!" as the level starts: how long it lasts, how far its letters ride up
+## and down, how fast the wave rolls and how far apart its letters are on it
+const _GO_TEXT: String = "Go!"
+const _GO_SECONDS: float = 1.2
+const _GO_WAVE_HEIGHT: float = 5.0
+const _GO_WAVE_SPEED: float = 7.0
+const _GO_WAVE_SPACING: float = 1.1
+## Through its life (0..1): when the blue starts coming on, and when it is
+## fully blue — which is also when the fade-out begins
+const _GO_BLUE_FROM: float = 0.15
+const _GO_BLUE_FULL: float = 0.5
+## The water it dissolves into — between the ocean's mid-depth and deep blues,
+## rich enough to read against the lighter water near the surface
+const _GO_OCEAN_COLOR := Color(0.0, 0.42, 1.0)
 ## A little south of the screen centre
 const _TEXT_OFFSET_Y: float = 44.0
 ## Under the pause menu (layer 8), which can open on top of this
@@ -42,6 +57,10 @@ var _waiting: bool = false
 var _menu_open: bool = false
 var _shown_msec: int = 0
 var _delay: float = _START_DELAY
+## One label per letter of "Go!", so each rides the wave on its own
+var _go_letters: Array[Label] = []
+var _go_rest: Array[Vector2] = []
+var _go_time: float = -1.0
 var _remaining: float = _COUNTDOWN_SECONDS
 
 func _ready() -> void:
@@ -73,6 +92,9 @@ func _make_number_label() -> Label:
 	return label
 
 func _process(delta: float) -> void:
+	if _go_time >= 0.0:
+		_wave_go(delta)
+		return
 	if not _waiting:
 		return
 	# Out of the way, and on hold, while the pause menu is open over it
@@ -132,6 +154,47 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _start() -> void:
 	_waiting = false
+	_label.visible = false
+	_previous_label.visible = false
 	get_tree().paused = false
 	started.emit()
-	queue_free()
+	_show_go()
+
+## Lays "Go!" out letter by letter where the numbers were.
+func _show_go() -> void:
+	var widths: Array[float] = []
+	var total: float = 0.0
+	for i in _GO_TEXT.length():
+		var letter := _make_number_label()
+		letter.text = _GO_TEXT[i]
+		letter.size = letter.get_minimum_size()
+		letter.visible = true
+		_go_letters.append(letter)
+		widths.append(letter.size.x)
+		total += letter.size.x
+	var screen: Vector2 = get_viewport().get_visible_rect().size
+	var x: float = (screen.x - total) * 0.5
+	for i in _go_letters.size():
+		var letter: Label = _go_letters[i]
+		_go_rest.append(Vector2(x, screen.y * 0.5 + _TEXT_OFFSET_Y - letter.size.y * 0.5))
+		letter.position = _go_rest[i]
+		x += widths[i]
+	_go_time = 0.0
+
+## The letters roll like a swell passing under them — each a beat behind the
+## one before — while the word takes on the colour of the water and fades.
+func _wave_go(delta: float) -> void:
+	_go_time += delta
+	var progress: float = clampf(_go_time / _GO_SECONDS, 0.0, 1.0)
+	for i in _go_letters.size():
+		var letter: Label = _go_letters[i]
+		var phase: float = _go_time * _GO_WAVE_SPEED - i * _GO_WAVE_SPACING
+		letter.position = _go_rest[i] + Vector2(cos(phase) * 1.5, sin(phase) * _GO_WAVE_HEIGHT)
+		# Fully blue before it starts to fade, so the fade reads as blue text
+		# sinking into the water rather than white text thinning out
+		var blue: float = smoothstep(_GO_BLUE_FROM, _GO_BLUE_FULL, progress)
+		letter.add_theme_color_override("font_color", Color.WHITE.lerp(_GO_OCEAN_COLOR, blue))
+		letter.add_theme_color_override("font_outline_color", Color.BLACK.lerp(_GO_OCEAN_COLOR, blue))
+		letter.modulate.a = 1.0 - smoothstep(_GO_BLUE_FULL, 1.0, progress)
+	if progress >= 1.0:
+		queue_free()

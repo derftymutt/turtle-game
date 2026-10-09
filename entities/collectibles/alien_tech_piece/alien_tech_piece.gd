@@ -8,7 +8,10 @@ class_name AlienTechPiece
 var _glow_offset: float = 0.0
 
 func _collectible_ready():
-	$SfxAppears.play()
+	# A piece placed in the level scene (it has an owner) was there all along —
+	# only one that is spawned during play has actually appeared.
+	if owner == null:
+		$SfxAppears.play()
 	point_value = 50
 	sink_speed = 20.0
 	sway_amount = 8.0

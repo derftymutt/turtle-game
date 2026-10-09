@@ -607,8 +607,8 @@ func _confirm_skip():
 	dialog.show_dialog(
 		"Study %s instead of equipping it?" % tech_name,
 		[
-			{"text": "Study It", "callback": do_skip},
-			{"text": "Keep Looking", "is_cancel": true},
+			{"text": "Yes, study It", "callback": do_skip},
+			{"text": "Go back", "is_cancel": true},
 		]
 	)
 
