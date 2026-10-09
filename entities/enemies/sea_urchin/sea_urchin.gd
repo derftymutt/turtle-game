@@ -28,6 +28,8 @@ var rotation_offset: float = 0.0
 var _mutated: bool = false
 var _benched: bool = false
 var _benched_groups: Array[StringName] = []
+# Eaten by the puffer bird: out of play for good, about to be freed.
+var _eaten: bool = false
 
 func _enemy_ready():
 	add_to_group("sea_urchins")
@@ -125,6 +127,25 @@ func set_benched(on: bool) -> void:
 				add_to_group(group)
 			_benched_groups.clear()
 	_apply_stand_down()
+
+## PufferBirdLauncher's skill shot: out of the level for good. Leaves every
+## group and the physics space at once but stays drawn — the bird carries it
+## off in its feet and then frees it.
+func be_eaten() -> void:
+	if _eaten:
+		return
+	_eaten = true
+	for group in get_groups():
+		if not String(group).begins_with("_"):
+			remove_from_group(group)
+	_contact_players.clear()
+	var group_node := get_parent() as SeaUrchinGroup
+	if group_node:
+		group_node.forget(self)
+	process_mode = Node.PROCESS_MODE_DISABLED
+
+func is_eaten() -> bool:
+	return _eaten
 
 func is_benched() -> bool:
 	return _benched

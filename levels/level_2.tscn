@@ -32,6 +32,7 @@
 [ext_resource type="PackedScene" uid="uid://c41fis6pd8gh2" path="res://systems/space_debris/space_debris_group.tscn" id="30_4xp61"]
 [ext_resource type="PackedScene" uid="uid://dq7r6j7ritsv7" path="res://entities/collectibles/powerup/powerup.tscn" id="31_4yoxl"]
 [ext_resource type="PackedScene" uid="uid://q614lo3kanxc" path="res://systems/space_debris/space_debris.tscn" id="32_6dcgf"]
+[ext_resource type="PackedScene" path="res://entities/npcs/puffer_bird/puffer_bird_launcher.tscn" id="33_pufferbird"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_tv8m3"]
 friction = 0.1
@@ -493,6 +494,9 @@ curve = SubResource("Curve2D_4yoxl")
 
 [node name="Visuals" parent="HydroFunnel3" index="1" unique_id=2005124627]
 position = Vector2(127, -131)
+
+[node name="PufferBirdLauncher" parent="." instance=ExtResource("33_pufferbird")]
+position = Vector2(0, -140)
 
 [editable path="OceanCurrent"]
 [editable path="SpaceDebrisGroup"]

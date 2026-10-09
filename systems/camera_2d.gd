@@ -99,6 +99,27 @@ func _ready() -> void:
 			global_position.y = sky_locked_y
 
 
+## Frames the follow target where it is right now, with no pan or cinematic —
+## for a turtle that was moved while the level is still frozen
+## (PufferBirdLauncher), when _process() isn't running to find it.
+func snap_to_target() -> void:
+	if not follow_target or _focus_active:
+		return
+	if _cinematic_tween and _cinematic_tween.is_valid():
+		_cinematic_tween.kill()
+	target_x = follow_target.global_position.x
+	if follow_target.global_position.y < ocean_surface_y - sky_entry_threshold:
+		state = CameraState.SKY_LOCKED
+		cinematic_played = true
+		zoom = sky_locked_zoom
+		global_position.y = sky_locked_y
+	else:
+		state = CameraState.OCEAN
+		cinematic_played = false
+		zoom = normal_zoom
+		global_position.y = 0.0
+
+
 # ── Main Loop ─────────────────────────────────────────────────────────────
 
 func _process(delta: float) -> void:

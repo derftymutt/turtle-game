@@ -57,6 +57,11 @@ func reseed() -> bool:
 			break
 	return _transition_to(new_active)
 
+## An urchin was eaten (SeaUrchin.be_eaten()) — it's no longer a candidate,
+## in this layout or any later one.
+func forget(urchin: SeaUrchin) -> void:
+	_active.erase(urchin)
+
 ## The current layout, for handing back to restore_layout() later.
 func get_layout() -> Array[SeaUrchin]:
 	return _active.duplicate()
@@ -115,6 +120,6 @@ func _settle() -> void:
 func _candidates() -> Array[SeaUrchin]:
 	var result: Array[SeaUrchin] = []
 	for child in get_children():
-		if child is SeaUrchin and not child.is_queued_for_deletion():
+		if child is SeaUrchin and not child.is_queued_for_deletion() and not child.is_eaten():
 			result.append(child)
 	return result

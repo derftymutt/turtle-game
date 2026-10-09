@@ -39,6 +39,10 @@ var persisted_hearts: int = -1
 # max_hp()).
 var rainbow_hearts: int = 0
 
+# Picky Puffer skill shots landed this run — plunges (PufferBirdLauncher) that
+# ended on the bird's sea urchin. Kept for the Puffer Party bonus level.
+var puffer_skill_shots: int = 0
+
 # Tutorial flags — reset each run
 var has_shown_tech_tutorial: bool = false
 var first_trash_cluster_spawned: bool = false
@@ -111,6 +115,7 @@ func reset_game():
 	total_score = 0
 	persisted_hearts = -1
 	rainbow_hearts = 0
+	puffer_skill_shots = 0
 	clear_carried_pieces()
 	has_shown_tech_tutorial = false
 	first_trash_cluster_spawned = false
@@ -144,6 +149,10 @@ func heart_capacity(slot: int) -> int:
 ## Full health in HP — rainbow hearts are worth 2.
 func max_hp() -> int:
 	return HEART_SLOTS + rainbow_heart_count()
+
+## A PufferBirdLauncher plunge ended on the Picky Puffer's sea urchin.
+func record_puffer_skill_shot() -> void:
+	puffer_skill_shots += 1
 
 ## Hot Graviton Harness lets the turtle carry 2 UFO parts at once instead of 1.
 func max_carry_capacity() -> int:

@@ -16,6 +16,9 @@ var _level_song_base_volume: float
 ## Set by an intro popup that wants the start prompt to wait until it is
 ## dismissed (BossIntroPopup) — see hold_start_prompt().
 var _start_prompt_held: bool = false
+## The level's PufferBirdLauncher, if it has one — it then opens the level
+## with a plunge instead of the start prompt.
+var _plunge_launcher: PufferBirdLauncher = null
 
 func _ready():
 	# Ensure game is unpaused
@@ -37,8 +40,14 @@ func _ready():
 	# Initialize this level with LevelManager
 	LevelManager.start_level(level_number)
 
-	if _wants_start_prompt() and not _start_prompt_held:
-		show_start_prompt()
+	if _wants_start_prompt():
+		_plunge_launcher = _find_plunge_launcher()
+		# In the bird's grasp from the first frame, even if a popup holds the
+		# countdown back
+		if _plunge_launcher:
+			_plunge_launcher.grab_turtle()
+		if not _start_prompt_held:
+			show_start_prompt()
 
 	print("📍 Level %d ready (%s)" % [level_number, scene_file_path])
 
@@ -53,20 +62,33 @@ func _wants_start_prompt() -> bool:
 func hold_start_prompt() -> void:
 	_start_prompt_held = true
 
-## Freezes the level until the player presses something (LevelStartPrompt).
+## Freezes the level until the player presses something (LevelStartPrompt),
+## or, in a level with a PufferBirdLauncher, until the plunge has landed.
 ## Only the game holds still — the level song plays through the wait.
 func show_start_prompt() -> void:
 	if not _wants_start_prompt():
 		get_tree().paused = false
 		return
-	var prompt := LevelStartPrompt.new()
 	# Back to pausing with the game (pause menu, popups) once the level is live
 	_sfx_level_song.process_mode = Node.PROCESS_MODE_ALWAYS
-	prompt.started.connect(func():
+	var on_started := func():
 		if is_instance_valid(_sfx_level_song):
 			_sfx_level_song.process_mode = Node.PROCESS_MODE_INHERIT
-	)
+	if is_instance_valid(_plunge_launcher):
+		_plunge_launcher.started.connect(on_started, CONNECT_ONE_SHOT)
+		_plunge_launcher.begin()
+		return
+	var prompt := LevelStartPrompt.new()
+	prompt.started.connect(on_started)
 	add_child(prompt)
+
+## This level's PufferBirdLauncher (they register in "plunge_launchers"), or
+## null — most levels have none.
+func _find_plunge_launcher() -> PufferBirdLauncher:
+	for node in get_tree().get_nodes_in_group("plunge_launchers"):
+		if node is PufferBirdLauncher and is_ancestor_of(node):
+			return node
+	return null
 
 ## Called by turtle when player dies
 func on_player_died(final_score: int, death_cause: String = ""):

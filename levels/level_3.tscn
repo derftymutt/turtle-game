@@ -31,6 +31,7 @@
 [ext_resource type="PackedScene" uid="uid://c41fis6pd8gh2" path="res://systems/space_debris/space_debris_group.tscn" id="31_q26s8"]
 [ext_resource type="PackedScene" uid="uid://dq7r6j7ritsv7" path="res://entities/collectibles/powerup/powerup.tscn" id="32_o87u6"]
 [ext_resource type="PackedScene" uid="uid://q614lo3kanxc" path="res://systems/space_debris/space_debris.tscn" id="33_h3b7p"]
+[ext_resource type="PackedScene" path="res://entities/npcs/puffer_bird/puffer_bird_launcher.tscn" id="33_o87u6"]
 [ext_resource type="PackedScene" path="res://systems/rainbow_fish/rainbow_fish_spawner.tscn" id="33_q26s8"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_jqt73"]
@@ -532,6 +533,8 @@ position = Vector2(-89, -27)
 
 [node name="RainbowFishSpawner" parent="." index="51" unique_id=1256303568 instance=ExtResource("33_q26s8")]
 kill_triggers = Array[int]([20, 20, 15])
+
+[node name="PufferBirdLauncher" parent="." index="52" unique_id=292110670 instance=ExtResource("33_o87u6")]
 
 [editable path="OceanCurrentLeft"]
 [editable path="OceanCurrentRight"]
