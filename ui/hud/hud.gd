@@ -245,7 +245,7 @@ func update_score(new_score: int):
 	_trash_clusters.on_score_updated(self, new_score, previous_score)
 
 ## A bonus trash bag right now, outside the score thresholds and the freebie
-## timer — the reward for the puffer bird's skill shot.
+## timer — the reward for the puffin's skill shot.
 func spawn_bonus_trash_cluster() -> void:
 	_trash_clusters.spawn(self)
 

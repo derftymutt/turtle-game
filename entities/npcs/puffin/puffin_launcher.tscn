@@ -1,0 +1,14 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://entities/npcs/puffin/puffin_launcher.gd" id="1_launcher"]
+[ext_resource type="Texture2D" uid="uid://tq2i5he47dcx" path="res://entities/npcs/puffin/puffin.png" id="2_bird"]
+
+[node name="PuffinLauncher" type="Node2D"]
+position = Vector2(0, -140)
+z_index = 20
+script = ExtResource("1_launcher")
+
+[node name="Bird" type="Sprite2D" parent="."]
+position = Vector2(0, -14)
+texture = ExtResource("2_bird")
+hframes = 2

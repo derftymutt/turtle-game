@@ -29,7 +29,7 @@ func save_game():
 		"total_time_ms":       LevelManager.total_time_ms,
 		"persisted_hearts":    GameManager.persisted_hearts,
 		"rainbow_hearts":      GameManager.rainbow_hearts,
-		"puffer_skill_shots":  GameManager.puffer_skill_shots,
+		"puffin_skill_shots":  GameManager.puffin_skill_shots,
 		"insight":             AlienTechManager.insight,
 	}
 	var file = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
@@ -76,7 +76,8 @@ func apply_save():
 	LevelManager.total_time_ms = data.get("total_time_ms", 0)
 	GameManager.persisted_hearts = int(data.get("persisted_hearts", -1))
 	GameManager.rainbow_hearts = int(data.get("rainbow_hearts", 0))
-	GameManager.puffer_skill_shots = int(data.get("puffer_skill_shots", 0))
+	# "puffer_skill_shots" is the key from before the bird was renamed
+	GameManager.puffin_skill_shots = int(data.get("puffin_skill_shots", data.get("puffer_skill_shots", 0)))
 	print("📂 Restored: Level %d, Total Score %d, Continues %d" % [
 		LevelManager.current_level_number, GameManager.total_score,
 		LevelManager.continue_count])

@@ -101,7 +101,7 @@ func _ready() -> void:
 
 ## Frames the follow target where it is right now, with no pan or cinematic —
 ## for a turtle that was moved while the level is still frozen
-## (PufferBirdLauncher), when _process() isn't running to find it.
+## (PuffinLauncher), when _process() isn't running to find it.
 func snap_to_target() -> void:
 	if not follow_target or _focus_active:
 		return

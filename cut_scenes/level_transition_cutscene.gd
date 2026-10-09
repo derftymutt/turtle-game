@@ -2,7 +2,7 @@
 # Between-levels cut scene (loaded as a full-screen scene via change_scene_to_file).
 # Sequence: UFO assembled flies across black screen → splits into halves → turtle
 # ejects upward → all elements plunge off the bottom → next level loads.
-# If the next level opens with a PufferBirdLauncher, a puffer bird darts
+# If the next level opens with a PuffinLauncher, a puffin darts
 # across after the falling turtle — it will be holding it when the level starts.
 extends Node
 
@@ -13,7 +13,7 @@ const VP_H: float = 360.0
 const UFO_TRAVEL_X: float = VP_W * 0.55   # x where the UFO stops and splits
 const UFO_Y: float = VP_H * 0.50           # vertical position of the UFO
 
-# Puffer bird fly-by: starts as the turtle drops out of sight
+# Puffin fly-by: starts as the turtle drops out of sight
 const BIRD_DELAY: float = 0.2
 const BIRD_FLIGHT_SECONDS: float = 2.0
 const BIRD_FLAP_FPS: float = 14.0
@@ -44,8 +44,8 @@ var _ufo: Sprite2D
 var _ufo_left: Sprite2D
 var _ufo_right: Sprite2D
 var _turtle: Sprite2D
-# Only built when the next level has a PufferBirdLauncher
-var _puffer_bird: Sprite2D
+# Only built when the next level has a PuffinLauncher
+var _puffin: Sprite2D
 var _bird_tween: Tween
 var _canvas: CanvasLayer
 var _level_label: Label
@@ -97,17 +97,17 @@ func _build_scene() -> void:
 	_canvas.add_child(_turtle)
 
 	var next_level: int = LevelManager.current_level_number + 1
-	if PufferBirdLauncher.level_has_launcher(LevelManager.level_scenes.get(next_level, "")):
-		_puffer_bird = Sprite2D.new()
-		_puffer_bird.texture = PufferBirdLauncher.BIRD_TEXTURE
-		_puffer_bird.hframes = PufferBirdLauncher.BIRD_FRAMES
+	if PuffinLauncher.level_has_launcher(LevelManager.level_scenes.get(next_level, "")):
+		_puffin = Sprite2D.new()
+		_puffin.texture = PuffinLauncher.BIRD_TEXTURE
+		_puffin.hframes = PuffinLauncher.BIRD_FRAMES
 		var outline_shader := Shader.new()
 		outline_shader.code = BIRD_OUTLINE_SHADER
 		var outline := ShaderMaterial.new()
 		outline.shader = outline_shader
-		_puffer_bird.material = outline
-		_puffer_bird.visible = false
-		_canvas.add_child(_puffer_bird)
+		_puffin.material = outline
+		_puffin.visible = false
+		_canvas.add_child(_puffin)
 
 	_level_label = Label.new()
 	_level_label.text = "Level %d" % next_level
@@ -283,27 +283,27 @@ func _show_level_title() -> void:
 		tween.tween_property(_effects_label, "modulate:a", 1.0, 0.35)\
 			.set_delay(0.2).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
-## The puffer bird dives after the turtle: in from mid-height off one side
+## The puffin dives after the turtle: in from mid-height off one side
 ## (picked at random), diagonally down and out the bottom where it fell.
-func _fly_puffer_bird() -> void:
-	if _puffer_bird == null:
+func _fly_puffin() -> void:
+	if _puffin == null:
 		return
 	var from_left: bool = randf() < 0.5
 	var start := Vector2(-40.0 if from_left else VP_W + 40.0, VP_H * 0.5)
 	var end := Vector2(_turtle.position.x, VP_H + 50.0)
-	_puffer_bird.position = start
-	_puffer_bird.flip_h = not from_left  # the art faces right
+	_puffin.position = start
+	_puffin.flip_h = not from_left  # the art faces right
 	_bird_tween = create_tween().set_parallel(true)
-	_bird_tween.tween_callback(func() -> void: _puffer_bird.visible = true).set_delay(BIRD_DELAY)
-	_bird_tween.tween_property(_puffer_bird, "position", end, BIRD_FLIGHT_SECONDS)\
+	_bird_tween.tween_callback(func() -> void: _puffin.visible = true).set_delay(BIRD_DELAY)
+	_bird_tween.tween_property(_puffin, "position", end, BIRD_FLIGHT_SECONDS)\
 		.set_delay(BIRD_DELAY).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	_bird_tween.tween_method(func(t: float) -> void:
-		_puffer_bird.frame = int(t * BIRD_FLAP_FPS) % _puffer_bird.hframes
+		_puffin.frame = int(t * BIRD_FLAP_FPS) % _puffin.hframes
 	, 0.0, BIRD_FLIGHT_SECONDS, BIRD_FLIGHT_SECONDS).set_delay(BIRD_DELAY)
 
 func _plunge() -> void:
 	_show_level_title()
-	_fly_puffer_bird()
+	_fly_puffin()
 	$SfxFall.play()
 	var target_y: float = VP_H + 140.0
 	var tween := create_tween()

@@ -1,8 +1,8 @@
 extends Node2D
-class_name PufferBirdLauncher
+class_name PuffinLauncher
 
-## PUFFER BIRD LAUNCHER — the plunger. Opt-in per level: instance
-## puffer_bird_launcher.tscn anywhere in a level, placed where the bird should
+## PUFFIN LAUNCHER — the plunger. Opt-in per level: instance
+## puffin_launcher.tscn anywhere in a level, placed where the bird should
 ## be holding the turtle when the level opens (top middle of the opening
 ## screen, just above the water). LevelBase finds it and runs it instead of
 ## the start countdown.
@@ -13,7 +13,7 @@ class_name PufferBirdLauncher
 ## everything — the physics world isn't stepping.
 ##
 ## Life cycle:
-##   HOLDING  — grab_turtle(): the bird has the turtle and the Picky Puffer's
+##   HOLDING  — grab_turtle(): the bird has the turtle and the Picky Puffin's
 ##              sea urchin is glowing, but the countdown hasn't begun (a
 ##              BossIntroPopup is still up).
 ##   SPOTTING — begin(): a yellow twinkle shoots from the bird's eye to its
@@ -28,7 +28,7 @@ class_name PufferBirdLauncher
 ##              inside the screen and the world boundaries.
 ##   LEAVING  — the plunge has stopped. Within `eat_radius` of the glowing
 ##              urchin the bird eats it (gone for good, counted by
-##              GameManager.record_puffer_skill_shot()). Either way the level
+##              GameManager.record_puffin_skill_shot()). Either way the level
 ##              starts and the bird flies off.
 
 ## The plunge is over and the level is running (same meaning as
@@ -133,7 +133,7 @@ const _TEXT_HEIGHT: float = 16.0
 const _HINT_TEXT: Array[String] = ["Hold ", " to charge"]
 const _HINT_BLINK_PERIOD_MSEC: float = 350.0
 const _HINT_BLINK_COLOR := Color(0.65, 0.12, 1.0)
-const _TARGET_TEXT: String = "Picky Puffer wants her sea urchin!"
+const _TARGET_TEXT: String = "Picky Puffin wants her sea urchin!"
 
 ## The TurtlePlayer (it has no class_name, so its own methods go through call())
 var _turtle: RigidBody2D = null
@@ -174,10 +174,10 @@ var _hint_button_label: Label = null
 
 @onready var _bird: Sprite2D = $Bird
 
-const SCENE_PATH: String = "res://entities/npcs/puffer_bird/puffer_bird_launcher.tscn"
-const BIRD_TEXTURE = preload("res://entities/npcs/puffer_bird/puffer_bird.png")
-const _SFX_LAUNCH = preload("res://assets/sounds/sfx/puffer bird launch.ogg")
-const _SFX_GETS_URCHIN = preload("res://assets/sounds/sfx/puffer bird gets urchin.ogg")
+const SCENE_PATH: String = "res://entities/npcs/puffin/puffin_launcher.tscn"
+const BIRD_TEXTURE = preload("res://entities/npcs/puffin/puffin.png")
+const _SFX_LAUNCH = preload("res://assets/sounds/sfx/puffin launch.ogg")
+const _SFX_GETS_URCHIN = preload("res://assets/sounds/sfx/puffin gets urchin.ogg")
 ## Frames side by side on BIRD_TEXTURE
 const BIRD_FRAMES: int = 2
 
@@ -214,7 +214,7 @@ func grab_turtle() -> void:
 		return
 	_turtle = get_tree().get_first_node_in_group("player") as RigidBody2D
 	if _turtle == null:
-		push_warning("PufferBirdLauncher: no turtle to hold")
+		push_warning("PuffinLauncher: no turtle to hold")
 		return
 	_state = State.HOLDING
 	visible = true
@@ -411,7 +411,7 @@ func _finish() -> void:
 	if is_instance_valid(_target) and _target.sprite:
 		_target.sprite.scale = Vector2.ONE
 	if ate:
-		GameManager.record_puffer_skill_shot()
+		GameManager.record_puffin_skill_shot()
 		# And a trash bag drifts in, a few seconds on so its sound doesn't
 		# land on the catch sound. The timer calls the HUD directly (this node
 		# is gone by then) and waits while the game is paused.
@@ -647,7 +647,7 @@ func _make_label(font_size: int) -> Label:
 	return label
 
 func _draw() -> void:
-	# The Picky Puffer's urchin
+	# The Picky Puffin's urchin
 	if _target_lit and _state != State.LEAVING and is_instance_valid(_target):
 		var at: Vector2 = to_local(_target.global_position)
 		var pulse: float = _pulse()

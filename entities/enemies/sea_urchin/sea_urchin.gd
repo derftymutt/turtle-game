@@ -28,7 +28,7 @@ var rotation_offset: float = 0.0
 var _mutated: bool = false
 var _benched: bool = false
 var _benched_groups: Array[StringName] = []
-# Eaten by the puffer bird: out of play for good, about to be freed.
+# Eaten by the puffin: out of play for good, about to be freed.
 var _eaten: bool = false
 
 func _enemy_ready():
@@ -128,7 +128,7 @@ func set_benched(on: bool) -> void:
 			_benched_groups.clear()
 	_apply_stand_down()
 
-## PufferBirdLauncher's skill shot: out of the level for good. Leaves every
+## PuffinLauncher's skill shot: out of the level for good. Leaves every
 ## group and the physics space at once but stays drawn — the bird carries it
 ## off in its feet and then frees it.
 func be_eaten() -> void:

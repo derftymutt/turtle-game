@@ -16,9 +16,9 @@ var _level_song_base_volume: float
 ## Set by an intro popup that wants the start prompt to wait until it is
 ## dismissed (BossIntroPopup) — see hold_start_prompt().
 var _start_prompt_held: bool = false
-## The level's PufferBirdLauncher, if it has one — it then opens the level
+## The level's PuffinLauncher, if it has one — it then opens the level
 ## with a plunge instead of the start prompt.
-var _plunge_launcher: PufferBirdLauncher = null
+var _plunge_launcher: PuffinLauncher = null
 
 func _ready():
 	# Ensure game is unpaused
@@ -63,7 +63,7 @@ func hold_start_prompt() -> void:
 	_start_prompt_held = true
 
 ## Freezes the level until the start countdown ends or the player presses
-## something (LevelStartPrompt), or, in a level with a PufferBirdLauncher, until the plunge has landed.
+## something (LevelStartPrompt), or, in a level with a PuffinLauncher, until the plunge has landed.
 ## Only the game holds still — the level song plays through the wait.
 func show_start_prompt() -> void:
 	if not _wants_start_prompt():
@@ -82,11 +82,11 @@ func show_start_prompt() -> void:
 	prompt.started.connect(on_started)
 	add_child(prompt)
 
-## This level's PufferBirdLauncher (they register in "plunge_launchers"), or
+## This level's PuffinLauncher (they register in "plunge_launchers"), or
 ## null — most levels have none.
-func _find_plunge_launcher() -> PufferBirdLauncher:
+func _find_plunge_launcher() -> PuffinLauncher:
 	for node in get_tree().get_nodes_in_group("plunge_launchers"):
-		if node is PufferBirdLauncher and is_ancestor_of(node):
+		if node is PuffinLauncher and is_ancestor_of(node):
 			return node
 	return null
 
