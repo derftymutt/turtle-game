@@ -15,7 +15,9 @@ class_name CradleScopeEffect
 ## The line is straight (the launch heading), like Acceleration Focus's — it does
 ## not bend for gravity or drag.
 ##
-## Cold: a short line. Hot: the line runs on to the first thing in its way.
+## Cold: a short line. Hot: the line runs on to the first thing in its way,
+## and after the release the turtle rolls down the arm slowly (HOT_ROLL_SPEED)
+## for more time to pick the shot. A swim kick still breaks away at full speed.
 
 const COLD_LENGTH: float = 48.0
 const HOT_LENGTH: float = 4000.0    # "no matter how far" — longer than any level
@@ -26,6 +28,9 @@ const CONTACT_GRACE: float = 0.15
 # Releasing the cradle drops the arm out from under the turtle, which then has
 # to sink back onto it — a much longer gap, allowed once per release.
 const RELEASE_GRACE: float = 0.75
+# Hot: fastest the turtle may slide along the released arm, in px/s. The arm
+# is about 33px long.
+const HOT_ROLL_SPEED: float = 12.0
 const LINE_COLOR := Color(1.0, 0.8, 0.35, 0.9)
 
 var active: bool = false  # scope showing — read by TechAura
@@ -76,6 +81,7 @@ func physics_process(player, delta: float) -> void:
 		if _off_contact_time > 0.0 and not _flipper.is_flipping:
 			_grace = CONTACT_GRACE
 		_off_contact_time = 0.0
+		_slow_roll(player)
 	else:
 		_off_contact_time += delta
 		if _off_contact_time >= _grace:
@@ -88,6 +94,20 @@ func physics_process(player, delta: float) -> void:
 	if not _flipper.is_press_swinging():
 		_aim_origin = player.global_position
 		_update_line(player)
+
+## Hot only: hold the roll down the released arm to HOT_ROLL_SPEED. Only the
+## along-the-arm part of the velocity is touched, and not during a swim kick
+## or the launch swing.
+func _slow_roll(player) -> void:
+	if not AlienTechManager.is_tech_hot(AlienTechRegistry.CRADLE_SCOPE):
+		return
+	if _flipper.is_flipping or _flipper.is_press_swinging() or not player.can_thrust:
+		return
+	var arm_dir: Vector2 = _flipper.collision_shape.position.normalized()
+	var along: float = player.linear_velocity.dot(arm_dir)
+	var excess: float = absf(along) - HOT_ROLL_SPEED
+	if excess > 0.0:
+		player.linear_velocity -= arm_dir * signf(along) * excess
 
 ## Called from TurtlePlayer.notify_launch() — any launch ends the scope.
 func on_launch() -> void:

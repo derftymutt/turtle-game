@@ -346,7 +346,7 @@ var _definitions: Array[Dictionary] = [
 		"slot_label":  "Cradle Scope",
 		"needs_input": false,
 		"color":       Color(1.0, 0.8, 0.35),
-		"hot_description": "The scope reaches all the way to whatever you'll hit.",
+		"hot_description": "Full length scope. Slowed down roll on flipper.",
 	},
 	{
 		"id":              TIME_CRAWL,
