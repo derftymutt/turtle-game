@@ -137,7 +137,7 @@ func physics_process(player, delta: float) -> void:
 ## puffer / current ejection has launched the turtle. `launch_velocity`
 ## (a Vector2, or null to read linear_velocity) covers impulse launches.
 func on_launch(player, from_bumper: bool = false, launch_velocity = null) -> void:
-	if not active or _phase != Phase.IDLE or _lockout > 0.0:
+	if not active or _phase != Phase.IDLE or _lockout > 0.0 or player._level_complete:
 		return
 	var v: Vector2 = launch_velocity if launch_velocity is Vector2 else player.linear_velocity
 	if v.length() < player.super_speed_threshold:
@@ -225,11 +225,13 @@ func on_slots_changed(_player) -> void:
 		active = false
 		_timer = 0.0
 
-## Hard stop with no easing — the player is leaving the tree.
+## Hard stop with no easing — the player is leaving the tree, or the level
+## was just beaten.
 func shutdown() -> void:
 	if _phase != Phase.IDLE:
 		_phase = Phase.IDLE
 		GameSettings.reset_time_dilation()
+		_set_lines_visible(false)
 
 ## Swim input is the aiming stick during bullet time.
 func blocks_swim() -> bool:

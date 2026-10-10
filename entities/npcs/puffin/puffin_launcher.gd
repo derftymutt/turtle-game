@@ -88,6 +88,12 @@ signal plunge_finished(ate_urchin: bool)
 @export_group("Visual")
 ## Marks where the plunge will stop while the power is sweeping
 @export var show_landing_preview: bool = false
+## The solid boxes behind the two text lines beside the bird (a dark take on
+## the orange of a puffin's beak)
+@export var text_box_color: Color = Color(0.82, 0.4, 0.04, 1.0)
+## The glow behind the bird and turtle before the plunge, and how far it reaches
+@export var halo_color: Color = Color(1.0, 1.0, 1.0, 0.9)
+@export var halo_radius: float = 60.0
 @export var aim_color: Color = Color(1.0, 1.0, 1.0, 1.0)
 @export var flap_fps: float = 6.0
 
@@ -123,6 +129,12 @@ const _SPOT_FLIGHT_SECONDS: float = 0.75
 const _SPOT_BURST_SECONDS: float = 0.35
 ## The bird's eye, from the centre of its sprite (art facing right)
 const _EYE_OFFSET := Vector2(13.0, -5.0)
+## Centre of the halo, between the bird and the turtle
+const _HALO_OFFSET := Vector2(0.0, -5.0)
+const _HALO_FADE_SECONDS: float = 0.25
+const _HALO_Z_INDEX: int = 14
+## Room between a text box's edge and its text (sides, top / bottom)
+const _TEXT_BOX_PADDING := Vector2(5.0, 2.0)
 ## Space between the power gauge and the countdown right of it
 const _GAUGE_GAP: float = 4.0
 ## Space between the end of the urchin line and the bird's centre line
@@ -154,6 +166,7 @@ var _leave_timer: float = 0.0
 var _facing: float = 1.0
 var _draw_time: float = 0.0
 var _eat_tween: Tween = null
+var _halo: Sprite2D = null
 var _yum_label: Label = null
 ## Which side of the bird the "Yum!" rides on (-1 left, 1 right)
 var _yum_side: float = 1.0
@@ -219,6 +232,7 @@ func grab_turtle() -> void:
 	_state = State.HOLDING
 	visible = true
 	_lift_bird_above_hud()
+	_build_halo()
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	set_process(true)
 	_carry_turtle()
@@ -239,6 +253,27 @@ func grab_turtle() -> void:
 		_full_launch_speed = maxf(min_launch_speed, corner_reach * plunge_drag + stop_speed)
 	_carry_turtle()
 	_target = _pick_target()
+
+## A soft white glow behind the bird and turtle until they plunge, so the pair
+## stand out from whatever in the level happens to sit behind them.
+func _build_halo() -> void:
+	var fade := Gradient.new()
+	fade.offsets = PackedFloat32Array([0.0, 0.4, 1.0])
+	fade.colors = PackedColorArray([Color(halo_color, halo_color.a), Color(halo_color, halo_color.a * 0.75), Color(halo_color, 0.0)])
+	var texture := GradientTexture2D.new()
+	texture.gradient = fade
+	texture.fill = GradientTexture2D.FILL_RADIAL
+	texture.fill_from = Vector2(0.5, 0.5)
+	texture.fill_to = Vector2(1.0, 0.5)
+	texture.width = int(halo_radius * 2.0)
+	texture.height = int(halo_radius * 2.0)
+	_halo = Sprite2D.new()
+	_halo.texture = texture
+	_halo.position = _HALO_OFFSET
+	# Just under the turtle's sprite (absolute z 15), over the level around it
+	_halo.z_as_relative = false
+	_halo.z_index = _HALO_Z_INDEX
+	add_child(_halo)
 
 ## Moves the bird sprite onto its own canvas layer over the HUD. The layer
 ## follows the viewport, so the sprite still lives in level coordinates — but
@@ -263,6 +298,7 @@ func begin() -> void:
 	get_tree().paused = true
 	_remaining = countdown_seconds
 	_build_ui()
+	_hide_hud_tech_names(true)
 	if is_instance_valid(_target):
 		_state = State.SPOTTING
 		_spot_time = 0.0
@@ -297,6 +333,9 @@ func _process(delta: float) -> void:
 			_plunge_tick(delta)
 		State.LEAVING:
 			_leave_tick(delta)
+	if _halo and _state >= State.PLUNGING:
+		# Gone in a blink once they go
+		_halo.modulate.a = maxf(0.0, _halo.modulate.a - delta / _HALO_FADE_SECONDS)
 	_update_bird()
 	_throb_target()
 	queue_redraw()
@@ -404,6 +443,14 @@ func _plunge_tick(delta: float) -> void:
 	if _velocity.length() <= stop_speed:
 		_finish()
 
+## Takes the alien tech names off the HUD for the countdown and plunge (the
+## text beside the bird sits over them), and brings them back when the level
+## starts.
+func _hide_hud_tech_names(hidden: bool) -> void:
+	var hud := get_tree().get_first_node_in_group("hud")
+	if hud and hud.has_method("set_tech_names_hidden"):
+		hud.set_tech_names_hidden(hidden)
+
 ## The plunge has stopped: eat the urchin if it's in reach, hand the turtle
 ## back to the physics world and start the level.
 func _finish() -> void:
@@ -427,6 +474,7 @@ func _finish() -> void:
 		_turtle.call("grant_grace_iframes", landing_grace_seconds)
 	_turtle = null
 
+	_hide_hud_tech_names(false)
 	_state = State.LEAVING
 	_leave_timer = 0.0
 	# From here on the bird pauses with the game like anything else
@@ -608,11 +656,14 @@ func _build_ui() -> void:
 	var here: Vector2 = get_global_transform_with_canvas().origin
 	var line_y: float = here.y + _bird_offset.y + _TEXT_LINE_DROP
 	if is_instance_valid(_target):
+		var target_box := _make_text_box()
+		_ui.add_child(target_box)
 		var target_label := _make_label(16)
 		target_label.text = _TARGET_TEXT
-		target_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-		target_label.size = Vector2(here.x - _TARGET_TEXT_GAP, _COUNTDOWN_SIZE.y)
-		target_label.position = Vector2(0.0, line_y - _COUNTDOWN_SIZE.y * 0.5)
+		target_label.reparent(target_box)
+		# Sized to its text, its right edge just short of the bird
+		target_box.size = target_box.get_combined_minimum_size()
+		target_box.position = Vector2(here.x - _TARGET_TEXT_GAP - target_box.size.x, line_y - target_box.size.y * 0.5)
 	# Separate labels in a row, so only the button name blinks
 	var row := HBoxContainer.new()
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -628,11 +679,36 @@ func _build_ui() -> void:
 	_countdown_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_countdown_label.custom_minimum_size = _COUNTDOWN_SIZE
 	_countdown_label.reparent(row)
-	for text in [" - " + _HINT_TEXT[0], "A" if GameSettings.using_gamepad else "Z", _HINT_TEXT[1]]:
+	var dash := _make_label(16)
+	dash.text = " - "
+	dash.reparent(row)
+	# The hint in its own box (the countdown and dash stay bare), as separate
+	# labels so only the button name blinks
+	var hint_box := _make_text_box()
+	hint_box.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(hint_box)
+	var hint_row := HBoxContainer.new()
+	hint_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hint_row.add_theme_constant_override("separation", 0)
+	hint_box.add_child(hint_row)
+	for text in [_HINT_TEXT[0], "A" if GameSettings.using_gamepad else "Z", _HINT_TEXT[1]]:
 		var part := _make_label(16)
 		part.text = text
-		part.reparent(row)
-	_hint_button_label = row.get_child(2) as Label
+		part.reparent(hint_row)
+	_hint_button_label = hint_row.get_child(1) as Label
+
+## A solid box behind a line of text, so it reads over the HUD beneath it.
+func _make_text_box() -> PanelContainer:
+	var style := StyleBoxFlat.new()
+	style.bg_color = text_box_color
+	style.content_margin_left = _TEXT_BOX_PADDING.x
+	style.content_margin_right = _TEXT_BOX_PADDING.x
+	style.content_margin_top = _TEXT_BOX_PADDING.y
+	style.content_margin_bottom = _TEXT_BOX_PADDING.y
+	var box := PanelContainer.new()
+	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.add_theme_stylebox_override("panel", style)
+	return box
 
 func _make_label(font_size: int) -> Label:
 	var label := Label.new()

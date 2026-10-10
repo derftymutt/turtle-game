@@ -244,6 +244,15 @@ func update_score(new_score: int):
 		score_label.text = "%d" % current_score
 	_trash_clusters.on_score_updated(self, new_score, previous_score)
 
+## Hides (or brings back) the two alien tech names — the puffin's plunge
+## countdown puts its own text over that part of the screen. Only the label
+## text goes transparent, so the layout, icons and cooldown bars hold.
+func set_tech_names_hidden(hidden: bool) -> void:
+	for label_name in ["SlotALabel", "SlotBLabel"]:
+		var label := find_child(label_name) as CanvasItem
+		if label:
+			label.self_modulate.a = 0.0 if hidden else 1.0
+
 ## A bonus trash bag right now, outside the score thresholds and the freebie
 ## timer — the reward for the puffin's skill shot.
 func spawn_bonus_trash_cluster() -> void:

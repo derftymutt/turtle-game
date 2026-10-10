@@ -44,6 +44,9 @@ func activate(player, _slot_index: int) -> void:
 	# start once this one has ended and time is back to normal.
 	if active:
 		return
+	if player._level_complete:
+		AlienTechManager.release_cooldown_hold(AlienTechRegistry.TIME_CRAWL, 0.0)
+		return
 	active = true
 	_elapsed = 0.0
 	AlienTechManager.set_passive_bar(AlienTechRegistry.TIME_CRAWL, 1.0)
@@ -72,7 +75,7 @@ func on_slots_changed(_player) -> void:
 	if active and not AlienTechManager.has_tech(AlienTechRegistry.TIME_CRAWL):
 		_end()
 
-## Hard stop — the player is leaving the tree.
+## Hard stop — the player is leaving the tree, or the level was just beaten.
 func shutdown() -> void:
 	if active:
 		_end()

@@ -307,7 +307,7 @@ func _ready():
 	AlienTechManager.reset_level_state()
 	AlienTechManager.tech_activated.connect(_on_alien_tech_activated)
 	AlienTechManager.tech_slots_changed.connect(_on_alien_tech_slots_changed_player)
-	LevelManager.level_complete.connect(func(): _level_complete = true)
+	LevelManager.level_complete.connect(_on_level_complete)
 	# Sync state for any tech already in slots before this node was ready (e.g. DevTechSeeder)
 	_on_alien_tech_slots_changed_player(AlienTechManager.slots[0], AlienTechManager.slots[1])
 
@@ -1448,6 +1448,13 @@ func notify_launch(from_bumper: bool = false, launch_velocity = null) -> void:
 ## `flipper` was pressed (a Vector2), or null if the scope isn't on that flipper.
 func cradle_scope_origin(flipper: FlipperBase):
 	return (_tech_effects[AlienTechRegistry.CRADLE_SCOPE] as CradleScopeEffect).launch_origin(flipper)
+
+## The end-of-level sequence must run at normal speed: lift any slow-down in
+## progress, and the effects refuse to start a new one once _level_complete.
+func _on_level_complete() -> void:
+	_level_complete = true
+	(_tech_effects[AlienTechRegistry.ACCELERATION_FOCUS] as AccelerationFocusEffect).shutdown()
+	(_tech_effects[AlienTechRegistry.TIME_CRAWL] as TimeCrawlEffect).shutdown()
 
 ## Never leave the whole game slowed down if we're freed mid bullet time
 ## (death, level change, quit to menu).
