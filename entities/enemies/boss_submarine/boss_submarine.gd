@@ -1,8 +1,6 @@
 extends BaseEnemyStatic
 class_name BossSubmarine
 
-signal health_changed(current: float, max_hp: float)
-
 ## ============================================================
 ## SUBMARINE BOSS
 ## ============================================================
@@ -35,6 +33,13 @@ signal health_changed(current: float, max_hp: float)
 @export var move_speed: float = 90.0
 ## Pause at destination before starting attack
 @export var arrival_pause: float = 2
+
+# ── Health hearts ────────────────────────────────────────────
+@export_group("Health Hearts")
+## Health one heart icon stands for — one super-speed hit by default
+@export var health_per_heart: float = 100.0
+## Top of the heart row, below the sub's origin
+@export var hearts_offset_y: float = 12.0
 
 # ── Attack: Fan Salvo ────────────────────────────────────────
 @export_group("Pattern 1: Fan Salvo")
@@ -126,6 +131,10 @@ var _sprite: AnimatedSprite2D = null
 # Original local X of the hatch (mirrored when sprite flips)
 var _hatch_point_origin_x: float = 0.0
 
+# Heart icons under the hull (see _build_hearts())
+const HEART_FULL_COLOR := Color(0.92, 0.16, 0.16)
+var _heart_labels: Array[Label] = []
+
 # ─────────────────────────────────────────────────────────────
 # SETUP
 # ─────────────────────────────────────────────────────────────
@@ -161,7 +170,7 @@ func _enemy_ready() -> void:
 	if not drone_scene:
 		push_warning("SubmarineBoss: drone_scene not assigned!")
 
-	health_changed.emit(current_health, max_health)
+	_build_hearts()
 
 	# Start the main behaviour loop after a short intro pause
 	_state = State.INTRO
@@ -268,7 +277,7 @@ func on_super_speed_hit(body: Node2D) -> void:
 func _apply_super_speed_damage(amount: float) -> void:
 	current_health -= amount
 	_play_damage_feedback()
-	health_changed.emit(current_health, max_health)
+	_update_hearts()
 	_start_hit_invincibility()
 
 	if current_health <= 0:
@@ -289,6 +298,42 @@ func _start_hit_invincibility() -> void:
 		flash_tween.kill()
 		modulate = Color.WHITE
 		_hit_invincible = false
+
+# ─────────────────────────────────────────────────────────────
+# HEALTH HEARTS
+# ─────────────────────────────────────────────────────────────
+
+## A row of heart icons under the hull, the same "♥" Labels as the turtle's
+## HeartsDisplay but red. As children they follow the sub and take part in
+## its hit flash and death fade.
+func _build_hearts() -> void:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 1)
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(row)
+
+	var heart_font: Font = load("res://assets/fonts/BoldPixels.ttf")
+	for i in ceili(max_health / health_per_heart):
+		var l := Label.new()
+		l.text = "♥"
+		if heart_font:
+			l.add_theme_font_override("font", heart_font)
+		l.add_theme_font_size_override("font_size", 22)
+		l.add_theme_constant_override("outline_size", 4)
+		l.add_theme_color_override("font_outline_color", Color.BLACK)
+		row.add_child(l)
+		_heart_labels.append(l)
+
+	row.size = row.get_combined_minimum_size()
+	row.position = Vector2(-row.size.x / 2.0, hearts_offset_y)
+	_update_hearts()
+
+## Hearts empty from the right; a partly drained heart still counts as full.
+func _update_hearts() -> void:
+	var full := ceili(maxf(current_health, 0.0) / health_per_heart)
+	for i in _heart_labels.size():
+		_heart_labels[i].add_theme_color_override("font_color",
+				HEART_FULL_COLOR if i < full else HeartsDisplay.HEART_EMPTY_COLOR)
 
 # ─────────────────────────────────────────────────────────────
 # STATE: MOVING
