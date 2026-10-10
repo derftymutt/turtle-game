@@ -83,6 +83,8 @@ signal plunge_finished(ate_urchin: bool)
 @export var target_throb: float = 0.35
 ## Seconds after a catch before its bonus trash bag drifts in
 @export var trash_bag_delay: float = 2.0
+## Outline of the twinkle that flies from the bird to its urchin
+@export var twinkle_outline_color: Color = Color(0.5, 0.05, 0.45, 1.0)
 @export var target_glow_color: Color = Color(1.0, 0.9, 0.3, 1.0)
 
 @export_group("Visual")
@@ -112,8 +114,13 @@ const _EAT_SECONDS: float = 0.3
 const _UI_LAYER: int = 5
 ## The bird itself draws over the HUD (layer 1), which covers the top of the sky
 const _BIRD_LAYER: int = 2
-## The power gauge, relative to this node: right of the bird, clear of the HUD
-const _POWER_METER := Rect2(28.0, -16.0, 8.0, 56.0)
+## The power arrow, measured down the plunge line from the turtle: where it
+## starts, its shaft, and its head
+const _ARROW_START: float = 13.0
+const _ARROW_SHAFT: float = 30.0
+const _ARROW_WIDTH: float = 5.0
+const _ARROW_TIP_LENGTH: float = 11.0
+const _ARROW_TIP_HALF_WIDTH: float = 7.0
 const _COUNTDOWN_SIZE := Vector2(40.0, 32.0)
 ## How far below the bird's centre the text line sits — clear of the HUD's
 ## top bar, which the bird itself overlaps
@@ -125,6 +132,8 @@ const _YUM_DISTANCE: float = 46.0
 ## Spotting the urchin: a beat for the screen to be seen, the twinkle's
 ## flight, then its burst on the urchin
 const _SPOT_DELAY: float = 0.35
+## The lead star's reach, centre to point
+const _STAR_RADIUS: float = 6.0
 const _SPOT_FLIGHT_SECONDS: float = 0.75
 const _SPOT_BURST_SECONDS: float = 0.35
 ## The bird's eye, from the centre of its sprite (art facing right)
@@ -135,8 +144,8 @@ const _HALO_FADE_SECONDS: float = 0.25
 const _HALO_Z_INDEX: int = 14
 ## Room between a text box's edge and its text (sides, top / bottom)
 const _TEXT_BOX_PADDING := Vector2(5.0, 2.0)
-## Space between the power gauge and the countdown right of it
-const _GAUGE_GAP: float = 4.0
+## Space between the bird's centre line and the countdown right of it
+const _COUNTDOWN_GAP: float = 26.0
 ## Space between the end of the urchin line and the bird's centre line
 const _TARGET_TEXT_GAP: float = 30.0
 const _TEXT_HEIGHT: float = 16.0
@@ -174,6 +183,7 @@ var _yum_side: float = 1.0
 var _target_lit: bool = false
 var _spot_time: float = 0.0
 var _twinkle: Array[Polygon2D] = []
+var _star_dust: CPUParticles2D = null
 ## The urchin the bird caught, on its way out of the level with it
 var _carried_urchin: SeaUrchin = null
 ## The viewport-following layer over the HUD that the bird sprite lives on
@@ -352,6 +362,11 @@ func _spot_tick(delta: float) -> void:
 		for star in _twinkle:
 			star.queue_free()
 		_twinkle.clear()
+		if _star_dust:
+			# No new dust; what's in the air drifts out, then the emitter goes
+			_star_dust.emitting = false
+			get_tree().create_timer(_star_dust.lifetime).timeout.connect(_star_dust.queue_free)
+			_star_dust = null
 		_start_aiming()
 		return
 	_target_lit = flight >= 1.0
@@ -365,20 +380,57 @@ func _spot_tick(delta: float) -> void:
 		star.rotation = _spot_time * 9.0
 		star.scale = Vector2.ONE * ((1.0 - i * 0.25) * (1.0 + sin(_spot_time * 30.0) * 0.15) + burst * 2.5)
 		star.modulate.a = (1.0 - i * 0.3) * (1.0 - burst)
+	# Star dust sheds from the lead star all the way to the urchin
+	if _star_dust and not _twinkle.is_empty():
+		_star_dust.global_position = _twinkle[0].global_position
+		_star_dust.emitting = _spot_time >= _SPOT_DELAY
 
-## The twinkle: a four-pointed yellow star and two fainter ones trailing it,
-## on the bird's layer so it starts over the HUD like the bird does.
+## The twinkle: a four-pointed yellow star with a thin dark outline, two
+## fainter stars trailing it and a light sprinkle of pixel star dust behind — on the bird's layer so it starts over the HUD like the bird.
 func _build_twinkle() -> void:
-	var points := PackedVector2Array()
-	for i in 8:
-		points.append(Vector2.from_angle(i * TAU / 8.0) * (7.0 if i % 2 == 0 else 2.0))
 	for i in 3:
 		var star := Polygon2D.new()
-		star.polygon = points
+		star.polygon = _star_points(_STAR_RADIUS, _STAR_RADIUS * 0.3)
 		star.color = target_glow_color
 		star.visible = false
+		# The outline is the same star, a little bigger, behind it
+		var outline := Polygon2D.new()
+		outline.polygon = _star_points(_STAR_RADIUS + 1.0, _STAR_RADIUS * 0.3 + 1.5)
+		outline.color = twinkle_outline_color
+		outline.show_behind_parent = true
+		star.add_child(outline)
 		_bird_layer.add_child(star)
 		_twinkle.append(star)
+
+	var fade := Gradient.new()
+	fade.offsets = PackedFloat32Array([0.0, 0.35, 1.0])
+	fade.colors = PackedColorArray([Color.WHITE, target_glow_color, Color(target_glow_color, 0.0)])
+	_star_dust = CPUParticles2D.new()
+	_star_dust.emitting = false
+	_star_dust.amount = 100
+	_star_dust.lifetime = 0.55
+	_star_dust.local_coords = false  # dust stays where it was shed
+	_star_dust.emission_shape = CPUParticles2D.EMISSION_SHAPE_SPHERE
+	_star_dust.emission_sphere_radius = 4.0
+	_star_dust.direction = Vector2.UP
+	_star_dust.spread = 180.0
+	_star_dust.initial_velocity_min = 5.0
+	_star_dust.initial_velocity_max = 20.0
+	_star_dust.gravity = Vector2(0.0, 30.0)
+	# Plain one- and two-pixel squares that don't shrink: pixel-art dust
+	_star_dust.scale_amount_min = 1.0
+	_star_dust.scale_amount_max = 2.0
+	_star_dust.color_ramp = fade
+	_bird_layer.add_child(_star_dust)
+	# Behind the stars
+	_bird_layer.move_child(_star_dust, _twinkle[0].get_index())
+
+## A four-pointed star: points at `outer`, the dips between them at `inner`.
+func _star_points(outer: float, inner: float) -> PackedVector2Array:
+	var points := PackedVector2Array()
+	for i in 8:
+		points.append(Vector2.from_angle(i * TAU / 8.0) * (outer if i % 2 == 0 else inner))
+	return points
 
 func _aim_tick(delta: float) -> void:
 	# Left / right swings the aim that way; the bird stays where it is
@@ -651,7 +703,7 @@ func _build_ui() -> void:
 	_ui.layer = _UI_LAYER
 	add_child(_ui)
 	# Everything on one line with the bird: the urchin text ending just left
-	# of it, and right of the power gauge the countdown, a dash, then the
+	# of it, and right of it the countdown, a dash, then the
 	# controls hint.
 	var here: Vector2 = get_global_transform_with_canvas().origin
 	var line_y: float = here.y + _bird_offset.y + _TEXT_LINE_DROP
@@ -668,7 +720,7 @@ func _build_ui() -> void:
 	var row := HBoxContainer.new()
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_theme_constant_override("separation", 0)
-	row.position = Vector2(here.x + _POWER_METER.end.x + _GAUGE_GAP, line_y - _COUNTDOWN_SIZE.y * 0.5)
+	row.position = Vector2(here.x + _COUNTDOWN_GAP, line_y - _COUNTDOWN_SIZE.y * 0.5)
 	row.size = Vector2(0.0, _COUNTDOWN_SIZE.y)
 	_ui.add_child(row)
 	_countdown_label = _make_label(32)
@@ -732,13 +784,7 @@ func _draw() -> void:
 		draw_arc(at, 13.0 + pulse * 4.0, 0.0, TAU, 24, Color(target_glow_color, 0.9), 1.0)
 	if _state != State.AIMING:
 		return
-	_draw_power_meter()
-	# Aim: blinking dots down the plunge line — drawn after the gauge, so they
-	# stay visible when the aim swings across it
-	var dir := _aim_direction()
-	for i in 5:
-		var blink: float = 0.45 + 0.55 * absf(sin(_draw_time * 6.0 - i * 0.9))
-		draw_circle(_TURTLE_OFFSET + dir * (16.0 + i * 9.0), 2.0 - i * 0.25, Color(aim_color, blink))
+	_draw_power_arrow()
 	if not _charging:
 		return
 	if show_landing_preview:
@@ -746,16 +792,39 @@ func _draw() -> void:
 		draw_arc(landing, 5.0, 0.0, TAU, 16, Color(aim_color, 0.95), 1.0)
 		draw_circle(landing, 1.5, Color(aim_color, 0.95))
 
-## The plunger gauge beside the bird: the one thing to read the strength from.
-## Always up while aiming, empty until the button is held.
-func _draw_power_meter() -> void:
-	var bar := _POWER_METER
-	draw_rect(bar.grow(2.0), Color(0.0, 0.0, 0.0, 0.85))
-	draw_rect(bar, Color(0.16, 0.18, 0.24, 1.0))
-	if _charging:
-		var fill: float = bar.size.y * _power
-		draw_rect(Rect2(bar.position.x, bar.end.y - fill, bar.size.x, fill), Color(1.0, 0.9, 0.3).lerp(Color(1.0, 0.25, 0.1), _power))
-	# Quarter marks
+## The aim and the plunger gauge in one: an arrow pointing down the plunge
+## line from under the turtle, filling from the turtle toward its tip as the
+## power climbs. Always up while aiming, empty until the button is held.
+## Drawn pointing straight down and turned to the aim.
+func _draw_power_arrow() -> void:
+	draw_set_transform(_TURTLE_OFFSET, -_aim)
+	var half: float = _ARROW_WIDTH * 0.5
+	var shaft_end: float = _ARROW_START + _ARROW_SHAFT
+	var tip_end: float = shaft_end + _ARROW_TIP_LENGTH
+	var outline := Color(0.0, 0.0, 0.0, 0.85)
+	var empty := Color(0.16, 0.18, 0.24, 1.0)
+	draw_rect(Rect2(-half, _ARROW_START, _ARROW_WIDTH, _ARROW_SHAFT).grow(2.0), outline)
+	draw_colored_polygon(_arrow_tip(shaft_end - 2.0, tip_end + 3.0, _ARROW_TIP_HALF_WIDTH + 3.0, tip_end + 3.0), outline)
+	draw_rect(Rect2(-half, _ARROW_START, _ARROW_WIDTH, _ARROW_SHAFT), empty)
+	draw_colored_polygon(_arrow_tip(shaft_end, tip_end, _ARROW_TIP_HALF_WIDTH, tip_end), empty)
+	if _charging and _power > 0.0:
+		var heat: Color = Color(1.0, 0.9, 0.3).lerp(Color(1.0, 0.25, 0.1), _power)
+		var filled: float = (_ARROW_SHAFT + _ARROW_TIP_LENGTH) * _power
+		draw_rect(Rect2(-half, _ARROW_START, _ARROW_WIDTH, minf(filled, _ARROW_SHAFT)), heat)
+		if filled > _ARROW_SHAFT + 0.5:
+			draw_colored_polygon(_arrow_tip(shaft_end, tip_end, _ARROW_TIP_HALF_WIDTH, _ARROW_START + filled), heat)
+	# Quarter marks along the shaft
 	for i in range(1, 4):
-		var y: float = bar.end.y - bar.size.y * i / 4.0
-		draw_line(Vector2(bar.position.x, y), Vector2(bar.position.x + bar.size.x * 0.5, y), Color(1.0, 1.0, 1.0, 0.7), 1.0)
+		var y: float = _ARROW_START + (_ARROW_SHAFT + _ARROW_TIP_LENGTH) * i / 4.0
+		if y < shaft_end:
+			draw_line(Vector2(-half, y), Vector2(0.0, y), Color(1.0, 1.0, 1.0, 0.7), 1.0)
+	draw_set_transform(Vector2.ZERO)
+
+## The arrowhead, from its base at `base_y` toward its point at `point_y`,
+## cut off at `until_y` (the point itself when they are equal).
+func _arrow_tip(base_y: float, point_y: float, base_half_width: float, until_y: float) -> PackedVector2Array:
+	var cut: float = clampf(until_y, base_y, point_y)
+	var cut_half_width: float = base_half_width * (point_y - cut) / (point_y - base_y)
+	if cut_half_width < 0.25:
+		return PackedVector2Array([Vector2(-base_half_width, base_y), Vector2(base_half_width, base_y), Vector2(0.0, point_y)])
+	return PackedVector2Array([Vector2(-base_half_width, base_y), Vector2(base_half_width, base_y), Vector2(cut_half_width, cut), Vector2(-cut_half_width, cut)])
