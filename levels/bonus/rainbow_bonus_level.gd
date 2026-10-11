@@ -45,7 +45,7 @@ const _FRUIT_SCENE = preload("res://entities/collectibles/fruit/fruit.tscn")
 ## Every this many seconds one colour's currents (ladders and nets) switch
 ## off for good, so the level gets harder the longer the turtle lasts.
 ## 0 = never.
-@export var current_shutdown_interval: float = 30.0
+@export var current_shutdown_interval: float = 25.0
 ## The currents flicker for this long before they go
 @export var current_shutdown_warning: float = 3.0
 ## Nodes whose OceanCurrent children are switched off, in order — one per
@@ -54,6 +54,30 @@ const _FRUIT_SCENE = preload("res://entities/collectibles/fruit/fruit.tscn")
 	"Orange Currents", "Yellow Currents", "Green Currents",
 	"Blue Currents", "Indigo Currents", "Violet Currents",
 ]
+
+@export_group("Wall Shrink")
+## Every this many seconds one colour's walls give way, red first: a wall
+## that leads into a flipper shrinks to one unit (staying joined to its
+## flipper), every other wall disappears. 0 = never.
+@export var wall_shrink_interval: float = 25.0
+## Head start the currents get: the first walls go this long after the first
+## currents do, and the two then alternate down the rainbow.
+@export var wall_shrink_start_delay: float = 25.0
+## The walls flicker for this long before they change
+@export var wall_shrink_warning: float = 3.0
+## A wall counts as leading into a flipper when one of its ends is within
+## this many pixels of the flipper's pivot
+@export var wall_flipper_reach: float = 14.0
+## Nodes whose DeadWall children are shrunk, in order — one per interval
+@export var wall_shrink_order: Array[String] = [
+	"Red Walls", "Orange Walls", "Yellow Walls", "Green Walls",
+	"Blue Walls", "Indigo Walls", "Violet Walls",
+]
+
+@export_group("Testing")
+## Start with every current already off and every wall already shrunk, as
+## the level is once both timers have run out. For testing — keep it off.
+@export var start_fully_stripped: bool = false
 
 ## Default launch current path (level space): up the right-edge lane from
 ## below violet, curving left over the top of LaunchWall into red.
@@ -70,6 +94,9 @@ var _live_fruit: Array[int] = []
 ## Seconds played, and how many entries of current_shutdown_order are gone
 var _shutdown_clock: float = 0.0
 var _shutdown_index: int = 0
+## How many entries of wall_shrink_order have given way (same clock)
+var _wall_shrink_index: int = 0
+const _WALL_BLINK_SECONDS := 0.15
 
 ## Runs before the children's _ready, so OceanCurrent builds its collision and
 ## bubbles from the curve. Fills in the launch path if the scene has none —
@@ -93,6 +120,8 @@ func _ready() -> void:
 	for bumper in get_tree().get_nodes_in_group("circular_bumpers"):
 		if bumper.has_signal("player_bounced"):
 			bumper.player_bounced.connect(_on_bumper_bounced)
+	if start_fully_stripped:
+		_strip_everything()
 
 ## Colour band at `y` (0 = red at the top … 6 = violet).
 func band_at(y: float) -> int:
@@ -164,17 +193,18 @@ func level_height() -> float:
 func _physics_process(delta: float) -> void:
 	if _ended:
 		return
-	_update_current_shutdown(delta)
+	_shutdown_clock += delta
+	_update_current_shutdown()
+	_update_wall_shrink()
 	var player := get_tree().get_first_node_in_group("player") as Node2D
 	if player and player.global_position.y > level_height() + fall_out_margin:
 		_end()
 
 ## Starts the next colour's currents flickering `current_shutdown_warning`
 ## seconds ahead of its turn, so they go dark right on the interval.
-func _update_current_shutdown(delta: float) -> void:
+func _update_current_shutdown() -> void:
 	if current_shutdown_interval <= 0.0 or _shutdown_index >= current_shutdown_order.size():
 		return
-	_shutdown_clock += delta
 	var warning: float = minf(current_shutdown_warning, current_shutdown_interval)
 	if _shutdown_clock < current_shutdown_interval * (_shutdown_index + 1) - warning:
 		return
@@ -185,6 +215,93 @@ func _update_current_shutdown(delta: float) -> void:
 	for child in group.get_children():
 		if child is OceanCurrent:
 			child.shut_down(warning)
+
+# ---------------------------------------------------------------------------
+# WALL SHRINK
+# ---------------------------------------------------------------------------
+
+## Testing aid (start_fully_stripped): the end state of both timers, at once.
+func _strip_everything() -> void:
+	# Currents finish setting themselves up a frame after _ready
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	_shutdown_index = current_shutdown_order.size()
+	_wall_shrink_index = wall_shrink_order.size()
+	for group_name in current_shutdown_order:
+		var group := get_node_or_null(group_name)
+		if group:
+			for child in group.get_children():
+				if child is OceanCurrent:
+					child.shut_down()
+	var flippers := get_tree().get_nodes_in_group("flippers")
+	for group_name in wall_shrink_order:
+		var group := get_node_or_null(group_name)
+		if group:
+			for child in group.get_children():
+				if child is DeadWall:
+					_shrink_wall(child, _wall_flipper_end(child, flippers))
+
+## Runs off the current-shutdown clock. Starts the next colour's walls
+## flickering `wall_shrink_warning` seconds ahead, so they change right on
+## the interval.
+func _update_wall_shrink() -> void:
+	if wall_shrink_interval <= 0.0 or _wall_shrink_index >= wall_shrink_order.size():
+		return
+	var warning: float = minf(wall_shrink_warning, wall_shrink_interval)
+	if _shutdown_clock < wall_shrink_start_delay + wall_shrink_interval * (_wall_shrink_index + 1) - warning:
+		return
+	var group := get_node_or_null(wall_shrink_order[_wall_shrink_index])
+	_wall_shrink_index += 1
+	if group == null:
+		return
+	var flippers := get_tree().get_nodes_in_group("flippers")
+	for child in group.get_children():
+		var wall := child as DeadWall
+		if wall == null:
+			continue
+		# Decided now, from the layout as placed — not after the flicker
+		var joint: Variant = _wall_flipper_end(wall, flippers)
+		var blinks: int = maxi(1, int(warning / (_WALL_BLINK_SECONDS * 2.0)))
+		var tween := wall.create_tween()
+		tween.set_loops(blinks)
+		tween.tween_property(wall, "modulate:a", 0.3, _WALL_BLINK_SECONDS)
+		tween.tween_property(wall, "modulate:a", 1.0, _WALL_BLINK_SECONDS)
+		tween.finished.connect(_shrink_wall.bind(wall, joint))
+
+## The end of `wall` that joins a flipper (within wall_flipper_reach of its
+## pivot), or null if it doesn't lead into one.
+func _wall_flipper_end(wall: DeadWall, flippers: Array) -> Variant:
+	var half: Vector2 = _wall_direction(wall) * wall.get_pixel_length() * 0.5
+	var best: Variant = null
+	var best_distance: float = wall_flipper_reach
+	for end: Vector2 in [wall.global_position + half, wall.global_position - half]:
+		for flipper in flippers:
+			var distance: float = end.distance_to((flipper as Node2D).global_position)
+			if distance <= best_distance:
+				best_distance = distance
+				best = end
+	return best
+
+func _wall_direction(wall: DeadWall) -> Vector2:
+	return Vector2.from_angle(deg_to_rad(wall.get_collision_rotation_degrees()))
+
+## A wall with a flipper end shrinks to one unit and slides along its own
+## line so that end stays exactly where it was; any other wall fades away.
+func _shrink_wall(wall: DeadWall, joint: Variant) -> void:
+	if not is_instance_valid(wall):
+		return
+	if joint == null:
+		wall.collision_layer = 0
+		var fade := wall.create_tween()
+		fade.tween_property(wall, "modulate:a", 0.0, 0.3)
+		fade.tween_callback(wall.queue_free)
+		return
+	if wall.length_units <= 1:
+		return
+	var joint_point: Vector2 = joint
+	var toward_joint: Vector2 = (joint_point - wall.global_position).normalized()
+	wall.length_units = 1
+	wall.global_position = joint_point - toward_joint * wall.get_pixel_length() * 0.5
 
 ## TurtlePlayer calls this when it dies — the bonus level just ends.
 func on_player_died(_final_score: int, _death_cause: String = "") -> void:
