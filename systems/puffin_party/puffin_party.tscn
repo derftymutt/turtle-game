@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://drnur2em5kcrl"]
+
+[ext_resource type="Script" uid="uid://ba53nc6py30w7" path="res://systems/puffin_party/puffin_party.gd" id="1_party"]
+
+[node name="PuffinParty" type="Node2D" unique_id=1765149139]
+script = ExtResource("1_party")

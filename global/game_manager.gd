@@ -41,7 +41,16 @@ var rainbow_hearts: int = 0
 
 # Picky Puffin skill shots landed this run — plunges (PuffinLauncher) that
 # ended on the bird's sea urchin. Kept for the Puffin Party bonus level.
-var puffin_skill_shots: int = 0
+var puffin_skill_shots: int = DEBUG_START_SKILL_SHOTS
+## TESTING ONLY: skill shots a run starts with (and the least a loaded save
+## has). 3 = the first level beaten leads straight into a Puffin Party.
+## Set back to 0 before release.
+const DEBUG_START_SKILL_SHOTS: int = 3
+## Skill shots that buy one Puffin Party
+const PUFFIN_PARTY_SKILL_SHOTS: int = 3
+## A Puffin Party has been earned and announced (by the level transition cut
+## scene) — the next level to load opens with it (LevelBase).
+var puffin_party_pending: bool = false
 
 # Tutorial flags — reset each run
 var has_shown_tech_tutorial: bool = false
@@ -115,7 +124,8 @@ func reset_game():
 	total_score = 0
 	persisted_hearts = -1
 	rainbow_hearts = 0
-	puffin_skill_shots = 0
+	puffin_skill_shots = DEBUG_START_SKILL_SHOTS
+	puffin_party_pending = false
 	clear_carried_pieces()
 	has_shown_tech_tutorial = false
 	first_trash_cluster_spawned = false
@@ -153,6 +163,15 @@ func max_hp() -> int:
 ## A PuffinLauncher plunge ended on the Picky Puffin's sea urchin.
 func record_puffin_skill_shot() -> void:
 	puffin_skill_shots += 1
+
+## Enough skill shots are banked for a Puffin Party.
+func puffin_party_earned() -> bool:
+	return puffin_skill_shots >= PUFFIN_PARTY_SKILL_SHOTS
+
+## Spends the skill shots: the next level opens with the party.
+func claim_puffin_party() -> void:
+	puffin_skill_shots = maxi(0, puffin_skill_shots - PUFFIN_PARTY_SKILL_SHOTS)
+	puffin_party_pending = true
 
 ## Hot Graviton Harness lets the turtle carry 2 UFO parts at once instead of 1.
 func max_carry_capacity() -> int:

@@ -6,6 +6,11 @@ class_name LevelBase
 ## Provides shared HUD, GameOver screen, and level management
 
 @export var level_number: int = 1  # Set this in each level's Inspector (1, 2, 3, etc.)
+## For tuning: open this level with the Puffin Party bonus whether or not one
+## has been earned. Keep it off.
+@export var debug_puffin_party: bool = false
+
+const _PUFFIN_PARTY_SCENE = preload("res://systems/puffin_party/puffin_party.tscn")
 
 @onready var hud: HUD = $HUD
 @onready var game_over_screen: GameOverScreen = $GameOverScreen
@@ -42,12 +47,18 @@ func _ready():
 
 	if _wants_start_prompt():
 		_plunge_launcher = _find_plunge_launcher()
-		# In the bird's grasp from the first frame, even if a popup holds the
-		# countdown back
-		if _plunge_launcher:
-			_plunge_launcher.grab_turtle()
-		if not _start_prompt_held:
-			show_start_prompt()
+		if _wants_puffin_party():
+			# The party comes first, up above the sky, and takes the place
+			# of the usual start: the turtle drops out of it into a level
+			# that is already running — no plunge, no countdown
+			_start_puffin_party()
+		else:
+			# In the bird's grasp from the first frame, even if a popup holds
+			# the countdown back
+			if _plunge_launcher:
+				_plunge_launcher.grab_turtle()
+			if not _start_prompt_held:
+				show_start_prompt()
 
 	print("📍 Level %d ready (%s)" % [level_number, scene_file_path])
 
@@ -81,6 +92,24 @@ func show_start_prompt() -> void:
 	var prompt := LevelStartPrompt.new()
 	prompt.started.connect(on_started)
 	add_child(prompt)
+
+## A Puffin Party is waiting to be played (GameManager.puffin_party_pending,
+## set by the level transition cut scene). Boss levels don't host one — it
+## stays pending for the level after.
+func _wants_puffin_party() -> bool:
+	if LevelManager.is_boss_level(level_number):
+		return false
+	return debug_puffin_party or GameManager.puffin_party_pending
+
+func _start_puffin_party() -> void:
+	GameManager.puffin_party_pending = false
+	var party: PuffinParty = _PUFFIN_PARTY_SCENE.instantiate()
+	add_child(party)
+	# This level's own plunge is not used this time
+	if is_instance_valid(_plunge_launcher):
+		_plunge_launcher.queue_free()
+		_plunge_launcher = null
+	party.start(self)
 
 ## This level's PuffinLauncher (they register in "plunge_launchers"), or
 ## null — most levels have none.

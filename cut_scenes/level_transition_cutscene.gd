@@ -4,6 +4,10 @@
 # ejects upward → all elements plunge off the bottom → next level loads.
 # If the next level opens with a PuffinLauncher, a puffin darts
 # across after the falling turtle — it will be holding it when the level starts.
+# If a Puffin Party has been earned (GameManager.puffin_party_earned()), a
+# puffin instead swoops in the moment the UFO breaks, catches the turtle and
+# carries it off; the title reads "Puffin Party!" and the next level opens
+# with the party.
 extends Node
 
 const _SFX_UFO_BREAKS = preload("res://assets/sounds/sfx/ufo breaks.ogg")
@@ -17,6 +21,11 @@ const UFO_Y: float = VP_H * 0.50           # vertical position of the UFO
 const BIRD_DELAY: float = 0.2
 const BIRD_FLIGHT_SECONDS: float = 2.0
 const BIRD_FLAP_FPS: float = 14.0
+# Puffin Party swoop: in to the turtle, then off screen with it
+const BIRD_SWOOP_SECONDS: float = 0.4
+const BIRD_CARRY_SECONDS: float = 0.7
+# The puffin's centre relative to the turtle it is gripping
+const BIRD_GRIP_OFFSET := Vector2(0.0, -22.0)
 
 # One-pixel white outline, so the bird's black wings read against the black
 # background. Empty pixels touching the art turn white.
@@ -47,6 +56,8 @@ var _turtle: Sprite2D
 # Only built when the next level has a PuffinLauncher
 var _puffin: Sprite2D
 var _bird_tween: Tween
+# The next level opens with a Puffin Party (decided once, in _ready)
+var _puffin_party: bool = false
 var _canvas: CanvasLayer
 var _level_label: Label
 var _effects_label: RichTextLabel
@@ -59,6 +70,10 @@ var _hot_techs: Array[Dictionary] = []
 var _fried_techs: Array[Dictionary] = []
 
 func _ready() -> void:
+	var upcoming: int = LevelManager.current_level_number + 1
+	if GameManager.puffin_party_earned() and upcoming in LevelManager.level_scenes and not LevelManager.is_boss_level(upcoming):
+		GameManager.claim_puffin_party()
+		_puffin_party = true
 	var transition := AlienTechManager.advance_level_transition()
 	_hot_techs = transition.get("hot", [])
 	_fried_techs = transition.get("fried", [])
@@ -97,7 +112,7 @@ func _build_scene() -> void:
 	_canvas.add_child(_turtle)
 
 	var next_level: int = LevelManager.current_level_number + 1
-	if PuffinLauncher.level_has_launcher(LevelManager.level_scenes.get(next_level, "")):
+	if _puffin_party or PuffinLauncher.level_has_launcher(LevelManager.level_scenes.get(next_level, "")):
 		_puffin = Sprite2D.new()
 		_puffin.texture = PuffinLauncher.BIRD_TEXTURE
 		_puffin.hframes = PuffinLauncher.BIRD_FRAMES
@@ -110,7 +125,7 @@ func _build_scene() -> void:
 		_canvas.add_child(_puffin)
 
 	_level_label = Label.new()
-	_level_label.text = "Level %d" % next_level
+	_level_label.text = "Puffin Party!" if _puffin_party else "Level %d" % next_level
 	_level_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_level_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_level_label.size = Vector2(VP_W, 80.0)
@@ -166,15 +181,18 @@ func _unhandled_input(event: InputEvent) -> void:
 func _run() -> void:
 	await _fly_in()
 	await _split()
-	await get_tree().create_timer(0.6).timeout
-	await _plunge()
-	# Let the bird get off screen before the level loads
-	if _bird_tween and _bird_tween.is_valid() and _bird_tween.is_running():
-		await _bird_tween.finished
+	if _puffin_party:
+		await _swoop_turtle_away()
+	else:
+		await get_tree().create_timer(0.6).timeout
+		await _plunge()
+		# Let the bird get off screen before the level loads
+		if _bird_tween and _bird_tween.is_valid() and _bird_tween.is_running():
+			await _bird_tween.finished
 	# Give the player time to actually read the hot/fried tech callouts —
 	# otherwise fall straight through like before.
 	var has_tech_news := not _hot_techs.is_empty() or not _fried_techs.is_empty()
-	if has_tech_news:
+	if has_tech_news or _puffin_party:
 		await get_tree().create_timer(0.6).timeout  # let the callout text finish fading in first
 		_show_press_any_key_prompt()
 		_waiting_for_input = true
@@ -300,6 +318,39 @@ func _fly_puffin() -> void:
 	_bird_tween.tween_method(func(t: float) -> void:
 		_puffin.frame = int(t * BIRD_FLAP_FPS) % _puffin.hframes
 	, 0.0, BIRD_FLIGHT_SECONDS, BIRD_FLIGHT_SECONDS).set_delay(BIRD_DELAY)
+
+## Puffin Party: the UFO halves drop away, but before the turtle can follow a
+## puffin swoops in from the left, takes it in its feet and carries it off to
+## the right. Then the title comes up.
+func _swoop_turtle_away() -> void:
+	$SfxFall.play()
+	var fall_y: float = VP_H + 140.0
+	var grab_point: Vector2 = _turtle.position + Vector2(0.0, 44.0)
+	_puffin.position = Vector2(-40.0, _turtle.position.y - 50.0)
+	_puffin.flip_h = false  # the art faces right
+	_puffin.visible = true
+	var total: float = BIRD_SWOOP_SECONDS + BIRD_CARRY_SECONDS
+	var tween := create_tween().set_parallel(true)
+	tween.tween_property(_ufo_left, "position:y", fall_y, 0.55)\
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tween.tween_property(_ufo_right, "position:y", fall_y, 0.55)\
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	# The turtle starts to fall; the puffin meets it there
+	tween.tween_property(_turtle, "position", grab_point, BIRD_SWOOP_SECONDS)\
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tween.tween_property(_puffin, "position", grab_point + BIRD_GRIP_OFFSET, BIRD_SWOOP_SECONDS)\
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.tween_method(func(t: float) -> void:
+		_puffin.frame = int(t * BIRD_FLAP_FPS) % _puffin.hframes
+	, 0.0, total, total)
+	# Then off to the right together, climbing a little
+	var carry_to := Vector2(VP_W + 70.0, grab_point.y - 80.0)
+	tween.tween_property(_turtle, "position", carry_to, BIRD_CARRY_SECONDS)\
+		.set_delay(BIRD_SWOOP_SECONDS).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tween.tween_property(_puffin, "position", carry_to + BIRD_GRIP_OFFSET, BIRD_CARRY_SECONDS)\
+		.set_delay(BIRD_SWOOP_SECONDS).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	await tween.finished
+	_show_level_title()
 
 func _plunge() -> void:
 	_show_level_title()

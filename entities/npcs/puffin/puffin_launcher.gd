@@ -795,34 +795,44 @@ func _draw() -> void:
 ## The aim and the plunger gauge in one: an arrow pointing down the plunge
 ## line from under the turtle, filling from the turtle toward its tip as the
 ## power climbs. Always up while aiming, empty until the button is held.
-## Drawn pointing straight down and turned to the aim.
 func _draw_power_arrow() -> void:
-	draw_set_transform(_TURTLE_OFFSET, -_aim)
+	draw_heat_arrow(self, _TURTLE_OFFSET, -_aim, _power if _charging else 0.0)
+
+## Draws the heat arrow on `canvas` (from inside its _draw()): starting a
+## little out from `origin`, pointing straight down when `turn` is 0 and
+## turned by `turn` radians otherwise, filled from the origin end toward the
+## tip by `fill` (0..1). The fill's colour runs yellow to red with `heat`
+## (0..1), which follows `fill` unless given. `shaft` is the length of the
+## arrow's shaft, for a shorter arrow than the plunger's. Shared with the
+## Puffin Party's puffins.
+static func draw_heat_arrow(canvas: CanvasItem, origin: Vector2, turn: float, fill: float, heat: float = -1.0, shaft: float = _ARROW_SHAFT) -> void:
+	canvas.draw_set_transform(origin, turn)
 	var half: float = _ARROW_WIDTH * 0.5
-	var shaft_end: float = _ARROW_START + _ARROW_SHAFT
+	var shaft_end: float = _ARROW_START + shaft
 	var tip_end: float = shaft_end + _ARROW_TIP_LENGTH
 	var outline := Color(0.0, 0.0, 0.0, 0.85)
 	var empty := Color(0.16, 0.18, 0.24, 1.0)
-	draw_rect(Rect2(-half, _ARROW_START, _ARROW_WIDTH, _ARROW_SHAFT).grow(2.0), outline)
-	draw_colored_polygon(_arrow_tip(shaft_end - 2.0, tip_end + 3.0, _ARROW_TIP_HALF_WIDTH + 3.0, tip_end + 3.0), outline)
-	draw_rect(Rect2(-half, _ARROW_START, _ARROW_WIDTH, _ARROW_SHAFT), empty)
-	draw_colored_polygon(_arrow_tip(shaft_end, tip_end, _ARROW_TIP_HALF_WIDTH, tip_end), empty)
-	if _charging and _power > 0.0:
-		var heat: Color = Color(1.0, 0.9, 0.3).lerp(Color(1.0, 0.25, 0.1), _power)
-		var filled: float = (_ARROW_SHAFT + _ARROW_TIP_LENGTH) * _power
-		draw_rect(Rect2(-half, _ARROW_START, _ARROW_WIDTH, minf(filled, _ARROW_SHAFT)), heat)
-		if filled > _ARROW_SHAFT + 0.5:
-			draw_colored_polygon(_arrow_tip(shaft_end, tip_end, _ARROW_TIP_HALF_WIDTH, _ARROW_START + filled), heat)
+	canvas.draw_rect(Rect2(-half, _ARROW_START, _ARROW_WIDTH, shaft).grow(2.0), outline)
+	canvas.draw_colored_polygon(_arrow_tip(shaft_end - 2.0, tip_end + 3.0, _ARROW_TIP_HALF_WIDTH + 3.0, tip_end + 3.0), outline)
+	canvas.draw_rect(Rect2(-half, _ARROW_START, _ARROW_WIDTH, shaft), empty)
+	canvas.draw_colored_polygon(_arrow_tip(shaft_end, tip_end, _ARROW_TIP_HALF_WIDTH, tip_end), empty)
+	fill = clampf(fill, 0.0, 1.0)
+	if fill > 0.0:
+		var heat_color: Color = Color(1.0, 0.9, 0.3).lerp(Color(1.0, 0.25, 0.1), clampf(fill if heat < 0.0 else heat, 0.0, 1.0))
+		var filled: float = (shaft + _ARROW_TIP_LENGTH) * fill
+		canvas.draw_rect(Rect2(-half, _ARROW_START, _ARROW_WIDTH, minf(filled, shaft)), heat_color)
+		if filled > shaft + 0.5:
+			canvas.draw_colored_polygon(_arrow_tip(shaft_end, tip_end, _ARROW_TIP_HALF_WIDTH, _ARROW_START + filled), heat_color)
 	# Quarter marks along the shaft
 	for i in range(1, 4):
-		var y: float = _ARROW_START + (_ARROW_SHAFT + _ARROW_TIP_LENGTH) * i / 4.0
+		var y: float = _ARROW_START + (shaft + _ARROW_TIP_LENGTH) * i / 4.0
 		if y < shaft_end:
-			draw_line(Vector2(-half, y), Vector2(0.0, y), Color(1.0, 1.0, 1.0, 0.7), 1.0)
-	draw_set_transform(Vector2.ZERO)
+			canvas.draw_line(Vector2(-half, y), Vector2(0.0, y), Color(1.0, 1.0, 1.0, 0.7), 1.0)
+	canvas.draw_set_transform(Vector2.ZERO)
 
 ## The arrowhead, from its base at `base_y` toward its point at `point_y`,
 ## cut off at `until_y` (the point itself when they are equal).
-func _arrow_tip(base_y: float, point_y: float, base_half_width: float, until_y: float) -> PackedVector2Array:
+static func _arrow_tip(base_y: float, point_y: float, base_half_width: float, until_y: float) -> PackedVector2Array:
 	var cut: float = clampf(until_y, base_y, point_y)
 	var cut_half_width: float = base_half_width * (point_y - cut) / (point_y - base_y)
 	if cut_half_width < 0.25:
