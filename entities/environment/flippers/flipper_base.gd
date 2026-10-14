@@ -81,6 +81,7 @@ var base_collision_position: Vector2 = Vector2.ZERO  # Store initial collision p
 var base_area_collision_position: Vector2 = Vector2.ZERO
 
 var _is_phased: bool = false
+var _hd_art: HdFlipperArt
 
 # Flipper Automaton tech: while true the flipper cycles on its own and ignores
 # the flip input, and enemies overlapping it take damage.
@@ -124,6 +125,28 @@ func _ready():
 	
 	# Set initial collision rotation
 	update_collision_rotation()
+
+	if _wants_hd_art() and collision_shape:
+		_hd_art = HdFlipperArt.new()
+		_hd_art.shape_node = collision_shape
+		_hd_art.accent = _RIGHT_ACCENT if flip_input == "flipper_right" else _LEFT_ACCENT
+		add_child(_hd_art)
+		add_to_group(HdArt.GROUP_ENVIRONMENT)
+		refresh_hd_art()
+
+
+## Whether this flipper swaps to HdFlipperArt while HdArt's environment category
+## is on. Cloud flippers have their own look and opt out.
+func _wants_hd_art() -> bool:
+	return true
+
+
+## HdArt: the environment category was toggled.
+func refresh_hd_art() -> void:
+	var hd: bool = HdArt.environment_on()
+	_hd_art.visible = hd
+	if animated_sprite:
+		animated_sprite.visible = not hd
 
 
 func _apply_input_accent() -> void:

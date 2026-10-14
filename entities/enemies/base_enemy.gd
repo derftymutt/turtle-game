@@ -23,6 +23,9 @@ const _ENEMY_DIE_SFX = preload("res://assets/sounds/sfx/dead enemy_1.ogg")
 # Visual feedback
 @export var damage_flash_duration: float = 0.3
 @export var damage_flash_color: Color = Color.CHARTREUSE
+## High-res stand-in for the AnimatedSprite2D's frames, with the same animation
+## names. Shown while HdArt's creature category is on (F8 in debug builds).
+@export var hd_sprite_frames: SpriteFrames
 
 # Internal state
 var current_health: float
@@ -34,6 +37,12 @@ var _contact_damage_ready: bool = true
 var _contact_players: Array = []
 var _is_phased: bool = false
 var _hit_iframes_timer: float = 0.0
+var _pixel_frames: SpriteFrames
+
+## HdArt: show the HD or pixel frames to match the creature category.
+func refresh_hd_art() -> void:
+	var hd: bool = HdArt.creatures_on()
+	HdArt.apply(sprite, hd_sprite_frames if hd else _pixel_frames, hd)
 
 func _ready():
 	current_health = max_health
@@ -43,6 +52,10 @@ func _ready():
 	sprite = get_node_or_null("AnimatedSprite2D")
 	if not sprite:
 		sprite = get_node_or_null("Sprite2D")
+	if hd_sprite_frames and sprite is AnimatedSprite2D:
+		_pixel_frames = sprite.sprite_frames
+		add_to_group(HdArt.GROUP_CREATURES)
+		refresh_hd_art()
 
 	# Set up damage area if it exists
 	damage_area = get_node_or_null("DamageArea")

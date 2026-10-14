@@ -50,6 +50,7 @@ var _slippery_area: Area2D
 var _charge_frames: int = 1
 var _charge_anim_time: float = 0.0
 var _player: Node
+var _hd_art: HdDeadWallArt
 
 ## --- Lifecycle ---
 
@@ -60,6 +61,12 @@ func _ready() -> void:
 	add_to_group("dead_walls")
 	add_to_group("eel_targetable")
 	super._ready()  ## BaseWall: _find_children() → _ensure_unique_shapes() → _update_wall()
+
+	if not Engine.is_editor_hint():
+		_hd_art = HdDeadWallArt.new()
+		add_child(_hd_art)
+		add_to_group(HdArt.GROUP_ENVIRONMENT)
+		_sync_hd_art()
 
 	## Physics material must be set in the Inspector.
 	## This fallback only fires if it was accidentally removed from the scene.
@@ -85,6 +92,7 @@ func _on_wall_updated() -> void:
 	_resize_slippery_area()
 	_sync_color()
 	_setup_charge_frames()
+	_sync_hd_art()
 
 ## --- Charge Animation ---
 
@@ -98,7 +106,11 @@ func _setup_charge_frames() -> void:
 	_charge_anim_time = 0.0
 
 func _process(delta: float) -> void:
-	if Engine.is_editor_hint() or _charge_frames <= 1 or not _sprite:
+	if Engine.is_editor_hint():
+		return
+	## The HD art can show the charge at any length; the pixel art only where a sheet exists.
+	var hd: bool = _hd_art != null and _hd_art.visible
+	if not hd and (_charge_frames <= 1 or not _sprite):
 		return
 
 	if not is_instance_valid(_player):
@@ -107,25 +119,45 @@ func _process(delta: float) -> void:
 	var charging: bool = _player != null and _player.is_fast_charging() and self in _player.touching_walls
 	if charging:
 		_charge_anim_time += delta
-		var anim_frames: int = _charge_frames - 1
-		_sprite.frame = 1 + int(_charge_anim_time * charge_anim_fps) % anim_frames
-	elif _sprite.frame != 0:
-		_sprite.frame = 0
+		_show_charge(true)
+	elif _charge_anim_time > 0.0:
 		_charge_anim_time = 0.0
+		_show_charge(false)
+
+func _show_charge(active: bool) -> void:
+	if _hd_art:
+		_hd_art.charge_time = _charge_anim_time if active else -1.0
+	if _sprite and _charge_frames > 1:
+		_sprite.frame = 1 + int(_charge_anim_time * charge_anim_fps) % (_charge_frames - 1) if active else 0
 
 ## Plays the charge animation with no turtle charging against the wall. The
 ## Academy points the mechanic out this way while the level is paused (so
 ## _process() isn't running): call it every frame, then end_charge_demo().
 func step_charge_demo(delta: float) -> void:
-	if _charge_frames <= 1 or not _sprite:
-		return
 	_charge_anim_time += delta
-	_sprite.frame = 1 + int(_charge_anim_time * charge_anim_fps) % (_charge_frames - 1)
+	_show_charge(true)
 
 func end_charge_demo() -> void:
-	if _sprite:
-		_sprite.frame = 0
 	_charge_anim_time = 0.0
+	_show_charge(false)
+
+## --- HD Art ---
+
+## HdArt: the environment category was toggled.
+func refresh_hd_art() -> void:
+	_sync_hd_art()
+
+func _sync_hd_art() -> void:
+	if not _hd_art:
+		return
+	var hd: bool = HdArt.environment_on()
+	var has_pixel_art: bool = _load_wall_texture(angle_preset, length_units) != null
+	_hd_art.visible = hd
+	_hd_art.setup(get_pixel_length(), get_pixel_thickness(), get_collision_rotation_degrees())
+	if _sprite:
+		_sprite.visible = has_pixel_art and not hd
+	if _polygon:
+		_polygon.visible = not has_pixel_art and not hd
 
 ## --- Oil Slick ---
 

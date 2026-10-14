@@ -8,6 +8,7 @@
 [ext_resource type="Texture2D" uid="uid://bm428btwp720u" path="res://entities/environment/ocean_boundaries/ocean_floor.png" id="6_nu44e"]
 [ext_resource type="TileSet" uid="uid://dyl02kfc4a681" path="res://entities/environment/ocean_boundaries/ocean_wall.tres" id="7_fpvgn"]
 [ext_resource type="PackedScene" uid="uid://8edo3etakc1a" path="res://entities/environment/walls/dead_wall/dead_wall.tscn" id="8_3t5n2"]
+[ext_resource type="PackedScene" uid="uid://4het8fdlmvgj" path="res://entities/environment/flippers/flipper_left_down.tscn" id="9_v2dqh"]
 [ext_resource type="Texture2D" uid="uid://8det4aydy3r5" path="res://entities/environment/walls/dead_wall/sprites/wall_diagonal_2u.png" id="10_2essh"]
 [ext_resource type="PackedScene" uid="uid://b8qcufospawn1" path="res://systems/community_ufo_event/community_ufo_spawner.tscn" id="10_kx1xp"]
 [ext_resource type="PackedScene" uid="uid://b8qdolphin001" path="res://entities/npcs/dolphin/dolphin.tscn" id="11_m516p"]
@@ -21,6 +22,9 @@
 [ext_resource type="PackedScene" uid="uid://u02ifu2255ot" path="res://entities/environment/flippers/cloud_flipper_left_up.tscn" id="l6_cloud_left"]
 [ext_resource type="PackedScene" uid="uid://p32a3utahssn" path="res://entities/environment/flippers/cloud_flipper_right_up.tscn" id="l6_cloud_right"]
 [ext_resource type="PackedScene" uid="uid://ko8xdpxfr5ej" path="res://entities/environment/current/current.tscn" id="l6_current"]
+[ext_resource type="PackedScene" uid="uid://d3ui83o5ln2lj" path="res://entities/environment/flippers/flipper_left_east.tscn" id="l6_left_east"]
+[ext_resource type="PackedScene" uid="uid://b5olvcks1vnwn" path="res://entities/environment/flippers/flipper_right_down.tscn" id="l6_right_down"]
+[ext_resource type="PackedScene" uid="uid://brjd5ho5mmmy4" path="res://entities/environment/flippers/flipper_right_west.tscn" id="l6_right_west"]
 [ext_resource type="PackedScene" uid="uid://bwyt5nkmne05h" path="res://entities/collectibles/ufo_piece/ufo_piece_seeder.tscn" id="l6_seeder"]
 [ext_resource type="PackedScene" uid="uid://b6mqqn1jgl6of" path="res://levels/environment/sky_background.tscn" id="l6_sky"]
 [ext_resource type="PackedScene" uid="uid://b8df8qps2nshf" path="res://entities/collectibles/star/sky_star_seeder.tscn" id="l6_stars"]
@@ -215,7 +219,7 @@ color = Color(0.1764706, 0.12156863, 0.023529412, 1)
 
 [node name="levelWalls" type="TileMapLayer" parent="." index="21" unique_id=363822574]
 position = Vector2(0, 4)
-tile_map_data = PackedByteArray("AADa//r/AAAEAAAAAADa//v/AAAGAAAAAADb//r/AAADAAAAAADb//v/AAAFAAAAAADb/wcAAAAEAAAAAADb/wgAAAABAAAAAADb/wkAAAACAAAAAADc/wcAAAADAAAAAADc/wgAAAACAAAAAADc/wkAAAAAAAAAAADy/wcAAAAEAAAAAADy/wgAAAAAAAAAAADy/wkAAAABAAAAAADz/wcAAAADAAAAAADz/wgAAAABAAAAAADz/wkAAAACAAAAAAAJAPr/AAAEAAAAAAAJAPv/AAAGAAAAAAAKAPn/AAAEAAAAAAAKAPr/AAABAAAAAAAKAPv/AAACAAAAAAAKAPz/AAAGAAAAAAAKAAcAAAAEAAAAAAAKAAgAAAAAAAAAAAAKAAkAAAABAAAAAAALAPn/AAADAAAAAAALAPr/AAACAAAAAAALAPv/AAAAAAAAAAALAPz/AAAFAAAAAAALAAcAAAADAAAAAAALAAgAAAABAAAAAAALAAkAAAACAAAAAAAMAPr/AAADAAAAAAAMAPv/AAAFAAAAAAAiAPv/AAAEAAAAAAAiAPz/AAAGAAAAAAAjAPv/AAADAAAAAAAjAPz/AAAFAAAAAAAjAAcAAAAEAAAAAAAjAAgAAAABAAAAAAAjAAkAAAACAAAAAAAkAAcAAAADAAAAAAAkAAgAAAACAAAAAAAkAAkAAAAAAAAAAAA=")
+tile_map_data = PackedByteArray("AADa//r/AAAEAAAAAADa//v/AAAGAAAAAADb//r/AAADAAAAAADb//v/AAAFAAAAAADb/wcAAAAEAAAAAADb/wgAAAABAAAAAADb/wkAAAACAAAAAADc/wcAAAADAAAAAADc/wgAAAACAAAAAADc/wkAAAAAAAAAAAA=")
 tile_set = SubResource("TileSet_m516p")
 
 [node name="SkyCentral" type="Node2D" parent="." index="22" unique_id=1703840280]
@@ -528,6 +532,108 @@ community_ufo_scene = ExtResource("12_l3m5x")
 squid_count = 5
 spawn_area_min = Vector2(-930, -90)
 spawn_area_max = Vector2(930, 150)
+
+[node name="FlipperLeftEast" parent="." index="30" unique_id=1447591536 instance=ExtResource("l6_left_east")]
+position = Vector2(-292, -91)
+
+[node name="FlipperLeftEast2" parent="." index="31" unique_id=1227674574 instance=ExtResource("l6_left_east")]
+position = Vector2(-197, 85)
+
+[node name="FlipperLeftEast5" parent="." index="32" unique_id=869845912 instance=ExtResource("l6_left_east")]
+position = Vector2(-197, -42)
+
+[node name="FlipperLeftEast4" parent="." index="33" unique_id=1609173780 instance=ExtResource("l6_left_east")]
+position = Vector2(100, 8)
+
+[node name="FlipperLeftEast6" parent="." index="34" unique_id=1268881329 instance=ExtResource("l6_left_east")]
+position = Vector2(322, -31)
+
+[node name="FlipperLeftEast7" parent="." index="35" unique_id=814676456 instance=ExtResource("l6_left_east")]
+position = Vector2(372, -87)
+
+[node name="FlipperLeftEast3" parent="." index="36" unique_id=427145467 instance=ExtResource("l6_left_east")]
+position = Vector2(-299, 135)
+
+[node name="FlipperRightWest2" parent="." index="37" unique_id=36298728 instance=ExtResource("l6_right_west")]
+position = Vector2(-127, 7)
+
+[node name="FlipperRightWest7" parent="." index="38" unique_id=469970896 instance=ExtResource("l6_right_west")]
+position = Vector2(451, 126)
+
+[node name="FlipperRightWest3" parent="." index="39" unique_id=194597256 instance=ExtResource("l6_right_west")]
+position = Vector2(283, -89)
+
+[node name="FlipperRightWest4" parent="." index="40" unique_id=1047837198 instance=ExtResource("l6_right_west")]
+position = Vector2(278, 130)
+
+[node name="FlipperRightWest5" parent="." index="41" unique_id=281765023 instance=ExtResource("l6_right_west")]
+position = Vector2(202, -53)
+
+[node name="FlipperRightWest6" parent="." index="42" unique_id=1345131051 instance=ExtResource("l6_right_west")]
+position = Vector2(193, 66)
+
+[node name="FlipperLeftDown" parent="." index="43" unique_id=555318297 instance=ExtResource("9_v2dqh")]
+position = Vector2(-49, -97)
+
+[node name="FlipperLeftDown2" parent="." index="44" unique_id=1702672644 instance=ExtResource("9_v2dqh")]
+position = Vector2(317, 48)
+
+[node name="FlipperRightDownPixelPerfect" parent="." index="45" unique_id=94480237 instance=ExtResource("l6_right_down")]
+position = Vector2(45, -98)
+
+[node name="FlipperRightDownPixelPerfect2" parent="." index="46" unique_id=1925684314 instance=ExtResource("l6_right_down")]
+position = Vector2(424, 47)
+
+[node name="CircularBumper" parent="." index="47" unique_id=2098876600 instance=ExtResource("l6_bumper")]
+position = Vector2(-1, 72)
+
+[node name="CircularBumper8" parent="." index="48" unique_id=1200390391 instance=ExtResource("l6_bumper")]
+position = Vector2(-1, -23)
+size_preset = 1
+radius = 16.0
+
+[node name="CircularBumper2" parent="." index="49" unique_id=839794749 instance=ExtResource("l6_bumper")]
+position = Vector2(-105, 99)
+
+[node name="CircularBumper3" parent="." index="50" unique_id=100272699 instance=ExtResource("l6_bumper")]
+position = Vector2(98, 102)
+
+[node name="CircularBumper4" parent="." index="51" unique_id=1256899385 instance=ExtResource("l6_bumper")]
+position = Vector2(255, -1)
+
+[node name="CircularBumper9" parent="." index="52" unique_id=1145424107 instance=ExtResource("l6_bumper")]
+position = Vector2(370, 18)
+
+[node name="CircularBumper5" parent="." index="53" unique_id=1829383295 instance=ExtResource("l6_bumper")]
+position = Vector2(-263, -3)
+
+[node name="CircularBumper6" parent="." index="54" unique_id=1661069942 instance=ExtResource("l6_bumper")]
+position = Vector2(-131, -91)
+
+[node name="CircularBumper7" parent="." index="55" unique_id=870149209 instance=ExtResource("l6_bumper")]
+position = Vector2(141, -92)
+
+[node name="DeadWall" parent="." index="56" unique_id=797132162 instance=ExtResource("8_3t5n2")]
+position = Vector2(441, 64)
+angle_preset = 2
+length_units = 1
+
+[node name="DeadWall4" parent="." index="57" unique_id=974742746 instance=ExtResource("8_3t5n2")]
+position = Vector2(61, -80)
+angle_preset = 2
+length_units = 1
+
+[node name="DeadWall2" parent="." index="58" unique_id=1881255669 instance=ExtResource("8_3t5n2")]
+position = Vector2(299, 65)
+angle_preset = 2
+length_units = 1
+mirrored = true
+
+[node name="DeadWall3" parent="." index="59" unique_id=1997814153 instance=ExtResource("8_3t5n2")]
+position = Vector2(-66, -79)
+angle_preset = 2
+length_units = 1
+mirrored = true
 
 [editable path="SkyCentral/Wall81"]
 [editable path="SkyCentral/Wall83"]

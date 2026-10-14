@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://b1n37gdnklwmu" path="res://entities/enemies/piranha/super_piranha.gd" id="1_rtrrk"]
 [ext_resource type="Texture2D" uid="uid://cjo6hqbhdkpt6" path="res://entities/enemies/piranha/sprites/piranha_sheet.png" id="2_rtrrk"]
 [ext_resource type="Texture2D" uid="uid://2bek8f0718kv" path="res://entities/enemies/piranha/sprites/piranha.png" id="3_kavyd"]
+[ext_resource type="SpriteFrames" path="res://entities/enemies/piranha/super_piranha_hd_frames.tres" id="hd_frames"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_kavyd"]
 atlas = ExtResource("2_rtrrk")
@@ -81,6 +82,7 @@ radius = 8.0
 collision_layer = 4
 collision_mask = 33
 script = ExtResource("1_rtrrk")
+hd_sprite_frames = ExtResource("hd_frames")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1092740509]
 sprite_frames = SubResource("SpriteFrames_tb8k7")

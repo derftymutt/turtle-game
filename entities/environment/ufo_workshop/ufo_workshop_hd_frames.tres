@@ -1,0 +1,30 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" uid="uid://h6qqt71j6ucb" path="res://entities/environment/ufo_workshop/sprites/hd/workshop_0.svg" id="f0"]
+[ext_resource type="Texture2D" uid="uid://p647y3oxjsom" path="res://entities/environment/ufo_workshop/sprites/hd/workshop_1.svg" id="f1"]
+[ext_resource type="Texture2D" uid="uid://dcrlvg4f7nd3f" path="res://entities/environment/ufo_workshop/sprites/hd/workshop_2.svg" id="f2"]
+[ext_resource type="Texture2D" uid="uid://bkv3hm21nmkg2" path="res://entities/environment/ufo_workshop/sprites/hd/workshop_3.svg" id="f3"]
+[ext_resource type="Texture2D" uid="uid://byuxyy7jafwov" path="res://entities/environment/ufo_workshop/sprites/hd/workshop_4.svg" id="f4"]
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("f0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("f1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("f2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("f3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("f4")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]

@@ -15,3 +15,8 @@ class_name CloudFlipperBase
 ##   (One Way Collision Margin can stay at its default value)
 ##
 ## No overrides needed — the parent FlipperBase implementation is used as-is.
+
+
+## Clouds keep their pixel art: HdFlipperArt only draws the plain flipper.
+func _wants_hd_art() -> bool:
+	return false

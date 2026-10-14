@@ -4,6 +4,9 @@ class_name CircularBumper
 
 const _SFX_BUMPER_LARGE = preload("res://assets/sounds/sfx/bumper large_1.ogg")
 const _SFX_BUMPER_SMALL = preload("res://assets/sounds/sfx/bumper small_1.ogg")
+## High-res line-art frames (see HdArt). Same animation names as the pixel
+## SpriteFrames, so the idle/hit logic is unchanged.
+const _HD_FRAMES = preload("res://entities/environment/walls/circular_bumper/circular_bumper_hd_frames.tres")
 
 ## CIRCULAR BUMPER — Classic pinball-style bumper that reflects the turtle with added force.
 ##
@@ -95,6 +98,7 @@ var _animated_sprite: AnimatedSprite2D
 var _hit_area: Area2D
 var _is_playing_hit: bool = false
 var _is_phased: bool = false
+var _pixel_frames: SpriteFrames
 
 ## --- Lifecycle ---
 
@@ -102,8 +106,11 @@ func _ready() -> void:
 	add_to_group("walls")
 	add_to_group("bumpers")
 	add_to_group("circular_bumpers")
+	add_to_group(HdArt.GROUP_ENVIRONMENT)
 
 	_find_children()
+	if _animated_sprite:
+		_pixel_frames = _animated_sprite.sprite_frames
 	_ensure_unique_shapes()
 	_update_bumper()
 
@@ -166,6 +173,7 @@ func _apply_hit_area_shape() -> void:
 func _apply_sprite() -> void:
 	if not _animated_sprite:
 		return
+	_apply_art_set()
 
 	## Build the idle animation name from current size and variant.
 	## e.g. size=SMALL, variant="2" → "small_2_idle"
@@ -185,6 +193,14 @@ func _apply_sprite() -> void:
 		_animated_sprite.visible = false
 		if _polygon:
 			_polygon.visible = true
+
+func _apply_art_set() -> void:
+	var hd: bool = HdArt.environment_on()
+	HdArt.apply(_animated_sprite, _HD_FRAMES if hd else _pixel_frames, hd)
+
+## HdArt: the environment category was toggled.
+func refresh_hd_art() -> void:
+	_apply_sprite()
 
 ## --- Hit Response ---
 

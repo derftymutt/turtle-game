@@ -121,9 +121,16 @@ func spawn_with_animation():
 	if not piranha_sprite:
 		piranha_sprite = temp_piranha.get_node_or_null("Sprite2D")
 
+	# Match the HD art when it's on (HdArt): the HD frame is drawn SCALE x larger.
+	var art_scale: float = 1.0
 	if piranha_sprite:
 		if piranha_sprite is AnimatedSprite2D:
-			approach_sprite.texture = piranha_sprite.sprite_frames.get_frame_texture("default", 0)
+			var frames: SpriteFrames = piranha_sprite.sprite_frames
+			if temp_piranha.hd_sprite_frames and HdArt.creatures_on():
+				frames = temp_piranha.hd_sprite_frames
+				art_scale = 1.0 / HdArt.SCALE
+				approach_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+			approach_sprite.texture = frames.get_frame_texture("default", 0)
 		else:
 			approach_sprite.texture = piranha_sprite.texture
 
@@ -132,7 +139,7 @@ func spawn_with_animation():
 	# Set up approach sprite
 	get_parent().add_child(approach_sprite)
 	approach_sprite.global_position = pos
-	approach_sprite.scale = Vector2(0.1, 0.1)
+	approach_sprite.scale = Vector2(0.1, 0.1) * art_scale
 	approach_sprite.modulate = Color(0.2, 0.2, 0.3, 0.5)
 
 	# Add tint for super piranhas during approach
@@ -144,7 +151,7 @@ func spawn_with_animation():
 	# Animate: scale up + fade in + slight rotation
 	var tween = create_tween()
 	tween.set_parallel(true)
-	tween.tween_property(approach_sprite, "scale", Vector2(1.2, 1.2), 0.6)\
+	tween.tween_property(approach_sprite, "scale", Vector2(1.2, 1.2) * art_scale, 0.6)\
 		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 	var final_color = Color(1.2, 0.5, 0.5, 1) if is_super else Color(1, 1, 1, 1)
@@ -155,7 +162,7 @@ func spawn_with_animation():
 
 	# === PHASE 3: Pop effect and spawn real piranha ===
 	var pop_tween = create_tween()
-	pop_tween.tween_property(approach_sprite, "scale", Vector2(1.3, 1.3), 0.1)
+	pop_tween.tween_property(approach_sprite, "scale", Vector2(1.3, 1.3) * art_scale, 0.1)
 	await pop_tween.finished
 
 	# Abort if time is frozen — the coroutine outlived the freeze window

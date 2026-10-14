@@ -1,0 +1,118 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" uid="uid://dyk5so041gm8e" path="res://entities/environment/walls/circular_bumper/sprites/hd/giant_1.svg" id="giant_1"]
+[ext_resource type="Texture2D" uid="uid://m8vk5vmhxl6v" path="res://entities/environment/walls/circular_bumper/sprites/hd/giant_2.svg" id="giant_2"]
+[ext_resource type="Texture2D" uid="uid://b2x431xnph0qv" path="res://entities/environment/walls/circular_bumper/sprites/hd/giant_3.svg" id="giant_3"]
+[ext_resource type="Texture2D" uid="uid://bi1hocf8vlttg" path="res://entities/environment/walls/circular_bumper/sprites/hd/planet_a.svg" id="planet_a"]
+[ext_resource type="Texture2D" uid="uid://clwchy5sh24o8" path="res://entities/environment/walls/circular_bumper/sprites/hd/planet_b.svg" id="planet_b"]
+[ext_resource type="Texture2D" uid="uid://dlg245on2uk32" path="res://entities/environment/walls/circular_bumper/sprites/hd/planet_c.svg" id="planet_c"]
+[ext_resource type="Texture2D" uid="uid://cd2hh8psgmh77" path="res://entities/environment/walls/circular_bumper/sprites/hd/ringed_a.svg" id="ringed_a"]
+[ext_resource type="Texture2D" uid="uid://dc3ce4pllbqp2" path="res://entities/environment/walls/circular_bumper/sprites/hd/ringed_a_flip.svg" id="ringed_a_flip"]
+[ext_resource type="Texture2D" uid="uid://dk1a2ewu71870" path="res://entities/environment/walls/circular_bumper/sprites/hd/ringed_b.svg" id="ringed_b"]
+[ext_resource type="Texture2D" uid="uid://ce6wa5y4de4w2" path="res://entities/environment/walls/circular_bumper/sprites/hd/ringed_b_flip.svg" id="ringed_b_flip"]
+[ext_resource type="Texture2D" uid="uid://d2w8xmr8kw7gw" path="res://entities/environment/walls/circular_bumper/sprites/hd/ringed_c.svg" id="ringed_c"]
+[ext_resource type="Texture2D" uid="uid://b3gs2pbxh4c1n" path="res://entities/environment/walls/circular_bumper/sprites/hd/ringed_c_flip.svg" id="ringed_c_flip"]
+
+[resource]
+animations = [
+{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("planet_b")
+}, {
+"duration": 1.0,
+"texture": ExtResource("planet_c")
+}, {
+"duration": 1.0,
+"texture": ExtResource("planet_b")
+}, {
+"duration": 1.0,
+"texture": ExtResource("planet_c")
+}],
+"loop": false,
+"name": &"small_1_hit",
+"speed": 11.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("planet_a")
+}],
+"loop": true,
+"name": &"small_1_idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("ringed_b")
+}, {
+"duration": 1.0,
+"texture": ExtResource("ringed_c")
+}, {
+"duration": 1.0,
+"texture": ExtResource("ringed_b")
+}, {
+"duration": 1.0,
+"texture": ExtResource("ringed_c")
+}],
+"loop": false,
+"name": &"small_2_hit",
+"speed": 11.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("ringed_a")
+}],
+"loop": true,
+"name": &"small_2_idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("ringed_b_flip")
+}, {
+"duration": 1.0,
+"texture": ExtResource("ringed_c_flip")
+}, {
+"duration": 1.0,
+"texture": ExtResource("ringed_b_flip")
+}, {
+"duration": 1.0,
+"texture": ExtResource("ringed_c_flip")
+}],
+"loop": false,
+"name": &"small_3_hit",
+"speed": 11.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("ringed_a_flip")
+}],
+"loop": true,
+"name": &"small_3_idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("giant_2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("giant_3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("giant_2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("giant_3")
+}],
+"loop": false,
+"name": &"medium_1_hit",
+"speed": 11.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("giant_1")
+}],
+"loop": true,
+"name": &"medium_1_idle",
+"speed": 5.0
+}]

@@ -37,6 +37,13 @@ const _RELOCATE_DELAY: float = 0.6
 @export var pulse_speed: float = 2.0
 @export var pulse_amount: float = 0.2
 
+## High-res frames (see HdArt), same "default" animation as the pixel sprite.
+const _HD_FRAMES = preload("res://entities/environment/ufo_workshop/ufo_workshop_hd_frames.tres")
+
+## HdArt: the environment category was toggled.
+func refresh_hd_art() -> void:
+	_hd_overlay.set_hd(HdArt.environment_on())
+
 # Node references (set up in scene editor)
 @onready var delivery_area: Area2D = $DeliveryArea
 @onready var sprite: Node2D = _find_sprite()
@@ -62,6 +69,7 @@ var _hopping: bool = false
 var _level_done: bool = false
 var _elected: bool = false
 var _relocate_pending: bool = false
+var _hd_overlay: HdSpriteOverlay
 
 func _ready():
 	add_to_group("ufo_workshop_candidate")
@@ -87,6 +95,10 @@ func _ready():
 	
 	if not sprite:
 		push_warning("UFOWorkshop: No sprite found! Add Sprite2D or AnimatedSprite2D child.")
+	elif sprite is AnimatedSprite2D:
+		_hd_overlay = HdSpriteOverlay.attach(sprite, _HD_FRAMES)
+		add_to_group(HdArt.GROUP_ENVIRONMENT)
+		refresh_hd_art()
 	
 	# Connect delivery area signals
 	delivery_area.body_entered.connect(_on_delivery_area_entered)

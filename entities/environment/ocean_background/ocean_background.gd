@@ -22,8 +22,26 @@ extends Node2D
 		_apply()
 
 
+var _hd_wave: HdWaveArt
+
+
 func _ready() -> void:
 	_apply()
+	var wave := get_node_or_null("WaveSurface") as CanvasItem
+	if wave and not Engine.is_editor_hint():
+		_hd_wave = HdWaveArt.new()
+		wave.add_sibling(_hd_wave)
+		_hd_wave.position = wave.position
+		add_to_group(HdArt.GROUP_ENVIRONMENT)
+		refresh_hd_art()
+
+
+## HdArt: the environment category was toggled.
+func refresh_hd_art() -> void:
+	var hd: bool = HdArt.environment_on()
+	_hd_wave.visible = hd
+	_hd_wave.set_process(hd)
+	$WaveSurface.visible = not hd
 
 
 func _apply() -> void:

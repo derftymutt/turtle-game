@@ -52,6 +52,7 @@ func _ready():
 	_load_settings()
 	_apply_game_speed()
 	_apply_mouse_mode_bindings()
+	HdArt.sync_viewport(get_tree())
 
 func _enter_tree() -> void:
 	# Not _ready(): at startup the whole main scene enters the tree before any
@@ -68,6 +69,7 @@ func _on_node_added(node: Node) -> void:
 		node.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 
 func _input(event: InputEvent) -> void:
+	HdArt.handle_debug_input(event, get_tree())
 	if event is InputEventJoypadButton and event.pressed:
 		_set_using_gamepad(true)
 	elif event is InputEventJoypadMotion and absf(event.axis_value) >= _GAMEPAD_AXIS_THRESHOLD:

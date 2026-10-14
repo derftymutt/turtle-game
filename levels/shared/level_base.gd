@@ -29,6 +29,9 @@ func _ready():
 	# Ensure game is unpaused
 	get_tree().paused = false
 
+	# HD art experiment: high-res overlays for the ocean wall/floor tiles
+	HdTileLayerArt.attach_all(self)
+
 	# Store normal volume for ducking
 	_level_song_base_volume = _sfx_level_song.volume_db
 

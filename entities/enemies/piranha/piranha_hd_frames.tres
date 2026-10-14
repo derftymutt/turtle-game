@@ -1,0 +1,36 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" uid="uid://br0iyxio3iwaa" path="res://entities/enemies/piranha/sprites/hd/piranha_flash_0.svg" id="piranha_flash_0"]
+[ext_resource type="Texture2D" uid="uid://cv5qvejse25uv" path="res://entities/enemies/piranha/sprites/hd/piranha_flash_1.svg" id="piranha_flash_1"]
+[ext_resource type="Texture2D" uid="uid://chi7w8xy1sj7v" path="res://entities/enemies/piranha/sprites/hd/piranha_flash_2.svg" id="piranha_flash_2"]
+[ext_resource type="Texture2D" uid="uid://c5h066r6sfawx" path="res://entities/enemies/piranha/sprites/hd/piranha_swim_0.svg" id="piranha_swim_0"]
+[ext_resource type="Texture2D" uid="uid://cbbp14nkn4gt" path="res://entities/enemies/piranha/sprites/hd/piranha_swim_1.svg" id="piranha_swim_1"]
+
+[resource]
+animations = [
+{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("piranha_flash_0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("piranha_flash_1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("piranha_flash_2")
+}],
+"loop": true,
+"name": &"damage",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("piranha_swim_0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("piranha_swim_1")
+}],
+"loop": true,
+"name": &"default",
+"speed": 6.0
+}]
