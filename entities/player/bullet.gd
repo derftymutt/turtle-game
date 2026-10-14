@@ -10,6 +10,7 @@ extends RigidBody2D
 var velocity: Vector2 = Vector2.ZERO
 var hit_targets: Array = []  # Track what we've already hit
 var first_physics_frame: bool = true  # Flag to check overlaps on first frame
+var _last_velocity: Vector2 = Vector2.ZERO  # pre-contact velocity, for the impact splatter
 
 func _ready():
 	# Physics setup
@@ -56,6 +57,8 @@ func _physics_process(delta):
 
 	if linear_velocity.length() > 10:
 		rotation = linear_velocity.angle()
+
+	_last_velocity = linear_velocity
 
 func _apply_homing(delta: float):
 	const HOMING_RANGE: float = 200.0
@@ -137,24 +140,28 @@ func _on_body_entered(body):
 	if body.is_in_group("trash_items"):
 		if body.has_method("destroy_trash"):
 			body.destroy_trash()
+		_splatter(body)
 		queue_free()
 		return
 
 	# Pop air bubbles (before enemies, so they take priority)
 	if body.is_in_group("air_bubbles") and body.has_method("pop_from_bullet"):
 		body.pop_from_bullet()
+		_splatter(body)
 		queue_free()
 		return
 
 	# Hit ocean flora — damage and reveal any hidden tech piece
 	if body.is_in_group("ocean_flora") and body.has_method("take_damage"):
 		body.take_damage(damage)
+		_splatter(body)
 		queue_free()
 		return
 
 	# Free a trapped rainbow fish (RainbowFishSpawner judges the colour order)
 	if body.is_in_group("rainbow_fish"):
 		body.on_shot()
+		_splatter(body)
 		queue_free()
 		return
 
@@ -162,10 +169,12 @@ func _on_body_entered(body):
 	if body.is_in_group("enemies") and body.has_method("take_damage"):
 		body.take_damage(damage)
 		_apply_bravado_hit(body)
+		_splatter(body)
 		queue_free()
 		return
 
 	# Hit wall/flipper - destroy bullet
+	_splatter(body)
 	queue_free()
 
 func _hit_enemy(body):
@@ -175,7 +184,34 @@ func _hit_enemy(body):
 	if body.has_method("take_damage"):
 		body.take_damage(damage)
 	_apply_bravado_hit(body)
+	_splatter(body)
 	queue_free()
+
+func _splatter(body: Node) -> void:
+	"""Spray a few green specks back off whatever we hit."""
+	var dir := _last_velocity if _last_velocity.length() > 1.0 else linear_velocity
+	if dir.length() < 1.0:
+		dir = Vector2.RIGHT.rotated(rotation)
+	dir = dir.normalized()
+	var point := global_position
+	var normal := -dir
+	# Find the real surface + normal with a short ray along our path
+	var space_state := get_world_2d().direct_space_state
+	if space_state:
+		var ray := PhysicsRayQueryParameters2D.create(
+			global_position - dir * 10.0, global_position + dir * 14.0, collision_mask)
+		ray.exclude = [self]
+		var hit := space_state.intersect_ray(ray)
+		if hit and hit.normal != Vector2.ZERO:
+			point = hit.position
+			normal = hit.normal
+		elif body is Node2D:
+			# Round-ish bodies (enemies): splash back away from their centre
+			var away: Vector2 = global_position - (body as Node2D).global_position
+			if away.length() > 0.5 and away.dot(dir) < 0.0:
+				normal = away.normalized()
+	var sprite := get_node_or_null("Sprite2D") as Sprite2D
+	SpitSplatter.spawn(get_parent(), point, dir, normal, sprite.texture if sprite else null)
 
 func _apply_bravado_hit(body) -> void:
 	if not AlienTechManager.is_tech_active(AlienTechRegistry.BRAVADO) or body.get("is_invincible"):
