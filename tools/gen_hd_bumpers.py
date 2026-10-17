@@ -107,8 +107,10 @@ for k, p in PLANETS.items():
     files[f"planet_{k}.svg"] = svg(24, planet(12, 12, 12, p, k))
     files[f"ringed_{k}.svg"] = ringed(p, False, "r" + k)
     files[f"ringed_{k}_flip.svg"] = ringed(p, True, "f" + k)
-for k, g in GIANTS.items():
-    files[f"giant_{k}.svg"] = giant(g, "g" + k)
+# The medium bumper (giant_*) now uses hand-drawn art: sprites/hd/bumper_medium_*.png.
+# Uncomment to regenerate the old line-art versions.
+# for k, g in GIANTS.items():
+#     files[f"giant_{k}.svg"] = giant(g, "g" + k)
 for name, text in files.items():
     with open(os.path.join(OUT, name), "w") as f:
         f.write(text)

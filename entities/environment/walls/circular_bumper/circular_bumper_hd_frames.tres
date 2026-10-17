@@ -1,8 +1,8 @@
 [gd_resource type="SpriteFrames" format=3]
 
-[ext_resource type="Texture2D" uid="uid://dyk5so041gm8e" path="res://entities/environment/walls/circular_bumper/sprites/hd/giant_1.svg" id="giant_1"]
-[ext_resource type="Texture2D" uid="uid://m8vk5vmhxl6v" path="res://entities/environment/walls/circular_bumper/sprites/hd/giant_2.svg" id="giant_2"]
-[ext_resource type="Texture2D" uid="uid://b2x431xnph0qv" path="res://entities/environment/walls/circular_bumper/sprites/hd/giant_3.svg" id="giant_3"]
+[ext_resource type="Texture2D" uid="uid://ngvsvkwre4e7" path="res://entities/environment/walls/circular_bumper/sprites/hd/bumper_medium_idle.png" id="bumper_medium_idle"]
+[ext_resource type="Texture2D" uid="uid://bbj61lcxou6ai" path="res://entities/environment/walls/circular_bumper/sprites/hd/bumper_medium_hit_1.png" id="bumper_medium_hit_1"]
+[ext_resource type="Texture2D" uid="uid://bebknepqy8y0c" path="res://entities/environment/walls/circular_bumper/sprites/hd/bumper_medium_hit_2.png" id="bumper_medium_hit_2"]
 [ext_resource type="Texture2D" uid="uid://bi1hocf8vlttg" path="res://entities/environment/walls/circular_bumper/sprites/hd/planet_a.svg" id="planet_a"]
 [ext_resource type="Texture2D" uid="uid://clwchy5sh24o8" path="res://entities/environment/walls/circular_bumper/sprites/hd/planet_b.svg" id="planet_b"]
 [ext_resource type="Texture2D" uid="uid://dlg245on2uk32" path="res://entities/environment/walls/circular_bumper/sprites/hd/planet_c.svg" id="planet_c"]
@@ -93,16 +93,16 @@ animations = [
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("giant_2")
+"texture": ExtResource("bumper_medium_hit_1")
 }, {
 "duration": 1.0,
-"texture": ExtResource("giant_3")
+"texture": ExtResource("bumper_medium_hit_2")
 }, {
 "duration": 1.0,
-"texture": ExtResource("giant_2")
+"texture": ExtResource("bumper_medium_hit_1")
 }, {
 "duration": 1.0,
-"texture": ExtResource("giant_3")
+"texture": ExtResource("bumper_medium_hit_2")
 }],
 "loop": false,
 "name": &"medium_1_hit",
@@ -110,7 +110,7 @@ animations = [
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("giant_1")
+"texture": ExtResource("bumper_medium_idle")
 }],
 "loop": true,
 "name": &"medium_1_idle",
