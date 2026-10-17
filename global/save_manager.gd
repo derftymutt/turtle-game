@@ -79,7 +79,7 @@ func apply_save():
 	GameManager.rainbow_hearts = int(data.get("rainbow_hearts", 0))
 	GameManager.puffin_party_pending = bool(data.get("puffin_party_pending", false))
 	# "puffer_skill_shots" is the key from before the bird was renamed
-	GameManager.puffin_skill_shots = maxi(GameManager.DEBUG_START_SKILL_SHOTS, int(data.get("puffin_skill_shots", data.get("puffer_skill_shots", 0))))
+	GameManager.puffin_skill_shots = int(data.get("puffin_skill_shots", data.get("puffer_skill_shots", 0)))
 	print("📂 Restored: Level %d, Total Score %d, Continues %d" % [
 		LevelManager.current_level_number, GameManager.total_score,
 		LevelManager.continue_count])

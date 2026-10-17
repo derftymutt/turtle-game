@@ -193,7 +193,7 @@ func _process_slowing(player, real_dt: float) -> void:
 func _lock(player) -> void:
 	var dir := _aim_dir()
 	player.linear_velocity = dir * _speed * _boost
-	player.facing_direction = player._vector_to_direction_suffix(dir)
+	player.set_facing(dir)
 	player._play_animation("kick")
 	GameSettings.set_time_dilation(_min_dilation)
 	_line.default_color = LOCKED_COLOR

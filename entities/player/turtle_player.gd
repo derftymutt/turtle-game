@@ -218,10 +218,50 @@ const DIRECTION_SUFFIXES: Array[String] = ["e", "se", "s", "sw", "w", "nw", "n",
 # The direction the turtle is currently facing. Persists between actions so
 # idle always shows the correct facing direction after a kick or shoot.
 var facing_direction: String = "s"  # Default: face downward into the water
+## The exact facing angle behind facing_direction (radians, Vector2.angle(): 0 = east,
+## clockwise). Visual only — the HD art turns to it smoothly instead of snapping to 8.
+var facing_angle: float = PI * 0.5
+
+## Faces the turtle along `direction`: the 8-way suffix for the pixel animations and
+## the exact angle for the HD art. Changes nothing physical.
+func set_facing(direction: Vector2) -> void:
+	facing_direction = _vector_to_direction_suffix(direction)
+	if direction != Vector2.ZERO:
+		facing_angle = direction.angle()
+	if _hd_overlay:
+		_hd_overlay.target_angle = facing_angle + PI * 0.5  # art faces north
 
 # ---------------------------------------------------------------------------
 # READY
 # ---------------------------------------------------------------------------
+
+## High-res frames (see HdArt), same animation names as the pixel sprite. Shown by an
+## HdSpriteOverlay child so the scale pulses / tints applied to the pixel sprite carry over.
+const _HD_FRAMES = preload("res://entities/player/turtle_hd_frames.tres")
+const _HD_SHINE = preload("res://entities/player/sprites/hd/turtle_shine.svg")
+var _hd_overlay: HdSpriteOverlay
+var _hd_shine: Sprite2D
+
+## HdArt: the creature category was toggled.
+func refresh_hd_art() -> void:
+	_hd_overlay.set_hd(HdArt.creatures_on())
+	_hd_shine.visible = _hd_overlay.visible
+
+## Dresses a Sprite2D as a copy of the turtle's current frame — the HD art when it's
+## showing, else the pixel frame — at `scale_mult` x the turtle's on-screen size.
+## Used by the motion trail, super speed burst and Quantum Mirror ghost.
+## Also sets its rotation to match (HD art turns freely; the pixel sprite stays upright).
+func dress_as_current_frame(copy: Sprite2D, scale_mult: float = 1.0) -> void:
+	var sprite: AnimatedSprite2D = $AnimatedSprite2D
+	var hd: bool = _hd_overlay != null and _hd_overlay.visible
+	if hd:
+		copy.texture = _hd_overlay.sprite_frames.get_frame_texture(_hd_overlay.animation, _hd_overlay.frame)
+		copy.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+		copy.global_rotation = _hd_overlay.global_rotation
+	else:
+		copy.texture = sprite.sprite_frames.get_frame_texture(sprite.animation, sprite.frame)
+		copy.global_rotation = sprite.global_rotation
+	copy.scale = sprite.scale * scale_mult / (HdArt.SCALE if hd else 1.0)
 
 func _ready():
 	gravity_scale = 0.0
@@ -257,6 +297,20 @@ func _ready():
 		hud.update_hearts(current_hearts, MAX_HEARTS)
 
 	add_to_group("player")
+
+	# HD art experiment: high-res turtle shown over the pixel sprite (F8 toggles)
+	_hd_overlay = HdSpriteOverlay.attach($AnimatedSprite2D, _HD_FRAMES)
+	_hd_overlay.free_rotation = true
+	_hd_overlay.target_angle = facing_angle + PI * 0.5
+	# The shell highlight is its own layer on the axis-aligned pixel sprite, so the
+	# light stays top-left however the HD turtle turns.
+	_hd_shine = Sprite2D.new()
+	_hd_shine.texture = _HD_SHINE
+	_hd_shine.scale = Vector2.ONE / HdArt.SCALE
+	_hd_shine.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	$AnimatedSprite2D.add_child(_hd_shine)
+	add_to_group(HdArt.GROUP_CREATURES)
+	refresh_hd_art()
 
 	_setup_super_speed_area()
 	_setup_rest_particles()
@@ -828,7 +882,7 @@ func apply_thrust(direction: Vector2):
 	is_player_controlling_rotation = true
 
 	# Update facing direction using kick_direction so thrust_inverted is accounted for
-	facing_direction = _vector_to_direction_suffix(kick_direction)
+	set_facing(kick_direction)
 
 	var animated_sprite = $AnimatedSprite2D
 	if animated_sprite:
@@ -872,7 +926,7 @@ func shoot(direction: Vector2):
 	is_player_controlling_rotation = true
 
 	# Update facing so idle returns to the correct pose afterward
-	facing_direction = _vector_to_direction_suffix(direction)
+	set_facing(direction)
 
 	var animated_sprite = $AnimatedSprite2D
 	if animated_sprite:
@@ -1273,13 +1327,11 @@ func _spawn_motion_trail(intensity: float = 1.0):
 		return
 
 	var trail = Sprite2D.new()
-	trail.texture = sprite.sprite_frames.get_frame_texture(sprite.animation, sprite.frame)
+	dress_as_current_frame(trail, 1.2)
 	# Use the sprite's global_position, NOT the body's global_position.
 	# The AnimatedSprite2D may have a local offset from the body origin;
 	# using the body origin causes trails to appear shifted.
 	trail.global_position = sprite.global_position
-	trail.global_rotation = sprite.global_rotation
-	trail.scale = sprite.scale * 1.2
 	var trail_color = super_speed_color
 	trail_color.a = 0.8 * intensity
 	trail.modulate = trail_color
@@ -1298,7 +1350,7 @@ func _create_super_speed_burst():
 	for i in range(8):
 		var burst_sprite = Sprite2D.new()
 		if sprite:
-			burst_sprite.texture = sprite.sprite_frames.get_frame_texture(sprite.animation, sprite.frame)
+			dress_as_current_frame(burst_sprite)
 
 		burst_sprite.global_position = global_position
 		burst_sprite.rotation = randf() * TAU
@@ -1314,7 +1366,7 @@ func _create_super_speed_burst():
 		tween.set_parallel(true)
 		var burst_dir = Vector2(cos(i * TAU / 8), sin(i * TAU / 8))
 		tween.tween_property(burst_sprite, "global_position", global_position + burst_dir * 50, 0.4)
-		tween.tween_property(burst_sprite, "scale", Vector2.ONE * 2.0, 0.4)
+		tween.tween_property(burst_sprite, "scale", burst_sprite.scale * 2.0, 0.4)
 		tween.tween_property(burst_sprite, "modulate:a", 0.0, 0.4)
 		tween.tween_callback(burst_sprite.queue_free)
 
@@ -1743,7 +1795,7 @@ func exit_puffer(exit_position: Vector2, exit_velocity: Vector2) -> void:
 		# before our next _physics_process recomputes it.
 		is_super_speed = true
 		_create_super_speed_burst()
-		facing_direction = _vector_to_direction_suffix(exit_velocity)
+		set_facing(exit_velocity)
 		_play_animation("kick")
 	notify_launch()
 

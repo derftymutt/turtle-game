@@ -1,0 +1,36 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://entities/player/sprites/hd/turtle_idle_free_0.svg" id="turtle_idle_free_0"]
+[ext_resource type="Texture2D" path="res://entities/player/sprites/hd/turtle_kick_free_0.svg" id="turtle_kick_free_0"]
+[ext_resource type="Texture2D" path="res://entities/player/sprites/hd/turtle_kick_free_1.svg" id="turtle_kick_free_1"]
+[ext_resource type="Texture2D" path="res://entities/player/sprites/hd/turtle_shoot_free_0.svg" id="turtle_shoot_free_0"]
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("turtle_idle_free_0")
+}],
+"loop": true,
+"name": &"idle_free",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("turtle_kick_free_0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("turtle_kick_free_1")
+}],
+"loop": false,
+"name": &"kick_free",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("turtle_shoot_free_0")
+}],
+"loop": false,
+"name": &"shoot_free",
+"speed": 5.0
+}]

@@ -8,8 +8,8 @@ class_name HdArt
 ## so those draw hard-edged and 2D MSAA smooths them while the environment is HD.
 ##
 ## Two independent categories, toggled at runtime in debug builds:
-##   F7 — environment (bumpers, dead walls, flippers)
-##   F8 — creatures (enemies with hd_sprite_frames set)
+##   F7 — environment (bumpers, dead walls, flippers, workshop, tiles, wave)
+##   F8 — creatures (the turtle, and enemies with hd_sprite_frames set)
 ## The choice is saved to user://hd_art.cfg so it survives restarts. HD art is
 ## runtime-only: the editor always shows the pixel art, so scenes never get the
 ## HD frames saved into them.

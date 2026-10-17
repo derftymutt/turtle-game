@@ -52,9 +52,8 @@ func _spawn_ghost(player) -> void:
 	if not sprite or not sprite.sprite_frames:
 		return
 	var g := Sprite2D.new()
-	g.texture = sprite.sprite_frames.get_frame_texture(sprite.animation, sprite.frame)
+	player.dress_as_current_frame(g)  # also matches the rotation
 	g.global_position = _origin
-	g.global_rotation = sprite.global_rotation  # always 0 — sprite stays axis-aligned
 	g.modulate = Color(0.85, 0.3, 0.95, 0.35)
 	g.z_index = 9  # under the live turtle (15) and motion trails (10)
 	player.get_parent().add_child(g)

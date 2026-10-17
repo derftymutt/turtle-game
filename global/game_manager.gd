@@ -41,11 +41,7 @@ var rainbow_hearts: int = 0
 
 # Picky Puffin skill shots landed this run — plunges (PuffinLauncher) that
 # ended on the bird's sea urchin. Kept for the Puffin Party bonus level.
-var puffin_skill_shots: int = DEBUG_START_SKILL_SHOTS
-## TESTING ONLY: skill shots a run starts with (and the least a loaded save
-## has). 3 = the first level beaten leads straight into a Puffin Party.
-## Set back to 0 before release.
-const DEBUG_START_SKILL_SHOTS: int = 3
+var puffin_skill_shots: int = 0
 ## Skill shots that buy one Puffin Party
 const PUFFIN_PARTY_SKILL_SHOTS: int = 3
 ## A Puffin Party has been earned and announced (by the level transition cut
@@ -124,7 +120,7 @@ func reset_game():
 	total_score = 0
 	persisted_hearts = -1
 	rainbow_hearts = 0
-	puffin_skill_shots = DEBUG_START_SKILL_SHOTS
+	puffin_skill_shots = 0
 	puffin_party_pending = false
 	clear_carried_pieces()
 	has_shown_tech_tutorial = false
